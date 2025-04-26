@@ -93,19 +93,32 @@ export function ChatBot() {
     }
   };
   
+  // Variável para rastrear quando foi a última interação do usuário
+  const [lastInteractionTime, setLastInteractionTime] = useState<number>(Date.now());
+  
+  // Verifica se o usuário está inativo há mais de 5 minutos
+  const isUserInactive = () => {
+    return Date.now() - lastInteractionTime > 5 * 60 * 1000; // 5 minutos em milissegundos
+  };
+  
   // Gera respostas humanizadas com base no script e no sentimento
   const generateHumanizedResponse = (userText: string, sentiment: 'positive' | 'negative' | 'neutral'): Message => {
     const lowerText = userText.toLowerCase();
     
+    // Atualiza o tempo da última interação
+    setLastInteractionTime(Date.now());
+    
     // Verifica se o usuário está perguntando como o bot está
-    if ((lowerText.includes("como você está") || lowerText.includes("como voce esta") || 
-         lowerText.includes("tudo bem com você") || lowerText.includes("e você") || lowerText.includes("e vc") ||
-         lowerText.includes("e voce") || lowerText.includes("tudo bem contigo"))) {
+    if (lowerText.includes("como você está") || lowerText.includes("como voce esta") || 
+        lowerText.includes("tudo bem com você") || lowerText.includes("e você") || lowerText.includes("e vc") ||
+        lowerText.includes("e voce") || lowerText.includes("tudo bem contigo") || 
+        lowerText.includes("como vai") || lowerText.includes("como vai você") || 
+        (lowerText.includes("tudo") && lowerText.includes("bem"))) {
       
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Estou INCRÍVEL hoje! 🤩 Muito animada para ajudar você a conquistar o sorriso dos seus sonhos! A propósito, você já conhece nosso tratamento de clareamento dental? Está com 15% de desconto essa semana! Posso te contar mais sobre ele? ✨",
+        content: "Estou SUPER bem! 🤩 Muito animada para te atender hoje! E você, como está? Posso ajudar com algo específico? 😊",
         timestamp: new Date(),
         sentiment: 'neutral'
       };
@@ -262,14 +275,51 @@ export function ChatBot() {
       };
     }
     
-    // Mensagem de fechamento (que incentiva continuidade e vendas)
-    if (messages.length > 3 && Math.random() > 0.6) {
+    // Verifica se o usuário está querendo avançar/prosseguir/continuar
+    if (lowerText.includes("prosseguir") || lowerText.includes("continuar") || lowerText.includes("avançar") || 
+        lowerText.includes("seguir") || lowerText.includes("próximo") || lowerText.includes("ok") || 
+        lowerText.includes("vamos lá") || lowerText.includes("próxima etapa")) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Ótimo! 👍 Estou aqui para continuar te atendendo. O que mais gostaria de saber? Posso falar sobre nossos serviços, preços, horários disponíveis ou tirar qualquer dúvida! 😊",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    // Verifica se o usuário está tentando encerrar a conversa
+    if (lowerText.includes("tchau") || lowerText.includes("adeus") || lowerText.includes("até logo") || 
+        lowerText.includes("até mais") || lowerText.includes("finalizar") || lowerText.includes("encerrar") ||
+        lowerText.includes("terminar") || lowerText.includes("bye") || lowerText.includes("sair")) {
+      
+      // Aqui sim, podemos tentar uma última venda antes do usuário sair
       const promos = [
-        "Sabia que estamos com uma SUPER PROMOÇÃO de clareamento dental essa semana? 50% OFF na segunda sessão! Quer aproveitar? 🤩",
-        "Nosso combo de harmonização facial está com desconto INCRÍVEL! Botox + preenchimento com 30% OFF! Quer saber mais? ✨",
-        "OPORTUNIDADE ÚNICA! Estamos com as últimas vagas para avaliação completa GRATUITA essa semana! Vamos agendar a sua? 📅",
-        "Tem interesse em cuidar do seu sorriso? Nossos PACOTES PROMOCIONAIS podem caber no seu orçamento! Quer conhecer? 💰",
-        "NOVIDADE! Acabamos de receber os equipamentos mais modernos para tratamentos estéticos! Quer ser uma das primeiras pessoas a experimentar? 🔝"
+        "Antes de ir, que tal aproveitar nossa SUPER PROMOÇÃO de clareamento dental? 50% OFF na segunda sessão! 🤩 Só até o fim da semana!",
+        "Espere! Temos uma oferta ESPECIAL hoje! Botox + preenchimento com 30% OFF! ✨ Não vai perder essa chance, vai?",
+        "Antes de se despedir, saiba que estamos com as ÚLTIMAS VAGAS para avaliação GRATUITA esta semana! 📅 Posso reservar uma para você?",
+        "Só um momento! Para você, temos um desconto EXCLUSIVO de primeira consulta! 💫 Quer aproveitar agora?",
+        "Ei, não vá ainda! Acabamos de lançar um PACOTE VIP com preços imbatíveis! 🔝 Posso te mostrar rapidinho?"
+      ];
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: `${promos[Math.floor(Math.random() * promos.length)]}\n\nMas se precisar ir, tudo bem! Estarei aqui quando voltar! 👋 Foi um prazer te atender!`,
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    // Mensagem de promoção (só aparecer se o usuário estiver inativo)
+    if (messages.length > 3 && isUserInactive()) {
+      const promos = [
+        "Ainda está aí? Sabia que estamos com uma SUPER PROMOÇÃO de clareamento dental essa semana? 50% OFF na segunda sessão! Quer aproveitar? 🤩",
+        "Lembrei de algo que pode te interessar! Nosso combo de harmonização facial está com desconto INCRÍVEL! Botox + preenchimento com 30% OFF! Quer saber mais? ✨",
+        "Enquanto você pensa, deixa eu te contar: estamos com as últimas vagas para avaliação GRATUITA essa semana! Vamos agendar a sua? 📅",
+        "Ei, você sabia que nossos PACOTES PROMOCIONAIS podem caber no seu orçamento? Posso te mostrar alguns! São oportunidades imperdíveis! 💰",
+        "Aproveitando o momento: acabamos de receber os equipamentos mais modernos para tratamentos estéticos! Quer ser uma das primeiras pessoas a experimentar? 🔝"
       ];
       
       return {
@@ -281,13 +331,14 @@ export function ChatBot() {
       };
     }
     
-    // Resposta padrão com emojis e foco em vendas
+    // Resposta genérica para QUALQUER pergunta que não foi capturada pelas condições anteriores
+    // Esta resposta é direta, sem tentar vender, apenas respondendo de forma amigável
     const defaultResponses = [
-      "Estou SUPER animada para te ajudar a transformar seu sorriso! 😁 Nossos tratamentos têm resultados INCRÍVEIS! Quer conhecer nossas opções mais populares?",
-      "Aqui na clínica, fazemos MILAGRES acontecerem todos os dias! 🌟 Que tal agendar uma avaliação GRATUITA para descobrir o que podemos fazer por você?",
-      "Já imaginou como seria ter um sorriso de CINEMA? 🎬 Nossos tratamentos estéticos são rápidos, indolores e com resultados SURPREENDENTES! Quer saber mais?",
-      "Sabia que um pequeno ajuste no seu sorriso pode TRANSFORMAR completamente sua aparência? 💫 Posso te mostrar como nossos procedimentos podem realçar sua beleza natural!",
-      "O que você acha de aproveitar nossas CONDIÇÕES ESPECIAIS dessa semana? 🎁 Temos descontos EXCLUSIVOS para primeiras consultas! Quer garantir a sua?"
+      `Entendi! 😊 Estou aqui para te ajudar com qualquer dúvida sobre nossos serviços. O que mais gostaria de saber? ${lowerText.includes("?") ? "" : "Pode me perguntar qualquer coisa!"}`,
+      `Claro! 👍 Fico feliz em poder ajudar! Tem mais alguma coisa que você gostaria de saber sobre nossa clínica ou procedimentos? ${lowerText.includes("?") ? "" : "Estou à disposição!"}`,
+      `Perfeito! 💯 Estou acompanhando tudo! Diga-me o que mais te interessa saber e farei o possível para ajudar! ${lowerText.includes("?") ? "" : "Estou aqui para esclarecer qualquer dúvida!"}`,
+      `Anotado! 📝 Estou aqui para o que precisar! Quer que eu detalhe mais alguma coisa sobre o que conversamos? ${lowerText.includes("?") ? "" : "Posso responder qualquer pergunta sobre nossos serviços!"}`,
+      `Entendido! 🌟 Estou à sua disposição para qualquer esclarecimento. Como posso continuar te ajudando? ${lowerText.includes("?") ? "" : "Não hesite em me fazer perguntas!"}`
     ];
     
     return {
