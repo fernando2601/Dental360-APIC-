@@ -432,7 +432,7 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => deleteClient.mutate()}
@@ -441,7 +441,7 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                 {deleteClient.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Delete
+                Excluir
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
