@@ -158,9 +158,9 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
   if (clients.length === 0) {
     return (
       <div className="text-center py-12 border rounded-lg">
-        <h3 className="font-medium text-lg mb-2">No clients found</h3>
+        <h3 className="font-medium text-lg mb-2">Nenhum paciente encontrado</h3>
         <p className="text-muted-foreground mb-6">
-          There are no clients in the system yet or none match your search criteria.
+          Não há pacientes no sistema ainda ou nenhum corresponde aos critérios de busca.
         </p>
       </div>
     );
@@ -171,11 +171,11 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Contact</TableHead>
-            <TableHead className="hidden md:table-cell">Birthday</TableHead>
-            <TableHead className="hidden md:table-cell">Address</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Nome</TableHead>
+            <TableHead>Contato</TableHead>
+            <TableHead className="hidden md:table-cell">Data de Nasc.</TableHead>
+            <TableHead className="hidden md:table-cell">Endereço</TableHead>
+            <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -193,20 +193,20 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                   <div className="flex flex-col">
                     <span>{formatDate(client.birthday)}</span>
                     <span className={`text-sm ${isBirthdaySoon(client.birthday) ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                      {calculateAge(client.birthday)} years old
+                      {calculateAge(client.birthday)} anos
                       {isBirthdaySoon(client.birthday) && (
                         <span className="ml-1">
-                          (Birthday soon!)
+                          (Aniversário próximo!)
                         </span>
                       )}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-muted-foreground">Not provided</span>
+                  <span className="text-muted-foreground">Não fornecido</span>
                 )}
               </TableCell>
               <TableCell className="hidden md:table-cell">
-                {client.address || <span className="text-muted-foreground">Not provided</span>}
+                {client.address || <span className="text-muted-foreground">Não fornecido</span>}
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
