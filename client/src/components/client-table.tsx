@@ -236,7 +236,7 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
             <DialogHeader>
               <DialogTitle>{selectedClient.fullName}</DialogTitle>
               <DialogDescription>
-                Client details and information
+                Detalhes e informações do paciente
               </DialogDescription>
             </DialogHeader>
             
@@ -247,50 +247,50 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                   <p>{selectedClient.email}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Phone</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Telefone</h4>
                   <p>{selectedClient.phone}</p>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Address</h4>
-                <p>{selectedClient.address || "Not provided"}</p>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Endereço</h4>
+                <p>{selectedClient.address || "Não fornecido"}</p>
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Birthday</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Data de Nascimento</h4>
                 {selectedClient.birthday ? (
                   <div>
                     <p>{formatDate(selectedClient.birthday)}</p>
                     <p className="text-sm text-muted-foreground">
-                      Age: {calculateAge(selectedClient.birthday)} years
+                      Idade: {calculateAge(selectedClient.birthday)} anos
                       {isBirthdaySoon(selectedClient.birthday) && (
                         <span className="ml-2 text-primary font-medium">
-                          (Birthday in {getDaysUntilBirthday(selectedClient.birthday)} days)
+                          (Aniversário em {getDaysUntilBirthday(selectedClient.birthday)} dias)
                         </span>
                       )}
                     </p>
                   </div>
                 ) : (
-                  <p>Not provided</p>
+                  <p>Não fornecido</p>
                 )}
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Notes</h4>
-                <p className="whitespace-pre-wrap">{selectedClient.notes || "No notes"}</p>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Observações</h4>
+                <p className="whitespace-pre-wrap">{selectedClient.notes || "Sem observações"}</p>
               </div>
             </div>
             
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
-                Close
+                Fechar
               </Button>
               <Button onClick={() => {
                 setIsViewDialogOpen(false);
                 handleEditClient(selectedClient);
               }}>
-                Edit Client
+                Editar Paciente
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -302,9 +302,9 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit Client</DialogTitle>
+              <DialogTitle>Editar Paciente</DialogTitle>
               <DialogDescription>
-                Update the client information below.
+                Atualize as informações do paciente abaixo.
               </DialogDescription>
             </DialogHeader>
             
@@ -315,7 +315,7 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>Nome Completo</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -344,7 +344,7 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone</FormLabel>
+                        <FormLabel>Telefone</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -359,7 +359,7 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address</FormLabel>
+                      <FormLabel>Endereço</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -373,7 +373,7 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                   name="birthday"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Birthday</FormLabel>
+                      <FormLabel>Data de Nascimento</FormLabel>
                       <FormControl>
                         <Input {...field} type="date" />
                       </FormControl>
@@ -387,7 +387,7 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel>Observações</FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
@@ -405,13 +405,13 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
                     variant="outline"
                     onClick={() => setIsEditDialogOpen(false)}
                   >
-                    Cancel
+                    Cancelar
                   </Button>
                   <Button type="submit" disabled={updateClient.isPending}>
                     {updateClient.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    Save Changes
+                    Salvar Alterações
                   </Button>
                 </DialogFooter>
               </form>
@@ -425,10 +425,10 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Client</AlertDialogTitle>
+              <AlertDialogTitle>Excluir Paciente</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete <span className="font-medium">{selectedClient.fullName}</span>?
-                This action cannot be undone and will remove all client data from the system.
+                Tem certeza que deseja excluir <span className="font-medium">{selectedClient.fullName}</span>?
+                Esta ação não pode ser desfeita e removerá todos os dados do paciente do sistema.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
