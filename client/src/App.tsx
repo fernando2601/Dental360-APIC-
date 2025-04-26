@@ -12,6 +12,10 @@ import Finances from "@/pages/finances";
 import Services from "@/pages/services";
 import Staff from "@/pages/staff";
 import Settings from "@/pages/settings";
+import WhatsApp from "@/pages/whatsapp";
+import Packages from "@/pages/packages";
+import Subscriptions from "@/pages/subscriptions";
+import ClinicInfo from "@/pages/clinic-info";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +28,10 @@ function Router() {
       <Route path="/finances" component={Finances} />
       <Route path="/services" component={Services} />
       <Route path="/staff" component={Staff} />
+      <Route path="/whatsapp" component={WhatsApp} />
+      <Route path="/packages" component={Packages} />
+      <Route path="/subscriptions" component={Subscriptions} />
+      <Route path="/clinic-info" component={ClinicInfo} />
       <Route path="/settings" component={Settings} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
