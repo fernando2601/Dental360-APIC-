@@ -251,11 +251,11 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
   // Get stock status
   function getStockStatus(item: any) {
     if (item.quantity <= 0) {
-      return { label: "Out of Stock", variant: "destructive", icon: <AlertTriangle className="h-3 w-3 mr-1" /> };
+      return { label: "Sem Estoque", variant: "destructive", icon: <AlertTriangle className="h-3 w-3 mr-1" /> };
     } else if (item.quantity <= item.threshold) {
-      return { label: "Low Stock", variant: "warning", icon: <AlertTriangle className="h-3 w-3 mr-1" /> };
+      return { label: "Estoque Baixo", variant: "warning", icon: <AlertTriangle className="h-3 w-3 mr-1" /> };
     } else {
-      return { label: "In Stock", variant: "success", icon: null };
+      return { label: "Em Estoque", variant: "success", icon: null };
     }
   }
 
@@ -271,9 +271,9 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
     return (
       <div className="text-center py-12 border rounded-lg">
         <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <h3 className="font-medium text-lg mb-2">No inventory items found</h3>
+        <h3 className="font-medium text-lg mb-2">Nenhum item encontrado no estoque</h3>
         <p className="text-muted-foreground mb-6">
-          There are no inventory items in the system yet or none match your search criteria.
+          Não há itens de estoque no sistema ainda ou nenhum item corresponde aos seus critérios de busca.
         </p>
       </div>
     );
@@ -285,11 +285,11 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
         <TableHeader>
           <TableRow>
             <TableHead>Item</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Stock</TableHead>
-            <TableHead className="hidden md:table-cell">Last Restocked</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Categoria</TableHead>
+            <TableHead>Estoque</TableHead>
+            <TableHead className="hidden md:table-cell">Última Reposição</TableHead>
+            <TableHead>Preço</TableHead>
+            <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -328,7 +328,7 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
                   <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleAddStock(item)}>
                       <Plus className="h-4 w-4 mr-1" />
-                      <span className="sr-only md:not-sr-only md:inline-flex">Add</span>
+                      <span className="sr-only md:not-sr-only md:inline-flex">Adicionar</span>
                     </Button>
                     <Button 
                       variant="outline" 
@@ -337,15 +337,15 @@ export default function InventoryTable({ inventory, isLoading }: InventoryTableP
                       disabled={item.quantity <= 0}
                     >
                       <Minus className="h-4 w-4 mr-1" />
-                      <span className="sr-only md:not-sr-only md:inline-flex">Remove</span>
+                      <span className="sr-only md:not-sr-only md:inline-flex">Remover</span>
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => handleEditItem(item)}>
                       <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Edit</span>
+                      <span className="sr-only">Editar</span>
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => handleDeleteItem(item)}>
                       <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
+                      <span className="sr-only">Excluir</span>
                     </Button>
                   </div>
                 </TableCell>
