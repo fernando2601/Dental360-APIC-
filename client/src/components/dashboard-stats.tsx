@@ -99,32 +99,32 @@ export function DashboardStats() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatsCard
-        title="Upcoming Appointments"
+        title="Próximos Agendamentos"
         value={isLoadingAppointments ? "..." : appointments?.length || 0}
         icon={<CalendarDays className="h-6 w-6 text-primary" />}
-        trend={{ value: 12, label: "vs. last week" }}
+        trend={{ value: 12, label: "vs. semana anterior" }}
         loading={isLoadingAppointments}
       />
       <StatsCard
-        title="Total Clients"
+        title="Total de Pacientes"
         value={isLoadingClients ? "..." : clients?.length || 0}
         icon={<Users className="h-6 w-6 text-primary" />}
-        trend={{ value: 8, label: "vs. last month" }}
+        trend={{ value: 8, label: "vs. mês anterior" }}
         loading={isLoadingClients}
         variant="success"
       />
       <StatsCard
-        title="Inventory Alerts"
+        title="Alertas de Estoque"
         value={isLoadingInventory ? "..." : inventoryAlerts}
         icon={<Package className="h-6 w-6 text-primary" />}
         variant={inventoryAlerts > 0 ? "warning" : "default"}
         loading={isLoadingInventory}
       />
       <StatsCard
-        title="Total Revenue"
+        title="Receita Total"
         value={isLoadingTransactions ? "..." : formatCurrency(totalRevenue)}
         icon={<DollarSign className="h-6 w-6 text-primary" />}
-        trend={{ value: 15, label: "vs. last month" }}
+        trend={{ value: 15, label: "vs. mês anterior" }}
         loading={isLoadingTransactions}
         variant="success"
       />
