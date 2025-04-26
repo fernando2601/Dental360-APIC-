@@ -109,19 +109,19 @@ export default function Appointments() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Appointment Management</h1>
-          <p className="text-muted-foreground">Schedule and manage client appointments.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gerenciamento de Agendamentos</h1>
+          <p className="text-muted-foreground">Agende e gerencie consultas de clientes.</p>
         </div>
         <Button className="mt-4 md:mt-0" onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          New Appointment
+          Novo Agendamento
         </Button>
       </div>
 
       <Tabs defaultValue="calendar" className="w-full">
         <TabsList>
-          <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-          <TabsTrigger value="list">List View</TabsTrigger>
+          <TabsTrigger value="calendar">Visualização em Calendário</TabsTrigger>
+          <TabsTrigger value="list">Visualização em Lista</TabsTrigger>
         </TabsList>
         <TabsContent value="calendar" className="mt-4">
           <AppointmentCalendar />
@@ -135,9 +135,9 @@ export default function Appointments() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Schedule New Appointment</DialogTitle>
+            <DialogTitle>Agendar Nova Consulta</DialogTitle>
             <DialogDescription>
-              Create a new appointment for a client.
+              Crie um novo agendamento para um cliente.
             </DialogDescription>
           </DialogHeader>
           
@@ -148,7 +148,7 @@ export default function Appointments() {
                 name="clientId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Client</FormLabel>
+                    <FormLabel>Cliente</FormLabel>
                     <Select
                       value={field.value.toString()}
                       onValueChange={(value) => {
@@ -157,7 +157,7 @@ export default function Appointments() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select client" />
+                          <SelectValue placeholder="Selecione o cliente" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -178,7 +178,7 @@ export default function Appointments() {
                 name="serviceId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service</FormLabel>
+                    <FormLabel>Serviço</FormLabel>
                     <Select
                       value={field.value.toString()}
                       onValueChange={(value) => {
@@ -189,7 +189,7 @@ export default function Appointments() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select service" />
+                          <SelectValue placeholder="Selecione o serviço" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -210,14 +210,14 @@ export default function Appointments() {
                 name="staffId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Staff Member</FormLabel>
+                    <FormLabel>Profissional</FormLabel>
                     <Select
                       value={field.value.toString()}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select staff member" />
+                          <SelectValue placeholder="Selecione o profissional" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -239,7 +239,7 @@ export default function Appointments() {
                   name="startTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start Time</FormLabel>
+                      <FormLabel>Horário de Início</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -261,7 +261,7 @@ export default function Appointments() {
                   name="endTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>End Time</FormLabel>
+                      <FormLabel>Horário de Término</FormLabel>
                       <FormControl>
                         <Input {...field} type="datetime-local" />
                       </FormControl>
