@@ -132,12 +132,12 @@ export default function Finances() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Financial Management</h1>
-          <p className="text-muted-foreground">Track income, expenses, and financial performance.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gestão Financeira</h1>
+          <p className="text-muted-foreground">Acompanhe receitas, despesas e desempenho financeiro.</p>
         </div>
         <Button className="mt-4 md:mt-0" onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Record Transaction
+          Registrar Transação
         </Button>
       </div>
 
@@ -145,31 +145,31 @@ export default function Finances() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-md font-medium">Total Income</CardTitle>
+            <CardTitle className="text-md font-medium">Receita Total</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</div>
-            <p className="text-xs text-muted-foreground">All time earnings</p>
+            <p className="text-xs text-muted-foreground">Total de ganhos</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-md font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-md font-medium">Despesas Totais</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">{formatCurrency(totalExpenses)}</div>
-            <p className="text-xs text-muted-foreground">All time expenses</p>
+            <p className="text-xs text-muted-foreground">Total de despesas</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-md font-medium">Net Income</CardTitle>
+            <CardTitle className="text-md font-medium">Lucro Líquido</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
               {formatCurrency(netIncome)}
             </div>
-            <p className="text-xs text-muted-foreground">Profit/Loss</p>
+            <p className="text-xs text-muted-foreground">Lucro/Prejuízo</p>
           </CardContent>
         </Card>
       </div>
@@ -177,8 +177,8 @@ export default function Finances() {
       {/* Charts and Transactions */}
       <Tabs defaultValue="charts" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="charts">Charts & Analytics</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="charts">Gráficos & Análises</TabsTrigger>
+          <TabsTrigger value="transactions">Transações</TabsTrigger>
         </TabsList>
         <TabsContent value="charts">
           <FinanceChart />
@@ -186,8 +186,8 @@ export default function Finances() {
         <TabsContent value="transactions">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Your most recent financial activities</CardDescription>
+              <CardTitle>Transações Recentes</CardTitle>
+              <CardDescription>Suas atividades financeiras mais recentes</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoadingTransactions ? (
@@ -196,17 +196,17 @@ export default function Finances() {
                 </div>
               ) : recentTransactions.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No transactions recorded yet.</p>
+                  <p className="text-muted-foreground">Nenhuma transação registrada ainda.</p>
                 </div>
               ) : (
                 <div className="rounded-md border">
                   <div className="grid grid-cols-7 p-4 font-medium border-b">
-                    <div className="col-span-2">Description</div>
-                    <div>Category</div>
-                    <div>Date</div>
-                    <div>Client</div>
-                    <div>Payment Method</div>
-                    <div className="text-right">Amount</div>
+                    <div className="col-span-2">Descrição</div>
+                    <div>Categoria</div>
+                    <div>Data</div>
+                    <div>Cliente</div>
+                    <div>Forma de Pagamento</div>
+                    <div className="text-right">Valor</div>
                   </div>
                   <div className="divide-y">
                     {recentTransactions.map((transaction: any) => {
@@ -244,9 +244,9 @@ export default function Finances() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Record Financial Transaction</DialogTitle>
+            <DialogTitle>Registrar Transação Financeira</DialogTitle>
             <DialogDescription>
-              Enter the details for the new transaction.
+              Digite os detalhes para a nova transação.
             </DialogDescription>
           </DialogHeader>
           
@@ -257,19 +257,19 @@ export default function Finances() {
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Transaction Type</FormLabel>
+                    <FormLabel>Tipo de Transação</FormLabel>
                     <Select
                       value={field.value}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select transaction type" />
+                          <SelectValue placeholder="Selecione o tipo de transação" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="income">Income</SelectItem>
-                        <SelectItem value="expense">Expense</SelectItem>
+                        <SelectItem value="income">Receita</SelectItem>
+                        <SelectItem value="expense">Despesa</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -282,9 +282,9 @@ export default function Finances() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Categoria</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Service, Product, Rent, etc." />
+                      <Input {...field} placeholder="Serviço, Produto, Aluguel, etc." />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -296,7 +296,7 @@ export default function Finances() {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Amount ($)</FormLabel>
+                    <FormLabel>Valor (R$)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" {...field} />
                     </FormControl>
@@ -310,7 +310,7 @@ export default function Finances() {
                 name="date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel>Data</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -324,11 +324,11 @@ export default function Finances() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Descrição</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
-                        placeholder="Brief description of the transaction"
+                        placeholder="Breve descrição da transação"
                         rows={2}
                       />
                     </FormControl>
@@ -342,23 +342,23 @@ export default function Finances() {
                 name="paymentMethod"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Payment Method</FormLabel>
+                    <FormLabel>Forma de Pagamento</FormLabel>
                     <Select
                       value={field.value || ""}
                       onValueChange={field.onChange}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select payment method" />
+                          <SelectValue placeholder="Selecione a forma de pagamento" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="cash">Cash</SelectItem>
-                        <SelectItem value="credit">Credit Card</SelectItem>
-                        <SelectItem value="debit">Debit Card</SelectItem>
-                        <SelectItem value="transfer">Bank Transfer</SelectItem>
-                        <SelectItem value="insurance">Insurance</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="cash">Dinheiro</SelectItem>
+                        <SelectItem value="credit">Cartão de Crédito</SelectItem>
+                        <SelectItem value="debit">Cartão de Débito</SelectItem>
+                        <SelectItem value="transfer">Transferência Bancária</SelectItem>
+                        <SelectItem value="insurance">Convênio</SelectItem>
+                        <SelectItem value="other">Outro</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -372,18 +372,18 @@ export default function Finances() {
                   name="clientId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client (Optional)</FormLabel>
+                      <FormLabel>Cliente (Opcional)</FormLabel>
                       <Select
                         value={field.value?.toString() || ""}
                         onValueChange={(value) => field.onChange(value ? Number(value) : undefined)}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select client" />
+                            <SelectValue placeholder="Selecione o cliente" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="">Nenhum</SelectItem>
                           {clients?.map((client: any) => (
                             <SelectItem key={client.id} value={client.id.toString()}>
                               {client.fullName}
@@ -403,13 +403,13 @@ export default function Finances() {
                   variant="outline"
                   onClick={() => setIsCreateDialogOpen(false)}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
                 <Button type="submit" disabled={createTransaction.isPending}>
                   {createTransaction.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Record Transaction
+                  Registrar Transação
                 </Button>
               </DialogFooter>
             </form>
