@@ -15,9 +15,9 @@ import ClientTable from "@/components/client-table";
 
 // Form schema for client
 const clientFormSchema = z.object({
-  fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z.string().min(5, { message: "Phone number is required." }),
+  fullName: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres." }),
+  email: z.string().email({ message: "Por favor, insira um endereço de e-mail válido." }),
+  phone: z.string().min(5, { message: "Número de telefone é obrigatório." }),
   address: z.string().optional(),
   birthday: z.string().optional(),
   notes: z.string().optional(),
@@ -52,8 +52,8 @@ export default function Clients() {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Client created successfully.",
+        title: "Sucesso",
+        description: "Paciente criado com sucesso.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
       setIsCreateDialogOpen(false);
@@ -61,8 +61,8 @@ export default function Clients() {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create client. Please try again.",
+        title: "Erro",
+        description: "Falha ao criar paciente. Por favor, tente novamente.",
         variant: "destructive",
       });
     },
@@ -94,15 +94,15 @@ export default function Clients() {
   function exportClients() {
     if (!clients || clients.length === 0) {
       toast({
-        title: "No data to export",
-        description: "There are no clients to export.",
+        title: "Sem dados para exportar",
+        description: "Não há pacientes para exportar.",
         variant: "destructive",
       });
       return;
     }
 
     // Create CSV content
-    const headers = ["Full Name", "Email", "Phone", "Address", "Birthday", "Notes"];
+    const headers = ["Nome Completo", "Email", "Telefone", "Endereço", "Data de Nascimento", "Observações"];
     const csvContent = [
       headers.join(","),
       ...clients.map((client: any) => [
@@ -131,17 +131,17 @@ export default function Clients() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Client Management</h1>
-          <p className="text-muted-foreground">Manage and track all your clinic clients.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gerenciamento de Pacientes</h1>
+          <p className="text-muted-foreground">Gerencie e acompanhe todos os pacientes da sua clínica.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0 w-full md:w-auto">
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Add New Client
+            Adicionar Novo Paciente
           </Button>
           <Button variant="outline" onClick={exportClients}>
             <Download className="mr-2 h-4 w-4" />
-            Export
+            Exportar
           </Button>
         </div>
       </div>
@@ -151,7 +151,7 @@ export default function Clients() {
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search clients..."
+            placeholder="Buscar pacientes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -169,9 +169,9 @@ export default function Clients() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add New Client</DialogTitle>
+            <DialogTitle>Adicionar Novo Paciente</DialogTitle>
             <DialogDescription>
-              Enter the client details to create a new record.
+              Insira os dados do paciente para criar um novo cadastro.
             </DialogDescription>
           </DialogHeader>
           
@@ -182,9 +182,9 @@ export default function Clients() {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>Nome Completo</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="John Doe" />
+                      <Input {...field} placeholder="João Silva" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -199,7 +199,7 @@ export default function Clients() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input {...field} type="email" placeholder="john@example.com" />
+                        <Input {...field} type="email" placeholder="joao@exemplo.com" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -211,9 +211,9 @@ export default function Clients() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="(555) 123-4567" />
+                        <Input {...field} placeholder="(11) 98765-4321" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -226,9 +226,9 @@ export default function Clients() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>Endereço</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="123 Main St, City, State, ZIP" />
+                      <Input {...field} placeholder="Rua Exemplo, 123, Bairro, Cidade, Estado, CEP" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -240,7 +240,7 @@ export default function Clients() {
                 name="birthday"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Birthday</FormLabel>
+                    <FormLabel>Data de Nascimento</FormLabel>
                     <FormControl>
                       <Input {...field} type="date" />
                     </FormControl>
@@ -254,11 +254,11 @@ export default function Clients() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes</FormLabel>
+                    <FormLabel>Observações</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
-                        placeholder="Any additional information about the client"
+                        placeholder="Informações adicionais sobre o paciente"
                         rows={3}
                       />
                     </FormControl>
@@ -273,13 +273,13 @@ export default function Clients() {
                   variant="outline"
                   onClick={() => setIsCreateDialogOpen(false)}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
                 <Button type="submit" disabled={createClient.isPending}>
                   {createClient.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Create Client
+                  Criar Paciente
                 </Button>
               </DialogFooter>
             </form>
