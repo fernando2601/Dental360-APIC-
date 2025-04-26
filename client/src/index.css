@@ -66,6 +66,28 @@
   border-color: #1d4ed8 !important;
 }
 
+/* Estilo para o botão do dropdown de visualização */
+.calendar-custom .fc-viewMenu-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  padding: 6px 12px !important;
+  font-size: 0.875rem !important;
+  border-radius: 6px !important;
+}
+
+/* Deixar números de dias menores */
+.calendar-custom .fc-daygrid-day-number {
+  font-size: 0.8rem !important;
+  padding: 4px !important;
+  opacity: 0.8 !important;
+}
+
+.calendar-custom .fc-col-header-cell-cushion {
+  font-size: 0.85rem !important;
+}
+
 .calendar-custom .fc-timegrid-now-indicator-line {
   border-color: #ef4444;
   border-width: 2px;

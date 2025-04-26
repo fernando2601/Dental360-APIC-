@@ -187,13 +187,29 @@ export function AppointmentCalendar() {
         headerToolbar: {
           left: 'prev,next hoje',
           center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay',
+          right: 'viewMenu',
         },
         buttonText: {
           today: 'Hoje',
           month: 'Mês',
           week: 'Semana',
           day: 'Dia',
+        },
+        titleFormat: { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric'
+        },
+        customButtons: {
+          viewMenu: {
+            text: '📅 Semana',
+            click: function() {
+              const customDropdown = document.getElementById('view-dropdown');
+              if (customDropdown) {
+                customDropdown.classList.toggle('hidden');
+              }
+            }
+          }
         },
         slotMinTime: '07:00:00',
         slotMaxTime: '20:00:00',
@@ -332,6 +348,28 @@ export function AppointmentCalendar() {
 
   const isLoading = isLoadingAppointments || isLoadingClients || isLoadingStaff || isLoadingServices;
 
+  const handleViewChange = (view: string) => {
+    if (calendarApi) {
+      calendarApi.changeView(view);
+      
+      // Atualizar o texto do botão dropdown
+      let buttonText = 'Semana';
+      if (view === 'dayGridMonth') buttonText = 'Mês';
+      else if (view === 'timeGridDay') buttonText = 'Dia';
+      
+      const viewButton = document.querySelector('.fc-viewMenu-button');
+      if (viewButton) {
+        viewButton.textContent = `📅 ${buttonText}`;
+      }
+      
+      // Esconder o dropdown
+      const dropdown = document.getElementById('view-dropdown');
+      if (dropdown) {
+        dropdown.classList.add('hidden');
+      }
+    }
+  };
+
   return (
     <Card className="col-span-full shadow-lg">
       <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
@@ -343,7 +381,35 @@ export function AppointmentCalendar() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div id="calendar" className="h-[700px] p-2 calendar-custom" />
+          <div className="relative">
+            {/* Dropdown de seleção de visualização */}
+            <div 
+              id="view-dropdown" 
+              className="absolute hidden right-0 top-12 z-10 bg-white shadow-lg rounded-md overflow-hidden border"
+            >
+              <ul className="py-1">
+                <li 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                  onClick={() => handleViewChange('dayGridMonth')}
+                >
+                  Mês
+                </li>
+                <li 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                  onClick={() => handleViewChange('timeGridWeek')}
+                >
+                  Semana
+                </li>
+                <li 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                  onClick={() => handleViewChange('timeGridDay')}
+                >
+                  Dia
+                </li>
+              </ul>
+            </div>
+            <div id="calendar" className="h-[700px] p-2 calendar-custom" />
+          </div>
         )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
