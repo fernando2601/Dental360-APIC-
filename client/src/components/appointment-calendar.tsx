@@ -18,6 +18,71 @@ import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+
+// Definição da localização portuguesa para o calendário
+const ptBrLocale = {
+  code: 'pt-br',
+  week: {
+    dow: 0, // Domingo como primeiro dia da semana
+    doy: 4, // A semana que contém Jan 4 é a primeira semana do ano
+  },
+  buttonText: {
+    prev: 'Anterior',
+    next: 'Próximo',
+    today: 'Hoje',
+    month: 'Mês',
+    week: 'Semana',
+    day: 'Dia',
+    list: 'Lista',
+  },
+  weekText: 'Sm',
+  allDayText: 'Todo o dia',
+  moreLinkText: 'mais',
+  noEventsText: 'Sem eventos para mostrar',
+  dayHeaderFormat: { weekday: 'long' },
+  weekdays: {
+    shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+    longhand: [
+      'Domingo',
+      'Segunda-feira',
+      'Terça-feira',
+      'Quarta-feira',
+      'Quinta-feira',
+      'Sexta-feira',
+      'Sábado',
+    ],
+  },
+  months: {
+    shorthand: [
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
+    ],
+    longhand: [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ],
+  },
+};
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -118,10 +183,17 @@ export function AppointmentCalendar() {
       const calendar = new Calendar(calendarEl, {
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
         initialView: 'timeGridWeek',
+        locale: ptBrLocale,
         headerToolbar: {
-          left: 'prev,next today',
+          left: 'prev,next hoje',
           center: 'title',
           right: 'dayGridMonth,timeGridWeek,timeGridDay',
+        },
+        buttonText: {
+          today: 'Hoje',
+          month: 'Mês',
+          week: 'Semana',
+          day: 'Dia',
         },
         slotMinTime: '08:00:00',
         slotMaxTime: '20:00:00',
@@ -226,7 +298,7 @@ export function AppointmentCalendar() {
   return (
     <Card className="col-span-full">
       <CardHeader>
-        <CardTitle>Appointment Calendar</CardTitle>
+        <CardTitle>Calendário de Agendamentos</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -240,9 +312,9 @@ export function AppointmentCalendar() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Schedule New Appointment</DialogTitle>
+              <DialogTitle>Agendar Nova Consulta</DialogTitle>
               <DialogDescription>
-                {selectedDate && `Creating appointment for ${format(selectedDate, 'MMMM d, yyyy')}`}
+                {selectedDate && `Criando agendamento para ${format(selectedDate, 'MMMM d, yyyy')}`}
               </DialogDescription>
             </DialogHeader>
             
@@ -253,7 +325,7 @@ export function AppointmentCalendar() {
                   name="clientId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client</FormLabel>
+                      <FormLabel>Cliente</FormLabel>
                       <Select
                         value={field.value.toString()}
                         onValueChange={(value) => {
@@ -262,7 +334,7 @@ export function AppointmentCalendar() {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select client" />
+                            <SelectValue placeholder="Selecione o cliente" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -283,7 +355,7 @@ export function AppointmentCalendar() {
                   name="serviceId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Service</FormLabel>
+                      <FormLabel>Serviço</FormLabel>
                       <Select
                         value={field.value.toString()}
                         onValueChange={(value) => {
@@ -294,7 +366,7 @@ export function AppointmentCalendar() {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select service" />
+                            <SelectValue placeholder="Selecione o serviço" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -315,20 +387,20 @@ export function AppointmentCalendar() {
                   name="staffId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Staff Member</FormLabel>
+                      <FormLabel>Profissional</FormLabel>
                       <Select
                         value={field.value.toString()}
                         onValueChange={field.onChange}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select staff member" />
+                            <SelectValue placeholder="Selecione o profissional" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {staff?.map((s: any) => (
                             <SelectItem key={s.id} value={s.id.toString()}>
-                              {s.user?.fullName || `Staff #${s.id}`}
+                              {s.user?.fullName || `Profissional #${s.id}`}
                             </SelectItem>
                           ))}
                         </SelectContent>
