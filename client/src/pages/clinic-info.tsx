@@ -118,13 +118,18 @@ export default function ClinicInfoPage() {
         return { ...prev, [field]: value };
       }
       
-      return {
-        ...prev,
-        [section]: {
-          ...prev[section as keyof ClinicInfo],
-          [field]: value
-        }
-      };
+      // Create a fresh copy of the form data
+      const newFormData = JSON.parse(JSON.stringify(prev)) as ClinicInfo;
+      
+      // Type assertion to access the section as any to allow property access
+      const sectionObj = newFormData[section as keyof ClinicInfo] as any;
+      
+      if (sectionObj && typeof sectionObj === 'object') {
+        // Update the field in the section
+        sectionObj[field] = value;
+      }
+      
+      return newFormData;
     });
   };
 
