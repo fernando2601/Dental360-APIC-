@@ -97,6 +97,35 @@ export function ChatBot() {
   const generateHumanizedResponse = (userText: string, sentiment: 'positive' | 'negative' | 'neutral'): Message => {
     const lowerText = userText.toLowerCase();
     
+    // Verifica se o usuário está perguntando como o bot está
+    if ((lowerText.includes("como você está") || lowerText.includes("como voce esta") || 
+         lowerText.includes("tudo bem com você") || lowerText.includes("e você") || lowerText.includes("e vc") ||
+         lowerText.includes("e voce") || lowerText.includes("tudo bem contigo"))) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Estou INCRÍVEL hoje! 🤩 Muito animada para ajudar você a conquistar o sorriso dos seus sonhos! A propósito, você já conhece nosso tratamento de clareamento dental? Está com 15% de desconto essa semana! Posso te contar mais sobre ele? ✨",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    // Verifica se está perguntando sobre formas de pagamento
+    if (lowerText.includes("paga") || lowerText.includes("pagamento") || lowerText.includes("dinheiro") || 
+        lowerText.includes("cartão") || lowerText.includes("cartao") || lowerText.includes("débito") || 
+        lowerText.includes("credito") || lowerText.includes("crédito") || lowerText.includes("pix") ||
+        lowerText.includes("parcela")) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Temos TODAS as formas de pagamento para facilitar sua vida! 💳💰\n\n• PIX (com 5% de desconto! 🤑)\n• Cartão de crédito (em até 12x sem juros!)\n• Cartão de débito\n• Dinheiro (com 3% de desconto)\n\nFácil, né? E o melhor: para procedimentos acima de R$1.000, oferecemos condições SUPER especiais! Quer que te conte sobre nossos pacotes com descontos incríveis? 🎁",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
     // Verifica se é uma resposta sobre como o usuário está se sentindo (logo após a primeira mensagem)
     if (messages.length === 1 || 
         (messages[messages.length-2]?.content.includes("Como você está hoje?") && 
@@ -106,7 +135,7 @@ export function ChatBot() {
         return {
           id: Date.now().toString(),
           sender: 'bot',
-          content: "Que alegria! 😍 Vamos deixar seu sorriso ainda mais incrível!\nPosso te ajudar a encontrar o serviço ideal?",
+          content: "Que alegria! 😍 Vamos deixar seu sorriso ainda mais incrível para combinar com esse seu astral!\n\nNosso clareamento dental é o MAIS PROCURADO do momento! Quer saber como funciona? Ou prefere conhecer nossos tratamentos de harmonização facial? Estamos com promoções IMPERDÍVEIS! 🤩",
           timestamp: new Date(),
           sentiment: 'neutral',
           hasCoupon: false
@@ -115,7 +144,7 @@ export function ChatBot() {
         return {
           id: Date.now().toString(),
           sender: 'bot',
-          content: "Poxa, sinto muito por isso. 😔\nPara melhorar seu dia, aqui vai um presente especial 🎁:\n**CUPOM DE DESCONTO DE 10%** para qualquer procedimento hoje!\n\nQuer que eu te ajude a agendar seu horário? 💬",
+          content: "Poxa, sinto muito por isso. 😔\nPara melhorar seu dia, aqui vai um presente especial 🎁:\n**CUPOM DE DESCONTO DE 10%** para qualquer procedimento hoje!\n\nUm sorriso novo pode transformar seu humor! Nossos tratamentos estéticos são rápidos e você já sai daqui se sentindo outra pessoa! Quer marcar uma avaliação? É TOTALMENTE gratuita! 💬",
           timestamp: new Date(),
           sentiment: 'neutral',
           hasCoupon: true
@@ -128,10 +157,34 @@ export function ChatBot() {
         lowerText.includes("quanto custa") || lowerText.includes("serviço") || lowerText.includes("procedimento") ||
         lowerText.includes("tratamento")) {
       
+      // Detectar se está perguntando sobre um serviço específico
+      let specificService = "";
+      
+      if (lowerText.includes("limpeza")) specificService = "limpeza dental";
+      else if (lowerText.includes("clareamento")) specificService = "clareamento dental";
+      else if (lowerText.includes("aparelho") || lowerText.includes("ortodon")) specificService = "aparelho ortodôntico";
+      else if (lowerText.includes("implante")) specificService = "implante dentário";
+      else if (lowerText.includes("botox")) specificService = "aplicação de botox";
+      else if (lowerText.includes("preenchimento") || lowerText.includes("labial")) specificService = "preenchimento labial";
+      else if (lowerText.includes("bichectomia")) specificService = "bichectomia";
+      else if (lowerText.includes("lifting") || lowerText.includes("fios")) specificService = "lifting facial";
+      else if (lowerText.includes("colágeno") || lowerText.includes("colageno")) specificService = "bioestimulador de colágeno";
+      
+      if (specificService) {
+        return {
+          id: Date.now().toString(),
+          sender: 'bot',
+          content: `Você vai AMAR nosso tratamento de ${specificService}! 😍 É um dos MAIS POPULARES da clínica! Temos os melhores preços do mercado e resultados INCRÍVEIS!\n\nQuer agendar uma avaliação para conhecer mais detalhes? Prometo que vai valer MUITO a pena! ✨`,
+          timestamp: new Date(),
+          sentiment: 'neutral',
+          showServicesInfo: true
+        };
+      }
+      
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Esses são alguns dos nossos procedimentos mais procurados! 💖\nPosso te passar mais detalhes sobre qualquer um deles! 👩‍⚕️👨‍⚕️",
+        content: "Esses são alguns dos nossos procedimentos mais procurados! 💖\nE o melhor: todos com CONDIÇÕES ESPECIAIS de pagamento!\n\nQual deles mais chamou sua atenção? Posso te dar todos os detalhes! Temos PROMOÇÕES dessa semana que você não vai querer perder! 😉",
         timestamp: new Date(),
         sentiment: 'neutral',
         showServicesInfo: true
@@ -140,12 +193,13 @@ export function ChatBot() {
     
     // Verifica se está perguntando sobre agendamento
     if (lowerText.includes("agen") || lowerText.includes("marcar") || lowerText.includes("consulta") || 
-        lowerText.includes("horário") || lowerText.includes("disponib") || lowerText.includes("atendimento")) {
+        lowerText.includes("horário") || lowerText.includes("disponib") || lowerText.includes("atendimento") ||
+        lowerText.includes("vaga") || lowerText.includes("hora") || lowerText.includes("dia")) {
       
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Gostaria de agendar uma avaliação gratuita? 📅\nTemos horários incríveis essa semana!\nPosso ver qual o melhor para você?",
+        content: "Ótima escolha! 🌟 Nossa avaliação inicial é TOTALMENTE GRATUITA e sem compromisso!\n\nTemos horários EXCLUSIVOS ainda essa semana! E para quem agenda online, oferecemos um check-up completo com radiografia digital inclusa no pacote! 📅✨\n\nQual o melhor dia para você? Manhã ou tarde?",
         timestamp: new Date(),
         sentiment: 'neutral',
         showScheduleInfo: true
@@ -155,15 +209,30 @@ export function ChatBot() {
     // Verifica se está perguntando sobre a clínica
     if (lowerText.includes("clínica") || lowerText.includes("lugar") || lowerText.includes("estabelecimento") || 
         lowerText.includes("diferencial") || lowerText.includes("vantagem") || lowerText.includes("por que escolher") ||
-        lowerText.includes("profissionais") || lowerText.includes("equipe") || lowerText.includes("médicos")) {
+        lowerText.includes("profissionais") || lowerText.includes("equipe") || lowerText.includes("médicos") ||
+        lowerText.includes("dentista") || lowerText.includes("doutor") || lowerText.includes("doutora")) {
       
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Por que escolher a nossa clínica? 😍\n\n✨ Profissionais premiados e apaixonados pelo que fazem\n✨ Atendimento acolhedor e humanizado\n✨ Equipamentos modernos para seu conforto e segurança\n✨ Resultados naturais e personalizados para você!\n\nAqui você não é só mais um paciente, você é parte da nossa família 💖",
+        content: "Por que escolher a nossa clínica? 😍\n\n✨ Profissionais PREMIADOS e apaixonados pelo que fazem\n✨ Atendimento VIP acolhedor e humanizado\n✨ Equipamentos ULTRA modernos para seu conforto e segurança\n✨ Resultados NATURAIS e personalizados para você!\n✨ Garantia em TODOS os tratamentos!\n\nAqui você não é só mais um paciente, você é parte da nossa família 💖\n\nQuer conhecer nosso espaço? Agende uma visita e ganhe uma AVALIAÇÃO COMPLETA grátis!",
         timestamp: new Date(),
         sentiment: 'neutral',
         showClinicInfo: true
+      };
+    }
+    
+    // Verifica se está perguntando sobre resultados
+    if (lowerText.includes("resultado") || lowerText.includes("antes e depois") || lowerText.includes("antes depois") ||
+        lowerText.includes("eficaz") || lowerText.includes("funciona") || lowerText.includes("quanto tempo") ||
+        lowerText.includes("duração") || lowerText.includes("duracao") || lowerText.includes("tempo de recuperação")) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Nossos resultados são EXTRAORDINÁRIOS! 🌟\n\nA maioria dos pacientes percebe diferença já na PRIMEIRA sessão! E o melhor: com mínimo desconforto e rápida recuperação!\n\nTemos mais de 5.000 casos de sucesso e um índice de satisfação de 98%! Incrível, né?\n\nQuer agendar uma consulta para conhecer casos parecidos com o seu? Tenho certeza que você vai se SURPREENDER! 😍",
+        timestamp: new Date(),
+        sentiment: 'neutral'
       };
     }
     
@@ -174,28 +243,57 @@ export function ChatBot() {
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Sem problema! Estou aqui para te ajudar com calma! 🫶\nSe eu não expliquei direito, me avise e eu tento de outra forma! 😉\nSeu sorriso merece o melhor!",
+        content: "Sem problema! Estou aqui para te ajudar com calma! 🫶\n\nVamos simplificar: temos tratamentos odontológicos (para seu sorriso perfeito!) e de harmonização facial (para realçar sua beleza natural!).\n\nQual área te interessa mais? Posso explicar detalhadamente cada procedimento, e o melhor: de um jeito SUPER fácil de entender! 😉",
         timestamp: new Date(),
         sentiment: 'neutral'
       };
     }
     
-    // Mensagem de fechamento (que incentiva continuidade)
-    if (messages.length > 3 && Math.random() > 0.7) {
+    // Verifica se está preocupado com dor
+    if (lowerText.includes("dor") || lowerText.includes("doi") || lowerText.includes("dolorido") || 
+        lowerText.includes("doloroso") || lowerText.includes("anestesia") || lowerText.includes("medo")) {
+      
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Fique à vontade para me perguntar o que quiser!\nEstou aqui para te dar toda atenção do mundo! 🌎💬\n\nQual serviço você gostaria de saber mais? 😄",
+        content: "Entendo sua preocupação! 💕 Mas fique tranquilo(a)!\n\nNossos procedimentos são praticamente INDOLORES! Usamos as técnicas mais modernas e anestesias de última geração.\n\nMuitos pacientes relatam que sentem MENOS desconforto do que esperavam! E nossa equipe é ESPECIALISTA em atender pessoas com medo ou ansiedade.\n\nQuer agendar uma CONVERSA sem compromisso com nossos especialistas? Eles podem explicar tudo pessoalmente! 😊",
         timestamp: new Date(),
         sentiment: 'neutral'
       };
     }
     
-    // Resposta padrão com emojis
+    // Mensagem de fechamento (que incentiva continuidade e vendas)
+    if (messages.length > 3 && Math.random() > 0.6) {
+      const promos = [
+        "Sabia que estamos com uma SUPER PROMOÇÃO de clareamento dental essa semana? 50% OFF na segunda sessão! Quer aproveitar? 🤩",
+        "Nosso combo de harmonização facial está com desconto INCRÍVEL! Botox + preenchimento com 30% OFF! Quer saber mais? ✨",
+        "OPORTUNIDADE ÚNICA! Estamos com as últimas vagas para avaliação completa GRATUITA essa semana! Vamos agendar a sua? 📅",
+        "Tem interesse em cuidar do seu sorriso? Nossos PACOTES PROMOCIONAIS podem caber no seu orçamento! Quer conhecer? 💰",
+        "NOVIDADE! Acabamos de receber os equipamentos mais modernos para tratamentos estéticos! Quer ser uma das primeiras pessoas a experimentar? 🔝"
+      ];
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: `${promos[Math.floor(Math.random() * promos.length)]}\n\nFique à vontade para me perguntar o que quiser! Estou aqui exclusivamente para te ajudar! 🌎💬`,
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    // Resposta padrão com emojis e foco em vendas
+    const defaultResponses = [
+      "Estou SUPER animada para te ajudar a transformar seu sorriso! 😁 Nossos tratamentos têm resultados INCRÍVEIS! Quer conhecer nossas opções mais populares?",
+      "Aqui na clínica, fazemos MILAGRES acontecerem todos os dias! 🌟 Que tal agendar uma avaliação GRATUITA para descobrir o que podemos fazer por você?",
+      "Já imaginou como seria ter um sorriso de CINEMA? 🎬 Nossos tratamentos estéticos são rápidos, indolores e com resultados SURPREENDENTES! Quer saber mais?",
+      "Sabia que um pequeno ajuste no seu sorriso pode TRANSFORMAR completamente sua aparência? 💫 Posso te mostrar como nossos procedimentos podem realçar sua beleza natural!",
+      "O que você acha de aproveitar nossas CONDIÇÕES ESPECIAIS dessa semana? 🎁 Temos descontos EXCLUSIVOS para primeiras consultas! Quer garantir a sua?"
+    ];
+    
     return {
       id: Date.now().toString(),
       sender: 'bot',
-      content: "Estou aqui para te ajudar com tudo sobre nossos serviços odontológicos e de harmonização facial! 😊 Quer saber sobre valores, agendar uma consulta ou conhecer nossos diferenciais? É só me dizer! 💬",
+      content: defaultResponses[Math.floor(Math.random() * defaultResponses.length)],
       timestamp: new Date(),
       sentiment: 'neutral'
     };
