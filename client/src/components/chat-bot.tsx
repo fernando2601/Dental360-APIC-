@@ -577,14 +577,87 @@ export function ChatBot() {
       };
     }
     
+    // Verifica se tem medo de dentista especificamente 
+    if (lowerText.includes("medo de dentista") || lowerText.includes("pavor de dentista") || 
+        lowerText.includes("trauma de dentista") || lowerText.includes("morro de medo")) {
+        
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Eu entendo COMPLETAMENTE! 🫂 Muitas pessoas sentem o mesmo!\n\nNossa clínica é especializada em pacientes que têm medo. Nossos profissionais são TREINADOS para criar um ambiente calmo e acolhedor. Temos até protocolos especiais de atendimento para pessoas ansiosas.\n\nAqui você define o ritmo! Podemos fazer pausas quando quiser, explicar cada detalhe antes e usar técnicas de relaxamento que realmente funcionam.\n\nTemos até a opção de sedação consciente para casos mais intensos! Que tal uma visita apenas para CONHECER o ambiente, sem nenhum procedimento? Muitos pacientes relatam que isso já ajuda a reduzir o medo! 😊",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+      
     // Verifica se está preocupado com dor
     if (lowerText.includes("dor") || lowerText.includes("doi") || lowerText.includes("dolorido") || 
-        lowerText.includes("doloroso") || lowerText.includes("anestesia") || lowerText.includes("medo")) {
+        lowerText.includes("doloroso") || lowerText.includes("anestesia") || lowerText.includes("medo") ||
+        lowerText.includes("medroso") || lowerText.includes("medrosa")) {
       
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Entendo sua preocupação! 💕 Mas fique tranquilo(a)!\n\nNossos procedimentos são praticamente INDOLORES! Usamos as técnicas mais modernas e anestesias de última geração.\n\nMuitos pacientes relatam que sentem MENOS desconforto do que esperavam! E nossa equipe é ESPECIALISTA em atender pessoas com medo ou ansiedade.\n\nQuer agendar uma CONVERSA sem compromisso com nossos especialistas? Eles podem explicar tudo pessoalmente! 😊",
+        content: "Entendo sua preocupação com a dor! 💕 É mais comum do que você imagina.\n\nMas posso te garantir: a odontologia EVOLUIU MUITO! Nossos procedimentos utilizam anestesias potentes e indolores (aplicadas com técnicas que você mal sente a agulha).\n\nAlém disso, temos protocolos especiais para pacientes mais sensíveis - como anestesia prévia em gel, controle de respiração e até fones com música relaxante durante o procedimento.\n\nJá atendemos CENTENAS de pacientes que tinham o mesmo receio e hoje frequentam a clínica tranquilamente. Quer conhecer nossa abordagem sem compromisso? Podemos começar apenas com uma conversa! 😊",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    // Verifica se está preocupado com o custo/dinheiro
+    if (lowerText.includes("sem grana") || lowerText.includes("sem dinheiro") || lowerText.includes("caro") || 
+        lowerText.includes("preço alto") || lowerText.includes("valor alto") || lowerText.includes("não tenho como pagar") || 
+        lowerText.includes("nao tenho como pagar") || lowerText.includes("fora do orçamento")) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Entendo sua preocupação com os valores! 💰 Mas temos ÓTIMAS NOTÍCIAS!\n\nNossa clínica tem opções para TODOS os orçamentos! Oferecemos:\n\n• Parcelamento em até 12x SEM JUROS\n• Descontos especiais para pacotes de tratamento\n• Planos mensais com valor fixo\n• Promoções sazonais (e temos uma AGORA!)\n\nMuitas pessoas se surpreendem quando descobrem que cuidar da saúde bucal pode caber no orçamento! E lembre-se: nossa avaliação inicial é TOTALMENTE GRATUITA, assim você conhece todas as opções antes de decidir.\n\nQuer agendar para conhecer os valores exatos para o seu caso? 😉",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    // Verifica se tem vergonha do sorriso
+    if (lowerText.includes("vergonha do sorriso") || lowerText.includes("vergonha de sorrir") || 
+        lowerText.includes("vergonha dos dentes") || lowerText.includes("não gosto do meu sorriso") || 
+        lowerText.includes("nao gosto do meu sorriso") || lowerText.includes("escondo meu sorriso") || 
+        lowerText.includes("evito sorrir") || lowerText.includes("tô com vergonha")) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Entendo perfeitamente esse sentimento! 💖 Mas saiba que MUITAS pessoas passam por isso e conseguimos transformar essa realidade!\n\nTer vergonha do sorriso afeta não só a aparência, mas a autoestima e até mesmo oportunidades sociais e profissionais. Por isso, transformar sorrisos é uma das coisas mais GRATIFICANTES do nosso trabalho!\n\nTemos diversos tratamentos que podem fazer uma diferença INCRÍVEL em pouco tempo - desde procedimentos simples como clareamento até transformações completas.\n\nO primeiro passo é uma avaliação para entendermos o que te incomoda. Muitos pacientes saem já com um plano de tratamento e uma nova esperança! Que tal dar esse primeiro passo? Nossa avaliação é gratuita e SIGILOSA. 😊",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    // Verifica se tentou clareamento caseiro sem sucesso
+    if ((lowerText.includes("clareamento") || lowerText.includes("clarear")) && 
+        (lowerText.includes("casa") || lowerText.includes("caseiro") || lowerText.includes("fiz em casa")) && 
+        (lowerText.includes("não deu certo") || lowerText.includes("nao deu certo") || lowerText.includes("não funcionou") || 
+         lowerText.includes("nao funcionou") || lowerText.includes("ruim") || lowerText.includes("insatisfeito"))) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "É muito comum essa experiência com clareamentos caseiros! 😓 A maioria deles realmente NÃO traz os resultados esperados.\n\nIsso acontece porque produtos de farmácia têm concentração muito baixa de agentes clareadores (por segurança) e não contam com a tecnologia de ativação que usamos na clínica.\n\nNosso clareamento profissional usa géis de alta concentração e luz especial que ACELERA o processo. O resultado é muito mais rápido, intenso e duradouro!\n\nAlém disso, fazemos tudo com acompanhamento para evitar sensibilidade. Muitos pacientes que tentaram métodos caseiros ficam IMPRESSIONADOS com a diferença do tratamento profissional! Quer conhecer? Temos promoção esta semana! ✨",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    // Verifica se tem medo de resultado artificial
+    if ((lowerText.includes("artificial") || lowerText.includes("falso") || lowerText.includes("fake") || 
+         lowerText.includes("forçado") || lowerText.includes("estranho") || lowerText.includes("exagerado")) && 
+        (lowerText.includes("resultado") || lowerText.includes("aparência") || lowerText.includes("aparencia") || 
+         lowerText.includes("ficar") || lowerText.includes("parecer") || lowerText.includes("medo"))) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Essa é uma preocupação SUPER válida! 💯 Entendo completamente!\n\nNossa filosofia é justamente criar resultados NATURAIS que valorizem sua beleza única, não transformações artificiais que parecem padronizadas.\n\nNossos profissionais são especialistas em harmonização e estética com abordagem conservadora. Trabalhamos com planejamento digital onde você pode VER previamente como ficará o resultado e aprovar antes de começarmos.\n\nTemos um portfólio imenso de casos onde os pacientes relatam que amigos e familiares perceberam que estão mais bonitos, mas não conseguem identificar exatamente o que mudou - esse é o sinal de um trabalho bem feito!\n\nQuer conhecer alguns desses resultados na consulta de avaliação? Você vai se surpreender! 😊",
         timestamp: new Date(),
         sentiment: 'neutral'
       };
