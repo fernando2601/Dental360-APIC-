@@ -506,6 +506,237 @@ export function ChatBot() {
       }
     }
     
+    // Fluxo para Preocupações Estéticas
+    else if (currentWorkflow.type === 'aestheticConcerns') {
+      switch (currentWorkflow.step) {
+        // Passo 1: Coletando informações sobre a preocupação específica do paciente
+        case 0:
+          // Identifica preocupações específicas mencionadas pelo usuário
+          let concernTypeValue = '';
+          
+          if (lowerText.includes('dente') || lowerText.includes('dentes')) {
+            if (lowerText.includes('torto') || lowerText.includes('tortos') || lowerText.includes('desalinhado')) {
+              concernTypeValue = 'dentes desalinhados';
+            } else if (lowerText.includes('amarelo') || lowerText.includes('amarelos') || lowerText.includes('escuro')) {
+              concernTypeValue = 'dentes amarelados';
+            } else if (lowerText.includes('quebrado') || lowerText.includes('quebrados') || lowerText.includes('rachado')) {
+              concernTypeValue = 'dentes danificados';
+            } else {
+              concernTypeValue = 'problemas dentários';
+            }
+          } else if (lowerText.includes('ruga') || lowerText.includes('rugas') || lowerText.includes('idade')) {
+            concernTypeValue = 'rugas e linhas de expressão';
+          } else if (lowerText.includes('lábio') || lowerText.includes('labio') || lowerText.includes('boca')) {
+            concernTypeValue = 'estética labial';
+          } else if (lowerText.includes('nariz') || lowerText.includes('rinoplastia')) {
+            concernTypeValue = 'estética nasal';
+          } else if (lowerText.includes('queixo') || lowerText.includes('mandíbula') || lowerText.includes('mandibula')) {
+            concernTypeValue = 'contorno mandibular';
+          } else if (lowerText.includes('pele') || lowerText.includes('tez') || lowerText.includes('acne')) {
+            concernTypeValue = 'textura da pele';
+          } else {
+            concernTypeValue = 'estética geral';
+          }
+          
+          // Atualiza o workflow com os dados e avança para o próximo passo
+          updateWorkflow({
+            step: 1,
+            data: { concernType: concernTypeValue }
+          });
+          
+          let treatmentSuggestion;
+          switch (concernTypeValue) {
+            case 'dentes desalinhados':
+              treatmentSuggestion = 'aparelho ortodôntico transparente, que é praticamente invisível';
+              break;
+            case 'dentes amarelados':
+              treatmentSuggestion = 'clareamento dental profissional, que pode clarear até 8 tons';
+              break;
+            case 'dentes danificados':
+              treatmentSuggestion = 'restaurações estéticas com resina ou facetas de porcelana';
+              break;
+            case 'rugas e linhas de expressão':
+              treatmentSuggestion = 'aplicação de Botox ou bioestimuladores de colágeno';
+              break;
+            case 'estética labial':
+              treatmentSuggestion = 'preenchimento labial com ácido hialurônico';
+              break;
+            case 'estética nasal':
+              treatmentSuggestion = 'rinomodelação sem cirurgia';
+              break;
+            case 'contorno mandibular':
+              treatmentSuggestion = 'harmonização facial com foco em definição mandibular';
+              break;
+            case 'textura da pele':
+              treatmentSuggestion = 'tratamentos para revitalização da pele';
+              break;
+            default:
+              treatmentSuggestion = 'harmonização facial personalizada';
+          }
+          
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Obrigado por compartilhar isso comigo! Entendo sua preocupação com ${concernTypeValue}.\n\nBoas notícias: temos tratamentos específicos para esse caso, como ${treatmentSuggestion}.\n\nMuitas pessoas se sentem da mesma forma, e o resultado após o tratamento não é apenas estético, mas também um aumento significativo da autoestima e qualidade de vida.\n\nGostaria de conhecer mais detalhes sobre esse tratamento específico ou agendar uma avaliação gratuita?`,
+            timestamp: new Date(),
+            workflowType: 'aestheticConcerns',
+            isWorkflowStep: true,
+            expectsInput: true
+          };
+          
+        // Passo 2: Oferecendo opções de tratamento e verificando se deseja agendar
+        case 1:
+          const aestheticConcernType = currentWorkflow.data.concernType || '';
+          const isPositiveResponse = lowerText.includes('sim') || lowerText.includes('quero') || 
+                                     lowerText.includes('claro') || lowerText.includes('ok') ||
+                                     lowerText.includes('gostaria') || lowerText.includes('agendar') ||
+                                     lowerText.includes('avaliação') || lowerText.includes('consulta');
+          
+          if (isPositiveResponse) {
+            // Inicia o workflow de agendamento com o tipo de preocupação
+            startWorkflow('schedulingProcess', { service: `Avaliação para ${aestheticConcernType}` });
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Excelente! 🌟 Vamos agendar uma avaliação gratuita para conversarmos sobre o tratamento para ${aestheticConcernType}.\n\nNessa avaliação, nossos especialistas vão examinar seu caso específico e apresentar todas as opções de tratamento personalizadas para você, incluindo custos e tempo de tratamento.\n\nQual seria a melhor data para sua visita?`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          } else if (lowerText.includes('preço') || lowerText.includes('preco') || lowerText.includes('valor') || 
+                     lowerText.includes('custo') || lowerText.includes('quanto custa') || lowerText.includes('investimento')) {
+            
+            // Redireciona para o workflow de preocupações financeiras
+            startWorkflow('financialConcerns', { concernType: aestheticConcernType });
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Entendo que os valores são uma parte importante da sua decisão. Os tratamentos para ${aestheticConcernType} têm uma faixa de preço que varia conforme a complexidade do caso e técnicas utilizadas.\n\nO mais importante é que oferecemos diversas opções de pagamento para caber no seu orçamento!\n\n• Parcelamento em até 12x SEM JUROS\n• Descontos para pagamento à vista\n• Pacotes promocionais\n\nPara dar um valor exato, precisamos realizar uma avaliação. Mas posso te adiantar que o investimento inicial para este tipo de tratamento começa em aproximadamente R$ ${Math.floor(Math.random() * 400) + 200},00.\n\nGostaria de agendar uma avaliação gratuita para conhecer todas as opções e valores?`,
+              timestamp: new Date(),
+              workflowType: 'financialConcerns',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          } else {
+            // Se a resposta não for clara, oferece mais informações
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Entendo! Para ajudar em sua decisão, posso te contar que nossos tratamentos para ${aestheticConcernType} são:\n\n• Minimamente invasivos\n• Com resultados visíveis em poucas sessões\n• Realizados por profissionais especializados\n• Personalizados para cada paciente\n\nAlém disso, temos centenas de casos de sucesso com resultados extraordinários! Se preferir, podemos agendar apenas uma consulta informativa, sem compromisso, para você conhecer melhor as opções. O que acha?`,
+              timestamp: new Date(),
+              workflowType: 'aestheticConcerns',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          }
+          
+        default:
+          // Reseta o workflow se chegou ao final
+          startWorkflow('initial', {});
+          return null;
+      }
+    }
+    
+    // Fluxo para Preocupações Financeiras
+    else if (currentWorkflow.type === 'financialConcerns') {
+      switch (currentWorkflow.step) {
+        // Passo 1: Identificando o serviço de interesse e apresentando opções de pagamento
+        case 0:
+          // Tenta identificar o serviço mencionado ou usa informações prévias
+          let serviceOfInterestInitial = '';
+          const allServices = [...services.dental.map(s => s.name.toLowerCase()), ...services.harmonization.map(s => s.name.toLowerCase())];
+          
+          for (const service of allServices) {
+            if (lowerText.includes(service.toLowerCase())) {
+              serviceOfInterest = service;
+              break;
+            }
+          }
+          
+          // Se não identificou nenhum serviço específico, verifica se há um tipo de preocupação anterior
+          if (!serviceOfInterest && currentWorkflow.data.concernType) {
+            serviceOfInterest = `tratamento para ${currentWorkflow.data.concernType}`;
+          }
+          
+          // Se mesmo assim não tiver nada, usa um termo genérico
+          if (!serviceOfInterest) {
+            serviceOfInterest = 'nossos procedimentos';
+          }
+          
+          // Atualiza o workflow e avança para o próximo passo
+          updateWorkflow({
+            step: 1,
+            data: { serviceOfInterest }
+          });
+          
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Fico feliz que esteja considerando ${serviceOfInterest}! 💯\n\nEntendo que o aspecto financeiro é importante, e por isso criamos opções flexíveis para todos os orçamentos:\n\n• Pagamento parcelado em até 12x sem juros (via cartão de crédito)\n• 5% de desconto para pagamento via PIX\n• 3% de desconto para pagamento em dinheiro\n• Pacotes com desconto progressivo (quanto mais sessões, maior o desconto)\n• Planos de tratamento customizados para caber no seu orçamento\n\nAlém disso, oferecemos avaliação TOTALMENTE GRATUITA para que você saiba exatamente os valores antes de iniciar qualquer procedimento.\n\nGostaria de agendar esta avaliação?`,
+            timestamp: new Date(),
+            workflowType: 'financialConcerns',
+            isWorkflowStep: true,
+            expectsInput: true
+          };
+          
+        // Passo 2: Verificando se deseja agendar e redirecionando para workflow de agendamento ou oferecendo desconto
+        case 1:
+          const serviceOfInterestValue = currentWorkflow.data.serviceOfInterest || '';
+          const wantsToSchedule = lowerText.includes('sim') || lowerText.includes('quero') || 
+                                  lowerText.includes('claro') || lowerText.includes('ok') ||
+                                  lowerText.includes('gostaria') || lowerText.includes('agendar') ||
+                                  lowerText.includes('avaliação') || lowerText.includes('consulta');
+          
+          if (wantsToSchedule) {
+            // Inicia o workflow de agendamento
+            startWorkflow('schedulingProcess', { service: `Avaliação para ${serviceOfInterestValue}` });
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Excelente decisão! 🌟 Vamos agendar sua avaliação gratuita para ${serviceOfInterestValue}.\n\nNessa consulta, além de avaliarmos seu caso específico, apresentaremos todas as opções de pagamento detalhadas e personalizadas para o seu orçamento.\n\nQual seria a melhor data para você?`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          } else if (lowerText.includes('caro') || lowerText.includes('muito') || lowerText.includes('não posso') || 
+                     lowerText.includes('nao posso') || lowerText.includes('não tenho') || lowerText.includes('alto')) {
+            
+            // Se ainda está preocupado com o valor, oferece um desconto especial
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Entendo sua preocupação com os valores. 💙\n\nPara casos como o seu, temos uma condição ESPECIAL que posso oferecer: um CUPOM DE 10% DE DESCONTO que você pode usar na primeira sessão após a avaliação!\n\nAlém disso, ao agendar hoje, você garante os preços atuais que serão reajustados no próximo mês.\n\nMuitos pacientes se surpreendem quando descobrem que os valores ficam bem mais acessíveis do que imaginavam, especialmente com nossas opções de parcelamento.\n\nPodemos agendar uma avaliação sem compromisso apenas para você conhecer todas as opções e valores exatos?`,
+              timestamp: new Date(),
+              workflowType: 'financialConcerns',
+              isWorkflowStep: true,
+              expectsInput: true,
+              hasCoupon: true
+            };
+          } else {
+            // Se ainda está em dúvida, oferece mais informações
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Entendo! É importante você ter todas as informações necessárias para tomar a melhor decisão.\n\nSaiba que nossa clínica trabalha com transparência total nos valores e nunca existem "surpresas" ou taxas adicionais durante o tratamento.\n\nMuitos dos nossos pacientes relatam que, considerando os resultados obtidos e o impacto positivo na qualidade de vida, o investimento foi extremamente válido.\n\nEstou à disposição para esclarecer qualquer dúvida adicional sobre valores, formas de pagamento ou agendamento. O que mais você gostaria de saber?`,
+              timestamp: new Date(),
+              workflowType: 'financialConcerns',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          }
+          
+        default:
+          // Reseta o workflow se chegou ao final
+          startWorkflow('initial', {});
+          return null;
+      }
+    }
+    
     // Se não corresponder a nenhum fluxo ativo ou estiver no fluxo inicial
     return null;
   };
@@ -1038,12 +1269,18 @@ export function ChatBot() {
         lowerText.includes("nao gosto do meu sorriso") || lowerText.includes("escondo meu sorriso") || 
         lowerText.includes("evito sorrir") || lowerText.includes("tô com vergonha")) {
       
+      // Inicia o workflow de preocupações estéticas
+      startWorkflow('aestheticConcerns', {});
+      
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Entendo perfeitamente esse sentimento! 💖 Mas saiba que MUITAS pessoas passam por isso e conseguimos transformar essa realidade!\n\nTer vergonha do sorriso afeta não só a aparência, mas a autoestima e até mesmo oportunidades sociais e profissionais. Por isso, transformar sorrisos é uma das coisas mais GRATIFICANTES do nosso trabalho!\n\nTemos diversos tratamentos que podem fazer uma diferença INCRÍVEL em pouco tempo - desde procedimentos simples como clareamento até transformações completas.\n\nO primeiro passo é uma avaliação para entendermos o que te incomoda. Muitos pacientes saem já com um plano de tratamento e uma nova esperança! Que tal dar esse primeiro passo? Nossa avaliação é gratuita e SIGILOSA. 😊",
+        content: "Entendo perfeitamente esse sentimento! 💖 Mas saiba que MUITAS pessoas passam por isso e conseguimos transformar essa realidade!\n\nTer vergonha do sorriso afeta não só a aparência, mas a autoestima e até mesmo oportunidades sociais e profissionais. Por isso, transformar sorrisos é uma das coisas mais GRATIFICANTES do nosso trabalho!\n\nTemos diversos tratamentos que podem fazer uma diferença INCRÍVEL em pouco tempo - desde procedimentos simples como clareamento até transformações completas.\n\nPoderia me contar um pouco mais sobre o que te incomoda no seu sorriso? Assim posso te indicar as melhores opções de tratamento.",
         timestamp: new Date(),
-        sentiment: 'neutral'
+        sentiment: 'neutral',
+        workflowType: 'aestheticConcerns',
+        isWorkflowStep: true,
+        expectsInput: true
       };
     }
     
