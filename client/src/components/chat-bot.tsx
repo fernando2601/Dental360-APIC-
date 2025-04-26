@@ -41,18 +41,26 @@ export function ChatBot() {
   // Serviços e preços
   const services = {
     dental: [
-      { name: "Limpeza", price: 120 },
-      { name: "Clareamento", price: 400 },
-      { name: "Tratamento de cárie", price: 250 },
-      { name: "Aparelho ortodôntico (manutenção)", price: 180 },
-      { name: "Implante dentário", price: 1800 }
+      { name: "Limpeza Dental", price: 120, description: "Remoção completa de placa bacteriana e tártaro." },
+      { name: "Clareamento Dental", price: 400, description: "Deixe seu sorriso até 8 tons mais branco!" },
+      { name: "Tratamento de Cárie", price: 250, description: "Restauração com materiais de última geração." },
+      { name: "Aparelho Ortodôntico", price: 180, description: "Manutenção mensal de aparelhos." },
+      { name: "Implante Dentário", price: 1800, description: "Substitui dentes perdidos com raiz artificial." },
+      { name: "Extração de Siso", price: 450, description: "Procedimento indolor com técnicas modernas." },
+      { name: "Tratamento de Gengivite", price: 280, description: "Combate a inflamação gengival antes que se agrave." },
+      { name: "Facetas Dentárias", price: 900, description: "Corrige forma e cor dos dentes com porcelana." },
+      { name: "Restauração Estética", price: 200, description: "Repara dentes danificados por cáries ou fraturas." },
+      { name: "Tratamento de Canal", price: 700, description: "Procedimento para salvar dentes comprometidos." }
     ],
     harmonization: [
-      { name: "Botox", price: 500 },
-      { name: "Preenchimento labial", price: 650 },
-      { name: "Bichectomia", price: 1200 },
-      { name: "Lifting facial com fios de PDO", price: 2000 },
-      { name: "Bioestimulador de colágeno", price: 800 }
+      { name: "Botox", price: 500, description: "Suaviza rugas e linhas de expressão sem cirurgia." },
+      { name: "Preenchimento Labial", price: 650, description: "Volumiza e define os lábios para aparência mais jovem." },
+      { name: "Bichectomia", price: 1200, description: "Afina o rosto removendo as bolas de Bichat." },
+      { name: "Lifting Facial", price: 2000, description: "Rejuvenescimento facial com fios de PDO." },
+      { name: "Bioestimulador de Colágeno", price: 800, description: "Estimula produção natural de colágeno para pele mais firme." },
+      { name: "Preenchimento Facial", price: 1300, description: "Restaura volume em áreas com perda de gordura." },
+      { name: "Harmonização Facial", price: 3500, description: "Conjunto de procedimentos para equilíbrio facial." },
+      { name: "Rinomodelação", price: 1700, description: "Harmoniza o nariz sem cirurgia." }
     ]
   };
 
@@ -201,22 +209,80 @@ export function ChatBot() {
       
       // Detectar se está perguntando sobre um serviço específico
       let specificService = "";
+      let price = 0;
       
-      if (lowerText.includes("limpeza")) specificService = "limpeza dental";
-      else if (lowerText.includes("clareamento")) specificService = "clareamento dental";
-      else if (lowerText.includes("aparelho") || lowerText.includes("ortodon")) specificService = "aparelho ortodôntico";
-      else if (lowerText.includes("implante")) specificService = "implante dentário";
-      else if (lowerText.includes("botox")) specificService = "aplicação de botox";
-      else if (lowerText.includes("preenchimento") || lowerText.includes("labial")) specificService = "preenchimento labial";
-      else if (lowerText.includes("bichectomia")) specificService = "bichectomia";
-      else if (lowerText.includes("lifting") || lowerText.includes("fios")) specificService = "lifting facial";
-      else if (lowerText.includes("colágeno") || lowerText.includes("colageno")) specificService = "bioestimulador de colágeno";
+      // Serviços dentários
+      if (lowerText.includes("limpeza")) {
+        specificService = "limpeza dental";
+        price = 120;
+      }
+      else if (lowerText.includes("clareamento")) {
+        specificService = "clareamento dental";
+        price = 400;
+      }
+      else if (lowerText.includes("aparelho") || lowerText.includes("ortodon")) {
+        specificService = "aparelho ortodôntico";
+        price = 180;
+      }
+      else if (lowerText.includes("implante")) {
+        specificService = "implante dentário";
+        price = 1800;
+      }
+      else if (lowerText.includes("siso")) {
+        specificService = "extração de siso";
+        price = 450;
+      }
+      else if (lowerText.includes("extração") || lowerText.includes("extracao")) {
+        specificService = "extração dentária";
+        price = 450;
+      }
+      else if (lowerText.includes("gengiv")) {
+        specificService = "tratamento de gengivite";
+        price = 280;
+      }
+      else if (lowerText.includes("faceta")) {
+        specificService = "facetas dentárias";
+        price = 900;
+      }
+      else if (lowerText.includes("canal")) {
+        specificService = "tratamento de canal";
+        price = 700;
+      }
+      else if (lowerText.includes("restaura")) {
+        specificService = "restauração estética";
+        price = 200;
+      }
+      // Harmonização facial
+      else if (lowerText.includes("botox")) {
+        specificService = "aplicação de botox";
+        price = 500;
+      }
+      else if (lowerText.includes("preenchimento") || lowerText.includes("labial")) {
+        specificService = "preenchimento labial";
+        price = 650;
+      }
+      else if (lowerText.includes("bichectomia")) {
+        specificService = "bichectomia";
+        price = 1200;
+      }
+      else if (lowerText.includes("lifting") || lowerText.includes("fios")) {
+        specificService = "lifting facial";
+        price = 2000;
+      }
+      else if (lowerText.includes("colágeno") || lowerText.includes("colageno")) {
+        specificService = "bioestimulador de colágeno";
+        price = 800;
+      }
+      else if (lowerText.includes("harmoniza")) {
+        specificService = "harmonização facial";
+        price = 3500;
+      };
       
       if (specificService) {
         return {
           id: Date.now().toString(),
           sender: 'bot',
-          content: `Você vai AMAR nosso tratamento de ${specificService}! 😍 É um dos MAIS POPULARES da clínica! Temos os melhores preços do mercado e resultados INCRÍVEIS!\n\nQuer agendar uma avaliação para conhecer mais detalhes? Prometo que vai valer MUITO a pena! ✨`,
+          content: `Você vai AMAR nosso tratamento de ${specificService}! 😍 É um dos MAIS POPULARES da clínica!\n\nO valor é de **R$ ${price.toFixed(2)}** com condições especiais de pagamento.\n\nNosso procedimento é realizado com os melhores materiais do mercado e os resultados são INCRÍVEIS!\n\nQuer agendar uma avaliação? Prometo que vai valer MUITO a pena! ✨`,
           timestamp: new Date(),
           sentiment: 'neutral',
           showServicesInfo: true
