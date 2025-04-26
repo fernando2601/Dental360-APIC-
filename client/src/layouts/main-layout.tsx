@@ -53,17 +53,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <header className="border-b bg-card z-10">
           <div className="flex h-16 items-center px-4 sm:px-6">
             <div className={isMobile ? "ml-10" : ""}>
-              <h1 className="text-xl font-heading font-bold">DentalSpa Clinic</h1>
+              <h1 className="text-xl font-heading font-bold">Clínica DentalSpa</h1>
             </div>
 
             <div className="ml-auto flex items-center space-x-4">
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
-                <span className="sr-only">Notifications</span>
+                <span className="sr-only">Notificações</span>
               </Button>
               <Button variant="ghost" size="icon">
                 <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
+                <span className="sr-only">Configurações</span>
               </Button>
               <Separator orientation="vertical" className="h-8" />
               <ThemeToggle />

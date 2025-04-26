@@ -145,9 +145,9 @@ interface NavLinkProps {
 function NavLink({ href, icon, label, collapsed, active, notification }: NavLinkProps) {
   return (
     <Link href={href}>
-      <a
+      <div
         className={cn(
-          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent",
+          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent cursor-pointer",
           active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground",
           collapsed && "justify-center"
         )}
@@ -164,7 +164,7 @@ function NavLink({ href, icon, label, collapsed, active, notification }: NavLink
             {notification}
           </Badge>
         )}
-      </a>
+      </div>
     </Link>
   );
 }

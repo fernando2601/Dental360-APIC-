@@ -66,13 +66,13 @@ interface NavItemProps {
 function NavItem({ href, icon, label, onClick }: NavItemProps) {
   return (
     <Link href={href}>
-      <a 
-        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
+      <div 
+        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent transition-colors cursor-pointer"
         onClick={onClick}
       >
         {icon}
         <span>{label}</span>
-      </a>
+      </div>
     </Link>
   );
 }

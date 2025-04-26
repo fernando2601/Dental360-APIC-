@@ -10,26 +10,41 @@ import { CalendarDays, Users, Plus, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { formatDate, getDaysUntilBirthday } from "@/lib/utils";
 
+// Definindo tipos simplificados
+interface Client {
+  id: number;
+  fullName: string;
+  birthday: string;
+}
+
+interface Appointment {
+  id: number;
+  clientId: string;
+  serviceId: string;
+  staffId: string;
+  startTime: string;
+}
+
 export default function Dashboard() {
   // Fetch clients for birthday reminders
-  const { data: clients } = useQuery({
+  const { data: clients = [] } = useQuery<Client[]>({
     queryKey: ['/api/clients'],
   });
 
   // Fetch upcoming appointments
-  const { data: appointments } = useQuery({
+  const { data: appointments = [] } = useQuery<Appointment[]>({
     queryKey: ['/api/appointments'],
   });
 
   // Get upcoming birthdays
-  const upcomingBirthdays = clients?.filter((client: any) => {
+  const upcomingBirthdays = clients.filter((client: Client) => {
     const daysUntil = getDaysUntilBirthday(client.birthday);
     return daysUntil !== null && daysUntil <= 14; // Upcoming in next 14 days
-  }).sort((a: any, b: any) => {
+  }).sort((a: Client, b: Client) => {
     const daysA = getDaysUntilBirthday(a.birthday) || 0;
     const daysB = getDaysUntilBirthday(b.birthday) || 0;
     return daysA - daysB;
-  }) || [];
+  });
 
   // Get today's appointments
   const today = new Date();
@@ -37,31 +52,31 @@ export default function Dashboard() {
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
 
-  const todaysAppointments = appointments?.filter((appt: any) => {
+  const todaysAppointments = appointments.filter((appt: Appointment) => {
     const apptDate = new Date(appt.startTime);
     return apptDate >= today && apptDate < tomorrow;
-  }).sort((a: any, b: any) => {
+  }).sort((a: Appointment, b: Appointment) => {
     return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
-  }) || [];
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome to your clinic management dashboard.</p>
+          <p className="text-muted-foreground">Bem-vindo ao painel de gerenciamento da sua clínica.</p>
         </div>
         <div className="flex items-center gap-3 mt-4 md:mt-0">
           <Link href="/appointments">
             <Button>
               <CalendarDays className="mr-2 h-4 w-4" />
-              Appointments
+              Agendamentos
             </Button>
           </Link>
           <Link href="/clients">
             <Button variant="outline">
               <Users className="mr-2 h-4 w-4" />
-              Clients
+              Pacientes
             </Button>
           </Link>
         </div>
@@ -70,18 +85,18 @@ export default function Dashboard() {
       <DashboardStats />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Today's Appointments */}
+        {/* Agendamentos de Hoje */}
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Today's Appointments</CardTitle>
+              <CardTitle>Agendamentos de Hoje</CardTitle>
               <CardDescription>
-                {todaysAppointments.length} appointments scheduled
+                {todaysAppointments.length} agendamentos marcados
               </CardDescription>
             </div>
             <Link href="/appointments">
               <Button variant="outline" size="sm">
-                View All
+                Ver Todos
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -90,14 +105,14 @@ export default function Dashboard() {
             {todaysAppointments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <CalendarDays className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium">No appointments today</h3>
+                <h3 className="text-lg font-medium">Sem agendamentos hoje</h3>
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
-                  There are no appointments scheduled for today.
+                  Não há agendamentos marcados para hoje.
                 </p>
                 <Link href="/appointments">
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    Schedule Appointment
+                    Agendar Consulta
                   </Button>
                 </Link>
               </div>
