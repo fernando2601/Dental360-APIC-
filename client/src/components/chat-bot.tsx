@@ -394,7 +394,7 @@ export function ChatBot() {
           return {
             id: Date.now().toString(),
             sender: 'bot',
-            content: `Sobre o ${service}: o valor é **R$ ${price.toFixed(2)}** e temos diversas opções de pagamento para facilitar sua vida!\n\nNossos clientes AMAM os resultados desse procedimento. Temos mais de 95% de satisfação! 🤩\n\nGostaria de agendar uma avaliação GRATUITA para saber mais detalhes ou tirar dúvidas presencialmente?`,
+            content: `Sobre o ${service}: o valor é **R$ ${(price || 0).toFixed(2)}** e temos diversas opções de pagamento para facilitar sua vida!\n\nNossos clientes AMAM os resultados desse procedimento. Temos mais de 95% de satisfação! 🤩\n\nGostaria de agendar uma avaliação GRATUITA para saber mais detalhes ou tirar dúvidas presencialmente?`,
             timestamp: new Date(),
             workflowType: 'priceInquiry',
             isWorkflowStep: true,
@@ -651,31 +651,31 @@ export function ChatBot() {
           
           for (const service of allServices) {
             if (lowerText.includes(service.toLowerCase())) {
-              serviceOfInterest = service;
+              serviceOfInterestInitial = service;
               break;
             }
           }
           
           // Se não identificou nenhum serviço específico, verifica se há um tipo de preocupação anterior
-          if (!serviceOfInterest && currentWorkflow.data.concernType) {
-            serviceOfInterest = `tratamento para ${currentWorkflow.data.concernType}`;
+          if (!serviceOfInterestInitial && currentWorkflow.data.concernType) {
+            serviceOfInterestInitial = `tratamento para ${currentWorkflow.data.concernType}`;
           }
           
           // Se mesmo assim não tiver nada, usa um termo genérico
-          if (!serviceOfInterest) {
-            serviceOfInterest = 'nossos procedimentos';
+          if (!serviceOfInterestInitial) {
+            serviceOfInterestInitial = 'nossos procedimentos';
           }
           
           // Atualiza o workflow e avança para o próximo passo
           updateWorkflow({
             step: 1,
-            data: { serviceOfInterest }
+            data: { serviceOfInterest: serviceOfInterestInitial }
           });
           
           return {
             id: Date.now().toString(),
             sender: 'bot',
-            content: `Fico feliz que esteja considerando ${serviceOfInterest}! 💯\n\nEntendo que o aspecto financeiro é importante, e por isso criamos opções flexíveis para todos os orçamentos:\n\n• Pagamento parcelado em até 12x sem juros (via cartão de crédito)\n• 5% de desconto para pagamento via PIX\n• 3% de desconto para pagamento em dinheiro\n• Pacotes com desconto progressivo (quanto mais sessões, maior o desconto)\n• Planos de tratamento customizados para caber no seu orçamento\n\nAlém disso, oferecemos avaliação TOTALMENTE GRATUITA para que você saiba exatamente os valores antes de iniciar qualquer procedimento.\n\nGostaria de agendar esta avaliação?`,
+            content: `Fico feliz que esteja considerando ${serviceOfInterestInitial}! 💯\n\nEntendo que o aspecto financeiro é importante, e por isso criamos opções flexíveis para todos os orçamentos:\n\n• Pagamento parcelado em até 12x sem juros (via cartão de crédito)\n• 5% de desconto para pagamento via PIX\n• 3% de desconto para pagamento em dinheiro\n• Pacotes com desconto progressivo (quanto mais sessões, maior o desconto)\n• Planos de tratamento customizados para caber no seu orçamento\n\nAlém disso, oferecemos avaliação TOTALMENTE GRATUITA para que você saiba exatamente os valores antes de iniciar qualquer procedimento.\n\nGostaria de agendar esta avaliação?`,
             timestamp: new Date(),
             workflowType: 'financialConcerns',
             isWorkflowStep: true,
