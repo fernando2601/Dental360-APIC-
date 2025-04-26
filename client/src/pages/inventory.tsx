@@ -64,8 +64,8 @@ export default function Inventory() {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Inventory item added successfully.",
+        title: "Sucesso",
+        description: "Item adicionado ao estoque com sucesso.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/inventory'] });
       setIsCreateDialogOpen(false);
@@ -73,8 +73,8 @@ export default function Inventory() {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to add inventory item. Please try again.",
+        title: "Erro",
+        description: "Falha ao adicionar item ao estoque. Por favor, tente novamente.",
         variant: "destructive",
       });
     },
@@ -107,15 +107,15 @@ export default function Inventory() {
   function exportInventory() {
     if (!inventory || inventory.length === 0) {
       toast({
-        title: "No data to export",
-        description: "There are no inventory items to export.",
+        title: "Sem dados para exportar",
+        description: "Não há itens no estoque para exportar.",
         variant: "destructive",
       });
       return;
     }
 
     // Create CSV content
-    const headers = ["Name", "Category", "Description", "Quantity", "Unit", "Threshold", "Price", "Last Restocked"];
+    const headers = ["Nome", "Categoria", "Descrição", "Quantidade", "Unidade", "Limite", "Preço", "Última Reposição"];
     const csvContent = [
       headers.join(","),
       ...inventory.map((item: any) => [
@@ -146,19 +146,19 @@ export default function Inventory() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Inventory Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gerenciamento de Estoque</h1>
           <p className="text-muted-foreground">
-            Track and manage your clinic inventory items.
+            Acompanhe e gerencie os itens de estoque da sua clínica.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0 w-full sm:w-auto">
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Item
+            Adicionar Item
           </Button>
           <Button variant="outline" onClick={exportInventory}>
             <Download className="mr-2 h-4 w-4" />
-            Export
+            Exportar
           </Button>
         </div>
       </div>
@@ -168,7 +168,7 @@ export default function Inventory() {
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search inventory items..."
+            placeholder="Buscar itens no estoque..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -176,14 +176,14 @@ export default function Inventory() {
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Category" />
+            <SelectValue placeholder="Categoria" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Categories</SelectLabel>
+              <SelectLabel>Categorias</SelectLabel>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
-                  {category === "all" ? "All Categories" : category}
+                  {category === "all" ? "Todas as Categorias" : category}
                 </SelectItem>
               ))}
             </SelectGroup>
@@ -201,9 +201,9 @@ export default function Inventory() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add Inventory Item</DialogTitle>
+            <DialogTitle>Adicionar Item ao Estoque</DialogTitle>
             <DialogDescription>
-              Enter the details for the new inventory item.
+              Insira os detalhes do novo item de estoque.
             </DialogDescription>
           </DialogHeader>
           
@@ -214,7 +214,7 @@ export default function Inventory() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Item Name</FormLabel>
+                    <FormLabel>Nome do Item</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Botox" />
                     </FormControl>
@@ -228,9 +228,9 @@ export default function Inventory() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Categoria</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Injectables" />
+                      <Input {...field} placeholder="Injetáveis" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -242,9 +242,9 @@ export default function Inventory() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Descrição</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Botulinum toxin for wrinkle reduction" />
+                      <Input {...field} placeholder="Toxina botulínica para redução de rugas" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -257,7 +257,7 @@ export default function Inventory() {
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity</FormLabel>
+                      <FormLabel>Quantidade</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -271,9 +271,9 @@ export default function Inventory() {
                   name="unit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Unit</FormLabel>
+                      <FormLabel>Unidade</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="units" />
+                        <Input {...field} placeholder="unidades" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -287,7 +287,7 @@ export default function Inventory() {
                   name="threshold"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Reorder Threshold</FormLabel>
+                      <FormLabel>Limite para Reposição</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -301,7 +301,7 @@ export default function Inventory() {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Unit Price ($)</FormLabel>
+                      <FormLabel>Preço Unitário (R$)</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" {...field} />
                       </FormControl>
@@ -317,13 +317,13 @@ export default function Inventory() {
                   variant="outline"
                   onClick={() => setIsCreateDialogOpen(false)}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
                 <Button type="submit" disabled={createInventoryItem.isPending}>
                   {createInventoryItem.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Add Item
+                  Adicionar Item
                 </Button>
               </DialogFooter>
             </form>
