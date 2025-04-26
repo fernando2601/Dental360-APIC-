@@ -1,0 +1,291 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Plus, Download, Search, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Textarea } from "@/components/ui/textarea";
+import ClientTable from "@/components/client-table";
+
+// Form schema for client
+const clientFormSchema = z.object({
+  fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  phone: z.string().min(5, { message: "Phone number is required." }),
+  address: z.string().optional(),
+  birthday: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type ClientFormValues = z.infer<typeof clientFormSchema>;
+
+export default function Clients() {
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Initialize form
+  const form = useForm<ClientFormValues>({
+    resolver: zodResolver(clientFormSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      address: "",
+      birthday: "",
+      notes: "",
+    },
+  });
+
+  // Create client mutation
+  const createClient = useMutation({
+    mutationFn: async (values: ClientFormValues) => {
+      const response = await apiRequest('POST', '/api/clients', values);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Client created successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      setIsCreateDialogOpen(false);
+      form.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create client. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Fetch clients
+  const { data: clients, isLoading } = useQuery({
+    queryKey: ['/api/clients'],
+  });
+
+  // Filter clients based on search query
+  const filteredClients = clients?.filter((client: any) => {
+    if (!searchQuery) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      client.fullName.toLowerCase().includes(query) ||
+      client.email.toLowerCase().includes(query) ||
+      client.phone.includes(query)
+    );
+  });
+
+  // Handle form submission
+  function onSubmit(values: ClientFormValues) {
+    createClient.mutate(values);
+  }
+
+  // Export clients as CSV
+  function exportClients() {
+    if (!clients || clients.length === 0) {
+      toast({
+        title: "No data to export",
+        description: "There are no clients to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create CSV content
+    const headers = ["Full Name", "Email", "Phone", "Address", "Birthday", "Notes"];
+    const csvContent = [
+      headers.join(","),
+      ...clients.map((client: any) => [
+        `"${client.fullName}"`,
+        `"${client.email}"`,
+        `"${client.phone}"`,
+        `"${client.address || ""}"`,
+        `"${client.birthday || ""}"`,
+        `"${client.notes || ""}"`
+      ].join(","))
+    ].join("\n");
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "clients.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Client Management</h1>
+          <p className="text-muted-foreground">Manage and track all your clinic clients.</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0 w-full md:w-auto">
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Client
+          </Button>
+          <Button variant="outline" onClick={exportClients}>
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* Search and filter section */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search clients..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
+      {/* Clients table */}
+      <ClientTable 
+        clients={filteredClients || []} 
+        isLoading={isLoading} 
+      />
+
+      {/* Create Client Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add New Client</DialogTitle>
+            <DialogDescription>
+              Enter the client details to create a new record.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="John Doe" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" placeholder="john@example.com" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="(555) 123-4567" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="123 Main St, City, State, ZIP" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="birthday"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Birthday</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="date" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Any additional information about the client"
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createClient.isPending}>
+                  {createClient.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Create Client
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

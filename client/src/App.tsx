@@ -1,0 +1,46 @@
+import { Switch, Route } from "wouter";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "./lib/theme-provider";
+import MainLayout from "./layouts/main-layout";
+import Dashboard from "@/pages/dashboard";
+import Appointments from "@/pages/appointments";
+import Clients from "@/pages/clients";
+import Inventory from "@/pages/inventory";
+import Finances from "@/pages/finances";
+import Services from "@/pages/services";
+import Staff from "@/pages/staff";
+import Settings from "@/pages/settings";
+import NotFound from "@/pages/not-found";
+
+function Router() {
+  return (
+    <Switch>
+      <Route path="/" component={Dashboard} />
+      <Route path="/appointments" component={Appointments} />
+      <Route path="/clients" component={Clients} />
+      <Route path="/inventory" component={Inventory} />
+      <Route path="/finances" component={Finances} />
+      <Route path="/services" component={Services} />
+      <Route path="/staff" component={Staff} />
+      <Route path="/settings" component={Settings} />
+      {/* Fallback to 404 */}
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <MainLayout>
+          <Router />
+        </MainLayout>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;

@@ -1,0 +1,452 @@
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Loader2, Pencil, Trash2, EyeIcon, CheckCircle, XCircle } from "lucide-react";
+import { formatDate, calculateAge, getDaysUntilBirthday } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+
+interface ClientTableProps {
+  clients: any[];
+  isLoading: boolean;
+}
+
+// Form schema for client
+const clientFormSchema = z.object({
+  fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  phone: z.string().min(5, { message: "Phone number is required." }),
+  address: z.string().optional(),
+  birthday: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type ClientFormValues = z.infer<typeof clientFormSchema>;
+
+export default function ClientTable({ clients, isLoading }: ClientTableProps) {
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Initialize edit form
+  const form = useForm<ClientFormValues>({
+    resolver: zodResolver(clientFormSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      address: "",
+      birthday: "",
+      notes: "",
+    },
+  });
+
+  // Update client mutation
+  const updateClient = useMutation({
+    mutationFn: async (values: ClientFormValues) => {
+      if (!selectedClient) return;
+      const response = await apiRequest('PUT', `/api/clients/${selectedClient.id}`, values);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Client updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      setIsEditDialogOpen(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update client. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete client mutation
+  const deleteClient = useMutation({
+    mutationFn: async () => {
+      if (!selectedClient) return;
+      const response = await apiRequest('DELETE', `/api/clients/${selectedClient.id}`);
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Client deleted successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      setIsDeleteDialogOpen(false);
+      setSelectedClient(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete client. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle view client
+  function handleViewClient(client: any) {
+    setSelectedClient(client);
+    setIsViewDialogOpen(true);
+  }
+
+  // Handle edit client
+  function handleEditClient(client: any) {
+    setSelectedClient(client);
+    form.reset({
+      fullName: client.fullName,
+      email: client.email,
+      phone: client.phone,
+      address: client.address || "",
+      birthday: client.birthday ? new Date(client.birthday).toISOString().split('T')[0] : "",
+      notes: client.notes || "",
+    });
+    setIsEditDialogOpen(true);
+  }
+
+  // Handle delete client
+  function handleDeleteClient(client: any) {
+    setSelectedClient(client);
+    setIsDeleteDialogOpen(true);
+  }
+
+  // Handle form submission
+  function onSubmit(values: ClientFormValues) {
+    updateClient.mutate(values);
+  }
+
+  // Check if birthday is coming up
+  function isBirthdaySoon(birthdayStr: string) {
+    if (!birthdayStr) return false;
+    const days = getDaysUntilBirthday(birthdayStr);
+    return days !== null && days <= 14;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (clients.length === 0) {
+    return (
+      <div className="text-center py-12 border rounded-lg">
+        <h3 className="font-medium text-lg mb-2">No clients found</h3>
+        <p className="text-muted-foreground mb-6">
+          There are no clients in the system yet or none match your search criteria.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Contact</TableHead>
+            <TableHead className="hidden md:table-cell">Birthday</TableHead>
+            <TableHead className="hidden md:table-cell">Address</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {clients.map((client) => (
+            <TableRow key={client.id}>
+              <TableCell className="font-medium">{client.fullName}</TableCell>
+              <TableCell>
+                <div className="flex flex-col">
+                  <span>{client.email}</span>
+                  <span className="text-muted-foreground text-sm">{client.phone}</span>
+                </div>
+              </TableCell>
+              <TableCell className="hidden md:table-cell">
+                {client.birthday ? (
+                  <div className="flex flex-col">
+                    <span>{formatDate(client.birthday)}</span>
+                    <span className={`text-sm ${isBirthdaySoon(client.birthday) ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                      {calculateAge(client.birthday)} years old
+                      {isBirthdaySoon(client.birthday) && (
+                        <span className="ml-1">
+                          (Birthday soon!)
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">Not provided</span>
+                )}
+              </TableCell>
+              <TableCell className="hidden md:table-cell">
+                {client.address || <span className="text-muted-foreground">Not provided</span>}
+              </TableCell>
+              <TableCell>
+                <div className="flex space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewClient(client)}>
+                    <EyeIcon className="h-4 w-4" />
+                    <span className="sr-only">View</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleEditClient(client)}>
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteClient(client)}>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {/* View Client Dialog */}
+      {selectedClient && (
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>{selectedClient.fullName}</DialogTitle>
+              <DialogDescription>
+                Client details and information
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Email</h4>
+                  <p>{selectedClient.email}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Phone</h4>
+                  <p>{selectedClient.phone}</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Address</h4>
+                <p>{selectedClient.address || "Not provided"}</p>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Birthday</h4>
+                {selectedClient.birthday ? (
+                  <div>
+                    <p>{formatDate(selectedClient.birthday)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Age: {calculateAge(selectedClient.birthday)} years
+                      {isBirthdaySoon(selectedClient.birthday) && (
+                        <span className="ml-2 text-primary font-medium">
+                          (Birthday in {getDaysUntilBirthday(selectedClient.birthday)} days)
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                ) : (
+                  <p>Not provided</p>
+                )}
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Notes</h4>
+                <p className="whitespace-pre-wrap">{selectedClient.notes || "No notes"}</p>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setIsViewDialogOpen(false);
+                handleEditClient(selectedClient);
+              }}>
+                Edit Client
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Edit Client Dialog */}
+      {selectedClient && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit Client</DialogTitle>
+              <DialogDescription>
+                Update the client information below.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="birthday"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Birthday</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="date" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notes</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          rows={3}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={updateClient.isPending}>
+                    {updateClient.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Save Changes
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {selectedClient && (
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Client</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete <span className="font-medium">{selectedClient.fullName}</span>?
+                This action cannot be undone and will remove all client data from the system.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => deleteClient.mutate()}
+                disabled={deleteClient.isPending}
+              >
+                {deleteClient.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </>
+  );
+}
