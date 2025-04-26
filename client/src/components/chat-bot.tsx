@@ -67,10 +67,20 @@ export function ChatBot() {
   const detectSentiment = (text: string): 'positive' | 'negative' | 'neutral' => {
     const lowerText = text.toLowerCase();
     
+    // Situações traumáticas ou muito tristes (prioridade máxima)
+    if (lowerText.includes("morreu") || lowerText.includes("faleceu") || lowerText.includes("morte") || 
+        lowerText.includes("falecimento") || lowerText.includes("perdeu") || lowerText.includes("perdi") ||
+        lowerText.includes("luto") || lowerText.includes("tragédia") || lowerText.includes("acidente grave") ||
+        lowerText.includes("hospital") || lowerText.includes("doença") || lowerText.includes("câncer") ||
+        lowerText.includes("terminal") || (lowerText.includes("irmão") && (lowerText.includes("morreu") || lowerText.includes("faleceu")))) {
+      return 'negative';
+    }
+    
     // Palavras que indicam sentimento negativo ou tristeza
     const negativeWords = ['triste', 'chateado', 'frustrado', 'infeliz', 'preocupado', 'dor', 'sofr', 'caro', 'custa', 'preço', 'magoado', 
     'ansioso', 'ansiedade', 'medo', 'assustado', 'desapontado', 'decepcionado', 'angustiado', 'não gosto', 'não quero', 
-    'ruim', 'péssimo', 'horrível', 'mal', 'pior', 'não estou bem', 'doente', 'cansado', 'estressado'];
+    'ruim', 'péssimo', 'horrível', 'mal', 'pior', 'não estou bem', 'doente', 'cansado', 'estressado', 'sozinho',
+    'sofrendo', 'difícil', 'problema', 'complicado', 'depressão', 'deprimido', 'acabado'];
     
     // Palavras que indicam sentimento positivo
     const positiveWords = ['feliz', 'animado', 'contente', 'satisfeito', 'ótimo', 'excelente', 'bom', 'bem', 'legal', 
@@ -107,6 +117,25 @@ export function ChatBot() {
     
     // Atualiza o tempo da última interação
     setLastInteractionTime(Date.now());
+    
+    // Verificação especial para situações de luto ou perda de familiar (prioridade máxima)
+    if ((lowerText.includes("irmão") || lowerText.includes("irmã") || lowerText.includes("pai") || 
+        lowerText.includes("mãe") || lowerText.includes("mãe") || lowerText.includes("filho") || 
+        lowerText.includes("filha") || lowerText.includes("avó") || lowerText.includes("avô") || 
+        lowerText.includes("tio") || lowerText.includes("tia") || lowerText.includes("primo") || 
+        lowerText.includes("prima") || lowerText.includes("familiar") || lowerText.includes("parente")) && 
+        (lowerText.includes("morreu") || lowerText.includes("faleceu") || lowerText.includes("perdi") || 
+        lowerText.includes("morte") || lowerText.includes("perdeu") || lowerText.includes("luto"))) {
+      
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Sinto muito pela sua perda. 😔 Momentos como esse são realmente difíceis. Estamos aqui para oferecer todo apoio que precisar.\n\nComo um gesto de solidariedade, gostaria de oferecer um **CUPOM ESPECIAL DE 15% DE DESCONTO** em qualquer procedimento quando você sentir que é o momento adequado.\n\nNão há pressa. Quando estiver pronto, estamos aqui para ajudar a cuidar de você com todo carinho e atenção que merece. 💖",
+        timestamp: new Date(),
+        sentiment: 'neutral',
+        hasCoupon: true
+      };
+    }
     
     // Verifica se o usuário está perguntando como o bot está
     if (lowerText.includes("como você está") || lowerText.includes("como voce esta") || 
@@ -157,7 +186,7 @@ export function ChatBot() {
         return {
           id: Date.now().toString(),
           sender: 'bot',
-          content: "Poxa, sinto muito por isso. 😔\nPara melhorar seu dia, aqui vai um presente especial 🎁:\n**CUPOM DE DESCONTO DE 10%** para qualquer procedimento hoje!\n\nUm sorriso novo pode transformar seu humor! Nossos tratamentos estéticos são rápidos e você já sai daqui se sentindo outra pessoa! Quer marcar uma avaliação? É TOTALMENTE gratuita! 💬",
+          content: "Poxa, sinto muito por isso. 😔\nPara melhorar seu dia, aqui vai um presente especial 🎁:\n**CUPOM DE DESCONTO DE 15%** para qualquer procedimento hoje!\n\nSei que momentos difíceis são complicados, mas estamos aqui para te apoiar! Nossos tratamentos podem ajudar a trazer um pouco mais de alegria para seus dias. A avaliação é TOTALMENTE gratuita e sem compromisso! 💬",
           timestamp: new Date(),
           sentiment: 'neutral',
           hasCoupon: true
@@ -553,8 +582,8 @@ export function ChatBot() {
                           <Gift className="h-3 w-3 text-yellow-700" />
                           <span className="text-xs font-medium text-yellow-700">Cupom de Desconto</span>
                         </div>
-                        <p className="text-sm font-bold text-center text-yellow-700">SORRIA10</p>
-                        <p className="text-xs text-center text-yellow-700">10% de desconto no próximo atendimento</p>
+                        <p className="text-sm font-bold text-center text-yellow-700">SORRIA15</p>
+                        <p className="text-xs text-center text-yellow-700">15% de desconto no próximo atendimento</p>
                       </div>
                     )}
                     
