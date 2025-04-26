@@ -416,7 +416,7 @@ export function AppointmentCalendar() {
                     name="startTime"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Start Time</FormLabel>
+                        <FormLabel>Horário de Início</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
@@ -438,7 +438,7 @@ export function AppointmentCalendar() {
                     name="endTime"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>End Time</FormLabel>
+                        <FormLabel>Horário de Término</FormLabel>
                         <FormControl>
                           <Input {...field} type="datetime-local" />
                         </FormControl>
@@ -460,14 +460,14 @@ export function AppointmentCalendar() {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue placeholder="Selecione o status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="scheduled">Scheduled</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                          <SelectItem value="no-show">No Show</SelectItem>
+                          <SelectItem value="scheduled">Agendado</SelectItem>
+                          <SelectItem value="completed">Concluído</SelectItem>
+                          <SelectItem value="cancelled">Cancelado</SelectItem>
+                          <SelectItem value="no-show">Não Compareceu</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -480,11 +480,11 @@ export function AppointmentCalendar() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel>Observações</FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
-                          placeholder="Any special notes or instructions"
+                          placeholder="Instruções ou observações especiais"
                           rows={3}
                         />
                       </FormControl>
@@ -499,13 +499,13 @@ export function AppointmentCalendar() {
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
                   >
-                    Cancel
+                    Cancelar
                   </Button>
                   <Button type="submit" disabled={createAppointment.isPending}>
                     {createAppointment.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    Schedule Appointment
+                    Agendar Consulta
                   </Button>
                 </DialogFooter>
               </form>
