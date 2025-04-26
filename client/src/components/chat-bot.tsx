@@ -262,7 +262,7 @@ export function ChatBot() {
         specificService = "implante dentário";
         price = 1800;
       }
-      else if (lowerText.includes("siso")) {
+      else if (lowerText.includes("siso") || lowerText.includes("dente do siso") || lowerText.includes("dentes do siso") || lowerText.includes("dente siso") || lowerText.includes("tirar siso") || lowerText.includes("tirar o siso")) {
         specificService = "extração de siso";
         price = 450;
       }
@@ -313,6 +313,19 @@ export function ChatBot() {
       };
       
       if (specificService) {
+        // Resposta especial para extração de siso
+        if (specificService === "extração de siso") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `SIM, realizamos extração de siso! 😁 É um dos procedimentos mais procurados da nossa clínica!\n\nO valor é de **R$ ${price.toFixed(2)}** e temos condições especiais de pagamento.\n\nNossa equipe é ESPECIALISTA nesse procedimento, garantindo uma recuperação rápida e o mínimo de desconforto possível. Usamos anestesia de última geração para você não sentir NADA!\n\nQuer agendar uma avaliação? Posso verificar os horários disponíveis! ✨`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
+        // Resposta normal para outros procedimentos
         return {
           id: Date.now().toString(),
           sender: 'bot',
