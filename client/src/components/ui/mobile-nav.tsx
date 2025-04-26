@@ -1,7 +1,23 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Home, Calendar, Users, Package, DollarSign, FileText, UserCircle, Settings } from "lucide-react";
+import { 
+  Menu, 
+  Home, 
+  Calendar, 
+  Users, 
+  Package, 
+  DollarSign, 
+  FileText, 
+  UserCircle, 
+  Settings, 
+  Building, 
+  Gift, 
+  BadgePercent,
+  MessageSquare,
+  BarChart2
+} from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { useState } from "react";
 
 export function MobileNav() {
@@ -21,13 +37,19 @@ export function MobileNav() {
         </div>
         <nav className="flex flex-col gap-2 mt-4">
           <NavItem href="/" icon={<Home className="h-5 w-5" />} label="Dashboard" onClick={() => setOpen(false)} />
-          <NavItem href="/appointments" icon={<Calendar className="h-5 w-5" />} label="Appointments" onClick={() => setOpen(false)} />
-          <NavItem href="/clients" icon={<Users className="h-5 w-5" />} label="Clients" onClick={() => setOpen(false)} />
-          <NavItem href="/inventory" icon={<Package className="h-5 w-5" />} label="Inventory" onClick={() => setOpen(false)} />
-          <NavItem href="/finances" icon={<DollarSign className="h-5 w-5" />} label="Finances" onClick={() => setOpen(false)} />
-          <NavItem href="/services" icon={<FileText className="h-5 w-5" />} label="Services" onClick={() => setOpen(false)} />
-          <NavItem href="/staff" icon={<UserCircle className="h-5 w-5" />} label="Staff" onClick={() => setOpen(false)} />
-          <NavItem href="/settings" icon={<Settings className="h-5 w-5" />} label="Settings" onClick={() => setOpen(false)} />
+          <NavItem href="/appointments" icon={<Calendar className="h-5 w-5" />} label="Agendamentos" onClick={() => setOpen(false)} />
+          <NavItem href="/clients" icon={<Users className="h-5 w-5" />} label="Pacientes" onClick={() => setOpen(false)} />
+          <NavItem href="/inventory" icon={<Package className="h-5 w-5" />} label="Estoque" onClick={() => setOpen(false)} />
+          <NavItem href="/finances" icon={<DollarSign className="h-5 w-5" />} label="Finanças" onClick={() => setOpen(false)} />
+          <NavItem href="/services" icon={<FileText className="h-5 w-5" />} label="Serviços" onClick={() => setOpen(false)} />
+          <NavItem href="/staff" icon={<UserCircle className="h-5 w-5" />} label="Equipe" onClick={() => setOpen(false)} />
+          <NavItem href="/whatsapp" icon={<FaWhatsapp className="h-5 w-5" />} label="WhatsApp" onClick={() => setOpen(false)} />
+          <NavItem href="/packages" icon={<Gift className="h-5 w-5" />} label="Pacotes" onClick={() => setOpen(false)} />
+          <NavItem href="/subscriptions" icon={<BadgePercent className="h-5 w-5" />} label="Assinatura" onClick={() => setOpen(false)} />
+          <NavItem href="/clinic-info" icon={<Building className="h-5 w-5" />} label="Dados da Clínica" onClick={() => setOpen(false)} />
+          <NavItem href="/settings" icon={<MessageSquare className="h-5 w-5" />} label="Templates de Chatbot" onClick={() => setOpen(false)} />
+          <NavItem href="/analytics" icon={<BarChart2 className="h-5 w-5" />} label="Análises" onClick={() => setOpen(false)} />
+          <NavItem href="/settings?tab=privacy" icon={<Settings className="h-5 w-5" />} label="Configurações de Privacidade" onClick={() => setOpen(false)} />
         </nav>
       </SheetContent>
     </Sheet>
