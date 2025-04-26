@@ -117,33 +117,33 @@ export class MemStorage implements IStorage {
     // Sample services
     const services = [
       {
-        name: "Dental Cleaning",
-        category: "Dental",
-        description: "Professional teeth cleaning to remove plaque and tartar.",
+        name: "Limpeza Dental",
+        category: "Odontológico",
+        description: "Limpeza profissional dos dentes para remover placa e tártaro.",
         duration: 45,
         price: 120,
         active: true
       },
       {
-        name: "Botox Treatment",
-        category: "Aesthetic",
-        description: "Botox injections to reduce wrinkles and fine lines.",
+        name: "Tratamento com Botox",
+        category: "Estética",
+        description: "Injeções de Botox para reduzir rugas e linhas finas.",
         duration: 30,
         price: 350,
         active: true
       },
       {
-        name: "Teeth Whitening",
-        category: "Dental",
-        description: "Professional teeth whitening for a brighter smile.",
+        name: "Clareamento Dental",
+        category: "Odontológico",
+        description: "Clareamento profissional dos dentes para um sorriso mais brilhante.",
         duration: 60,
         price: 250,
         active: true
       },
       {
-        name: "Facial Harmonization",
-        category: "Aesthetic",
-        description: "Balanced facial proportions using dermal fillers.",
+        name: "Harmonização Facial",
+        category: "Estética",
+        description: "Proporções faciais equilibradas usando preenchedores dérmicos.",
         duration: 90,
         price: 700,
         active: true
@@ -185,16 +185,16 @@ export class MemStorage implements IStorage {
 
     // Create chat templates
     this.createChatTemplate({
-      title: "Botox Procedure Information",
-      category: "Treatment Information",
-      content: "Our Botox procedure is a minimally invasive treatment that involves injecting small amounts of purified botulinum toxin into specific muscles to temporarily reduce the appearance of wrinkles and fine lines. The procedure takes approximately 15-20 minutes, and most patients experience minimal discomfort. Results typically appear within 3-5 days after treatment and last about 3-4 months.",
+      title: "Informações sobre Procedimento de Botox",
+      category: "Informações de Tratamento",
+      content: "Nosso procedimento de Botox é um tratamento minimamente invasivo que envolve a injeção de pequenas quantidades de toxina botulínica purificada em músculos específicos para reduzir temporariamente a aparência de rugas e linhas finas. O procedimento leva aproximadamente 15-20 minutos, e a maioria dos pacientes experimenta desconforto mínimo. Os resultados geralmente aparecem dentro de 3-5 dias após o tratamento e duram cerca de 3-4 meses.",
       active: true
     });
 
     this.createChatTemplate({
-      title: "Appointment Scheduling Process",
-      category: "Appointment Scheduling",
-      content: "To schedule an appointment, you can use our online booking system at any time or call our office during business hours (Monday-Friday, 9am-5pm). We require a 24-hour notice for cancellations to avoid a cancellation fee.",
+      title: "Processo de Agendamento de Consultas",
+      category: "Agendamento de Consultas",
+      content: "Para agendar uma consulta, você pode usar nosso sistema de reservas online a qualquer momento ou ligar para nosso consultório durante o horário comercial (segunda a sexta, 9h-17h). Exigimos um aviso prévio de 24 horas para cancelamentos para evitar uma taxa de cancelamento.",
       active: true
     });
 
