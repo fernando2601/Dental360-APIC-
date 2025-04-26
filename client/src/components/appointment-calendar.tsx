@@ -195,7 +195,7 @@ export function AppointmentCalendar() {
           week: 'Semana',
           day: 'Dia',
         },
-        slotMinTime: '08:00:00',
+        slotMinTime: '07:00:00',
         slotMaxTime: '20:00:00',
         allDaySlot: false,
         height: 'auto',
@@ -203,21 +203,56 @@ export function AppointmentCalendar() {
         selectable: true,
         selectMirror: true,
         dayMaxEvents: true,
-        events: appointments.map((appointment: any) => ({
-          id: appointment.id.toString(),
-          title: getAppointmentTitle(appointment),
-          start: appointment.startTime,
-          end: appointment.endTime,
-          backgroundColor: getStatusColor(appointment.status),
-          borderColor: getStatusColor(appointment.status),
-          extendedProps: {
-            clientId: appointment.clientId,
-            staffId: appointment.staffId,
-            serviceId: appointment.serviceId,
-            status: appointment.status,
-            notes: appointment.notes,
-          },
-        })),
+        slotLabelFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        },
+        dayHeaderFormat: { weekday: 'short', day: 'numeric', omitCommas: true },
+        // Personalizações de estilo
+        dayCellClassNames: 'rounded-md bg-slate-50/50',
+        slotLabelClassNames: 'text-sm font-medium text-slate-500',
+        events: appointments.map((appointment: any) => {
+          const client = clients?.find((c: any) => c.id === appointment.clientId);
+          const service = services?.find((s: any) => s.id === appointment.serviceId);
+          const staff = staff?.find((s: any) => s.id === appointment.staffId);
+          
+          return {
+            id: appointment.id.toString(),
+            title: client?.fullName || 'Cliente',
+            start: appointment.startTime,
+            end: appointment.endTime,
+            backgroundColor: getStatusColor(appointment.status),
+            borderColor: getStatusColor(appointment.status),
+            textColor: '#ffffff',
+            classNames: 'rounded-md shadow-sm',
+            extendedProps: {
+              clientId: appointment.clientId,
+              staffId: appointment.staffId,
+              serviceId: appointment.serviceId,
+              status: appointment.status,
+              notes: appointment.notes,
+              clientName: client?.fullName,
+              serviceName: service?.name,
+              staffName: staff?.user?.fullName || `Profissional #${appointment.staffId}`,
+            },
+          };
+        }),
+        eventContent: function(arg) {
+          const timeText = arg.timeText;
+          const title = arg.event.title;
+          const serviceName = arg.event.extendedProps.serviceName;
+          
+          return { 
+            html: `
+              <div class="p-1">
+                <div class="text-xs font-semibold">${timeText}</div>
+                <div class="text-sm font-medium">${title}</div>
+                ${serviceName ? `<div class="text-xs opacity-90">${serviceName}</div>` : ''}
+              </div>
+            `
+          };
+        },
         select: (info) => {
           // Handle date selection - open appointment form
           setSelectedDate(info.start);
@@ -255,20 +290,22 @@ export function AppointmentCalendar() {
     const client = clients?.find((c: any) => c.id === appointment.clientId);
     const service = services?.find((s: any) => s.id === appointment.serviceId);
     
-    return `${client?.fullName || 'Client'} - ${service?.name || 'Service'}`;
+    return `${client?.fullName || 'Cliente'}`;
   }
 
   // Get status color
   function getStatusColor(status: string) {
     switch (status) {
       case 'scheduled':
-        return '#2C7EA1';
+        return '#60a5fa'; // Azul claro vibrante
+      case 'in-progress':
+        return '#f43f5e'; // Vermelho forte - indicador em andamento
       case 'completed':
-        return '#10B981';
+        return '#34d399'; // Verde vibrante  
       case 'cancelled':
-        return '#F43F5E';
+        return '#f87171'; // Vermelho suave
       case 'no-show':
-        return '#F59E0B';
+        return '#fbbf24'; // Amarelo âmbar
       default:
         return '#9CA3AF';
     }
@@ -296,17 +333,17 @@ export function AppointmentCalendar() {
   const isLoading = isLoadingAppointments || isLoadingClients || isLoadingStaff || isLoadingServices;
 
   return (
-    <Card className="col-span-full">
-      <CardHeader>
-        <CardTitle>Calendário de Agendamentos</CardTitle>
+    <Card className="col-span-full shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+        <CardTitle className="text-2xl font-bold">Calendário de Agendamentos</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0 sm:p-2">
         {isLoading ? (
           <div className="flex items-center justify-center h-[600px]">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div id="calendar" className="h-[600px]" />
+          <div id="calendar" className="h-[700px] p-2 calendar-custom" />
         )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -465,6 +502,7 @@ export function AppointmentCalendar() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="scheduled">Agendado</SelectItem>
+                          <SelectItem value="in-progress">Em Andamento</SelectItem>
                           <SelectItem value="completed">Concluído</SelectItem>
                           <SelectItem value="cancelled">Cancelado</SelectItem>
                           <SelectItem value="no-show">Não Compareceu</SelectItem>
