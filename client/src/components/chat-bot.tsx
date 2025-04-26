@@ -24,7 +24,7 @@ export function ChatBot() {
     {
       id: "welcome",
       sender: "bot",
-      content: "Hello! How can I help you today with your dental or aesthetic treatment questions?",
+      content: "Olá! Tudo bem? Como posso ajudar você hoje com suas dúvidas sobre tratamentos dentários ou estéticos?",
       timestamp: new Date()
     }
   ]);
@@ -100,7 +100,7 @@ export function ChatBot() {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <Bot className="h-5 w-5 text-primary" />
-              <span>DentalSpa Assistant</span>
+              <span>Assistente DentalSpa</span>
             </CardTitle>
           </CardHeader>
           <ScrollArea className="h-[300px] px-4" type="always">
