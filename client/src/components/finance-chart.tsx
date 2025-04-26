@@ -192,10 +192,10 @@ export function FinanceChart() {
   const netIncome = totalIncome - totalExpenses;
 
   const dateRangeOptions = [
-    { value: "week", label: "Last 7 Days" },
-    { value: "month", label: "Last 30 Days" },
-    { value: "quarter", label: "Last 3 Months" },
-    { value: "year", label: "Last 12 Months" },
+    { value: "week", label: "Últimos 7 Dias" },
+    { value: "month", label: "Últimos 30 Dias" },
+    { value: "quarter", label: "Últimos 3 Meses" },
+    { value: "year", label: "Últimos 12 Meses" },
   ];
 
   const COLORS = ['#2C7EA1', '#5BC0BE', '#3D9E9C', '#1A6985', '#9AA5B1', '#7B8794', '#616E7C'];
@@ -204,14 +204,14 @@ export function FinanceChart() {
     <Card className="col-span-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Financial Overview</CardTitle>
+          <CardTitle>Visão Geral Financeira</CardTitle>
           <CardDescription>
-            Monitor income, expenses, and financial trends
+            Monitore receitas, despesas e tendências financeiras
           </CardDescription>
         </div>
         <Select value={dateRange} onValueChange={setDateRange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select period" />
+            <SelectValue placeholder="Selecione o período" />
           </SelectTrigger>
           <SelectContent>
             {dateRangeOptions.map(option => (
@@ -225,15 +225,15 @@ export function FinanceChart() {
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-muted/50 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-muted-foreground">Total Income</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Receita Total</h3>
             <p className="text-2xl font-bold text-success mt-1">{formatCurrency(totalIncome)}</p>
           </div>
           <div className="bg-muted/50 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-muted-foreground">Total Expenses</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Despesas Totais</h3>
             <p className="text-2xl font-bold text-destructive mt-1">{formatCurrency(totalExpenses)}</p>
           </div>
           <div className="bg-muted/50 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-muted-foreground">Net Income</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Lucro Líquido</h3>
             <p className={`text-2xl font-bold mt-1 ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
               {formatCurrency(netIncome)}
             </p>
@@ -242,8 +242,8 @@ export function FinanceChart() {
 
         <Tabs defaultValue="overview" value={currentTab} onValueChange={setCurrentTab} className="w-full">
           <TabsList className="mb-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="categories">Categories</TabsTrigger>
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="categories">Categorias</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="w-full">
             {isLoading ? (
@@ -255,14 +255,14 @@ export function FinanceChart() {
                 <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                   <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `$${value}`} />
+                  <YAxis tickFormatter={(value) => `R$${value}`} />
                   <Tooltip 
                     formatter={(value) => formatCurrency(value as number)}
-                    labelFormatter={(label) => `Date: ${label}`}
+                    labelFormatter={(label) => `Data: ${label}`}
                   />
                   <Legend />
-                  <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expenses" name="Expenses" fill="#F43F5E" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="income" name="Receitas" fill="#10B981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="expenses" name="Despesas" fill="#F43F5E" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
