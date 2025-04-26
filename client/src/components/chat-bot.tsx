@@ -239,81 +239,143 @@ export function ChatBot() {
     // Verifica se está perguntando sobre preços ou serviços
     if (lowerText.includes("preço") || lowerText.includes("valor") || lowerText.includes("custo") || 
         lowerText.includes("quanto custa") || lowerText.includes("serviço") || lowerText.includes("procedimento") ||
-        lowerText.includes("tratamento")) {
+        lowerText.includes("tratamento") || lowerText.includes("fazer") || lowerText.includes("quanto tempo") ||
+        lowerText.includes("dói") || lowerText.includes("doi") || lowerText.includes("doer") || 
+        lowerText.includes("realizar") || lowerText.includes("especialista") || lowerText.includes("profissional")) {
       
       // Detectar se está perguntando sobre um serviço específico
       let specificService = "";
       let price = 0;
       
-      // Serviços dentários
-      if (lowerText.includes("limpeza")) {
+      // Serviços dentários - baseado na lista de palavras-chave fornecida
+      if (lowerText.includes("limpeza") || lowerText.includes("profilaxia") || lowerText.includes("tártaro") || lowerText.includes("tartaro") || lowerText.includes("placa bacteriana")) {
         specificService = "limpeza dental";
         price = 120;
       }
-      else if (lowerText.includes("clareamento")) {
+      else if (lowerText.includes("clareamento") || lowerText.includes("dentes brancos") || lowerText.includes("clareamento a laser") || lowerText.includes("clareamento caseiro")) {
         specificService = "clareamento dental";
         price = 400;
       }
-      else if (lowerText.includes("aparelho") || lowerText.includes("ortodon")) {
+      else if (lowerText.includes("aparelho") || lowerText.includes("ortodon") || lowerText.includes("aparelho fixo") || 
+               lowerText.includes("aparelho móvel") || lowerText.includes("dente torto") || lowerText.includes("invisível") || 
+               lowerText.includes("invisivel") || lowerText.includes("alinhar os dentes") || lowerText.includes("mordida cruzada")) {
         specificService = "aparelho ortodôntico";
         price = 180;
       }
-      else if (lowerText.includes("implante")) {
+      else if (lowerText.includes("implante") || lowerText.includes("implante dentário") || lowerText.includes("colocar dente") || lowerText.includes("dente artificial")) {
         specificService = "implante dentário";
         price = 1800;
       }
-      else if (lowerText.includes("siso") || lowerText.includes("dente do siso") || lowerText.includes("dentes do siso") || lowerText.includes("dente siso") || lowerText.includes("tirar siso") || lowerText.includes("tirar o siso")) {
+      else if (lowerText.includes("siso") || lowerText.includes("dente do siso") || lowerText.includes("dentes do siso") || 
+               lowerText.includes("dente siso") || lowerText.includes("tirar siso") || lowerText.includes("tirar o siso") || 
+               lowerText.includes("arrancar siso") || lowerText.includes("siso nascendo") || lowerText.includes("siso está nascendo") || 
+               lowerText.includes("dente incluso")) {
         specificService = "extração de siso";
         price = 450;
       }
-      else if (lowerText.includes("extração") || lowerText.includes("extracao")) {
+      else if (lowerText.includes("extração") || lowerText.includes("extracao") || lowerText.includes("arrancar dente") || 
+               lowerText.includes("tirar dente") || lowerText.includes("remover dente") || lowerText.includes("dente quebrou")) {
         specificService = "extração dentária";
         price = 450;
       }
-      else if (lowerText.includes("gengiv")) {
+      else if (lowerText.includes("gengiv") || lowerText.includes("periodont") || lowerText.includes("inflamação") || 
+               lowerText.includes("inflamacao") || lowerText.includes("sangramento") || lowerText.includes("retração gengival") || 
+               lowerText.includes("gengivite")) {
         specificService = "tratamento de gengivite";
         price = 280;
       }
-      else if (lowerText.includes("faceta")) {
+      else if (lowerText.includes("faceta") || lowerText.includes("lente") || lowerText.includes("lente de contato dental") || 
+               lowerText.includes("porcelana") || lowerText.includes("dente quebrado") || lowerText.includes("estética dental")) {
         specificService = "facetas dentárias";
         price = 900;
       }
-      else if (lowerText.includes("canal")) {
+      else if (lowerText.includes("canal") || lowerText.includes("endodontia") || lowerText.includes("nervo") || 
+               lowerText.includes("polpa") || lowerText.includes("tratamento de canal") || lowerText.includes("pulpotomia")) {
         specificService = "tratamento de canal";
         price = 700;
       }
-      else if (lowerText.includes("restaura")) {
+      else if (lowerText.includes("restaura") || lowerText.includes("obturação") || lowerText.includes("obturacao") || 
+               lowerText.includes("cárie") || lowerText.includes("carie") || lowerText.includes("dente quebrado") || 
+               lowerText.includes("resina")) {
         specificService = "restauração estética";
         price = 200;
       }
+      else if (lowerText.includes("consulta") || lowerText.includes("avaliação") || lowerText.includes("avaliacao") || 
+               lowerText.includes("check-up") || lowerText.includes("check up") || lowerText.includes("exame") || 
+               lowerText.includes("diagnóstico") || lowerText.includes("diagnostico") || lowerText.includes("primeira vez")) {
+        specificService = "consulta inicial com diagnóstico";
+        price = 0; // Gratuita
+      }
+      else if (lowerText.includes("raio") || lowerText.includes("raio-x") || lowerText.includes("raio x") || 
+               lowerText.includes("radiografia") || lowerText.includes("imagem") || lowerText.includes("panorâmica") || 
+               lowerText.includes("panoramica")) {
+        specificService = "radiografia odontológica";
+        price = 80;
+      }
+      else if (lowerText.includes("sensibilidade") || lowerText.includes("dente sensível") || lowerText.includes("dente sensivel") || 
+               lowerText.includes("dói com frio") || lowerText.includes("doi com frio") || lowerText.includes("dói com doce") || 
+               lowerText.includes("doi com doce")) {
+        specificService = "tratamento para sensibilidade dentária";
+        price = 150;
+      }
+      else if (lowerText.includes("prótese") || lowerText.includes("protese") || lowerText.includes("dentadura") || 
+               lowerText.includes("ponte") || lowerText.includes("coroa") || lowerText.includes("dente artificial")) {
+        specificService = "prótese dentária";
+        price = 950;
+      }
+      else if (lowerText.includes("bruxismo") || lowerText.includes("ranger") || lowerText.includes("protetor") || 
+               lowerText.includes("protetor bucal") || lowerText.includes("placa")) {
+        specificService = "tratamento para bruxismo";
+        price = 350;
+      }
+      else if (lowerText.includes("halitose") || lowerText.includes("mau hálito") || lowerText.includes("mau halito") || 
+               lowerText.includes("bafo") || lowerText.includes("cheiro ruim")) {
+        specificService = "tratamento para halitose";
+        price = 180;
+      }
+      else if (lowerText.includes("odontopediatria") || lowerText.includes("criança") || lowerText.includes("crianca") || 
+               lowerText.includes("bebê") || lowerText.includes("bebe") || lowerText.includes("filho") || 
+               lowerText.includes("filha") || lowerText.includes("infantil")) {
+        specificService = "odontopediatria";
+        price = 150;
+      }
+      else if (lowerText.includes("urgência") || lowerText.includes("urgencia") || lowerText.includes("emergência") || 
+               lowerText.includes("emergencia") || lowerText.includes("dor forte") || lowerText.includes("acidente") || 
+               lowerText.includes("quebrou agora")) {
+        specificService = "atendimento de emergência";
+        price = 200;
+      }
       // Harmonização facial
-      else if (lowerText.includes("botox")) {
+      else if (lowerText.includes("botox") || lowerText.includes("toxina botulínica") || lowerText.includes("rugas")) {
         specificService = "aplicação de botox";
         price = 500;
       }
-      else if (lowerText.includes("preenchimento") || lowerText.includes("labial")) {
+      else if (lowerText.includes("preenchimento") || lowerText.includes("labial") || lowerText.includes("ácido hialurônico") || 
+               lowerText.includes("acido hialuronico") || lowerText.includes("volume")) {
         specificService = "preenchimento labial";
         price = 650;
       }
-      else if (lowerText.includes("bichectomia")) {
+      else if (lowerText.includes("bichectomia") || lowerText.includes("bochecha") || lowerText.includes("afinar rosto")) {
         specificService = "bichectomia";
         price = 1200;
       }
-      else if (lowerText.includes("lifting") || lowerText.includes("fios")) {
+      else if (lowerText.includes("lifting") || lowerText.includes("fios") || lowerText.includes("fio russo") || 
+               lowerText.includes("fios de sustentação") || lowerText.includes("flacidez")) {
         specificService = "lifting facial";
         price = 2000;
       }
-      else if (lowerText.includes("colágeno") || lowerText.includes("colageno")) {
+      else if (lowerText.includes("colágeno") || lowerText.includes("colageno") || lowerText.includes("bioestimulador")) {
         specificService = "bioestimulador de colágeno";
         price = 800;
       }
-      else if (lowerText.includes("harmoniza")) {
+      else if (lowerText.includes("harmoniza") || lowerText.includes("facial") || lowerText.includes("harmonização facial") || 
+               lowerText.includes("orofacial") || lowerText.includes("estética facial")) {
         specificService = "harmonização facial";
         price = 3500;
       };
       
       if (specificService) {
-        // Resposta especial para extração de siso
+        // Respostas especiais para procedimentos específicos
         if (specificService === "extração de siso") {
           return {
             id: Date.now().toString(),
@@ -325,15 +387,108 @@ export function ChatBot() {
           };
         }
         
+        else if (specificService === "tratamento de canal") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Realizamos tratamento de canal com MÁXIMO conforto! 🦷\n\nO valor é de **R$ ${price.toFixed(2)}** e pode ser parcelado.\n\nNossa técnica moderna garante um procedimento praticamente SEM DOR, diferente do que muitos imaginam! Usamos equipamentos de última geração e anestesia eficiente.\n\nNão deixe para depois! Agende uma avaliação e resolva o problema antes que piore. ✨`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
+        else if (specificService === "clareamento dental") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Nosso clareamento dental é REVOLUCIONÁRIO! ✨\n\nO valor é de **R$ ${price.toFixed(2)}** (temos opções a laser e caseiro).\n\nO resultado é IMEDIATO e pode clarear até 8 tons em uma única sessão! É seguro, não danifica o esmalte e tem efeito duradouro.\n\nEstamos com uma PROMOÇÃO especial essa semana! Quer garantir seu sorriso brilhante? 😁`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
+        else if (specificService === "aparelho ortodôntico") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Temos TODOS os tipos de aparelhos ortodônticos! 😍\n\nO valor inicial é de **R$ ${price.toFixed(2)}** por mês (varia conforme o tipo escolhido).\n\nDispomos de aparelhos convencionais, estéticos, autoligados e invisíveis - para todas as necessidades e bolsos!\n\nNossa equipe de ortodontistas é ESPECIALIZADA e vai criar um plano de tratamento personalizado para você. Agende uma avaliação GRATUITA! 🌟`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
+        else if (specificService === "facetas dentárias") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Transforme seu sorriso com nossas facetas dentárias premium! ✨\n\nO valor é de **R$ ${price.toFixed(2)}** por unidade, com condições especiais para pacotes.\n\nNossas lentes de contato dentais são ultrafinas, resistentes e IDÊNTICAS aos dentes naturais. O procedimento é rápido, indolor e o resultado é IMEDIATO!\n\nTemos um DESCONTO ESPECIAL para quem agendar a avaliação esta semana! 💎`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
+        else if (specificService === "implante dentário") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Nossos implantes dentários são referência de QUALIDADE! 👑\n\nO valor é de **R$ ${price.toFixed(2)}** por unidade, parcelado em até 12x.\n\nUtilizamos implantes de titânio da mais alta qualidade, com técnicas minimamente invasivas e rápida recuperação. O resultado é 100% natural e PERMANENTE!\n\nAgendando a avaliação hoje, você ganha a tomografia computadorizada GRATUITAMENTE! 🎁`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
+        else if (specificService === "consulta inicial com diagnóstico") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Nossa consulta inicial com diagnóstico completo é TOTALMENTE GRATUITA! ✨\n\nInclui avaliação detalhada, radiografia digital, plano de tratamento personalizado e orçamento sem compromisso.\n\nÉ uma oportunidade perfeita para conhecer nossa clínica e tirar todas as suas dúvidas com nossos especialistas.\n\nQual o melhor dia para você? Temos horários disponíveis ainda esta semana! 📅`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
+        else if (specificService === "limpeza dental") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Nossa limpeza dental profissional é COMPLETA! ✨\n\nO valor é de **R$ ${price.toFixed(2)}** e inclui remoção de tártaro, polimento e aplicação de flúor.\n\nO procedimento é rápido (cerca de 40 minutos), indolor e deixa seus dentes muito mais brancos e saudáveis! Recomendamos fazer a cada 6 meses.\n\nEsta semana estamos com preço promocional! Quer aproveitar? 😁`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
+        // Resposta para procedimentos de harmonização
+        else if (specificService === "aplicação de botox" || specificService === "preenchimento labial" || 
+                 specificService === "bichectomia" || specificService === "lifting facial" || 
+                 specificService === "bioestimulador de colágeno" || specificService === "harmonização facial") {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Nosso tratamento de ${specificService} é REFERÊNCIA em resultados naturais! ✨\n\nO valor é de **R$ ${price.toFixed(2)}**, com condições especiais de pagamento.\n\nRealizamos procedimentos com produtos importados da mais alta qualidade e técnicas minimamente invasivas. Nossa equipe é especializada em harmonização orofacial e certificada internacionalmente.\n\nQuer transformar sua aparência de forma segura e natural? Agende sua avaliação GRATUITA! 💫`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
+        
         // Resposta normal para outros procedimentos
-        return {
-          id: Date.now().toString(),
-          sender: 'bot',
-          content: `Você vai AMAR nosso tratamento de ${specificService}! 😍 É um dos MAIS POPULARES da clínica!\n\nO valor é de **R$ ${price.toFixed(2)}** com condições especiais de pagamento.\n\nNosso procedimento é realizado com os melhores materiais do mercado e os resultados são INCRÍVEIS!\n\nQuer agendar uma avaliação? Prometo que vai valer MUITO a pena! ✨`,
-          timestamp: new Date(),
-          sentiment: 'neutral',
-          showServicesInfo: true
-        };
+        else {
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Você vai AMAR nosso tratamento de ${specificService}! 😍 É um dos MAIS POPULARES da clínica!\n\nO valor é de **R$ ${price.toFixed(2)}** com condições especiais de pagamento.\n\nNosso procedimento é realizado com os melhores materiais do mercado e os resultados são INCRÍVEIS!\n\nQuer agendar uma avaliação? Prometo que vai valer MUITO a pena! ✨`,
+            timestamp: new Date(),
+            sentiment: 'neutral',
+            showServicesInfo: true
+          };
+        }
       }
       
       return {
