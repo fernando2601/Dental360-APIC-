@@ -167,6 +167,40 @@ export function ChatBot() {
         lowerText.includes("credito") || lowerText.includes("crédito") || lowerText.includes("pix") ||
         lowerText.includes("parcela")) {
       
+      // Mensagem específica para cartão de crédito
+      if (lowerText.includes("cartão") || lowerText.includes("cartao") || lowerText.includes("credito") || lowerText.includes("crédito")) {
+        return {
+          id: Date.now().toString(),
+          sender: 'bot',
+          content: "Aceitamos cartão de crédito em até 12x SEM JUROS! 💳✨\n\nNão vai pesar NADA no seu bolso! E para quem fecha o pacote completo de tratamento, temos condições AINDA MAIS vantajosas!\n\nQuer agendar uma avaliação para conhecer todos os detalhes? Nossa agenda dessa semana está quase lotada! 📅",
+          timestamp: new Date(),
+          sentiment: 'neutral'
+        };
+      }
+      
+      // Mensagem específica para PIX
+      if (lowerText.includes("pix")) {
+        return {
+          id: Date.now().toString(),
+          sender: 'bot',
+          content: "Pagamento via PIX tem 5% de DESCONTO ESPECIAL! 🤑\n\nÉ nossa forma de pagamento preferida: rápida, segura e com vantagem extra para você!\n\nTemos também outras opções de pagamento disponíveis. Quer conhecer?",
+          timestamp: new Date(),
+          sentiment: 'neutral'
+        };
+      }
+      
+      // Mensagem específica para dinheiro
+      if (lowerText.includes("dinheiro")) {
+        return {
+          id: Date.now().toString(),
+          sender: 'bot',
+          content: "Pagamento em dinheiro tem 3% de desconto! 💵\n\nE claro, fornecemos recibo e nota fiscal para sua segurança e tranquilidade!\n\nTemos também outras formas de pagamento. Posso detalhar alguma específica para você?",
+          timestamp: new Date(),
+          sentiment: 'neutral'
+        };
+      }
+      
+      // Mensagem genérica sobre formas de pagamento (quando nenhuma específica foi mencionada)
       return {
         id: Date.now().toString(),
         sender: 'bot',
@@ -314,16 +348,34 @@ export function ChatBot() {
       };
     }
     
-    // Verifica se está perguntando sobre a clínica
+    // Verifica se está perguntando sobre a clínica, seus diferenciais ou por que escolhê-la
     if (lowerText.includes("clínica") || lowerText.includes("lugar") || lowerText.includes("estabelecimento") || 
         lowerText.includes("diferencial") || lowerText.includes("vantagem") || lowerText.includes("por que escolher") ||
+        lowerText.includes("por que vocês") || lowerText.includes("porque escolher") || lowerText.includes("porque vocês") ||
+        lowerText.includes("por que devo") || lowerText.includes("porque devo") || lowerText.includes("vale a pena") ||
         lowerText.includes("profissionais") || lowerText.includes("equipe") || lowerText.includes("médicos") ||
         lowerText.includes("dentista") || lowerText.includes("doutor") || lowerText.includes("doutora")) {
+      
+      // Respostas alternativas do script fornecido
+      const clinicResponses = [
+        "Porque aqui você não é só mais um paciente, você é único para nós! 💖\nNossa missão é transformar vidas com carinho, responsabilidade e resultados incríveis! ✨\nTemos profissionais premiados, tecnologia de ponta e o atendimento mais humano que você vai encontrar! 🏆\nSeu sorriso e sua autoestima merecem o melhor... e o melhor está aqui! 😍",
+        
+        "Porque a gente entrega o que promete: resultados de alta qualidade sem pesar no seu bolso! 💳💥\nVocê pode parcelar tudo de forma super tranquila, com preços justos e ofertas especiais!\nTudo isso feito por profissionais experientes e apaixonados pelo que fazem!\nA sua felicidade é o que move a gente! 🚀",
+        
+        "Porque você merece se olhar no espelho e se sentir incrível todos os dias! 💖\nA nossa clínica é especializada em transformar autoestima, com procedimentos seguros, modernos e personalizados para você!\nAqui, a gente acredita que um sorriso bonito muda o mundo ao seu redor — e queremos construir isso junto com você! 😍",
+        
+        "Porque somos especialistas em entregar qualidade, segurança e atendimento humanizado! 👩‍⚕️👨‍⚕️\nTemos estrutura moderna, profissionais certificados e preços que cabem no seu bolso com facilidade no pagamento! 💳\nSe você busca ser tratado(a) com respeito, atenção e sair daqui feliz da vida, então já encontrou o lugar certo! 🎯",
+        
+        "Porque aqui o seu sorriso é levado a sério, mas o atendimento é leve e cheio de alegria! 😁✨\nCuidar de você é um privilégio para a nossa equipe!\nAlém disso, temos descontos exclusivos, parcelamento sem estresse e um ambiente acolhedor que vai fazer você se sentir em casa! 🏡\nVamos juntos deixar você ainda mais radiante? 🌟"
+      ];
+      
+      // Escolhe uma resposta aleatória do array
+      const randomResponse = clinicResponses[Math.floor(Math.random() * clinicResponses.length)];
       
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Por que escolher a nossa clínica? 😍\n\n✨ Profissionais PREMIADOS e apaixonados pelo que fazem\n✨ Atendimento VIP acolhedor e humanizado\n✨ Equipamentos ULTRA modernos para seu conforto e segurança\n✨ Resultados NATURAIS e personalizados para você!\n✨ Garantia em TODOS os tratamentos!\n\nAqui você não é só mais um paciente, você é parte da nossa família 💖\n\nQuer conhecer nosso espaço? Agende uma visita e ganhe uma AVALIAÇÃO COMPLETA grátis!",
+        content: randomResponse + "\n\nQuer conhecer nosso espaço? Agende uma visita e ganhe uma AVALIAÇÃO COMPLETA grátis! 🎉",
         timestamp: new Date(),
         sentiment: 'neutral',
         showClinicInfo: true
