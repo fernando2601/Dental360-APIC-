@@ -137,19 +137,19 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Birthday Reminders */}
+        {/* Aniversários Próximos */}
         <Card>
           <CardHeader>
-            <CardTitle>Upcoming Birthdays</CardTitle>
-            <CardDescription>Client birthday reminders</CardDescription>
+            <CardTitle>Aniversários Próximos</CardTitle>
+            <CardDescription>Lembretes de aniversários dos pacientes</CardDescription>
           </CardHeader>
           <CardContent>
             {upcomingBirthdays.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium">No upcoming birthdays</h3>
+                <h3 className="text-lg font-medium">Sem aniversários próximos</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  No client birthdays in the next 14 days.
+                  Nenhum aniversário de paciente nos próximos 14 dias.
                 </p>
               </div>
             ) : (
@@ -166,7 +166,7 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                          {daysUntil === 0 ? "Today" : daysUntil === 1 ? "Tomorrow" : `${daysUntil} days`}
+                          {daysUntil === 0 ? "Hoje" : daysUntil === 1 ? "Amanhã" : `${daysUntil} dias`}
                         </span>
                       </div>
                     </div>
@@ -180,8 +180,8 @@ export default function Dashboard() {
 
       <Tabs defaultValue="appointments" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="appointments">Appointment Calendar</TabsTrigger>
-          <TabsTrigger value="finances">Financial Overview</TabsTrigger>
+          <TabsTrigger value="appointments">Calendário de Agendamentos</TabsTrigger>
+          <TabsTrigger value="finances">Visão Financeira</TabsTrigger>
         </TabsList>
         <TabsContent value="appointments">
           <AppointmentCalendar />
