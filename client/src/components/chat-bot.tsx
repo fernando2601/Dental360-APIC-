@@ -8,6 +8,34 @@ import { MessageSquare, Send, User, Bot, Gift, MoreHorizontal, Calendar, Info, T
 import { useToast } from "@/hooks/use-toast";
 import { formatTimeAgo } from "@/lib/utils";
 
+// Definição dos diferentes tipos de fluxos de trabalho
+type WorkflowType = 
+  | 'initial' 
+  | 'priceInquiry' 
+  | 'serviceDetails' 
+  | 'schedulingProcess' 
+  | 'fearAndAnxiety' 
+  | 'financialConcerns'
+  | 'aestheticConcerns'
+  | 'emergencyCase'
+  | 'followUp';
+
+// Interface para rastrear o estado do fluxo de trabalho
+interface WorkflowState {
+  type: WorkflowType;
+  step: number;
+  data: {
+    service?: string;
+    price?: number;
+    preferredDate?: string;
+    preferredTime?: string;
+    concernType?: string;
+    urgencyLevel?: 'low' | 'medium' | 'high';
+    followUpDate?: Date;
+    [key: string]: any; // Para dados adicionais específicos do fluxo
+  };
+}
+
 type Message = {
   id: string;
   sender: 'user' | 'bot';
@@ -19,6 +47,12 @@ type Message = {
   showServicesInfo?: boolean;
   showScheduleInfo?: boolean;
   showClinicInfo?: boolean;
+  // Campos adicionais para o workflow
+  workflowAction?: string;
+  workflowOptions?: string[];
+  workflowType?: WorkflowType;
+  expectsInput?: boolean;
+  isWorkflowStep?: boolean;
 };
 
 export function ChatBot() {
@@ -28,7 +62,10 @@ export function ChatBot() {
       id: "welcome",
       sender: "bot",
       content: "Olá! Seja MUITO bem-vindo(a) à nossa clínica ✨\nEu sou o assistente virtual mais animado do Brasil! 😁\nComo você está hoje?",
-      timestamp: new Date()
+      timestamp: new Date(),
+      workflowType: 'initial',
+      isWorkflowStep: true,
+      expectsInput: true
     }
   ]);
   const [input, setInput] = useState("");
@@ -37,6 +74,42 @@ export function ChatBot() {
 
   // Estado para controlar se está "digitando"
   const [isTyping, setIsTyping] = useState(false);
+  
+  // Estado para rastrear o fluxo de trabalho atual
+  const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowState>({
+    type: 'initial',
+    step: 0,
+    data: {}
+  });
+  
+  // Função para atualizar o fluxo de trabalho
+  const updateWorkflow = (updates: Partial<WorkflowState>) => {
+    setCurrentWorkflow(prev => ({
+      ...prev,
+      ...updates,
+      data: {
+        ...prev.data,
+        ...(updates.data || {})
+      }
+    }));
+  };
+  
+  // Função para avançar para o próximo passo no fluxo
+  const advanceWorkflowStep = () => {
+    setCurrentWorkflow(prev => ({
+      ...prev,
+      step: prev.step + 1
+    }));
+  };
+  
+  // Função para iniciar um novo fluxo de trabalho
+  const startWorkflow = (type: WorkflowType, initialData: Record<string, any> = {}) => {
+    setCurrentWorkflow({
+      type,
+      step: 0,
+      data: initialData
+    });
+  };
   
   // Serviços e preços
   const services = {
@@ -119,12 +192,336 @@ export function ChatBot() {
     return Date.now() - lastInteractionTime > 5 * 60 * 1000; // 5 minutos em milissegundos
   };
   
+  // Processa a resposta com base no fluxo de trabalho atual
+  const processWorkflowResponse = (userText: string): Message | null => {
+    const lowerText = userText.toLowerCase();
+    
+    // Se não estiver em um fluxo de trabalho ou estiver no fluxo inicial passo 0, retorne null para seguir o fluxo normal
+    if (currentWorkflow.type === 'initial' && currentWorkflow.step === 0) {
+      return null;
+    }
+    
+    // Fluxo de Agendamento
+    if (currentWorkflow.type === 'schedulingProcess') {
+      switch (currentWorkflow.step) {
+        // Passo 1: Coletando o serviço desejado
+        case 0:
+          // Tenta identificar o serviço mencionado
+          const dentServices = services.dental.map(s => s.name.toLowerCase());
+          const harmServices = services.harmonization.map(s => s.name.toLowerCase());
+          const allServices = [...dentServices, ...harmServices];
+          
+          let matchedService = '';
+          
+          // Verifica se algum serviço foi mencionado
+          for (const service of allServices) {
+            if (lowerText.includes(service.toLowerCase())) {
+              matchedService = service;
+              break;
+            }
+          }
+          
+          // Se identificou um serviço
+          if (matchedService) {
+            // Atualiza os dados do workflow
+            updateWorkflow({
+              step: 1,
+              data: { service: matchedService }
+            });
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Ótima escolha! O serviço de ${matchedService} é um dos nossos mais procurados! 🌟\n\nQual seria a melhor data para você? Temos horários disponíveis esta semana!`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          } 
+          // Se não identificou um serviço específico
+          else {
+            // Oferece opções 
+            const dentalOptions = services.dental.slice(0, 3).map(s => s.name);
+            const harmOptions = services.harmonization.slice(0, 2).map(s => s.name);
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Para agendar, preciso saber qual serviço você deseja. Aqui estão algumas opções populares:\n\n**Odontologia:**\n• ${dentalOptions.join('\n• ')}\n\n**Harmonização:**\n• ${harmOptions.join('\n• ')}\n\nQual destes serviços você gostaria de agendar? Ou me diga se deseja outro serviço.`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true,
+              workflowOptions: [...dentalOptions, ...harmOptions]
+            };
+          }
+          
+        // Passo 2: Coletando a data preferida  
+        case 1:
+          // Extrai informações de data do texto
+          let dateInfo = '';
+          
+          if (lowerText.includes('segunda') || lowerText.includes('segunda-feira')) {
+            dateInfo = 'segunda-feira';
+          } else if (lowerText.includes('terça') || lowerText.includes('terça-feira')) {
+            dateInfo = 'terça-feira';
+          } else if (lowerText.includes('quarta') || lowerText.includes('quarta-feira')) {
+            dateInfo = 'quarta-feira';
+          } else if (lowerText.includes('quinta') || lowerText.includes('quinta-feira')) {
+            dateInfo = 'quinta-feira';
+          } else if (lowerText.includes('sexta') || lowerText.includes('sexta-feira')) {
+            dateInfo = 'sexta-feira';
+          } else if (lowerText.includes('sábado') || lowerText.includes('sabado')) {
+            dateInfo = 'sábado';
+          } else if (lowerText.includes('amanhã') || lowerText.includes('amanha')) {
+            dateInfo = 'amanhã';
+          } else if (lowerText.includes('hoje')) {
+            dateInfo = 'hoje';
+          } else if (lowerText.includes('próxima semana') || lowerText.includes('proxima semana')) {
+            dateInfo = 'próxima semana';
+          } else if (lowerText.includes('esse final de semana') || lowerText.includes('este final de semana')) {
+            dateInfo = 'este final de semana';
+          } else {
+            // Tenta extrair datas no formato dd/mm ou números
+            const dateRegex = /\d{1,2}\/\d{1,2}/;
+            const dateMatch = lowerText.match(dateRegex);
+            if (dateMatch) {
+              dateInfo = dateMatch[0];
+            }
+          }
+          
+          // Se conseguiu extrair alguma data
+          if (dateInfo) {
+            updateWorkflow({
+              step: 2,
+              data: { preferredDate: dateInfo }
+            });
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Perfeito! Tenho disponibilidade para ${dateInfo}. 📆\n\nQual horário seria melhor para você? Temos manhã (8h às 12h) ou tarde (13h às 18h).`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          } 
+          // Se não conseguiu extrair uma data
+          else {
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Não consegui identificar uma data específica. Que tal me dizer o dia da semana que prefere? Por exemplo: "segunda-feira", "terça à tarde", ou uma data como "15/05".`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          }
+          
+        // Passo 3: Coletando o horário preferido  
+        case 2:
+          // Extrai informações de horário do texto
+          let timeInfo = '';
+          
+          if (lowerText.includes('manhã') || lowerText.includes('manha')) {
+            timeInfo = 'manhã';
+          } else if (lowerText.includes('tarde')) {
+            timeInfo = 'tarde';
+          } else if (lowerText.includes('noite')) {
+            timeInfo = 'fim da tarde';
+          } else {
+            // Tenta extrair horários no formato hh:mm ou apenas hh
+            const timeRegex = /\d{1,2}[h:]\d{0,2}/;
+            const timeMatch = lowerText.match(timeRegex);
+            if (timeMatch) {
+              timeInfo = timeMatch[0];
+            }
+          }
+          
+          // Se conseguiu extrair algum horário
+          if (timeInfo) {
+            updateWorkflow({
+              step: 3,
+              data: { preferredTime: timeInfo }
+            });
+            
+            // Confirma os dados coletados e finaliza o agendamento
+            const { service, preferredDate } = currentWorkflow.data;
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `ÓTIMO! 🎉 Reservei seu horário para ${service} na ${preferredDate}, período da ${timeInfo}.\n\nUma pessoa da nossa equipe entrará em contato para confirmar o horário exato e passar todas as orientações.\n\nSua avaliação inicial é TOTALMENTE GRATUITA! Além disso, por ter agendado online, você receberá um KIT ESPECIAL de boas-vindas na primeira consulta! 🎁\n\nPosso ajudar com mais alguma coisa?`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: false
+            };
+          } 
+          // Se não conseguiu extrair um horário
+          else {
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Não consegui identificar um horário específico. Por favor, me diga se prefere "manhã", "tarde" ou um horário específico como "14h".`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          }
+          
+        default:
+          // Reseta o workflow se chegou ao final
+          startWorkflow('initial', {});
+          return null;
+      }
+    }
+    
+    // Fluxo de Informações sobre Serviços (Preços)
+    else if (currentWorkflow.type === 'priceInquiry') {
+      switch (currentWorkflow.step) {
+        // Passo 1: Detalhando o serviço de interesse e perguntando se deseja agendar
+        case 0:
+          const { service, price } = currentWorkflow.data;
+          
+          // Avança o workflow
+          advanceWorkflowStep();
+          
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Sobre o ${service}: o valor é **R$ ${price.toFixed(2)}** e temos diversas opções de pagamento para facilitar sua vida!\n\nNossos clientes AMAM os resultados desse procedimento. Temos mais de 95% de satisfação! 🤩\n\nGostaria de agendar uma avaliação GRATUITA para saber mais detalhes ou tirar dúvidas presencialmente?`,
+            timestamp: new Date(),
+            workflowType: 'priceInquiry',
+            isWorkflowStep: true,
+            expectsInput: true
+          };
+          
+        // Passo 2: Verificando se quer agendar e redirecionando para o workflow de agendamento se sim
+        case 1:
+          // Verifica se a resposta é positiva para agendar
+          const isPositive = lowerText.includes('sim') || lowerText.includes('quero') || 
+                             lowerText.includes('claro') || lowerText.includes('ok') ||
+                             lowerText.includes('pode') || lowerText.includes('gostaria') ||
+                             lowerText.includes('vamos');
+                             
+          if (isPositive) {
+            // Inicia o workflow de agendamento com os dados do serviço já preenchidos
+            const { service, price } = currentWorkflow.data;
+            startWorkflow('schedulingProcess', { service, price });
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Ótima escolha! 😊 Vamos agendar uma avaliação para o serviço de ${service}.\n\nQual seria a melhor data para você? Temos horários disponíveis ainda esta semana!`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          } else {
+            // Se não deseja agendar, oferece outras opções
+            startWorkflow('initial', {});
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Sem problemas! Estamos aqui sempre que precisar. 😊\n\nSe tiver outras dúvidas sobre nossos serviços, formas de pagamento ou qualquer outro assunto, é só me perguntar!`,
+              timestamp: new Date(),
+              workflowType: 'initial',
+              isWorkflowStep: false,
+              expectsInput: true
+            };
+          }
+          
+        default:
+          // Reseta o workflow se chegou ao final
+          startWorkflow('initial', {});
+          return null;
+      }
+    }
+    
+    // Fluxo para Casos de Medo/Ansiedade
+    else if (currentWorkflow.type === 'fearAndAnxiety') {
+      switch (currentWorkflow.step) {
+        // Passo 1: Oferecendo informações adicionais sobre como lidamos com medo
+        case 0:
+          // Avança o workflow
+          advanceWorkflowStep();
+          
+          return {
+            id: Date.now().toString(),
+            sender: 'bot',
+            content: `Entendo sua preocupação com o medo. 💙 Muitos dos nossos pacientes também tinham receio antes da primeira consulta.\n\nNossa clínica tem um protocolo especial para lidar com pacientes ansiosos, que inclui:\n\n• Ambiente calmo com música relaxante\n• Explicação detalhada de cada procedimento antes de iniciar\n• Pausas sempre que você precisar\n• Técnicas de anestesia indolor\n• Opção de sedação consciente para casos mais extremos\n\nGostaria de conhecer nossa clínica sem compromisso? Muitos pacientes relatam que apenas conhecer o ambiente já ajuda a reduzir a ansiedade.`,
+            timestamp: new Date(),
+            workflowType: 'fearAndAnxiety',
+            isWorkflowStep: true,
+            expectsInput: true
+          };
+          
+        // Passo 2: Verificando se deseja agendar visita especial para conhecer a clínica
+        case 1:
+          // Verifica se a resposta é positiva
+          const isPositive = lowerText.includes('sim') || lowerText.includes('quero') || 
+                             lowerText.includes('claro') || lowerText.includes('ok') ||
+                             lowerText.includes('pode') || lowerText.includes('gostaria') ||
+                             lowerText.includes('vamos');
+                             
+          if (isPositive) {
+            // Inicia o workflow de agendamento com o tipo especial de visita
+            startWorkflow('schedulingProcess', { service: 'Visita de reconhecimento sem procedimentos' });
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Excelente escolha! 👏 Vamos agendar uma visita especial para você conhecer nossa clínica, sem nenhum procedimento.\n\nSerá apenas uma conversa com nossa equipe, para você se familiarizar com o ambiente e tirar todas as dúvidas. Muitos pacientes se sentem muito mais confiantes depois dessa primeira visita!\n\nQual seria a melhor data para você?`,
+              timestamp: new Date(),
+              workflowType: 'schedulingProcess',
+              isWorkflowStep: true,
+              expectsInput: true
+            };
+          } else {
+            // Se não deseja agendar, oferece outras opções
+            startWorkflow('initial', {});
+            
+            return {
+              id: Date.now().toString(),
+              sender: 'bot',
+              content: `Sem problemas! Quando se sentir confortável, estamos aqui. 😊\n\nSe preferir, posso enviar mais informações sobre nossas técnicas para lidar com medo e ansiedade, ou você pode ver depoimentos de pacientes que também tinham receio antes de nos conhecer. O que acha?`,
+              timestamp: new Date(),
+              workflowType: 'initial',
+              isWorkflowStep: false,
+              expectsInput: true
+            };
+          }
+          
+        default:
+          // Reseta o workflow se chegou ao final
+          startWorkflow('initial', {});
+          return null;
+      }
+    }
+    
+    // Se não corresponder a nenhum fluxo ativo ou estiver no fluxo inicial
+    return null;
+  };
+
   // Gera respostas humanizadas com base no script e no sentimento
   const generateHumanizedResponse = (userText: string, sentiment: 'positive' | 'negative' | 'neutral'): Message => {
     const lowerText = userText.toLowerCase();
     
     // Atualiza o tempo da última interação
     setLastInteractionTime(Date.now());
+    
+    // Primeiro verifica se estamos em um fluxo de trabalho ativo
+    const workflowResponse = processWorkflowResponse(userText);
+    if (workflowResponse) {
+      return workflowResponse;
+    }
     
     // Verificação especial para situações de luto ou perda de familiar (prioridade máxima)
     if ((lowerText.includes("irmão") || lowerText.includes("irmã") || lowerText.includes("pai") || 
@@ -506,13 +903,18 @@ export function ChatBot() {
         lowerText.includes("horário") || lowerText.includes("disponib") || lowerText.includes("atendimento") ||
         lowerText.includes("vaga") || lowerText.includes("hora") || lowerText.includes("dia")) {
       
+      // Inicia o workflow de agendamento
+      startWorkflow('schedulingProcess', {});
+      
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Ótima escolha! 🌟 Nossa avaliação inicial é TOTALMENTE GRATUITA e sem compromisso!\n\nTemos horários EXCLUSIVOS ainda essa semana! E para quem agenda online, oferecemos um check-up completo com radiografia digital inclusa no pacote! 📅✨\n\nQual o melhor dia para você? Manhã ou tarde?",
+        content: "Ótima escolha! 🌟 Nossa avaliação inicial é TOTALMENTE GRATUITA e sem compromisso!\n\nTemos horários EXCLUSIVOS ainda essa semana! E para quem agenda online, oferecemos um check-up completo com radiografia digital inclusa no pacote! 📅✨\n\nQual serviço você gostaria de agendar?",
         timestamp: new Date(),
         sentiment: 'neutral',
-        showScheduleInfo: true
+        workflowType: 'schedulingProcess',
+        isWorkflowStep: true,
+        expectsInput: true
       };
     }
     
@@ -580,13 +982,19 @@ export function ChatBot() {
     // Verifica se tem medo de dentista especificamente 
     if (lowerText.includes("medo de dentista") || lowerText.includes("pavor de dentista") || 
         lowerText.includes("trauma de dentista") || lowerText.includes("morro de medo")) {
-        
+      
+      // Inicia o workflow de medo/ansiedade
+      startWorkflow('fearAndAnxiety', {});
+      
       return {
         id: Date.now().toString(),
         sender: 'bot',
         content: "Eu entendo COMPLETAMENTE! 🫂 Muitas pessoas sentem o mesmo!\n\nNossa clínica é especializada em pacientes que têm medo. Nossos profissionais são TREINADOS para criar um ambiente calmo e acolhedor. Temos até protocolos especiais de atendimento para pessoas ansiosas.\n\nAqui você define o ritmo! Podemos fazer pausas quando quiser, explicar cada detalhe antes e usar técnicas de relaxamento que realmente funcionam.\n\nTemos até a opção de sedação consciente para casos mais intensos! Que tal uma visita apenas para CONHECER o ambiente, sem nenhum procedimento? Muitos pacientes relatam que isso já ajuda a reduzir o medo! 😊",
         timestamp: new Date(),
-        sentiment: 'neutral'
+        sentiment: 'neutral',
+        workflowType: 'fearAndAnxiety',
+        isWorkflowStep: true,
+        expectsInput: true
       };
     }
       
@@ -609,12 +1017,18 @@ export function ChatBot() {
         lowerText.includes("preço alto") || lowerText.includes("valor alto") || lowerText.includes("não tenho como pagar") || 
         lowerText.includes("nao tenho como pagar") || lowerText.includes("fora do orçamento")) {
       
+      // Inicia o workflow de preocupações financeiras
+      startWorkflow('financialConcerns', {});
+      
       return {
         id: Date.now().toString(),
         sender: 'bot',
-        content: "Entendo sua preocupação com os valores! 💰 Mas temos ÓTIMAS NOTÍCIAS!\n\nNossa clínica tem opções para TODOS os orçamentos! Oferecemos:\n\n• Parcelamento em até 12x SEM JUROS\n• Descontos especiais para pacotes de tratamento\n• Planos mensais com valor fixo\n• Promoções sazonais (e temos uma AGORA!)\n\nMuitas pessoas se surpreendem quando descobrem que cuidar da saúde bucal pode caber no orçamento! E lembre-se: nossa avaliação inicial é TOTALMENTE GRATUITA, assim você conhece todas as opções antes de decidir.\n\nQuer agendar para conhecer os valores exatos para o seu caso? 😉",
+        content: "Entendo sua preocupação com os valores! 💰 Mas temos ÓTIMAS NOTÍCIAS!\n\nNossa clínica tem opções para TODOS os orçamentos! Oferecemos:\n\n• Parcelamento em até 12x SEM JUROS\n• Descontos especiais para pacotes de tratamento\n• Planos mensais com valor fixo\n• Promoções sazonais (e temos uma AGORA!)\n\nMuitas pessoas se surpreendem quando descobrem que cuidar da saúde bucal pode caber no orçamento! E lembre-se: nossa avaliação inicial é TOTALMENTE GRATUITA, assim você conhece todas as opções antes de decidir.\n\nQual tratamento você está considerando realizar?",
         timestamp: new Date(),
-        sentiment: 'neutral'
+        sentiment: 'neutral',
+        workflowType: 'financialConcerns',
+        isWorkflowStep: true,
+        expectsInput: true
       };
     }
     
