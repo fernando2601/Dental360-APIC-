@@ -283,14 +283,14 @@ export default function Appointments() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder="Selecione o status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                        <SelectItem value="no-show">No Show</SelectItem>
+                        <SelectItem value="scheduled">Agendado</SelectItem>
+                        <SelectItem value="completed">Concluído</SelectItem>
+                        <SelectItem value="cancelled">Cancelado</SelectItem>
+                        <SelectItem value="no-show">Não Compareceu</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -303,11 +303,11 @@ export default function Appointments() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes</FormLabel>
+                    <FormLabel>Observações</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
-                        placeholder="Any special notes or instructions"
+                        placeholder="Quaisquer notas ou instruções especiais"
                         rows={3}
                       />
                     </FormControl>
@@ -322,13 +322,13 @@ export default function Appointments() {
                   variant="outline"
                   onClick={() => setIsCreateDialogOpen(false)}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
                 <Button type="submit" disabled={createAppointment.isPending}>
                   {createAppointment.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  Schedule Appointment
+                  Agendar Consulta
                 </Button>
               </DialogFooter>
             </form>
@@ -369,9 +369,9 @@ function ListView() {
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-10">
           <Calendar className="h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">No appointments found</h3>
+          <h3 className="text-lg font-medium mb-2">Nenhum agendamento encontrado</h3>
           <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
-            There are no appointments scheduled in the system yet. Create a new appointment to get started.
+            Não há agendamentos cadastrados no sistema ainda. Crie um novo agendamento para começar.
           </p>
         </CardContent>
       </Card>
@@ -407,6 +407,21 @@ function ListView() {
         return 'bg-gray-100 text-gray-800';
     }
   };
+  
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return 'Agendado';
+      case 'completed':
+        return 'Concluído';
+      case 'cancelled':
+        return 'Cancelado';
+      case 'no-show':
+        return 'Não Compareceu';
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
 
   // Sort appointments by date (newest first)
   const sortedAppointments = [...appointments].sort((a: any, b: any) => {
@@ -417,11 +432,11 @@ function ListView() {
     <div className="space-y-4">
       <div className="rounded-md border">
         <div className="grid grid-cols-7 p-4 font-medium border-b">
-          <div className="col-span-2">Client</div>
-          <div>Service</div>
-          <div>Staff</div>
-          <div>Date & Time</div>
-          <div>Duration</div>
+          <div className="col-span-2">Cliente</div>
+          <div>Serviço</div>
+          <div>Profissional</div>
+          <div>Data & Hora</div>
+          <div>Duração</div>
           <div>Status</div>
         </div>
         <div className="divide-y">
@@ -444,7 +459,7 @@ function ListView() {
                 <div>{durationMinutes} min</div>
                 <div>
                   <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeColor(appointment.status)}`}>
-                    {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                    {getStatusText(appointment.status)}
                   </span>
                 </div>
               </div>
