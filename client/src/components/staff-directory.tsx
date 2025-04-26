@@ -47,9 +47,9 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
   if (staff.length === 0) {
     return (
       <div className="text-center py-12 border rounded-lg">
-        <h3 className="font-medium text-lg mb-2">No staff members found</h3>
+        <h3 className="font-medium text-lg mb-2">Nenhum membro da equipe encontrado</h3>
         <p className="text-muted-foreground mb-6">
-          There are no staff members in the system yet or none match your search criteria.
+          Não há membros da equipe no sistema ainda ou nenhum corresponde aos seus critérios de busca.
         </p>
       </div>
     );
@@ -76,7 +76,7 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
                     </div>
                   </div>
                   <Badge variant={member.available ? "default" : "secondary"}>
-                    {member.available ? "Available" : "Unavailable"}
+                    {member.available ? "Disponível" : "Indisponível"}
                   </Badge>
                 </div>
               </CardHeader>
@@ -84,7 +84,7 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
                 {member.bio ? (
                   <p className="text-sm line-clamp-3">{member.bio}</p>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No bio available</p>
+                  <p className="text-sm text-muted-foreground">Sem biografia disponível</p>
                 )}
 
                 <div className="mt-4 space-y-2">
@@ -105,7 +105,7 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
               <CardFooter className="border-t pt-4">
                 <Button variant="outline" size="sm" className="w-full" onClick={() => handleViewStaff(member)}>
                   <Eye className="mr-2 h-4 w-4" />
-                  View Details
+                  Ver Detalhes
                 </Button>
               </CardFooter>
             </Card>
@@ -134,14 +134,14 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
                     <h3 className="font-medium text-lg">{selectedStaff.user?.fullName || `Staff #${selectedStaff.id}`}</h3>
                     <p className="text-muted-foreground">{selectedStaff.specialization}</p>
                     <Badge className="mt-1" variant={selectedStaff.available ? "default" : "secondary"}>
-                      {selectedStaff.available ? "Available" : "Unavailable"}
+                      {selectedStaff.available ? "Disponível" : "Indisponível"}
                     </Badge>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Bio</h4>
-                  <p className="whitespace-pre-wrap">{selectedStaff.bio || "No bio available"}</p>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Biografia</h4>
+                  <p className="whitespace-pre-wrap">{selectedStaff.bio || "Sem biografia disponível"}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -150,14 +150,14 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
                     <p>{selectedStaff.user?.email || "N/A"}</p>
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Phone</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Telefone</h4>
                     <p>{selectedStaff.user?.phone || "N/A"}</p>
                   </div>
                 </div>
 
                 {selectedStaff.user?.role && (
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Role</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Função</h4>
                     <p className="capitalize">{selectedStaff.user.role}</p>
                   </div>
                 )}
@@ -165,7 +165,7 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
-                  Close
+                  Fechar
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -181,11 +181,11 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Staff Member</TableHead>
-            <TableHead>Specialization</TableHead>
-            <TableHead className="hidden md:table-cell">Contact</TableHead>
+            <TableHead>Membro da Equipe</TableHead>
+            <TableHead>Especialização</TableHead>
+            <TableHead className="hidden md:table-cell">Contato</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -223,12 +223,12 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
                   {member.available ? (
                     <>
                       <CheckCircle className="h-4 w-4 text-success mr-1" />
-                      <span className="text-sm">Available</span>
+                      <span className="text-sm">Disponível</span>
                     </>
                   ) : (
                     <>
                       <XCircle className="h-4 w-4 text-muted-foreground mr-1" />
-                      <span className="text-sm">Unavailable</span>
+                      <span className="text-sm">Indisponível</span>
                     </>
                   )}
                 </div>
@@ -237,11 +237,11 @@ export default function StaffDirectory({ staff, isLoading, view }: StaffDirector
                 <div className="flex space-x-2">
                   <Button variant="ghost" size="sm" onClick={() => handleViewStaff(member)}>
                     <Eye className="h-4 w-4" />
-                    <span className="sr-only">View</span>
+                    <span className="sr-only">Ver</span>
                   </Button>
                   <Button variant="ghost" size="sm">
                     <Edit className="h-4 w-4" />
-                    <span className="sr-only">Edit</span>
+                    <span className="sr-only">Editar</span>
                   </Button>
                 </div>
               </TableCell>

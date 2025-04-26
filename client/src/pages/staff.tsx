@@ -69,17 +69,17 @@ export default function Staff() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Staff Directory</h1>
-          <p className="text-muted-foreground">Manage your clinic staff and practitioners.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Diretório de Equipe</h1>
+          <p className="text-muted-foreground">Gerencie a equipe e os profissionais da sua clínica.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0 w-full md:w-auto">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Staff Member
+            Adicionar Membro da Equipe
           </Button>
           <Button variant="outline" onClick={exportStaffDirectory}>
             <Download className="mr-2 h-4 w-4" />
-            Export
+            Exportar
           </Button>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function Staff() {
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search staff directory..."
+            placeholder="Buscar no diretório de equipe..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -99,8 +99,8 @@ export default function Staff() {
 
       <Tabs defaultValue="cards" className="w-full">
         <TabsList>
-          <TabsTrigger value="cards">Card View</TabsTrigger>
-          <TabsTrigger value="list">List View</TabsTrigger>
+          <TabsTrigger value="cards">Visualização em Cards</TabsTrigger>
+          <TabsTrigger value="list">Visualização em Lista</TabsTrigger>
         </TabsList>
         
         <TabsContent value="cards">
