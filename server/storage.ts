@@ -154,27 +154,27 @@ export class MemStorage implements IStorage {
     this.createUser({
       username: "admin",
       password: "admin123",
-      fullName: "Admin User",
+      fullName: "Administrador",
       role: "admin",
-      email: "admin@dentalclinic.com",
+      email: "admin@clinicadental.com",
       phone: "555-123-4567"
     });
 
     // Create a dentist
     const dentist = this.createUser({
-      username: "drsmith",
+      username: "drsilva",
       password: "password123",
-      fullName: "Dr. Sarah Smith",
-      role: "dentist",
-      email: "smith@dentalclinic.com",
+      fullName: "Dra. Ana Silva",
+      role: "dentista",
+      email: "silva@clinicadental.com",
       phone: "555-987-6543"
     });
 
     // Create a staff member
     this.createStaffMember({
       userId: dentist.id,
-      specialization: "General Dentistry",
-      bio: "Dr. Smith specializes in general and cosmetic dentistry.",
+      specialization: "Odontologia Geral",
+      bio: "Dra. Silva é especialista em odontologia geral e estética.",
       available: true
     });
 
@@ -201,21 +201,21 @@ export class MemStorage implements IStorage {
     // Create inventory items
     this.createInventoryItem({
       name: "Botox",
-      category: "Injectables",
-      description: "Botulinum toxin for wrinkle reduction",
+      category: "Injetáveis",
+      description: "Toxina botulínica para redução de rugas",
       quantity: 50,
-      unit: "units",
+      unit: "unidades",
       threshold: 10,
       price: 12,
       lastRestocked: new Date()
     });
 
     this.createInventoryItem({
-      name: "Dental Floss",
-      category: "Dental Supplies",
-      description: "Professional dental floss",
+      name: "Fio Dental",
+      category: "Suprimentos Odontológicos",
+      description: "Fio dental profissional",
       quantity: 100,
-      unit: "boxes",
+      unit: "caixas",
       threshold: 20,
       price: 5,
       lastRestocked: new Date()
