@@ -79,8 +79,8 @@ export default function Appointments() {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create appointment. Please try again.",
+        title: "Erro",
+        description: "Falha ao criar agendamento. Por favor, tente novamente.",
         variant: "destructive",
       });
     },

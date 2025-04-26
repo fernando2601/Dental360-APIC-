@@ -4,10 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, Send, User, Bot, Gift } from "lucide-react";
+import { MessageSquare, Send, User, Bot, Gift, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { formatTimeAgo } from "@/lib/utils";
 
 type Message = {
@@ -220,6 +218,22 @@ export function ChatBot() {
                   </div>
                 </div>
               ))}
+              
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="max-w-[80%] rounded-lg px-3 py-2 bg-muted">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Bot className="h-3 w-3" />
+                      <span className="text-xs font-medium">Assistente</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MoreHorizontal className="h-4 w-4 animate-pulse" />
+                      <span className="text-sm">Digitando...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </CardContent>
           </ScrollArea>
@@ -230,12 +244,12 @@ export function ChatBot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                disabled={sendMessage.isPending}
+                disabled={isTyping}
               />
               <Button 
                 size="icon" 
                 onClick={handleSendMessage}
-                disabled={sendMessage.isPending}
+                disabled={isTyping}
               >
                 <Send className="h-4 w-4" />
               </Button>
