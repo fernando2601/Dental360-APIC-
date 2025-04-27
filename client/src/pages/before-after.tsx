@@ -4,10 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// URLs de imagens dos assets fornecidos pelo cliente
-// Usando URLs alternativas diretas do Unsplash para garantir que as imagens carreguem
-const teethWhiteningImageUrl = "https://plus.unsplash.com/premium_photo-1661766752153-9f0c3fad728f?q=80&w=1000&auto=format&fit=crop";
-const botoxImageUrl = "https://plus.unsplash.com/premium_photo-1664194584496-a3a628728828?q=80&w=1000&auto=format&fit=crop";
+// URLs de imagens confiáveis para o projeto
+// Usando links de imagens de sites populares que permitem acesso direto
+const teethWhiteningImageUrl = "https://media.istockphoto.com/id/1311454368/photo/beautiful-woman-smile.jpg?s=612x612&w=0&k=20&c=xW0I4Yz0XJswJl0qO0H3_Uq7MonDV2Mn-8I65jPSHbM=";
+const botoxImageUrl = "https://media.istockphoto.com/id/1369589255/photo/beautiful-mature-woman-face-close-up-before-after-cosmetic-procedures-antiaging-and-facelift.jpg?s=612x612&w=0&k=20&c=lbFKjERf_d8Tglu0umsVTmfQyjX8HGKDx8c5sK_6Soc=";
 
 // Imagens para outras categorias (Pixabay/recursos gratuitos)
 const dentalImplantBeforeUrl = "https://cdn.pixabay.com/photo/2021/12/05/10/44/caries-6847656_1280.jpg"; // Dente faltando
