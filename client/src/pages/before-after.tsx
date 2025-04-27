@@ -5,23 +5,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // URLs de imagens dos assets fornecidos pelo cliente
-const teethWhiteningImage = "/assets/teeth-whitening.png"; // Imagem real antes e depois do clareamento
+const teethWhiteningImageUrl = "/assets/teeth-whitening.png"; // Imagem real antes e depois do clareamento
+const botoxImageUrl = "/assets/botox.png"; // Homens e mulheres antes e depois do botox
 
-// Imagens para Botox - antes e depois
-const botoxImage = "/assets/botox.png"; // Homens e mulheres antes e depois do botox
+// Imagens para outras categorias (Pixabay/recursos gratuitos)
+const dentalImplantBeforeUrl = "https://cdn.pixabay.com/photo/2021/12/05/10/44/caries-6847656_1280.jpg"; // Dente faltando
+const dentalImplantAfterUrl = "https://cdn.pixabay.com/photo/2017/09/07/15/29/dental-implant-2725604_1280.jpg"; // Implante dentário
 
-// Variáveis para compatibilidade com outros componentes
-const botoxBefore = botoxImage;
-const botoxAfter = botoxImage;
+const veneersBeforeUrl = "https://cdn.pixabay.com/photo/2017/08/07/22/10/yellow-teeth-2608214_1280.jpg"; // Dentes irregulares amarelados
+const veneersAfterUrl = "https://cdn.pixabay.com/photo/2020/04/16/04/08/lente-5048733_1280.jpg"; // Dentes com lentes perfeitas
 
-const dentalImplantBefore = "https://cdn.pixabay.com/photo/2021/12/05/10/44/caries-6847656_1280.jpg"; // Dente faltando
-const dentalImplantAfter = "https://cdn.pixabay.com/photo/2017/09/07/15/29/dental-implant-2725604_1280.jpg"; // Implante dentário
-
-const veneersBefore = "https://cdn.pixabay.com/photo/2017/08/07/22/10/yellow-teeth-2608214_1280.jpg"; // Dentes irregulares amarelados
-const veneersAfter = "https://cdn.pixabay.com/photo/2020/04/16/04/08/lente-5048733_1280.jpg"; // Dentes com lentes perfeitas
-
-const facialHarmonyBefore = "https://cdn.pixabay.com/photo/2022/01/19/09/31/woman-6948776_1280.jpg"; // Rosto assimétrico
-const facialHarmonyAfter = "https://cdn.pixabay.com/photo/2021/03/04/08/06/woman-6067305_1280.jpg"; // Rosto harmonizado
+const facialHarmonyBeforeUrl = "https://cdn.pixabay.com/photo/2022/01/19/09/31/woman-6948776_1280.jpg"; // Rosto assimétrico
+const facialHarmonyAfterUrl = "https://cdn.pixabay.com/photo/2021/03/04/08/06/woman-6067305_1280.jpg"; // Rosto harmonizado
 
 // Componente para mostrar antes e depois
 function BeforeAfterCard({
@@ -118,8 +113,6 @@ function BeforeAfterCard({
 }
 
 export default function BeforeAfterPage() {
-  const year = new Date().getFullYear();
-  
   return (
     <MainLayout>
       <div className="container mx-auto py-8">
@@ -164,7 +157,7 @@ export default function BeforeAfterPage() {
                 <div>
                   <div className="w-full flex items-center justify-center border rounded-lg overflow-hidden shadow-md mb-6">
                     <img
-                      src={teethWhiteningImage}
+                      src={teethWhiteningImageUrl}
                       alt="Antes e depois do clareamento dental"
                       className="w-full h-auto object-contain"
                     />
@@ -240,7 +233,7 @@ export default function BeforeAfterPage() {
                     <h4 className="text-xl font-bold mb-3">Resultados reais</h4>
                     <div className="w-full aspect-video flex items-center justify-center">
                       <img
-                        src={botoxImage}
+                        src={botoxImageUrl}
                         alt="Botox antes e depois em homens e mulheres"
                         className="w-full h-auto object-contain shadow-md rounded-lg"
                       />
@@ -325,11 +318,11 @@ export default function BeforeAfterPage() {
             <BeforeAfterCard
               title="Implante Dentário Completo"
               description="Nossos implantes dentários são feitos com titânio de alta qualidade e tecnologia de ponta para garantir uma fixação perfeita e durável. O procedimento é realizado com anestesia local e planejamento digital 3D para máxima precisão."
-              beforeImage={dentalImplantBefore}
-              afterImage={dentalImplantAfter}
+              beforeImage={dentalImplantBeforeUrl}
+              afterImage={dentalImplantAfterUrl}
               patientName="Carlos Oliveira"
               patientAge={58}
-              testimonial="Perdi meus dentes frontais em um acidente e isso afetou completamente minha autoestima. Graças aos implantes que fiz na clínica, posso sorrir novamente! Ninguém consegue distinguir os implantes dos meus dentes naturais. O processo foi muito mais confortável do que eu imaginava e a equipe me deixou tranquilo em todas as etapas."
+              testimonial="Perdi meus dentes frontais em um acidente e isso afetou completamente minha autoestima. Graças aos implantes que fiz na clínica, posso sorrir novamente! Ninguém consegue distinguir os implantes dos meus dentes naturais. O processo foi muito mais confortável do que eu imaginava."
             />
           </TabsContent>
           
@@ -337,11 +330,11 @@ export default function BeforeAfterPage() {
             <BeforeAfterCard
               title="Lentes de Contato Dental"
               description="Nossas lentes de contato dental são confeccionadas com porcelana de alta resistência e personalizadas para cada paciente. O procedimento é minimamente invasivo e transforma completamente seu sorriso em apenas duas sessões."
-              beforeImage={veneersBefore}
-              afterImage={veneersAfter}
+              beforeImage={veneersBeforeUrl}
+              afterImage={veneersAfterUrl}
               patientName="Juliana Costa"
               patientAge={29}
-              testimonial="Eu tinha dentes manchados e levemente tortos que me incomodavam há anos. As lentes de contato dental transformaram completamente meu sorriso! O procedimento foi rápido e o resultado superou todas as minhas expectativas. Agora tenho o sorriso dos meus sonhos e minha confiança aumentou 100%."
+              testimonial="Eu tinha dentes manchados e levemente tortos que me incomodavam há anos. As lentes de contato dental transformaram completamente meu sorriso! O procedimento foi rápido e o resultado superou todas as minhas expectativas. Agora tenho o sorriso dos meus sonhos!"
             />
           </TabsContent>
           
@@ -349,11 +342,11 @@ export default function BeforeAfterPage() {
             <BeforeAfterCard
               title="Harmonização Facial Completa"
               description="Nossa harmonização facial combina diferentes procedimentos estéticos para equilibrar e valorizar suas características naturais. Utilizamos técnicas avançadas de preenchimento, Botox e bioestimuladores para resultados espetaculares e naturais."
-              beforeImage={facialHarmonyBefore}
-              afterImage={facialHarmonyAfter}
+              beforeImage={facialHarmonyBeforeUrl}
+              afterImage={facialHarmonyAfterUrl}
               patientName="Fernanda Souza"
               patientAge={37}
-              testimonial="A harmonização facial mudou minha vida! Eu estava insatisfeita com vários aspectos do meu rosto, mas não queria parecer artificial. Os profissionais da clínica fizeram um planejamento personalizado que valorizou minhas características naturais. Agora me olho no espelho e me sinto mais bonita e confiante. Vale cada centavo investido!"
+              testimonial="A harmonização facial mudou minha vida! Eu estava insatisfeita com vários aspectos do meu rosto, mas não queria parecer artificial. Os profissionais da clínica fizeram um planejamento personalizado que valorizou minhas características naturais. Vale cada centavo investido!"
             />
           </TabsContent>
         </Tabs>
