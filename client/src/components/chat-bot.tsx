@@ -748,6 +748,23 @@ export function ChatBot() {
     // Atualiza o tempo da última interação
     setLastInteractionTime(Date.now());
     
+    // Verificação para respostas de alta prioridade
+    // Tratamos primeiro casos especiais que precisam de resposta exata
+    // Adicionamos um log para depuração
+    console.log("Texto recebido:", userText);
+    console.log("Texto convertido para minúsculo:", lowerText);
+    
+    if (lowerText === "meu dente tá podre" || lowerText === "meu dente ta podre") {
+      console.log("MATCH EXATO: Detectado 'meu dente tá podre'");
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Fica tranquilo(a)! Nós somos especialistas em salvar sorrisos! ❤️ Dá pra restaurar ou até reconstruir o dente, dependendo do caso. Vamos agendar uma avaliação sem compromisso?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+
     // Primeiro verifica se estamos em um fluxo de trabalho ativo
     const workflowResponse = processWorkflowResponse(userText);
     if (workflowResponse) {
@@ -778,7 +795,11 @@ export function ChatBot() {
       }
     }
     
-    if (lowerText.includes("dente") && (lowerText.includes("podre") || lowerText.includes("estragado"))) {
+    // Resposta específica para "Meu dente tá podre" e variações
+    if (lowerText === "meu dente tá podre" || lowerText === "meu dente ta podre" || 
+        lowerText.includes("meu dente tá podre") || lowerText.includes("meu dente ta podre") ||
+        ((lowerText.includes("dente") || lowerText.includes("dental")) && 
+        (lowerText.includes("podre") || lowerText.includes("estragado") || lowerText.includes("tá podre") || lowerText.includes("ta podre")))) {
       return {
         id: Date.now().toString(),
         sender: 'bot',
