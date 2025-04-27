@@ -2,6 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { HarmonyBeforeImage, HarmonyAfterImage } from "@/components/harmony-images";
 
 // Componente para mostrar antes e depois com imagens reais em SVG
 function BeforeAfterCard({
@@ -171,15 +172,72 @@ export default function BeforeAfterPage() {
         </TabsContent>
         
         <TabsContent value="facial-harmony">
-          <BeforeAfterCard
-            title="Harmonização Facial Completa"
-            description="Nossa abordagem de harmonização facial combina diferentes técnicas como botox, preenchimentos e bioestimuladores para equilibrar as proporções do rosto, realçando a beleza natural e rejuvenescendo a aparência."
-            beforeImageSrc="/images/harmonizacao/antes.jpg"
-            afterImageSrc="/images/harmonizacao/depois.png"
-            patientName="Carlos Mendes"
-            patientAge={35}
-            testimonial="Com a harmonização facial, consegui ter um visual mais elegante e refinado. A diferença é notável - me sinto mais confiante e recebo muitos elogios. O tratamento foi indolor e os resultados superaram minhas expectativas!"
-          />
+          <Card className="mb-8 overflow-hidden shadow-lg border-0">
+            <div className="p-4 md:p-6 flex flex-col">
+              {/* Título e descrição */}
+              <div className="mb-6">
+                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 text-transparent bg-clip-text mb-2">
+                  Harmonização Facial Completa
+                </h3>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  Nossa abordagem de harmonização facial combina diferentes técnicas como botox, preenchimentos e bioestimuladores para equilibrar as proporções do rosto, realçando a beleza natural e rejuvenescendo a aparência.
+                </p>
+              </div>
+
+              {/* Representação visual de antes/depois com imagens importadas */}
+              <div className="flex flex-col md:flex-row gap-6 mb-6">
+                <div className="flex-1 flex flex-col border rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-destructive/20 p-3 text-center font-medium text-destructive text-sm uppercase tracking-wider">
+                    Antes
+                  </div>
+                  <div className="h-80 flex-1 p-2">
+                    <HarmonyBeforeImage />
+                  </div>
+                </div>
+                
+                <div className="flex-1 flex flex-col border rounded-lg overflow-hidden shadow-md">
+                  <div className="bg-primary/20 p-3 text-center font-medium text-primary text-sm uppercase tracking-wider">
+                    Depois
+                  </div>
+                  <div className="h-80 flex-1 p-2">
+                    <HarmonyAfterImage />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Depoimento */}
+              <div className="bg-primary/5 p-5 rounded-xl mb-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar className="h-16 w-16 border-2 border-primary shadow-md">
+                    <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
+                      CM
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-bold text-lg">Carlos Mendes</h4>
+                    <p className="text-sm text-muted-foreground">35 anos</p>
+                  </div>
+                </div>
+                
+                <div className="relative mx-4">
+                  <div className="absolute -left-6 -top-6 text-7xl text-primary/20">"</div>
+                  <blockquote className="italic text-base md:text-lg relative z-10 px-4 py-2">
+                    Com a harmonização facial, consegui ter um visual mais elegante e refinado. A diferença é notável - me sinto mais confiante e recebo muitos elogios. O tratamento foi indolor e os resultados superaram minhas expectativas!
+                  </blockquote>
+                  <div className="absolute -right-6 -bottom-6 text-7xl text-primary/20">"</div>
+                </div>
+              </div>
+              
+              {/* CTA */}
+              <div className="bg-gradient-to-r from-primary to-primary/80 p-6 rounded-xl shadow-lg text-white text-center">
+                <h4 className="font-bold text-xl mb-3">Quer resultados como esse?</h4>
+                <p className="mb-5">Agende uma consulta de avaliação GRATUITA hoje mesmo!</p>
+                <button className="bg-white text-primary hover:bg-primary-foreground px-8 py-3 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-md">
+                  AGENDAR AGORA
+                </button>
+              </div>
+            </div>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
