@@ -4,14 +4,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // URLs de imagens SVG criadas localmente (garantia de funcionamento)
-const teethWhiteningImageUrl = "./teeth-before-after.svg";
-const botoxImageUrl = "./botox-before-after.svg";
-const dentalImplantBeforeUrl = "./dental-implant-before.svg"; 
-const dentalImplantAfterUrl = "./dental-implant-after.svg";
-const veneersBeforeUrl = "./veneers-before.svg";
-const veneersAfterUrl = "./veneers-after.svg";
-const harmonyBeforeUrl = "./harmony-before.svg";
-const harmonyAfterUrl = "./harmony-after.svg";
+const teethWhiteningImageUrl = "/images/teeth-before-after.svg";
+const botoxImageUrl = "/images/botox-before-after.svg";
+// Substitua com URLs confiáveis para as outras imagens
+const dentalImplantBeforeUrl = "https://i.ibb.co/VT6rQYG/dental-implant-before.png"; 
+const dentalImplantAfterUrl = "https://i.ibb.co/JzTFzD4/dental-implant-after.png";
+const veneersBeforeUrl = "https://i.ibb.co/7vWxRJN/veneers-before.png";
+const veneersAfterUrl = "https://i.ibb.co/k4mJwnG/veneers-after.png";
+const harmonyBeforeUrl = "https://i.ibb.co/G2fxRLr/harmony-before.png";
+const harmonyAfterUrl = "https://i.ibb.co/8dRVcLN/harmony-after.png";
 
 // Componente para mostrar antes e depois
 function BeforeAfterCard({
