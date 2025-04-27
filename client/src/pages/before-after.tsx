@@ -4,17 +4,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// URLs de imagens reais para exemplos
-const teethWhiteningBefore = "https://images.pexels.com/photos/3845587/pexels-photo-3845587.jpeg?auto=compress&cs=tinysrgb&w=600";
-const teethWhiteningAfter = "https://images.pexels.com/photos/3764013/pexels-photo-3764013.jpeg?auto=compress&cs=tinysrgb&w=600";
-const botoxBefore = "https://images.pexels.com/photos/3763152/pexels-photo-3763152.jpeg?auto=compress&cs=tinysrgb&w=600";
-const botoxAfter = "https://images.pexels.com/photos/6724353/pexels-photo-6724353.jpeg?auto=compress&cs=tinysrgb&w=600";
-const dentalImplantBefore = "https://images.pexels.com/photos/4269697/pexels-photo-4269697.jpeg?auto=compress&cs=tinysrgb&w=600";
-const dentalImplantAfter = "https://images.pexels.com/photos/3762453/pexels-photo-3762453.jpeg?auto=compress&cs=tinysrgb&w=600";
-const veneersBefore = "https://images.pexels.com/photos/3845542/pexels-photo-3845542.jpeg?auto=compress&cs=tinysrgb&w=600";
-const veneersAfter = "https://images.pexels.com/photos/6627404/pexels-photo-6627404.jpeg?auto=compress&cs=tinysrgb&w=600";
-const facialHarmonyBefore = "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=600";
-const facialHarmonyAfter = "https://images.pexels.com/photos/4662958/pexels-photo-4662958.jpeg?auto=compress&cs=tinysrgb&w=600";
+// URLs de imagens reais para exemplos - selecionadas especificamente para cada tratamento
+const teethWhiteningBefore = "https://cdn.pixabay.com/photo/2016/01/07/05/23/teeth-1125238_1280.jpg"; // Dentes amarelados
+const teethWhiteningAfter = "https://cdn.pixabay.com/photo/2021/05/14/08/44/smile-6253087_1280.jpg"; // Dentes brancos perfeitos
+
+const botoxBefore = "https://cdn.pixabay.com/photo/2018/03/12/12/32/woman-3219507_1280.jpg"; // Mulher com rugas
+const botoxAfter = "https://cdn.pixabay.com/photo/2015/03/03/18/58/woman-657753_1280.jpg"; // Mulher sem rugas
+
+const dentalImplantBefore = "https://cdn.pixabay.com/photo/2021/12/05/10/44/caries-6847656_1280.jpg"; // Dente faltando
+const dentalImplantAfter = "https://cdn.pixabay.com/photo/2017/09/07/15/29/dental-implant-2725604_1280.jpg"; // Implante dentário
+
+const veneersBefore = "https://cdn.pixabay.com/photo/2017/08/07/22/10/yellow-teeth-2608214_1280.jpg"; // Dentes irregulares amarelados
+const veneersAfter = "https://cdn.pixabay.com/photo/2020/04/16/04/08/lente-5048733_1280.jpg"; // Dentes com lentes perfeitas
+
+const facialHarmonyBefore = "https://cdn.pixabay.com/photo/2022/01/19/09/31/woman-6948776_1280.jpg"; // Rosto assimétrico
+const facialHarmonyAfter = "https://cdn.pixabay.com/photo/2021/03/04/08/06/woman-6067305_1280.jpg"; // Rosto harmonizado
 
 // Componente para mostrar antes e depois
 function BeforeAfterCard({
@@ -199,12 +203,6 @@ export default function BeforeAfterPage() {
           </TabsContent>
         </Tabs>
       </div>
-      
-      <footer className="bg-primary/5 py-4 mt-10">
-        <div className="container mx-auto text-center text-sm text-muted-foreground">
-          © {year} Clínica DentalSpa. Todos os direitos reservados.
-        </div>
-      </footer>
     </MainLayout>
   );
 }
