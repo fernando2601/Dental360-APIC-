@@ -1,11 +1,17 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // URLs de imagens SVG criadas localmente (garantia de funcionamento)
 const teethWhiteningImageUrl = "/teeth-before-after.svg";
 const botoxImageUrl = "/botox-before-after.svg";
+const dentalImplantBeforeUrl = "/dental-implant-before.svg"; 
+const dentalImplantAfterUrl = "/dental-implant-after.svg";
+const veneersBeforeUrl = "/veneers-before.svg";
+const veneersAfterUrl = "/veneers-after.svg";
+const harmonyBeforeUrl = "/harmony-before.svg";
+const harmonyAfterUrl = "/harmony-after.svg";
 
 // Componente para mostrar antes e depois
 function BeforeAfterCard({
@@ -257,8 +263,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Implantes Dentários Permanentes"
             description="Nossos implantes dentários de titânio substituem completamente dentes perdidos, devolvendo função e estética ao seu sorriso. A técnica minimamente invasiva garante recuperação rápida e resultados duradouros."
-            beforeImage="/dental-implant-before.svg"
-            afterImage="/dental-implant-after.svg"
+            beforeImage={dentalImplantBeforeUrl}
+            afterImage={dentalImplantAfterUrl}
             patientName="Carlos Mendonça"
             patientAge={48}
             testimonial="Perdi um dente da frente em um acidente e fiquei muito constrangido por anos. O implante que recebi na clínica ficou tão natural que ninguém percebe que não é meu dente original. Recuperei minha confiança para sorrir!"
@@ -269,8 +275,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Lentes de Contato Dental"
             description="Nossas lentes de contato dental (facetas) são ultrafinas e proporcionam um sorriso perfeito. Corrigem dentes manchados, quebrados, desalinhados ou com espaços, criando um sorriso harmonioso e natural."
-            beforeImage="/veneers-before.svg"
-            afterImage="/veneers-after.svg"
+            beforeImage={veneersBeforeUrl}
+            afterImage={veneersAfterUrl}
             patientName="Paula Gonzaga"
             patientAge={35}
             testimonial="Sempre tive dentes tortos e com espaçamentos que me incomodavam muito. Com as lentes de contato dental, meu sorriso ficou alinhado e perfeito em apenas duas sessões! O resultado superou todas as minhas expectativas."
@@ -281,8 +287,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Harmonização Facial Completa"
             description="Nossa abordagem de harmonização facial combina diferentes técnicas como botox, preenchimentos e bioestimuladores para equilibrar as proporções do rosto, realçando a beleza natural e rejuvenescendo a aparência."
-            beforeImage="/harmony-before.svg"
-            afterImage="/harmony-after.svg"
+            beforeImage={harmonyBeforeUrl}
+            afterImage={harmonyAfterUrl}
             patientName="Fernanda Lopes"
             patientAge={42}
             testimonial="A harmonização facial transformou minha autoestima! O médico analisou meu rosto como um todo e aplicou as técnicas nos pontos certos. O resultado é natural e equilibrado, exatamente o que eu queria. Todos dizem que estou com aparência rejuvenescida, mas ninguém sabe exatamente o que mudou!"
