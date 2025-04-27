@@ -4,14 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // URLs de imagens SVG criadas localmente (garantia de funcionamento)
-const teethWhiteningImageUrl = "/teeth-before-after.svg";
-const botoxImageUrl = "/botox-before-after.svg";
-const dentalImplantBeforeUrl = "/dental-implant-before.svg"; 
-const dentalImplantAfterUrl = "/dental-implant-after.svg";
-const veneersBeforeUrl = "/veneers-before.svg";
-const veneersAfterUrl = "/veneers-after.svg";
-const harmonyBeforeUrl = "/harmony-before.svg";
-const harmonyAfterUrl = "/harmony-after.svg";
+const teethWhiteningImageUrl = "./teeth-before-after.svg";
+const botoxImageUrl = "./botox-before-after.svg";
+const dentalImplantBeforeUrl = "./dental-implant-before.svg"; 
+const dentalImplantAfterUrl = "./dental-implant-after.svg";
+const veneersBeforeUrl = "./veneers-before.svg";
+const veneersAfterUrl = "./veneers-after.svg";
+const harmonyBeforeUrl = "./harmony-before.svg";
+const harmonyAfterUrl = "./harmony-after.svg";
 
 // Componente para mostrar antes e depois
 function BeforeAfterCard({
