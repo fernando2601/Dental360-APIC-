@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, X, Maximize2, Minimize2, Send, User, Bot } from "lucide-react";
+import { MessageSquare, X, Maximize2, Minimize2, Send, User, Bot, Sparkles } from "lucide-react";
 import { formatTimeAgo } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 // Tipagem para as mensagens
 type Message = {
@@ -27,6 +30,16 @@ interface ChatContext {
   paymentMethod: string | null;
   interestedInService: string | null;
   hasSevereMentalState: boolean;
+  recentTopics: string[];
+  frequentQuestions: string[];
+}
+
+// Interface para sugestões de IA
+interface AISuggestion {
+  id: string;
+  text: string;
+  type: 'general' | 'appointment' | 'service' | 'payment' | 'discount';
+  context?: string;
 }
 
 // Respostas pré-definidas
@@ -77,6 +90,59 @@ const CLINIC_ADVANTAGES = [
   "Porque aqui o seu sorriso é levado a sério, mas o atendimento é leve e cheio de alegria! 😁✨\nCuidar de você é um privilégio para a nossa equipe!\nAlém disso, temos descontos exclusivos, parcelamento sem estresse e um ambiente acolhedor que vai fazer você se sentir em casa! 🏡\nVamos juntos deixar você ainda mais radiante? 🌟"
 ];
 
+// Sugestões de respostas inteligentes - baseadas em contexto
+const AI_SUGGESTIONS: Record<string, AISuggestion[]> = {
+  initial: [
+    { id: 'sug_1', text: 'Quais serviços vocês oferecem?', type: 'general' },
+    { id: 'sug_2', text: 'Quanto custa um clareamento dental?', type: 'service' },
+    { id: 'sug_3', text: 'Quero agendar uma consulta', type: 'appointment' }
+  ],
+  services: [
+    { id: 'sug_srv_1', text: 'Quero saber mais sobre clareamento', type: 'service' },
+    { id: 'sug_srv_2', text: 'Preciso extrair o siso', type: 'service' },
+    { id: 'sug_srv_3', text: 'Quanto custa o botox?', type: 'service' },
+    { id: 'sug_srv_4', text: 'Como é feita a limpeza?', type: 'service' }
+  ],
+  pricing: [
+    { id: 'sug_price_1', text: 'É possível parcelar?', type: 'payment' },
+    { id: 'sug_price_2', text: 'Vocês aceitam PIX?', type: 'payment' },
+    { id: 'sug_price_3', text: 'Tem desconto para pacote?', type: 'discount' },
+    { id: 'sug_price_4', text: 'Está um pouco caro pra mim', type: 'discount' }
+  ],
+  appointment: [
+    { id: 'sug_apt_1', text: 'Tem horário essa semana?', type: 'appointment' },
+    { id: 'sug_apt_2', text: 'Quanto tempo dura a consulta?', type: 'appointment' },
+    { id: 'sug_apt_3', text: 'Preciso levar algo?', type: 'appointment' },
+    { id: 'sug_apt_4', text: 'Tem estacionamento?', type: 'general' }
+  ],
+  fear: [
+    { id: 'sug_fear_1', text: 'Tenho muito medo de dentista', type: 'general' },
+    { id: 'sug_fear_2', text: 'Dói fazer tratamento de canal?', type: 'service' },
+    { id: 'sug_fear_3', text: 'Como funciona a anestesia?', type: 'service' },
+    { id: 'sug_fear_4', text: 'Posso levar acompanhante?', type: 'general' }
+  ],
+  aesthetics: [
+    { id: 'sug_aes_1', text: 'Quanto tempo dura o botox?', type: 'service' },
+    { id: 'sug_aes_2', text: 'O preenchimento é dolorido?', type: 'service' },
+    { id: 'sug_aes_3', text: 'Quero melhorar meu sorriso', type: 'service' },
+    { id: 'sug_aes_4', text: 'Tenho manchas nos dentes', type: 'service' }
+  ]
+};
+
+// Lista de perguntas frequentes
+const FREQUENT_QUESTIONS = [
+  "Quanto custa o clareamento dental?",
+  "Como funciona o pagamento?",
+  "Vocês atendem nos finais de semana?",
+  "Preciso marcar horário para avaliação?",
+  "Quanto tempo dura uma limpeza?",
+  "Vocês têm emergência?",
+  "O aparelho invisível é confortável?",
+  "Posso parcelar o tratamento?",
+  "Vocês aceitam convênio?",
+  "Quanto tempo dura o efeito do botox?"
+];
+
 // Palavras-chave e suas respostas
 const KEYWORDS: Record<string, string> = {
   // Dentistas
@@ -113,7 +179,7 @@ const KEYWORDS: Record<string, string> = {
   "crédito": "Aceitamos todos os cartões de crédito e parcelamos em até 12x sem juros! 💳✨\nÉ uma forma de você cuidar do seu sorriso sem pesar no orçamento. Podemos agendar seu horário agora?",
   "pagamento": RESPONSES.payment,
   "pix": "Sim, aceitamos PIX! 📱 É prático, seguro e super rápido!\nEnviamos o QR code na hora do pagamento e você pode usar o banco de sua preferência. Além do PIX, aceitamos cartões e dinheiro. Como prefere pagar?",
-  "dinheiro": "Sim, aceitamos pagamento em dinheiro! 💵\nPara pagamentos à vista em dinheiro, oferecemos um desconto especial de 5%! Também aceitamos PIX e cartões se for mais conveniente. O que seria melhor para você?",
+  "dinheiro_pagamento": "Sim, aceitamos pagamento em dinheiro! 💵\nPara pagamentos à vista em dinheiro, oferecemos um desconto especial de 5%! Também aceitamos PIX e cartões se for mais conveniente. O que seria melhor para você?",
   
   // Sentimentos
   "bem": RESPONSES.positive,
@@ -136,7 +202,6 @@ const KEYWORDS: Record<string, string> = {
   
   // Dúvidas e traumas
   "dor": "Fique tranquilo(a), trabalhamos com anestesia moderna e técnicas suaves! 😌\nNosso objetivo é zero desconforto durante os procedimentos. Podemos agendar uma consulta para você conhecer nossa abordagem?",
-  "medo": RESPONSES.afraid,
   "trauma": "Entendemos totalmente! 💕\nNossa clínica é especializada em atender pacientes com trauma de dentista. Vamos no seu ritmo, com muito carinho e paciência. Quer dar uma chance para nós?",
   
   // Agendamento
@@ -149,17 +214,17 @@ const KEYWORDS: Record<string, string> = {
   // Objeções de vendas
   "caro": RESPONSES.expensive,
   "cara": RESPONSES.expensive,
-  "preços": RESPONSES.compare_prices,
-  "comparando": RESPONSES.compare_prices,
+  "preços_alt": RESPONSES.compare_prices,
+  "comparando_precos": RESPONSES.compare_prices,
   "pesquisando": RESPONSES.compare_prices,
   "orçamento": RESPONSES.compare_prices,
-  "dinheiro": RESPONSES.no_money,
+  "dinheiro_falta": RESPONSES.no_money,
   "não tenho": RESPONSES.no_money,
   "sem grana": RESPONSES.no_money_alt,
   "apertado": RESPONSES.no_money_alt,
   "outra clínica": RESPONSES.looking_elsewhere,
   "estou vendo": RESPONSES.looking_elsewhere,
-  "comparando": RESPONSES.looking_elsewhere_alt,
+  "comparando_clinica": RESPONSES.looking_elsewhere_alt,
   "longe": RESPONSES.too_far,
   "distante": RESPONSES.too_far,
   "pensar": RESPONSES.thinking_about_it,
@@ -169,7 +234,7 @@ const KEYWORDS: Record<string, string> = {
   "prioridade": RESPONSES.not_priority,
   "agora não": RESPONSES.not_priority,
   "momento": RESPONSES.not_priority_alt,
-  "medo": RESPONSES.afraid,
+  "medo_dentista": RESPONSES.afraid,
   "receio": RESPONSES.afraid_alt,
   "pavor": RESPONSES.afraid,
   "ansiedade": RESPONSES.afraid_alt,
@@ -183,6 +248,8 @@ export function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [inactivityTimer, setInactivityTimer] = useState<NodeJS.Timeout | null>(null);
+  const [currentSuggestions, setCurrentSuggestions] = useState<AISuggestion[]>([]);
+  const [suggestionsType, setSuggestionsType] = useState<string>("initial");
   const [chatContext, setChatContext] = useState<ChatContext>({
     lastInteraction: new Date(),
     hasGivenDiscount: false,
@@ -194,7 +261,9 @@ export function ChatBot() {
     mentionedFamilyLoss: false,
     paymentMethod: null,
     interestedInService: null,
-    hasSevereMentalState: false
+    hasSevereMentalState: false,
+    recentTopics: [],
+    frequentQuestions: []
   });
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -272,7 +341,7 @@ export function ChatBot() {
     }
   };
 
-  // Rola para a mensagem mais recente
+  // Rola para a mensagem mais recente e atualiza sugestões de IA
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -287,8 +356,73 @@ export function ChatBot() {
       
       // Resetar o timer de inatividade
       resetInactivityTimer();
+      
+      // Gerar novas sugestões de IA com base no contexto atual
+      updateAISuggestions();
     }
   }, [messages]);
+  
+  // Função para atualizar sugestões de IA baseadas no contexto da conversa
+  const updateAISuggestions = useCallback(() => {
+    let newSuggestionsType = "initial";
+    
+    // Determinar o tipo de sugestões com base no contexto
+    if (chatContext.interestedInService) {
+      if (chatContext.interestedInService.includes("siso") || 
+          chatContext.interestedInService.includes("canal") ||
+          chatContext.interestedInService.includes("implante") ||
+          chatContext.interestedInService.includes("restauração")) {
+        newSuggestionsType = "services";
+      } else if (chatContext.interestedInService.includes("clareamento") ||
+                 chatContext.interestedInService.includes("estética")) {
+        newSuggestionsType = "aesthetics";
+      }
+    } else if (chatContext.mentionedPrice || chatContext.hasGivenDiscount) {
+      newSuggestionsType = "pricing";
+    } else if (messages.some(m => m.content.toLowerCase().includes("medo") || 
+                            m.content.toLowerCase().includes("receio") ||
+                            m.content.toLowerCase().includes("trauma"))) {
+      newSuggestionsType = "fear";
+    } else if (messages.some(m => m.content.toLowerCase().includes("agendar") || 
+                                  m.content.toLowerCase().includes("marcar") ||
+                                  m.content.toLowerCase().includes("consulta"))) {
+      newSuggestionsType = "appointment";
+    }
+    
+    // Se o tipo mudou, atualizar sugestões
+    if (newSuggestionsType !== suggestionsType) {
+      setSuggestionsType(newSuggestionsType);
+      setCurrentSuggestions(AI_SUGGESTIONS[newSuggestionsType]);
+    }
+    
+    // Adicionar uma sugestão personalizada com base no histórico
+    if (messages.length > 2 && chatContext.recentTopics.length > 0) {
+      const lastTopic = chatContext.recentTopics[chatContext.recentTopics.length - 1];
+      
+      // Adicionar uma sugestão personalizada baseada no tópico recente
+      if (lastTopic === "clareamento") {
+        const customSuggestion: AISuggestion = { 
+          id: `custom_${Date.now()}`, 
+          text: "Quanto tempo dura o efeito do clareamento?", 
+          type: "service" 
+        };
+        
+        if (!currentSuggestions.some(s => s.text.includes("dura o efeito"))) {
+          setCurrentSuggestions(prev => [...prev.slice(0, 3), customSuggestion]);
+        }
+      } else if (lastTopic === "payment") {
+        const customSuggestion: AISuggestion = { 
+          id: `custom_${Date.now()}`, 
+          text: "Tem desconto para pagamento à vista?", 
+          type: "payment" 
+        };
+        
+        if (!currentSuggestions.some(s => s.text.includes("desconto"))) {
+          setCurrentSuggestions(prev => [...prev.slice(0, 3), customSuggestion]);
+        }
+      }
+    }
+  }, [chatContext, messages, suggestionsType, currentSuggestions]);
 
   // Função para obter uma resposta de diferencial aleatória
   const getRandomAdvantage = (): string => {
@@ -523,6 +657,51 @@ export function ChatBot() {
     return RESPONSES.default;
   };
 
+  // Função para usar uma sugestão de IA como input
+  const handleUseSuggestion = (suggestion: AISuggestion) => {
+    if (isTyping) return;
+    
+    // Registra o tópico na lista de tópicos recentes
+    setChatContext(prev => ({
+      ...prev,
+      recentTopics: [...prev.recentTopics, suggestion.type],
+      lastInteraction: new Date()
+    }));
+    
+    // Usa a sugestão como mensagem do usuário
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      sender: 'user',
+      content: suggestion.text,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    
+    // Reinicia o timer de inatividade
+    resetInactivityTimer();
+    
+    // Simula o chatbot digitando
+    setIsTyping(true);
+    
+    // Determina o tempo de digitação baseado no tamanho da resposta
+    const response = generateResponse(suggestion.text);
+    const typingTime = Math.min(2000, 500 + response.length * 5);
+    
+    // Gera a resposta após um pequeno delay
+    setTimeout(() => {
+      const botResponse: Message = {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: response,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, botResponse]);
+      setIsTyping(false);
+    }, typingTime);
+  };
+  
   // Envia a mensagem e gera uma resposta inteligente
   const handleSendMessage = () => {
     if (!input.trim()) return;
@@ -538,10 +717,25 @@ export function ChatBot() {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     
+    // Detecta possíveis tópicos para adicionar ao contexto
+    const lowerInput = input.toLowerCase();
+    let detectedTopic = null;
+    
+    if (lowerInput.includes("clareamento") || lowerInput.includes("branqueamento")) {
+      detectedTopic = "clareamento";
+    } else if (lowerInput.includes("siso") || lowerInput.includes("juízo")) {
+      detectedTopic = "extração";
+    } else if (lowerInput.includes("botox") || lowerInput.includes("preenchimento")) {
+      detectedTopic = "harmonização";
+    } else if (lowerInput.includes("cartão") || lowerInput.includes("pix") || lowerInput.includes("pagamento")) {
+      detectedTopic = "payment";
+    }
+    
     // Atualiza o contexto do chat
     setChatContext(prev => ({
       ...prev,
-      lastInteraction: new Date()
+      lastInteraction: new Date(),
+      recentTopics: detectedTopic ? [...prev.recentTopics, detectedTopic] : prev.recentTopics
     }));
     
     // Reinicia o timer de inatividade
@@ -684,6 +878,26 @@ export function ChatBot() {
                   <div ref={messagesEndRef} />
                 </ScrollArea>
               </CardContent>
+              {/* AI Suggestions */}
+              <div className="p-2 border-t">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-3 w-3 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground">Sugestões de IA</span>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {currentSuggestions.map((suggestion) => (
+                    <Badge
+                      key={suggestion.id}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+                      onClick={() => handleUseSuggestion(suggestion)}
+                    >
+                      {suggestion.text}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
               <CardFooter className="border-t p-2">
                 <div className="flex w-full items-center gap-2">
                   <Input
@@ -693,6 +907,37 @@ export function ChatBot() {
                     onKeyDown={(e) => e.key === 'Enter' && !isTyping && handleSendMessage()}
                     className="flex-1 text-sm"
                   />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        disabled={isTyping}
+                      >
+                        <Sparkles className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-0" side="top" align="end">
+                      <div className="p-2 border-b">
+                        <h3 className="text-sm font-medium">Perguntas frequentes</h3>
+                      </div>
+                      <div className="p-2 flex flex-col gap-1 max-h-60 overflow-y-auto">
+                        {FREQUENT_QUESTIONS.map((question, index) => (
+                          <Button
+                            key={index}
+                            variant="ghost"
+                            className="w-full justify-start text-sm font-normal"
+                            onClick={() => {
+                              setInput(question);
+                            }}
+                          >
+                            {question}
+                          </Button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                   <Button 
                     onClick={handleSendMessage} 
                     disabled={isTyping}
