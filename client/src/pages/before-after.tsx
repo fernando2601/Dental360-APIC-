@@ -5,18 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // URLs de imagens dos assets fornecidos pelo cliente
-const teethWhiteningBefore = "/attached_assets/image_1745782226720.png"; // Imagem real antes do clareamento (parte superior)
-const teethWhiteningAfter = "/attached_assets/image_1745782226720.png"; // Imagem real depois do clareamento (parte inferior)
+const teethWhiteningImage = "/assets/teeth-whitening.png"; // Imagem real antes e depois do clareamento
 
 // Imagens para Botox - antes e depois
-const botoxBeforeMale = "/attached_assets/image_1745782272200.png"; // Homem antes e depois do botox (lado esquerdo)
-const botoxAfterMale = "/attached_assets/image_1745782272200.png"; // Homem antes e depois do botox (lado direito)
-const botoxBeforeFemale = "/attached_assets/image_1745782272200.png"; // Mulher antes do botox (lado direito - primeira foto)
-const botoxAfterFemale = "/attached_assets/image_1745782272200.png"; // Mulher depois do botox (lado direito - segunda foto)
+const botoxImage = "/assets/botox.png"; // Homens e mulheres antes e depois do botox
 
-// Definindo as variáveis para compatibilidade com outros componentes
-const botoxBefore = botoxBeforeMale;
-const botoxAfter = botoxAfterMale;
+// Variáveis para compatibilidade com outros componentes
+const botoxBefore = botoxImage;
+const botoxAfter = botoxImage;
 
 const dentalImplantBefore = "https://cdn.pixabay.com/photo/2021/12/05/10/44/caries-6847656_1280.jpg"; // Dente faltando
 const dentalImplantAfter = "https://cdn.pixabay.com/photo/2017/09/07/15/29/dental-implant-2725604_1280.jpg"; // Implante dentário
@@ -168,7 +164,7 @@ export default function BeforeAfterPage() {
                 <div>
                   <div className="w-full flex items-center justify-center border rounded-lg overflow-hidden shadow-md mb-6">
                     <img
-                      src={teethWhiteningBefore}
+                      src={teethWhiteningImage}
                       alt="Antes e depois do clareamento dental"
                       className="w-full h-auto object-contain"
                     />
@@ -239,27 +235,27 @@ export default function BeforeAfterPage() {
 
                 {/* Imagens antes/depois - Masculino e Feminino */}
                 <div className="space-y-8">
-                  {/* Resultados masculinos */}
+                  {/* Resultados masculinos e femininos */}
                   <div>
-                    <h4 className="text-xl font-bold mb-3">Resultados em homens</h4>
+                    <h4 className="text-xl font-bold mb-3">Resultados reais</h4>
                     <div className="w-full aspect-video flex items-center justify-center">
                       <img
-                        src={botoxBeforeMale}
-                        alt="Botox em homens antes e depois"
+                        src={botoxImage}
+                        alt="Botox antes e depois em homens e mulheres"
                         className="w-full h-auto object-contain shadow-md rounded-lg"
                       />
                     </div>
                   </div>
                   
-                  {/* Resultados femininos */}
-                  <div>
-                    <h4 className="text-xl font-bold mb-3">Resultados em mulheres</h4>
-                    <div className="w-full aspect-video flex items-center justify-center">
-                      <img
-                        src={botoxBeforeFemale}
-                        alt="Botox em mulheres antes e depois"
-                        className="w-full h-auto object-contain shadow-md rounded-lg"
-                      />
+                  {/* Explicação da imagem */}
+                  <div className="bg-primary/5 p-4 rounded-lg mt-4">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="bg-destructive/20 p-2 rounded font-medium text-destructive text-sm">ANTES</div>
+                      <p className="text-sm">Rugas de expressão e sinais de envelhecimento visíveis. Aparência cansada e marcas naturais do tempo.</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-primary/20 p-2 rounded font-medium text-primary text-sm">DEPOIS</div>
+                      <p className="text-sm">Pele visivelmente mais lisa, com suavização das rugas e aparência rejuvenescida, mantendo a naturalidade das expressões.</p>
                     </div>
                   </div>
                 </div>
