@@ -52,7 +52,16 @@ const RESPONSES = {
   doubt: "Sem problema! Estou aqui para te ajudar com calma! 🫶\nSe eu não expliquei direito, me avise e eu tento de outra forma! 😉\nSeu sorriso merece o melhor!",
   advantages: "Por que escolher a nossa clínica? 😍\n\n✨ Profissionais premiados e apaixonados pelo que fazem\n✨ Atendimento acolhedor e humanizado\n✨ Equipamentos modernos para seu conforto e segurança\n✨ Resultados naturais e personalizados para você!\n\nAqui você não é só mais um paciente, você é parte da nossa família 💖",
   closing: "Fique à vontade para me perguntar o que quiser!\nEstou aqui para te dar toda atenção do mundo! 🌎💬\n\nQual serviço você gostaria de saber mais? 😄",
-  payment: "Sim, oferecemos pagamento em até 12x sem juros no cartão! 💳\nTambém aceitamos PIX, dinheiro e todos os cartões de débito.\nNossa prioridade é tornar seu tratamento acessível e confortável para você! 😊",
+  // A função generatePaymentResponse retorna uma das variações de respostas sobre pagamento
+  get payment() { 
+    const options = [
+      "Temos TODAS as opções para facilitar sua vida! 💸\n\n• Dinheiro: 5% de DESCONTO IMEDIATO!\n• Cartão de crédito: 12x SEM JUROS!\n• Débito e PIX: Praticidade e rapidez\n\nALÉM DISSO, para pagamentos FECHADOS HOJE, você ganha um CHECK-UP COMPLETO + LIMPEZA PROFISSIONAL totalmente GRATUITOS!\n\nQual opção é melhor para você? Podemos RESERVAR SEU HORÁRIO AGORA! ⏰",
+      "Facilitamos ao MÁXIMO para você! 💰\n\n• DINHEIRO: Desconto ESPECIAL de 5%\n• CRÉDITO: Parcele em 12x SEM JUROS!\n• Aceitamos TODOS os cartões e PIX\n\nTemos também nosso PLANO EXCLUSIVO com mensalidades a partir de R$59,90 que incluem CONSULTAS ILIMITADAS!\n\nQuer ECONOMIZAR e ter o MELHOR SORRISO ao mesmo tempo? Vamos agendar HOJE? 📱",
+      "TEMOS VÁRIAS FORMAS DE PAGAMENTO EXCLUSIVAS! 💵💳\n\n• Dinheiro à vista: 5% OFF!\n• Cartão: até 12x SEM JUROS!\n• PIX: Rápido e seguro\n\nAPROVEITE NOSSA PROMOÇÃO: Fechando QUALQUER tratamento HOJE, você ganha um KIT DENTAL PROFISSIONAL (escova, fio e gel clareador) TOTALMENTE GRÁTIS!\n\nQuer garantir essa OFERTA LIMITADA? Posso agendar seu horário AGORA MESMO! ⏳"
+    ];
+    
+    return options[Math.floor(Math.random() * options.length)];
+  },
   siso: "Claro! E olha, tirar o siso com a gente é super tranquilo, viu? 😁\nTemos técnicas modernas que deixam o procedimento rápido e confortável.\n\nO valor da extração é R$ 250 por dente, e dá para parcelar em até 10x sem juros!\n\nQuer agendar uma avaliação gratuita?",
   clareamento: "Já pensou sair com aquele sorriso de revista? 📸\nA gente faz clareamento profissional seguro e com resultados incríveis! Seu sorriso pode ficar até 5 tons mais branco!\n\nO valor é R$ 400 e hoje temos uma oferta especial com 10% de desconto! Quer aproveitar?",
   bruxismo: "O bruxismo é mais comum do que você imagina! 😉\nTemos protetores bucais personalizados que vão proteger seus dentes e aliviar a tensão.\n\nO valor do protetor é R$ 200 e inclui as consultas de ajuste. Quer mais informações ou já podemos agendar?",
@@ -224,11 +233,32 @@ const KEYWORDS: Record<string, string> = {
   "custa": RESPONSES.services,
   "cartão": RESPONSES.payment,
   "parcela": RESPONSES.payment,
-  "débito": "Aceitamos todos os cartões de débito! 💳\nÉ uma forma rápida e prática de pagamento. Temos também a opção do PIX e dinheiro, se preferir. O que seria mais conveniente para você?",
-  "crédito": "Aceitamos todos os cartões de crédito e parcelamos em até 12x sem juros! 💳✨\nÉ uma forma de você cuidar do seu sorriso sem pesar no orçamento. Podemos agendar seu horário agora?",
-  "pagamento": RESPONSES.payment,
-  "pix": "Sim, aceitamos PIX! 📱 É prático, seguro e super rápido!\nEnviamos o QR code na hora do pagamento e você pode usar o banco de sua preferência. Além do PIX, aceitamos cartões e dinheiro. Como prefere pagar?",
-  "dinheiro_pagamento": "Sim, aceitamos pagamento em dinheiro! 💵\nPara pagamentos à vista em dinheiro, oferecemos um desconto especial de 5%! Também aceitamos PIX e cartões se for mais conveniente. O que seria melhor para você?",
+  "débito": "Aceitamos cartões de débito SIM! 💳\nInfelizmente NÃO oferecemos desconto nessa modalidade, MAS nossos preços já são EXTREMAMENTE COMPETITIVOS! O valor do tratamento é o MELHOR CUSTO-BENEFÍCIO do mercado - materiais IMPORTADOS e profissionais RENOMADOS!\n\nNão perca tempo com clínicas que usam materiais de baixa qualidade! Agende AGORA MESMO! 🔥",
+  
+  "débito_alt": "Cartão de débito é MUITO BEM-VINDO! 💳\nNão temos desconto para débito, MAS TEMOS UMA QUALIDADE INCOMPARÁVEL! Enquanto outras clínicas oferecem descontos e usam materiais inferiores, nós GARANTIMOS o MELHOR RESULTADO POSSÍVEL!\n\nAPROVEITE nossa PROMOÇÃO RELÂMPAGO: Agende HOJE para qualquer procedimento e ganhe uma AVALIAÇÃO COMPLETA + KIT DENTAL PREMIUM! Vagas LIMITADÍSSIMAS! ⏰",
+  
+  "débito_alt2": "Sim, aceitamos débito sem problema! 💳\nApesar de não termos desconto nessa forma de pagamento, posso GARANTIR: Você NÃO VAI ENCONTRAR melhor qualidade pelo mesmo preço em LUGAR NENHUM!\n\nNossos dentistas são REFERÊNCIA NACIONAL e usamos equipamentos DIGITAIS DE ÚLTIMA GERAÇÃO!\n\nVamos agendar seu horário HOJE? Estamos com POUCAS VAGAS disponíveis! 📅",
+  
+  "crédito": "ÓTIMA ESCOLHA! 💳 Aceitamos TODOS os cartões de crédito e parcelamos em até 12x SEM JUROS!\n\nIsso significa que você pode começar seu tratamento HOJE MESMO e dividir em parcelas PEQUENAS que cabem no seu orçamento!\n\nIMAGINE sair daqui HOJE com seu tratamento iniciado pagando uma pequena parcela! Nossos horários estão ACABANDO RÁPIDO! Posso reservar o seu? ⏰",
+  
+  "crédito_alt": "SUPER VANTAJOSO! 💳✨ Parcelamos em até 12x SEM JUROS e SEM ENTRADA! Isso significa que você sai com o sorriso novo HOJE, mas só começa a pagar no PRÓXIMO MÊS!\n\nMelhor ainda: Temos APROVAÇÃO IMEDIATA e você já sai com o tratamento AGENDADO!\n\nNão jogue dinheiro fora em clínicas medianas... INVISTA no seu melhor SORRISO! Quando podemos agendar? 📆",
+  
+  "crédito_alt2": "EXCELENTE PEDIDA! 💳 Com crédito você parcela em até 12x SEM JUROS, mas aproveita os benefícios IMEDIATAMENTE!\n\nNossa EXCLUSIVIDADE: Tratamentos com garantia de até 5 ANOS por escrito! Nenhuma outra clínica oferece isso!\n\nAGENDE AGORA e ganhe PONTOS FIDELIDADE que podem ser trocados por procedimentos GRATUITOS! Esta promoção termina HOJE! 🏆",
+  
+  "pagamento": "Temos TODAS as opções para facilitar sua vida! 💸\n\n• Dinheiro: 5% de DESCONTO IMEDIATO!\n• Cartão de crédito: 12x SEM JUROS!\n• Débito e PIX: Praticidade e rapidez\n\nALÉM DISSO, para pagamentos FECHADOS HOJE, você ganha um CHECK-UP COMPLETO + LIMPEZA PROFISSIONAL totalmente GRATUITOS!\n\nQual opção é melhor para você? Podemos RESERVAR SEU HORÁRIO AGORA! ⏰",
+  
+  "pagamento_alt": "Facilitamos ao MÁXIMO para você! 💰\n\n• DINHEIRO: Desconto ESPECIAL de 5%\n• CRÉDITO: Parcele em 12x SEM JUROS!\n• Aceitamos TODOS os cartões e PIX\n\nTemos também nosso PLANO EXCLUSIVO com mensalidades a partir de R$59,90 que incluem CONSULTAS ILIMITADAS!\n\nQuer ECONOMIZAR e ter o MELHOR SORRISO ao mesmo tempo? Vamos agendar HOJE? 📱",
+  "pix": "Sim, aceitamos PIX! 📱 É prático, seguro e super rápido!\nInfelizmente NÃO oferecemos desconto para pagamento via PIX, mas garanto que a QUALIDADE do nosso atendimento compensa qualquer desconto! 💯\nNossos valores já são SUPER COMPETITIVOS e nossa equipe é formada pelos MELHORES PROFISSIONAIS do mercado!\n\nQuer agendar seu horário hoje? Posso reservar uma vaga ESPECIAL para você! ⏰",
+  
+  "pix_alt": "Aceitamos PIX sim! 📲 NÃO oferecemos desconto para esta modalidade, MAS o que economizamos em taxas INVESTIMOS em materiais de ALTÍSSIMA QUALIDADE que garantem RESULTADOS SUPERIORES e mais DURADOUROS! 🏆\nNossos pacientes sempre saem satisfeitos independente da forma de pagamento! Posso garantir seu horário ainda hoje?",
+  
+  "pix_alt2": "Claro que aceitamos PIX! 💸 E embora não tenhamos desconto para este método, você já está economizando ao escolher nossa clínica - temos os MELHORES PREÇOS da região para a QUALIDADE que oferecemos! ✨\nAproveite para agendar HOJE mesmo e garanta uma AVALIAÇÃO GRATUITA! Os horários estão preenchendo rapidamente! 🕒",
+  
+  "dinheiro_pagamento": "Sim, aceitamos pagamento em dinheiro! 💵\nPara pagamentos À VISTA EM DINHEIRO, oferecemos um DESCONTO ESPECIAL DE 5%! Também aceitamos PIX e cartões se for mais conveniente.\n\nRECOMENDO FORTEMENTE o pagamento em dinheiro para você MAXIMIZAR SUA ECONOMIA! 💰 Posso reservar seu horário agora mesmo?",
+  
+  "dinheiro_pagamento_alt": "ÓTIMA ESCOLHA! 💵 Pagamento em dinheiro tem DESCONTO EXCLUSIVO DE 5%! É nossa forma de agradecer e eliminar taxas bancárias!\n\nINVESTIR no seu sorriso com este desconto é uma DECISÃO INTELIGENTE! Nossos resultados são GARANTIDOS e você ainda economiza! 🤑\n\nAproveite esta condição ESPECIAL! Posso reservar seu horário HOJE?",
+  
+  "dinheiro_pagamento_alt2": "Claro que aceitamos dinheiro! E MELHOR AINDA: você ganha 5% de DESCONTO IMEDIATO! 💸\n\nEstamos com uma PROMOÇÃO RELÂMPAGO: pagando em dinheiro HOJE, além dos 5%, você ganha uma SESSÃO DE LIMPEZA GRATUITA no próximo retorno! OFERTA VÁLIDA SOMENTE HOJE! ⏰\n\nQuer aproveitar esta condição EXCLUSIVA?",
   
   // Horários de Funcionamento
   "horário funcionamento": RESPONSES.horarios, 
@@ -685,15 +715,59 @@ export function ChatBot() {
     if (lowerMessage.includes("pix")) {
       newContext.paymentMethod = "pix";
       setChatContext(newContext);
-      return "O PIX é uma ótima escolha! 📱 É rápido, prático e seguro.\n\nGeramos o QR code na hora do pagamento, e você pode utilizar o banco de sua preferência. Para pagamentos via PIX, oferecemos um desconto adicional de 3%!\n\nQual procedimento você está interessado(a)? Assim posso passar valores mais precisos.";
+      
+      // Escolhe aleatoriamente entre as 3 variações de resposta
+      const randomNum = Math.random();
+      if (randomNum < 0.33) {
+        return KEYWORDS["pix"];
+      } else if (randomNum < 0.66) {
+        return KEYWORDS["pix_alt"];
+      } else {
+        return KEYWORDS["pix_alt2"];
+      }
     } else if (lowerMessage.includes("débito")) {
       newContext.paymentMethod = "débito";
       setChatContext(newContext);
-      return "Aceitamos todos os cartões de débito! 💳\n\nÉ uma forma prática e segura de pagamento. O valor é debitado na hora da sua conta, sem complicações.\n\nTemos máquinas de todas as bandeiras principais. Há algum procedimento específico que você gostaria de saber o valor?";
+      
+      // Escolhe aleatoriamente entre as 3 variações de resposta
+      const randomNum = Math.random();
+      if (randomNum < 0.33) {
+        return KEYWORDS["débito"];
+      } else if (randomNum < 0.66) {
+        return KEYWORDS["débito_alt"];
+      } else {
+        return KEYWORDS["débito_alt2"];
+      }
     } else if (lowerMessage.includes("crédito")) {
       newContext.paymentMethod = "crédito";
       setChatContext(newContext);
-      return "Parcelamos em até 12x sem juros no cartão de crédito! 💳✨\n\nIsso permite que você comece seu tratamento imediatamente sem pesar no orçamento mensal. Aceitamos todas as bandeiras principais.\n\nQual procedimento você tem interesse? Posso calcular as parcelas para você visualizar melhor!";
+      
+      // Escolhe aleatoriamente entre as 3 variações de resposta
+      const randomNum = Math.random();
+      if (randomNum < 0.33) {
+        return KEYWORDS["crédito"];
+      } else if (randomNum < 0.66) {
+        return KEYWORDS["crédito_alt"];
+      } else {
+        return KEYWORDS["crédito_alt2"];
+      }
+    } else if (lowerMessage.includes("dinheiro")) {
+      newContext.paymentMethod = "dinheiro";
+      setChatContext(newContext);
+      
+      // Escolhe aleatoriamente entre as 3 variações de resposta
+      const randomNum = Math.random();
+      if (randomNum < 0.33) {
+        return KEYWORDS["dinheiro_pagamento"];
+      } else if (randomNum < 0.66) {
+        return KEYWORDS["dinheiro_pagamento_alt"];
+      } else {
+        return KEYWORDS["dinheiro_pagamento_alt2"];
+      }
+    } else if (lowerMessage.includes("pagamento") || lowerMessage.includes("forma de pagar") || lowerMessage.includes("como pagar")) {
+      
+      // Escolhe aleatoriamente entre as 2 variações de resposta
+      return Math.random() < 0.5 ? KEYWORDS["pagamento"] : KEYWORDS["pagamento_alt"];
     }
     
     // Detecção de sentimentos persistentes de tristeza e oferecimento de desconto
