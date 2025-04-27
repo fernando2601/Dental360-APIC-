@@ -16,7 +16,6 @@ import WhatsApp from "@/pages/whatsapp";
 import Packages from "@/pages/packages";
 import Subscriptions from "@/pages/subscriptions";
 import ClinicInfo from "@/pages/clinic-info";
-import Chat from "@/pages/chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -34,7 +33,6 @@ function Router() {
       <Route path="/subscriptions" component={Subscriptions} />
       <Route path="/clinic-info" component={ClinicInfo} />
       <Route path="/settings" component={Settings} />
-      <Route path="/chat" component={Chat} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

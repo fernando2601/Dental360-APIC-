@@ -91,14 +91,6 @@ export function Sidebar({ className }: SidebarProps) {
               </h3>
             </div>
             <NavLink 
-              href="/chat" 
-              icon={<MessageSquare className="h-4 w-4" />} 
-              label="Chat da Clínica" 
-              collapsed={collapsed} 
-              active={location === "/chat"} 
-              notification={1}
-            />
-            <NavLink 
               href="/settings" 
               icon={<MessageSquare className="h-4 w-4" />} 
               label="Templates de Chatbot" 
