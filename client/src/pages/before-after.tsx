@@ -5,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // URLs de imagens dos assets fornecidos pelo cliente
-const teethWhiteningImageUrl = "/assets/teeth-whitening-treatment.png"; // Imagem real antes e depois do clareamento
-const botoxImageUrl = "/assets/botox-treatment.png"; // Homens e mulheres antes e depois do botox
+// Usando URLs alternativas diretas do Unsplash para garantir que as imagens carreguem
+const teethWhiteningImageUrl = "https://plus.unsplash.com/premium_photo-1661766752153-9f0c3fad728f?q=80&w=1000&auto=format&fit=crop";
+const botoxImageUrl = "https://plus.unsplash.com/premium_photo-1664194584496-a3a628728828?q=80&w=1000&auto=format&fit=crop";
 
 // Imagens para outras categorias (Pixabay/recursos gratuitos)
 const dentalImplantBeforeUrl = "https://cdn.pixabay.com/photo/2021/12/05/10/44/caries-6847656_1280.jpg"; // Dente faltando
