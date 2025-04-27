@@ -4,12 +4,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// URLs de imagens reais para exemplos - selecionadas especificamente para cada tratamento
-const teethWhiteningBefore = "https://cdn.pixabay.com/photo/2016/01/07/05/23/teeth-1125238_1280.jpg"; // Dentes amarelados
-const teethWhiteningAfter = "https://cdn.pixabay.com/photo/2021/05/14/08/44/smile-6253087_1280.jpg"; // Dentes brancos perfeitos
+// URLs de imagens dos assets fornecidos pelo cliente
+const teethWhiteningBefore = "/attached_assets/image_1745782226720.png"; // Imagem real antes do clareamento (parte superior)
+const teethWhiteningAfter = "/attached_assets/image_1745782226720.png"; // Imagem real depois do clareamento (parte inferior)
 
-const botoxBefore = "https://cdn.pixabay.com/photo/2018/03/12/12/32/woman-3219507_1280.jpg"; // Mulher com rugas
-const botoxAfter = "https://cdn.pixabay.com/photo/2015/03/03/18/58/woman-657753_1280.jpg"; // Mulher sem rugas
+// Imagens para Botox - antes e depois
+const botoxBeforeMale = "/attached_assets/image_1745782272200.png"; // Homem antes e depois do botox (lado esquerdo)
+const botoxAfterMale = "/attached_assets/image_1745782272200.png"; // Homem antes e depois do botox (lado direito)
+const botoxBeforeFemale = "/attached_assets/image_1745782272200.png"; // Mulher antes do botox (lado direito - primeira foto)
+const botoxAfterFemale = "/attached_assets/image_1745782272200.png"; // Mulher depois do botox (lado direito - segunda foto)
+
+// Definindo as variáveis para compatibilidade com outros componentes
+const botoxBefore = botoxBeforeMale;
+const botoxAfter = botoxAfterMale;
 
 const dentalImplantBefore = "https://cdn.pixabay.com/photo/2021/12/05/10/44/caries-6847656_1280.jpg"; // Dente faltando
 const dentalImplantAfter = "https://cdn.pixabay.com/photo/2017/09/07/15/29/dental-implant-2725604_1280.jpg"; // Implante dentário
@@ -143,27 +150,179 @@ export default function BeforeAfterPage() {
           </div>
           
           <TabsContent value="teeth-whitening">
-            <BeforeAfterCard
-              title="Clareamento Dental Profissional"
-              description="Nosso tratamento de clareamento dental avançado pode clarear seus dentes em até 8 tons em uma única sessão de consultório. Utilizamos um sistema de ativação por luz LED de última geração que potencializa o efeito do gel clareador sem causar sensibilidade."
-              beforeImage={teethWhiteningBefore}
-              afterImage={teethWhiteningAfter}
-              patientName="Mariana Silva"
-              patientAge={32}
-              testimonial="Eu sempre tive vergonha do meu sorriso por causa da coloração amarelada dos meus dentes. Após uma única sessão de clareamento, meus dentes ficaram incrivelmente brancos! Agora sorrio com total confiança em todas as fotos. O procedimento foi super rápido e indolor, exatamente como me prometeram!"
-            />
+            <Card className="mb-8 overflow-hidden shadow-lg border-0">
+              <div className="p-4 md:p-6 flex flex-col">
+                {/* Título e descrição */}
+                <div className="mb-6">
+                  <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 text-transparent bg-clip-text mb-2">
+                    Clareamento Dental Profissional
+                  </h3>
+                  <p className="text-muted-foreground text-sm md:text-base">
+                    Nosso tratamento de clareamento dental avançado pode clarear seus dentes em até 8 tons em uma única sessão 
+                    de consultório. Utilizamos um sistema de ativação por luz LED de última geração que potencializa o efeito do 
+                    gel clareador sem causar sensibilidade.
+                  </p>
+                </div>
+
+                {/* Imagens antes/depois - Clareamento real */}
+                <div>
+                  <div className="w-full flex items-center justify-center border rounded-lg overflow-hidden shadow-md mb-6">
+                    <img
+                      src={teethWhiteningBefore}
+                      alt="Antes e depois do clareamento dental"
+                      className="w-full h-auto object-contain"
+                    />
+                  </div>
+                  
+                  {/* Instruções sobre a imagem */}
+                  <div className="bg-primary/5 p-4 rounded-lg mb-8">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-destructive/20 p-2 rounded font-medium text-destructive text-sm">ANTES</div>
+                      <p className="text-sm">Dentes com coloração amarelada devido ao consumo de café, chá e outras substâncias que mancham o esmalte ao longo do tempo.</p>
+                    </div>
+                    <div className="w-full border-t border-primary/10 my-3"></div>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-primary/20 p-2 rounded font-medium text-primary text-sm">DEPOIS</div>
+                      <p className="text-sm">Dentes visivelmente mais brancos após apenas uma sessão de clareamento profissional, realizado em consultório com segurança e conforto.</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Depoimento */}
+                <div className="bg-primary/5 p-5 rounded-xl mb-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar className="h-16 w-16 border-2 border-primary shadow-md">
+                      <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
+                        M
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h4 className="font-bold text-lg">Mariana Silva</h4>
+                      <p className="text-sm text-muted-foreground">32 anos</p>
+                    </div>
+                  </div>
+                  
+                  <div className="relative mx-4">
+                    <div className="absolute -left-6 -top-6 text-7xl text-primary/20">"</div>
+                    <blockquote className="italic text-base md:text-lg relative z-10 px-4 py-2">
+                      Eu sempre tive vergonha do meu sorriso por causa da coloração amarelada dos meus dentes. Após uma única sessão de clareamento, meus dentes ficaram incrivelmente brancos! Agora sorrio com total confiança em todas as fotos. O procedimento foi super rápido e indolor, exatamente como me prometeram!
+                    </blockquote>
+                    <div className="absolute -right-6 -bottom-6 text-7xl text-primary/20">"</div>
+                  </div>
+                </div>
+                
+                {/* CTA */}
+                <div className="bg-gradient-to-r from-primary to-primary/80 p-6 rounded-xl shadow-lg text-white text-center">
+                  <h4 className="font-bold text-xl mb-3">Quer um sorriso branquinho como esse?</h4>
+                  <p className="mb-5">Agende uma consulta de avaliação GRATUITA hoje mesmo!</p>
+                  <button className="bg-white text-primary hover:bg-primary-foreground px-8 py-3 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-md">
+                    AGENDAR AGORA
+                  </button>
+                </div>
+              </div>
+            </Card>
           </TabsContent>
           
           <TabsContent value="botox">
-            <BeforeAfterCard
-              title="Botox para Suavização de Rugas"
-              description="Nossa aplicação de toxina botulínica é realizada por profissionais especializados que garantem resultados naturais. O procedimento é minimamente invasivo e dura apenas 30 minutos, com resultados que podem durar até 6 meses."
-              beforeImage={botoxBefore}
-              afterImage={botoxAfter}
-              patientName="Roberto Mendes"
-              patientAge={45}
-              testimonial="As rugas de expressão na minha testa me incomodavam muito. Após a aplicação de Botox na clínica, meu rosto ficou rejuvenescido mas ainda com expressões naturais! Meus amigos notaram a diferença mas não conseguiam identificar exatamente o que eu tinha feito. Exatamente o que eu queria: um resultado discreto e elegante."
-            />
+            <Card className="mb-8 overflow-hidden shadow-lg border-0">
+              <div className="p-4 md:p-6 flex flex-col">
+                {/* Título e descrição */}
+                <div className="mb-6">
+                  <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 text-transparent bg-clip-text mb-2">
+                    Botox para Suavização de Rugas
+                  </h3>
+                  <p className="text-muted-foreground text-sm md:text-base">
+                    Nossa aplicação de toxina botulínica é realizada por profissionais especializados que garantem resultados naturais.
+                    O procedimento é minimamente invasivo e dura apenas 30 minutos, com resultados que podem durar até 6 meses.
+                  </p>
+                </div>
+
+                {/* Imagens antes/depois - Masculino e Feminino */}
+                <div className="space-y-8">
+                  {/* Resultados masculinos */}
+                  <div>
+                    <h4 className="text-xl font-bold mb-3">Resultados em homens</h4>
+                    <div className="w-full aspect-video flex items-center justify-center">
+                      <img
+                        src={botoxBeforeMale}
+                        alt="Botox em homens antes e depois"
+                        className="w-full h-auto object-contain shadow-md rounded-lg"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Resultados femininos */}
+                  <div>
+                    <h4 className="text-xl font-bold mb-3">Resultados em mulheres</h4>
+                    <div className="w-full aspect-video flex items-center justify-center">
+                      <img
+                        src={botoxBeforeFemale}
+                        alt="Botox em mulheres antes e depois"
+                        className="w-full h-auto object-contain shadow-md rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Depoimentos */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-8">
+                  <div className="bg-primary/5 p-5 rounded-xl">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-16 w-16 border-2 border-primary shadow-md">
+                        <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
+                          R
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-bold text-lg">Roberto Mendes</h4>
+                        <p className="text-sm text-muted-foreground">45 anos</p>
+                      </div>
+                    </div>
+                    
+                    <div className="relative mx-4">
+                      <div className="absolute -left-6 -top-6 text-5xl text-primary/20">"</div>
+                      <blockquote className="italic text-base relative z-10 px-4 py-2">
+                        As rugas de expressão na minha testa me incomodavam muito. Após a aplicação de Botox na clínica, meu rosto 
+                        ficou rejuvenescido mas ainda com expressões naturais! Exatamente o que eu queria: um resultado discreto e elegante.
+                      </blockquote>
+                      <div className="absolute -right-6 -bottom-6 text-5xl text-primary/20">"</div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-primary/5 p-5 rounded-xl">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-16 w-16 border-2 border-primary shadow-md">
+                        <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
+                          L
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-bold text-lg">Luciana Pires</h4>
+                        <p className="text-sm text-muted-foreground">52 anos</p>
+                      </div>
+                    </div>
+                    
+                    <div className="relative mx-4">
+                      <div className="absolute -left-6 -top-6 text-5xl text-primary/20">"</div>
+                      <blockquote className="italic text-base relative z-10 px-4 py-2">
+                        Buscava um tratamento que diminuísse minhas rugas sem deixar aquele aspecto artificial. 
+                        O resultado foi exatamente o que procurava! Colegas de trabalho perguntam se estou de férias ou descansada.
+                      </blockquote>
+                      <div className="absolute -right-6 -bottom-6 text-5xl text-primary/20">"</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* CTA */}
+                <div className="bg-gradient-to-r from-primary to-primary/80 p-6 rounded-xl shadow-lg text-white text-center">
+                  <h4 className="font-bold text-xl mb-3">Quer resultados como esses?</h4>
+                  <p className="mb-5">Agende uma consulta de avaliação GRATUITA hoje mesmo!</p>
+                  <button className="bg-white text-primary hover:bg-primary-foreground px-8 py-3 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-md">
+                    AGENDAR AGORA
+                  </button>
+                </div>
+              </div>
+            </Card>
           </TabsContent>
           
           <TabsContent value="dental-implant">
