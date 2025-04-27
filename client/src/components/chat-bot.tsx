@@ -279,6 +279,9 @@ export function ChatBot() {
           timestamp: new Date(),
         }
       ]);
+      
+      // Inicializa as sugestões de IA
+      setCurrentSuggestions(AI_SUGGESTIONS.initial);
     }
     
     // Configurar timer de inatividade inicial
@@ -888,8 +891,21 @@ export function ChatBot() {
                   {currentSuggestions.map((suggestion) => (
                     <Badge
                       key={suggestion.id}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+                      variant={
+                        suggestion.type === 'appointment' ? 'default' :
+                        suggestion.type === 'service' ? 'secondary' :
+                        suggestion.type === 'payment' ? 'outline' :
+                        suggestion.type === 'discount' ? 'destructive' : 
+                        'outline'
+                      }
+                      className={cn(
+                        "cursor-pointer transition-colors text-sm",
+                        suggestion.type === 'appointment' && "bg-blue-500 hover:bg-blue-600",
+                        suggestion.type === 'service' && "bg-green-500 hover:bg-green-600",
+                        suggestion.type === 'payment' && "border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white",
+                        suggestion.type === 'discount' && "bg-pink-500 hover:bg-pink-600",
+                        suggestion.type === 'general' && "border-gray-300 hover:bg-gray-100"
+                      )}
                       onClick={() => handleUseSuggestion(suggestion)}
                     >
                       {suggestion.text}
@@ -930,6 +946,12 @@ export function ChatBot() {
                             className="w-full justify-start text-sm font-normal"
                             onClick={() => {
                               setInput(question);
+                              
+                              // Opcional: fechar o popover ao clicar na pergunta
+                              document.body.click();
+                              
+                              // Alternativa: enviar a mensagem automaticamente
+                              // setTimeout(() => handleSendMessage(), 100);
                             }}
                           >
                             {question}
