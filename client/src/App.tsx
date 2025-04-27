@@ -21,23 +21,25 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/appointments" component={Appointments} />
-      <Route path="/clients" component={Clients} />
-      <Route path="/inventory" component={Inventory} />
-      <Route path="/finances" component={Finances} />
-      <Route path="/services" component={Services} />
-      <Route path="/staff" component={Staff} />
-      <Route path="/whatsapp" component={WhatsApp} />
-      <Route path="/packages" component={Packages} />
-      <Route path="/subscriptions" component={Subscriptions} />
-      <Route path="/clinic-info" component={ClinicInfo} />
-      <Route path="/before-after" component={BeforeAfter} />
-      <Route path="/settings" component={Settings} />
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
-    </Switch>
+    <MainLayout>
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/appointments" component={Appointments} />
+        <Route path="/clients" component={Clients} />
+        <Route path="/inventory" component={Inventory} />
+        <Route path="/finances" component={Finances} />
+        <Route path="/services" component={Services} />
+        <Route path="/staff" component={Staff} />
+        <Route path="/whatsapp" component={WhatsApp} />
+        <Route path="/packages" component={Packages} />
+        <Route path="/subscriptions" component={Subscriptions} />
+        <Route path="/clinic-info" component={ClinicInfo} />
+        <Route path="/before-after" component={BeforeAfter} />
+        <Route path="/settings" component={Settings} />
+        {/* Fallback to 404 */}
+        <Route component={NotFound} />
+      </Switch>
+    </MainLayout>
   );
 }
 
