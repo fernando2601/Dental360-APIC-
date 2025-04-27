@@ -20,7 +20,9 @@ import {
   Zap,
   Building,
   Gift,
-  BadgePercent
+  BadgePercent,
+  Images,
+  ImageDown
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useMobile } from "@/hooks/use-mobile";
@@ -84,6 +86,7 @@ export function Sidebar({ className }: SidebarProps) {
             <NavLink href="/packages" icon={<Gift className="h-4 w-4" />} label="Pacotes" collapsed={collapsed} active={location === "/packages"} />
             <NavLink href="/subscriptions" icon={<BadgePercent className="h-4 w-4" />} label="Assinatura" collapsed={collapsed} active={location === "/subscriptions"} />
             <NavLink href="/clinic-info" icon={<Building className="h-4 w-4" />} label="Dados da Clínica" collapsed={collapsed} active={location === "/clinic-info"} />
+            <NavLink href="/before-after" icon={<Images className="h-4 w-4" />} label="Antes & Depois" collapsed={collapsed} active={location === "/before-after"} />
             
             <div className="px-4 py-2 mt-4">
               <h3 className={cn("text-xs font-medium text-muted-foreground", collapsed && "sr-only")}>
