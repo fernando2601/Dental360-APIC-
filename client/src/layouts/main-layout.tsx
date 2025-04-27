@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/ui/sidebar";
-import { ChatBot } from "@/components/chat-bot";
 import { MobileNav } from "@/components/ui/mobile-nav";
 import { useMobile } from "@/hooks/use-mobile";
 import { Bell, Settings, Menu } from "lucide-react";
@@ -76,9 +75,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
           {children}
         </main>
       </div>
-
-      {/* ChatBot - floats on all pages */}
-      <ChatBot />
     </div>
   );
 }
