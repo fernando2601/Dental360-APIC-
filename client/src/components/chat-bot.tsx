@@ -110,15 +110,15 @@ const RESPONSES = {
 
 // Respostas de diferencial - usadas para variar as mensagens sobre por que escolher a clínica
 const CLINIC_ADVANTAGES = [
-  "Porque aqui você não é só mais um paciente, você é único para nós! 💖\nNossa missão é transformar vidas com carinho, responsabilidade e resultados incríveis! ✨\nTemos profissionais premiados, tecnologia de ponta e o atendimento mais humano que você vai encontrar! 🏆\nSeu sorriso e sua autoestima merecem o melhor... e o melhor está aqui! 😍",
+  "Porque aqui você não é só mais um paciente, você é único para nós! 💖\nNossa missão é transformar vidas com carinho, responsabilidade e resultados incríveis! ✨\nTemos profissionais premiados, tecnologia de ponta e o atendimento mais humano que você vai encontrar! 🏆\nSeu sorriso e sua autoestima merecem o melhor... e o melhor está aqui! 😍\n\nQuer agendar uma avaliação GRATUITA hoje mesmo e garantir 10% de desconto no seu primeiro procedimento? 💸",
   
-  "Porque a gente entrega o que promete: resultados de alta qualidade sem pesar no seu bolso! 💳💥\nVocê pode parcelar tudo de forma super tranquila, com preços justos e ofertas especiais!\nTudo isso feito por profissionais experientes e apaixonados pelo que fazem!\nA sua felicidade é o que move a gente! 🚀",
+  "Porque a gente entrega o que promete: resultados de alta qualidade sem pesar no seu bolso! 💳💥\nVocê pode parcelar tudo em até 12X SEM JUROS, com preços justos e ofertas exclusivas para quem fecha hoje!\nTudo isso feito por profissionais experientes e apaixonados pelo que fazem!\nNão perca tempo! Nossos horários estão acabando rápido! 🕒 Posso reservar o seu?",
   
-  "Porque você merece se olhar no espelho e se sentir incrível todos os dias! 💖\nA nossa clínica é especializada em transformar autoestima, com procedimentos seguros, modernos e personalizados para você!\nAqui, a gente acredita que um sorriso bonito muda o mundo ao seu redor — e queremos construir isso junto com você! 😍",
+  "Porque você merece se olhar no espelho e se sentir incrível todos os dias! 💖\nA nossa clínica é especializada em transformar autoestima, com procedimentos seguros, modernos e personalizados para você!\nLembre-se: investir no seu sorriso não é gasto, é INVESTIMENTO que dura para sempre! ✅\nAproveite nossa promoção desta semana e garanta 15% OFF! Posso agendar para quando?",
   
-  "Porque somos especialistas em entregar qualidade, segurança e atendimento humanizado! 👩‍⚕️👨‍⚕️\nTemos estrutura moderna, profissionais certificados e preços que cabem no seu bolso com facilidade no pagamento! 💳\nSe você busca ser tratado(a) com respeito, atenção e sair daqui feliz da vida, então já encontrou o lugar certo! 🎯",
+  "Porque somos especialistas em entregar qualidade, segurança e atendimento humanizado! 👩‍⚕️👨‍⚕️\nTemos estrutura moderna, profissionais certificados e preços que cabem no seu bolso com facilidade no pagamento! 💳\nSe você busca ser tratado(a) com respeito e atenção, então já encontrou o lugar certo! 🎯\nLIGUE HOJE e ganhe uma análise facial completa totalmente GRÁTIS! O que acha de aproveitar?",
   
-  "Porque aqui o seu sorriso é levado a sério, mas o atendimento é leve e cheio de alegria! 😁✨\nCuidar de você é um privilégio para a nossa equipe!\nAlém disso, temos descontos exclusivos, parcelamento sem estresse e um ambiente acolhedor que vai fazer você se sentir em casa! 🏡\nVamos juntos deixar você ainda mais radiante? 🌟"
+  "Porque aqui o seu sorriso é levado a sério, mas o atendimento é leve e cheio de alegria! 😁✨\nCuidar de você é um privilégio para a nossa equipe!\nAlém disso, temos descontos exclusivos, parcelamento sem estresse e uma GARANTIA em todos os procedimentos que nenhuma outra clínica oferece! 💯\nVamos agendar seu horário? Os slots dessa semana estão se esgotando! ⏰"
 ];
 
 // Sugestões de respostas inteligentes - baseadas em contexto
@@ -791,11 +791,30 @@ export function ChatBot() {
     }
     
     // Checa por perguntas sobre diferencial da clínica - responde com variações
-    if (lowerMessage.includes("por que") || 
+    if (lowerMessage.includes("por que contratar") || 
+        lowerMessage.includes("por que escolher vocês") || 
+        lowerMessage.includes("por que ir aí") ||
+        lowerMessage.includes("motivo para escolher") ||
+        lowerMessage.includes("razão para escolher")) {
+      // Respostas ultra persuasivas de vendas para "por que contratar vocês"
+      const salesResponses = [
+        "🔥 PROMOÇÃO EXCLUSIVA PARA VOCÊ! 🔥\n\nSomos a ÚNICA clínica da região com tecnologia de ponta que ELIMINA a DOR em 100% dos procedimentos! ✅\n\nMais de 10.000 sorrisos transformados, com taxa de satisfação de 99,8%! Nossos profissionais são REFERÊNCIA nacional e utilizam técnicas exclusivas!\n\n⚠️ APROVEITE AGORA: 20% OFF em QUALQUER tratamento se agendar HOJE! Vagas LIMITADAS para esta semana!\n\nQuer garantir seu desconto exclusivo? Posso reservar um horário VIP para você! ⏰",
+        
+        "⭐ DIFERENTE DE QUALQUER OUTRA CLÍNICA! ⭐\n\nCansado de tratamentos que não cumprem o prometido? Aqui entregamos RESULTADOS GARANTIDOS por escrito! 📝\n\nEconomize até R$3.500 em tratamentos combinados com nossos pacotes promocionais! 💰\n\nEQUIPE PREMIADA internacionalmente usando materiais importados que outras clínicas nem conhecem ainda!\n\n⚡ BÔNUS ESPECIAL: Avaliação + Limpeza + Kit clareador por apenas R$99 para novos pacientes! VAGAS LIMITADÍSSIMAS!\n\nPosso garantir sua vaga ainda hoje?",
+        
+        "💎 EXPERIÊNCIA VIP QUE VOCÊ MERECE! 💎\n\nImaginando como seria ter o sorriso dos seus sonhos SEM DOR, SEM DESCONFORTO e com PARCELAS QUE CABEM NO SEU BOLSO? 💭\n\nNossa tecnologia exclusiva reduz o tempo de tratamento em até 60% comparado às clínicas convencionais! ⏱️\n\nJUNTE-SE aos mais de 15.000 pacientes satisfeitos que transformaram não só o sorriso, mas a AUTOCONFIANÇA e a QUALIDADE DE VIDA!\n\n🔥 OFERTA RELÂMPAGO: 30% OFF para os primeiros 5 agendamentos do dia! Você vai deixar essa oportunidade passar? ⏳",
+        
+        "🚨 ALERTA DE OPORTUNIDADE! 🚨\n\nEnquanto você PENSA, outras pessoas estão AGENDANDO e garantindo os melhores horários e DESCONTOS EXCLUSIVOS que só oferecemos hoje! ⏰\n\nSomos a clínica MAIS PREMIADA da região, com equipamentos digitais que resultam em tratamentos INDOLORES e ULTRA-RÁPIDOS! 🏆\n\nFinanciamento próprio com APROVAÇÃO IMEDIATA! Parcele em até 24X com a PRIMEIRA PARCELA SÓ PARA DAQUI 30 DIAS! 💳\n\n⭐ DECIDA AGORA: Agende sua avaliação VIP e ganhe um clareamento dental EXPRESS no mesmo dia! Posso reservar seu horário?",
+        
+        "💯 COMPROMISSO DE RESULTADO! 💯\n\nA diferença entre um sorriso comum e um sorriso DESLUMBRANTE está a apenas UMA DECISÃO de distância! ✨\n\nNossa equipe utiliza PROTOCOLOS EXCLUSIVOS de última geração que garantem resultados em metade do tempo e com o DOBRO da durabilidade! 🔬\n\nMais de 300 DEPOIMENTOS 5 ESTRELAS não mentem! Somos os ÚNICOS com satisfação garantida ou seu dinheiro de volta! 💰\n\n🔥 SUPER OFERTA: Feche qualquer pacote hoje e ganhe um tratamento facial de HARMONIZAÇÃO EXPRESS totalmente GRÁTIS! Posso contar como seu agendamento VIP?"
+      ];
+      
+      return salesResponses[Math.floor(Math.random() * salesResponses.length)];
+    }
+    else if (lowerMessage.includes("por que") || 
         lowerMessage.includes("vantagem") || 
         lowerMessage.includes("diferencial") || 
-        lowerMessage.includes("melhor") ||
-        lowerMessage.includes("escolher vocês")) {
+        lowerMessage.includes("melhor")) {
       return getRandomAdvantage();
     }
     
