@@ -75,6 +75,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <main className="flex-1 overflow-y-auto bg-background p-4 md:p-6">
           {children}
         </main>
+        
+        {/* Footer */}
+        <footer className="border-t bg-card/50 py-4">
+          <div className="container mx-auto text-center text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Clínica DentalSpa. Todos os direitos reservados.
+          </div>
+        </footer>
       </div>
       
       {/* Chatbot flutuante */}

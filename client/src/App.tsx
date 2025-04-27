@@ -16,6 +16,7 @@ import WhatsApp from "@/pages/whatsapp";
 import Packages from "@/pages/packages";
 import Subscriptions from "@/pages/subscriptions";
 import ClinicInfo from "@/pages/clinic-info";
+import BeforeAfter from "@/pages/before-after";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/packages" component={Packages} />
       <Route path="/subscriptions" component={Subscriptions} />
       <Route path="/clinic-info" component={ClinicInfo} />
+      <Route path="/before-after" component={BeforeAfter} />
       <Route path="/settings" component={Settings} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
