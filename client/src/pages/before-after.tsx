@@ -174,11 +174,11 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Harmonização Facial Completa"
             description="Nossa abordagem de harmonização facial combina diferentes técnicas como botox, preenchimentos e bioestimuladores para equilibrar as proporções do rosto, realçando a beleza natural e rejuvenescendo a aparência."
-            beforeImageSrc="https://placehold.co/600x400/ffcdd2/333333?text=Proporções+Assimétricas"
-            afterImageSrc="https://placehold.co/600x400/c8e6c9/333333?text=Harmonia+Facial+Perfeita"
-            patientName="Fernanda Lopes"
-            patientAge={42}
-            testimonial="A harmonização facial transformou minha autoestima! O médico analisou meu rosto como um todo e aplicou as técnicas nos pontos certos. O resultado é natural e equilibrado, exatamente o que eu queria. Todos dizem que estou com aparência rejuvenescida, mas ninguém sabe exatamente o que mudou!"
+            beforeImageSrc="/images/harmonizacao/antes.jpg"
+            afterImageSrc="/images/harmonizacao/depois.png"
+            patientName="Carlos Mendes"
+            patientAge={35}
+            testimonial="Com a harmonização facial, consegui ter um visual mais elegante e refinado. A diferença é notável - me sinto mais confiante e recebo muitos elogios. O tratamento foi indolor e os resultados superaram minhas expectativas!"
           />
         </TabsContent>
       </Tabs>
