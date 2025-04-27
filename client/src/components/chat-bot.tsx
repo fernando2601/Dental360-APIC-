@@ -59,6 +59,37 @@ const RESPONSES = {
   default: "Estou aqui para te ajudar com qualquer dúvida sobre tratamentos dentários ou de harmonização! 😊\nQuer informações sobre algum procedimento específico ou prefere agendar uma avaliação gratuita?",
   inactivity: "Ainda está por aí? 😊 Estou aqui esperando suas perguntas ou podemos continuar nossa conversa depois se preferir!",
   goodbye: "Foi um prazer conversar com você! Estarei aqui quando precisar de informações ou quiser agendar sua consulta. Tenha um ótimo dia e volte sempre! 😊✨",
+  
+  // Horários de atendimento
+  horarios: "Nossos horários de atendimento são super flexíveis para atender à sua rotina! ⏰\n\n**Segunda a Sexta:** 9h às 21h\n**Sábados:** 8h às 16h\n**Domingos:** Fechado\n\nQue tal agendarmos um horário para você? Temos várias opções disponíveis essa semana! 📅",
+  
+  // Dias específicos
+  segunda: "Na segunda-feira temos os seguintes horários disponíveis:\n\n• 09:30 - 10:30 (Dra. Cláudia)\n• 11:00 - 12:00 (Dr. Ricardo)\n• 14:15 - 15:15 (Dra. Cláudia)\n• 16:30 - 17:30 (Dr. Ricardo)\n• 18:45 - 19:45 (Dra. Cláudia)\n\nQual horário seria melhor para você?",
+  terca: "Na terça-feira temos os seguintes horários disponíveis:\n\n• 10:00 - 11:00 (Dr. Ricardo)\n• 13:30 - 14:30 (Dra. Cláudia)\n• 15:00 - 16:00 (Dr. Ricardo)\n• 17:15 - 18:15 (Dra. Patrícia)\n• 19:30 - 20:30 (Dr. Ricardo)\n\nAlgum desses horários funciona para você?",
+  quarta: "Na quarta-feira temos os seguintes horários disponíveis:\n\n• 09:15 - 10:15 (Dra. Patrícia)\n• 11:30 - 12:30 (Dr. Ricardo)\n• 14:00 - 15:00 (Dra. Cláudia)\n• 16:15 - 17:15 (Dra. Patrícia)\n• 18:30 - 19:30 (Dr. Ricardo)\n\nQual seria o melhor horário para você?",
+  quinta: "Na quinta-feira temos os seguintes horários disponíveis:\n\n• 09:45 - 10:45 (Dr. Ricardo)\n• 12:00 - 13:00 (Dra. Patrícia)\n• 14:30 - 15:30 (Dr. Ricardo)\n• 16:45 - 17:45 (Dra. Cláudia)\n• 19:00 - 20:00 (Dra. Patrícia)\n\nQual horário se encaixa melhor na sua agenda?",
+  sexta: "Na sexta-feira temos os seguintes horários disponíveis:\n\n• 09:00 - 10:00 (Dra. Cláudia)\n• 11:15 - 12:15 (Dra. Patrícia)\n• 13:45 - 14:45 (Dr. Ricardo)\n• 16:00 - 17:00 (Dra. Cláudia)\n• 18:15 - 19:15 (Dr. Ricardo)\n\nQual horário prefere?",
+  sabado: "No sábado temos os seguintes horários disponíveis:\n\n• 08:30 - 09:30 (Dr. Ricardo)\n• 10:00 - 11:00 (Dra. Cláudia)\n• 11:30 - 12:30 (Dra. Patrícia)\n• 13:00 - 14:00 (Dr. Ricardo)\n• 14:30 - 15:30 (Dra. Cláudia)\n\nQual horário seria ideal para você?",
+  
+  // Duração dos procedimentos
+  duracao_limpeza: "Nossa limpeza dental profissional dura aproximadamente 45 minutos. É um procedimento tranquilo e indolor, com resultados imediatos! ✨ Quer agendar uma sessão?",
+  duracao_clareamento: "O procedimento de clareamento em consultório dura cerca de 1 hora e 30 minutos. Em uma única sessão, você já consegue ver a diferença! 😁 Para casos mais complexos, pode ser necessária uma segunda sessão. Quer agendar?",
+  duracao_canal: "O tratamento de canal geralmente leva entre 1 hora e 1 hora e 30 minutos por sessão. Na maioria dos casos, são necessárias 1 ou 2 sessões, dependendo da complexidade. Não se preocupe, usamos anestesia moderna para seu total conforto! 💉✨",
+  duracao_extracao: "A extração simples de dente leva cerca de 30 a 45 minutos, incluindo o tempo de anestesia. Para o siso, pode durar entre 45 minutos e 1 hora. Temos profissionais especializados que realizam o procedimento com o máximo de cuidado e conforto! 🦷",
+  duracao_botox: "A aplicação de Botox é super rápida, em torno de 30 minutos. O procedimento é minimamente invasivo e o resultado começa a aparecer em 3 a 5 dias, com efeito completo em 15 dias! 💉✨ Quer agendar sua aplicação?",
+  duracao_preenchimento: "O procedimento de preenchimento labial dura aproximadamente 45 minutos a 1 hora. O resultado é imediato e continua melhorando nos dias seguintes! Usamos produtos de alta qualidade para um resultado natural. 💋",
+  
+  // Perguntas sobre a clínica
+  estacionamento: "Sim, temos estacionamento próprio, gratuito para clientes durante o atendimento! 🚗 Além disso, estamos bem localizados, próximos a pontos de ônibus e metrô. Fácil de chegar de qualquer forma! Como prefere vir?",
+  wifi: "Sim, oferecemos Wi-Fi gratuito para todos os nossos pacientes! 📱 A senha é fornecida na recepção. Queremos que você se sinta à vontade durante todo o tempo que estiver conosco!",
+  acompanhante: "Claro que pode trazer acompanhante! 👨‍👩‍👧 Temos uma sala de espera confortável com café, água e revistas. Para procedimentos mais complexos, como extrações, sempre recomendamos vir acompanhado(a). Podemos agendar seu horário?",
+  
+  // Emergências
+  emergencia: "Sim, atendemos emergências dentárias! 🚨 Reserve uma hora em nossa agenda todos os dias para casos urgentes. Dor de dente, restauração quebrada, trauma dental - estamos aqui para ajudar! Qual é a sua situação? Podemos te encaixar hoje!",
+  
+  // Convênios
+  convenio: "Atualmente trabalhamos com os seguintes convênios: Amil, Bradesco Saúde, Sul América, Unimed e Odontoprev. 💳 Oferecemos também nosso plano próprio de fidelidade com descontos especiais! Gostaria de saber mais sobre algum deles?",
+  
   // Novas respostas para objeções de vendas
   expensive: "Entendo sua preocupação com os valores! 💙\n\nMas veja bem, investir na sua saúde bucal e autoestima é um dos melhores investimentos que você pode fazer. E temos várias opções para facilitar:\n\n✅ Parcelamento em até 12x sem juros\n✅ Descontos para pacotes de tratamento\n✅ Primeira avaliação totalmente gratuita\n\nQual opção se encaixa melhor no seu orçamento? Podemos encontrar uma solução personalizada para você! 😊",
   expensive_alt: "Compreendo completamente! 💯\n\nMas sabia que oferecemos o melhor custo-benefício da região? Nossos tratamentos têm garantia e usamos materiais de altíssima qualidade que duram muito mais.\n\nAlém disso, para novos pacientes, estamos com um desconto especial de 10% no primeiro procedimento!\n\nPosso te mostrar algumas opções que cabem no seu bolso? 💸",
@@ -94,7 +125,7 @@ const CLINIC_ADVANTAGES = [
 const AI_SUGGESTIONS: Record<string, AISuggestion[]> = {
   initial: [
     { id: 'sug_1', text: 'Quais serviços vocês oferecem?', type: 'general' },
-    { id: 'sug_2', text: 'Quanto custa um clareamento dental?', type: 'service' },
+    { id: 'sug_2', text: 'Qual o horário de funcionamento?', type: 'appointment' },
     { id: 'sug_3', text: 'Quero agendar uma consulta', type: 'appointment' }
   ],
   services: [
@@ -110,9 +141,9 @@ const AI_SUGGESTIONS: Record<string, AISuggestion[]> = {
     { id: 'sug_price_4', text: 'Está um pouco caro pra mim', type: 'discount' }
   ],
   appointment: [
-    { id: 'sug_apt_1', text: 'Tem horário essa semana?', type: 'appointment' },
-    { id: 'sug_apt_2', text: 'Quanto tempo dura a consulta?', type: 'appointment' },
-    { id: 'sug_apt_3', text: 'Preciso levar algo?', type: 'appointment' },
+    { id: 'sug_apt_1', text: 'Tem horário na segunda-feira?', type: 'appointment' },
+    { id: 'sug_apt_2', text: 'Quanto tempo dura o clareamento?', type: 'service' },
+    { id: 'sug_apt_3', text: 'Vocês atendem no sábado?', type: 'appointment' },
     { id: 'sug_apt_4', text: 'Tem estacionamento?', type: 'general' }
   ],
   fear: [
@@ -126,6 +157,24 @@ const AI_SUGGESTIONS: Record<string, AISuggestion[]> = {
     { id: 'sug_aes_2', text: 'O preenchimento é dolorido?', type: 'service' },
     { id: 'sug_aes_3', text: 'Quero melhorar meu sorriso', type: 'service' },
     { id: 'sug_aes_4', text: 'Tenho manchas nos dentes', type: 'service' }
+  ],
+  schedule: [
+    { id: 'sug_sch_1', text: 'Horários disponíveis na segunda?', type: 'appointment' },
+    { id: 'sug_sch_2', text: 'Tem horário na quarta-feira?', type: 'appointment' },
+    { id: 'sug_sch_3', text: 'Vocês atendem no sábado?', type: 'appointment' },
+    { id: 'sug_sch_4', text: 'Qual é o horário de atendimento?', type: 'appointment' }
+  ],
+  duration: [
+    { id: 'sug_dur_1', text: 'Quanto tempo dura a limpeza?', type: 'service' },
+    { id: 'sug_dur_2', text: 'Qual a duração da extração do siso?', type: 'service' },
+    { id: 'sug_dur_3', text: 'Quanto tempo demora o clareamento?', type: 'service' },
+    { id: 'sug_dur_4', text: 'Quanto tempo para fazer canal?', type: 'service' }
+  ],
+  emergency: [
+    { id: 'sug_emrg_1', text: 'Estou com muita dor de dente', type: 'appointment' },
+    { id: 'sug_emrg_2', text: 'Meu dente quebrou, vocês atendem hoje?', type: 'appointment' },
+    { id: 'sug_emrg_3', text: 'Vocês têm atendimento de emergência?', type: 'appointment' },
+    { id: 'sug_emrg_4', text: 'Preciso de um dentista urgente', type: 'appointment' }
   ]
 };
 
@@ -180,6 +229,59 @@ const KEYWORDS: Record<string, string> = {
   "pagamento": RESPONSES.payment,
   "pix": "Sim, aceitamos PIX! 📱 É prático, seguro e super rápido!\nEnviamos o QR code na hora do pagamento e você pode usar o banco de sua preferência. Além do PIX, aceitamos cartões e dinheiro. Como prefere pagar?",
   "dinheiro_pagamento": "Sim, aceitamos pagamento em dinheiro! 💵\nPara pagamentos à vista em dinheiro, oferecemos um desconto especial de 5%! Também aceitamos PIX e cartões se for mais conveniente. O que seria melhor para você?",
+  
+  // Horários de Funcionamento
+  "horário funcionamento": RESPONSES.horarios, 
+  "horário atendimento": RESPONSES.horarios,
+  "horários disponíveis": RESPONSES.horarios,
+  "quando atendem": RESPONSES.horarios,
+  "que horas": RESPONSES.horarios,
+  "aberto": RESPONSES.horarios,
+  "fechado": RESPONSES.horarios,
+  "fim de semana": RESPONSES.horarios,
+  "domingo": "Aos domingos nossa clínica está fechada para descanso da equipe. Atendemos de segunda a sexta das 9h às 21h e aos sábados das 8h às 16h. Podemos agendar um horário em um desses dias para você?",
+  "sábado": RESPONSES.sabado,
+  "segunda": RESPONSES.segunda,
+  "terça": RESPONSES.terca,
+  "quarta": RESPONSES.quarta,
+  "quinta": RESPONSES.quinta,
+  "sexta": RESPONSES.sexta,
+  
+  // Duração dos procedimentos
+  "tempo limpeza": RESPONSES.duracao_limpeza,
+  "duração limpeza": RESPONSES.duracao_limpeza,
+  "quanto tempo limpeza": RESPONSES.duracao_limpeza,
+  "tempo clareamento": RESPONSES.duracao_clareamento,
+  "duração clareamento": RESPONSES.duracao_clareamento,
+  "quanto tempo clareamento": RESPONSES.duracao_clareamento,
+  "tempo canal": RESPONSES.duracao_canal,
+  "duração canal": RESPONSES.duracao_canal,
+  "quanto tempo canal": RESPONSES.duracao_canal,
+  "tempo extração": RESPONSES.duracao_extracao,
+  "duração extração": RESPONSES.duracao_extracao,
+  "quanto tempo extração": RESPONSES.duracao_extracao,
+  "tempo botox": RESPONSES.duracao_botox,
+  "duração botox": RESPONSES.duracao_botox,
+  "quanto tempo botox": RESPONSES.duracao_botox,
+  "tempo preenchimento": RESPONSES.duracao_preenchimento,
+  "duração preenchimento": RESPONSES.duracao_preenchimento,
+  "quanto tempo preenchimento": RESPONSES.duracao_preenchimento,
+  
+  // Perguntas frequentes sobre a clínica
+  "estacionamento": RESPONSES.estacionamento,
+  "carro": RESPONSES.estacionamento,
+  "estacionar": RESPONSES.estacionamento,
+  "wifi": RESPONSES.wifi,
+  "internet": RESPONSES.wifi,
+  "acompanhante": RESPONSES.acompanhante,
+  "acompanhar": RESPONSES.acompanhante,
+  "emergência": RESPONSES.emergencia,
+  "urgência": RESPONSES.emergencia,
+  "urgente": RESPONSES.emergencia,
+  "dor forte": RESPONSES.emergencia,
+  "quebrou": RESPONSES.emergencia,
+  "convênio": RESPONSES.convenio,
+  "plano": RESPONSES.convenio,
   
   // Sentimentos
   "bem": RESPONSES.positive,
@@ -369,26 +471,82 @@ export function ChatBot() {
   const updateAISuggestions = useCallback(() => {
     let newSuggestionsType = "initial";
     
+    // Analisar mensagens recentes (últimas 3)
+    const recentMessages = messages.slice(-3);
+    const recentContent = recentMessages.map(m => m.content.toLowerCase()).join(' ');
+    
     // Determinar o tipo de sugestões com base no contexto
-    if (chatContext.interestedInService) {
+    
+    // Palavras relacionadas a horários
+    if (recentContent.includes("horário") || 
+        recentContent.includes("quando") || 
+        recentContent.includes("atendimento") || 
+        recentContent.includes("segunda") || 
+        recentContent.includes("terça") || 
+        recentContent.includes("quarta") || 
+        recentContent.includes("quinta") || 
+        recentContent.includes("sexta") || 
+        recentContent.includes("sábado") || 
+        recentContent.includes("domingo")) {
+      newSuggestionsType = "schedule";
+    }
+    // Palavras relacionadas a duração de procedimentos
+    else if (recentContent.includes("duração") || 
+             recentContent.includes("quanto tempo") || 
+             recentContent.includes("demora") || 
+             recentContent.includes("leva quanto tempo") || 
+             recentContent.includes("sessão") || 
+             recentContent.includes("minutos") || 
+             recentContent.includes("horas")) {
+      newSuggestionsType = "duration";
+    }
+    // Palavras relacionadas a emergências
+    else if (recentContent.includes("emergência") || 
+             recentContent.includes("urgente") || 
+             recentContent.includes("dor forte") || 
+             recentContent.includes("quebrou") || 
+             recentContent.includes("acidente") || 
+             recentContent.includes("sangramento")) {
+      newSuggestionsType = "emergency";
+    }
+    // Interesse em serviços específicos
+    else if (chatContext.interestedInService) {
       if (chatContext.interestedInService.includes("siso") || 
           chatContext.interestedInService.includes("canal") ||
           chatContext.interestedInService.includes("implante") ||
           chatContext.interestedInService.includes("restauração")) {
         newSuggestionsType = "services";
       } else if (chatContext.interestedInService.includes("clareamento") ||
-                 chatContext.interestedInService.includes("estética")) {
+                 chatContext.interestedInService.includes("estética") ||
+                 chatContext.interestedInService.includes("botox") ||
+                 chatContext.interestedInService.includes("preenchimento")) {
         newSuggestionsType = "aesthetics";
       }
-    } else if (chatContext.mentionedPrice || chatContext.hasGivenDiscount) {
+    } 
+    // Menções a preços e descontos
+    else if (chatContext.mentionedPrice || chatContext.hasGivenDiscount || 
+             recentContent.includes("preço") || 
+             recentContent.includes("valor") || 
+             recentContent.includes("custa") || 
+             recentContent.includes("pagar") || 
+             recentContent.includes("parcelar")) {
       newSuggestionsType = "pricing";
-    } else if (messages.some(m => m.content.toLowerCase().includes("medo") || 
-                            m.content.toLowerCase().includes("receio") ||
-                            m.content.toLowerCase().includes("trauma"))) {
+    } 
+    // Questões relacionadas a medo e ansiedade
+    else if (recentContent.includes("medo") || 
+             recentContent.includes("receio") ||
+             recentContent.includes("trauma") ||
+             recentContent.includes("ansiedade") ||
+             recentContent.includes("pavor") ||
+             recentContent.includes("nervoso") ||
+             recentContent.includes("nervosa")) {
       newSuggestionsType = "fear";
-    } else if (messages.some(m => m.content.toLowerCase().includes("agendar") || 
-                                  m.content.toLowerCase().includes("marcar") ||
-                                  m.content.toLowerCase().includes("consulta"))) {
+    } 
+    // Agendamentos e consultas
+    else if (recentContent.includes("agendar") || 
+             recentContent.includes("marcar") ||
+             recentContent.includes("consulta") ||
+             recentContent.includes("horário")) {
       newSuggestionsType = "appointment";
     }
     
