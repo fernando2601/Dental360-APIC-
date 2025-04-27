@@ -126,8 +126,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Clareamento Dental Profissional"
             description="Nosso tratamento de clareamento dental avançado pode clarear seus dentes em até 8 tons em uma única sessão de consultório. Utilizamos um sistema de ativação por luz LED de última geração que potencializa o efeito do gel clareador sem causar sensibilidade."
-            beforeImageSrc="/images/antes-depois/dentes-antes.svg"
-            afterImageSrc="/images/antes-depois/dentes-depois.svg"
+            beforeImageSrc="https://placehold.co/600x400/ffcdd2/333333?text=Dentes+Amarelados"
+            afterImageSrc="https://placehold.co/600x400/c8e6c9/333333?text=Dentes+Brancos+e+Brilhantes"
             patientName="Mariana Silva"
             patientAge={32}
             testimonial="Eu sempre tive vergonha do meu sorriso por causa da coloração amarelada dos meus dentes. Após uma única sessão de clareamento, meus dentes ficaram incrivelmente brancos! Agora sorrio com total confiança em todas as fotos. O procedimento foi super rápido e indolor, exatamente como me prometeram!"
@@ -138,8 +138,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Botox para Suavização de Rugas"
             description="Nossa aplicação de toxina botulínica é realizada por profissionais especializados que garantem resultados naturais. O procedimento é minimamente invasivo e dura apenas 30 minutos, com resultados que podem durar até 6 meses."
-            beforeImageSrc="/images/antes-depois/botox-antes.svg"
-            afterImageSrc="/images/antes-depois/botox-depois.svg"
+            beforeImageSrc="https://placehold.co/600x400/ffcdd2/333333?text=Rugas+e+Linhas+de+Expressão"
+            afterImageSrc="https://placehold.co/600x400/c8e6c9/333333?text=Pele+Lisa+e+Jovem"
             patientName="Luciana Pires"
             patientAge={52}
             testimonial="Buscava um tratamento que diminuísse minhas rugas sem deixar aquele aspecto artificial. O resultado foi exatamente o que procurava! Colegas de trabalho perguntam se estou de férias ou descansada e ninguém percebe que fiz o procedimento."
@@ -150,8 +150,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Implantes Dentários Permanentes"
             description="Nossos implantes dentários de titânio substituem completamente dentes perdidos, devolvendo função e estética ao seu sorriso. A técnica minimamente invasiva garante recuperação rápida e resultados duradouros."
-            beforeImageSrc="/images/antes-depois/implante-antes.svg"
-            afterImageSrc="/images/antes-depois/implante-depois.svg"
+            beforeImageSrc="https://placehold.co/600x400/ffcdd2/333333?text=Dente+Ausente"
+            afterImageSrc="https://placehold.co/600x400/c8e6c9/333333?text=Implante+Perfeito"
             patientName="Carlos Mendonça"
             patientAge={48}
             testimonial="Perdi um dente da frente em um acidente e fiquei muito constrangido por anos. O implante que recebi na clínica ficou tão natural que ninguém percebe que não é meu dente original. Recuperei minha confiança para sorrir!"
@@ -162,8 +162,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Lentes de Contato Dental"
             description="Nossas lentes de contato dental (facetas) são ultrafinas e proporcionam um sorriso perfeito. Corrigem dentes manchados, quebrados, desalinhados ou com espaços, criando um sorriso harmonioso e natural."
-            beforeImageSrc="/images/antes-depois/dentes-antes.svg"
-            afterImageSrc="/images/antes-depois/dentes-depois.svg"
+            beforeImageSrc="https://placehold.co/600x400/ffcdd2/333333?text=Dentes+Desalinhados"
+            afterImageSrc="https://placehold.co/600x400/c8e6c9/333333?text=Sorriso+Perfeitamente+Alinhado"
             patientName="Paula Gonzaga"
             patientAge={35}
             testimonial="Sempre tive dentes tortos e com espaçamentos que me incomodavam muito. Com as lentes de contato dental, meu sorriso ficou alinhado e perfeito em apenas duas sessões! O resultado superou todas as minhas expectativas."
@@ -174,8 +174,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Harmonização Facial Completa"
             description="Nossa abordagem de harmonização facial combina diferentes técnicas como botox, preenchimentos e bioestimuladores para equilibrar as proporções do rosto, realçando a beleza natural e rejuvenescendo a aparência."
-            beforeImageSrc="/images/antes-depois/harmonizacao-antes.svg"
-            afterImageSrc="/images/antes-depois/harmonizacao-depois.svg"
+            beforeImageSrc="https://placehold.co/600x400/ffcdd2/333333?text=Proporções+Assimétricas"
+            afterImageSrc="https://placehold.co/600x400/c8e6c9/333333?text=Harmonia+Facial+Perfeita"
             patientName="Fernanda Lopes"
             patientAge={42}
             testimonial="A harmonização facial transformou minha autoestima! O médico analisou meu rosto como um todo e aplicou as técnicas nos pontos certos. O resultado é natural e equilibrado, exatamente o que eu queria. Todos dizem que estou com aparência rejuvenescida, mas ninguém sabe exatamente o que mudou!"
