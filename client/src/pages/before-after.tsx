@@ -2,30 +2,21 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Smile, Frown, Sparkles, Zap, Check, Heart, Star, FolderHeart, Crown, BadgeAlert } from "lucide-react";
 
-// Componente para mostrar antes e depois sem imagens externas
+// Componente para mostrar antes e depois com imagens reais em SVG
 function BeforeAfterCard({
   title,
   description,
-  beforeIcon,
-  afterIcon,
-  beforeTitle,
-  afterTitle,
-  beforeDescription,
-  afterDescription,
+  beforeImageSrc,
+  afterImageSrc,
   patientName,
   patientAge,
   testimonial,
 }: {
   title: string;
   description: string;
-  beforeIcon: React.ReactNode;
-  afterIcon: React.ReactNode;
-  beforeTitle: string;
-  afterTitle: string;
-  beforeDescription: string;
-  afterDescription: string;
+  beforeImageSrc: string;
+  afterImageSrc: string;
   patientName: string;
   patientAge: number;
   testimonial: string;
@@ -41,18 +32,18 @@ function BeforeAfterCard({
           <p className="text-muted-foreground text-sm md:text-base">{description}</p>
         </div>
 
-        {/* Representação visual de antes/depois com ícones */}
+        {/* Representação visual de antes/depois com imagens SVG */}
         <div className="flex flex-col md:flex-row gap-6 mb-6">
           <div className="flex-1 flex flex-col border rounded-lg overflow-hidden shadow-md">
             <div className="bg-destructive/20 p-3 text-center font-medium text-destructive text-sm uppercase tracking-wider">
               Antes
             </div>
-            <div className="h-48 sm:h-64 md:h-80 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100">
-              <div className="text-red-500 mb-4 p-6 rounded-full bg-red-100 border border-red-200" style={{fontSize: "48px"}}>
-                {beforeIcon}
-              </div>
-              <h4 className="text-xl font-bold text-red-600 mb-2">{beforeTitle}</h4>
-              <p className="text-center text-muted-foreground">{beforeDescription}</p>
+            <div className="h-auto flex-1 p-2">
+              <img 
+                src={beforeImageSrc}
+                alt="Antes do tratamento"
+                className="w-full h-full object-contain"
+              />
             </div>
           </div>
           
@@ -60,12 +51,12 @@ function BeforeAfterCard({
             <div className="bg-primary/20 p-3 text-center font-medium text-primary text-sm uppercase tracking-wider">
               Depois
             </div>
-            <div className="h-48 sm:h-64 md:h-80 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100">
-              <div className="text-green-500 mb-4 p-6 rounded-full bg-green-100 border border-green-200" style={{fontSize: "48px"}}>
-                {afterIcon}
-              </div>
-              <h4 className="text-xl font-bold text-green-600 mb-2">{afterTitle}</h4>
-              <p className="text-center text-muted-foreground">{afterDescription}</p>
+            <div className="h-auto flex-1 p-2">
+              <img 
+                src={afterImageSrc}
+                alt="Depois do tratamento"
+                className="w-full h-full object-contain"
+              />
             </div>
           </div>
         </div>
@@ -135,12 +126,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Clareamento Dental Profissional"
             description="Nosso tratamento de clareamento dental avançado pode clarear seus dentes em até 8 tons em uma única sessão de consultório. Utilizamos um sistema de ativação por luz LED de última geração que potencializa o efeito do gel clareador sem causar sensibilidade."
-            beforeIcon={<Frown size={64} />}
-            afterIcon={<Smile size={64} />}
-            beforeTitle="Coloração Amarelada"
-            afterTitle="Branco Natural"
-            beforeDescription="Dentes com manchas e coloração amarelada devido ao consumo de café, chá e outras substâncias que escurecem o esmalte."
-            afterDescription="Dentes visivelmente mais brancos e brilhantes após apenas uma sessão de clareamento profissional em consultório."
+            beforeImageSrc="/images/antes-depois/dentes-antes.svg"
+            afterImageSrc="/images/antes-depois/dentes-depois.svg"
             patientName="Mariana Silva"
             patientAge={32}
             testimonial="Eu sempre tive vergonha do meu sorriso por causa da coloração amarelada dos meus dentes. Após uma única sessão de clareamento, meus dentes ficaram incrivelmente brancos! Agora sorrio com total confiança em todas as fotos. O procedimento foi super rápido e indolor, exatamente como me prometeram!"
@@ -151,12 +138,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Botox para Suavização de Rugas"
             description="Nossa aplicação de toxina botulínica é realizada por profissionais especializados que garantem resultados naturais. O procedimento é minimamente invasivo e dura apenas 30 minutos, com resultados que podem durar até 6 meses."
-            beforeIcon={<BadgeAlert size={64} />}
-            afterIcon={<Sparkles size={64} />}
-            beforeTitle="Rugas e Linhas de Expressão"
-            afterTitle="Pele Lisa e Jovem"
-            beforeDescription="Rugas de expressão visíveis, especialmente na testa, ao redor dos olhos e entre as sobrancelhas."
-            afterDescription="Pele visivelmente mais lisa, com suavização das rugas e aparência rejuvenescida, mantendo a naturalidade das expressões."
+            beforeImageSrc="/images/antes-depois/botox-antes.svg"
+            afterImageSrc="/images/antes-depois/botox-depois.svg"
             patientName="Luciana Pires"
             patientAge={52}
             testimonial="Buscava um tratamento que diminuísse minhas rugas sem deixar aquele aspecto artificial. O resultado foi exatamente o que procurava! Colegas de trabalho perguntam se estou de férias ou descansada e ninguém percebe que fiz o procedimento."
@@ -167,12 +150,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Implantes Dentários Permanentes"
             description="Nossos implantes dentários de titânio substituem completamente dentes perdidos, devolvendo função e estética ao seu sorriso. A técnica minimamente invasiva garante recuperação rápida e resultados duradouros."
-            beforeIcon={<Frown size={64} />}
-            afterIcon={<Crown size={64} />}
-            beforeTitle="Dente Ausente"
-            afterTitle="Implante Perfeito"
-            beforeDescription="Espaço vazio na arcada dentária causando dificuldades para mastigar e constrangimento social."
-            afterDescription="Implante dental permanente que se integra completamente ao osso e parece um dente natural."
+            beforeImageSrc="/images/antes-depois/implante-antes.svg"
+            afterImageSrc="/images/antes-depois/implante-depois.svg"
             patientName="Carlos Mendonça"
             patientAge={48}
             testimonial="Perdi um dente da frente em um acidente e fiquei muito constrangido por anos. O implante que recebi na clínica ficou tão natural que ninguém percebe que não é meu dente original. Recuperei minha confiança para sorrir!"
@@ -183,12 +162,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Lentes de Contato Dental"
             description="Nossas lentes de contato dental (facetas) são ultrafinas e proporcionam um sorriso perfeito. Corrigem dentes manchados, quebrados, desalinhados ou com espaços, criando um sorriso harmonioso e natural."
-            beforeIcon={<BadgeAlert size={64} />}
-            afterIcon={<Star size={64} />}
-            beforeTitle="Dentes Desalinhados"
-            afterTitle="Sorriso Perfeitamente Alinhado"
-            beforeDescription="Dentes com espaçamento irregular, manchas permanentes ou pequenas fraturas que comprometem a estética."
-            afterDescription="Sorriso perfeitamente alinhado e branco com lentes de contato dental ultrafinas e resistentes."
+            beforeImageSrc="/images/antes-depois/dentes-antes.svg"
+            afterImageSrc="/images/antes-depois/dentes-depois.svg"
             patientName="Paula Gonzaga"
             patientAge={35}
             testimonial="Sempre tive dentes tortos e com espaçamentos que me incomodavam muito. Com as lentes de contato dental, meu sorriso ficou alinhado e perfeito em apenas duas sessões! O resultado superou todas as minhas expectativas."
@@ -199,12 +174,8 @@ export default function BeforeAfterPage() {
           <BeforeAfterCard
             title="Harmonização Facial Completa"
             description="Nossa abordagem de harmonização facial combina diferentes técnicas como botox, preenchimentos e bioestimuladores para equilibrar as proporções do rosto, realçando a beleza natural e rejuvenescendo a aparência."
-            beforeIcon={<FolderHeart size={64} />}
-            afterIcon={<Heart size={64} />}
-            beforeTitle="Proporções Assimétricas"
-            afterTitle="Harmonia Facial Perfeita"
-            beforeDescription="Assimetrias faciais, volume insuficiente em áreas estratégicas e sinais de envelhecimento."
-            afterDescription="Contornos faciais equilibrados, volume distribuído harmonicamente e aparência rejuvenescida e natural."
+            beforeImageSrc="/images/antes-depois/harmonizacao-antes.svg"
+            afterImageSrc="/images/antes-depois/harmonizacao-depois.svg"
             patientName="Fernanda Lopes"
             patientAge={42}
             testimonial="A harmonização facial transformou minha autoestima! O médico analisou meu rosto como um todo e aplicou as técnicas nos pontos certos. O resultado é natural e equilibrado, exatamente o que eu queria. Todos dizem que estou com aparência rejuvenescida, mas ninguém sabe exatamente o que mudou!"
