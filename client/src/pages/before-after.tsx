@@ -4,17 +4,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// URLs de imagens de exemplo (placeholder)
-const teethWhiteningBefore = "https://placehold.co/600x400/e2e8f0/1e293b?text=Antes+Clareamento";
-const teethWhiteningAfter = "https://placehold.co/600x400/e2e8f0/1e293b?text=Depois+Clareamento";
-const botoxBefore = "https://placehold.co/600x400/e2e8f0/1e293b?text=Antes+Botox";
-const botoxAfter = "https://placehold.co/600x400/e2e8f0/1e293b?text=Depois+Botox";
-const dentalImplantBefore = "https://placehold.co/600x400/e2e8f0/1e293b?text=Antes+Implante";
-const dentalImplantAfter = "https://placehold.co/600x400/e2e8f0/1e293b?text=Depois+Implante";
-const veneersBefore = "https://placehold.co/600x400/e2e8f0/1e293b?text=Antes+Lentes";
-const veneersAfter = "https://placehold.co/600x400/e2e8f0/1e293b?text=Depois+Lentes";
-const facialHarmonyBefore = "https://placehold.co/600x400/e2e8f0/1e293b?text=Antes+Harmonização";
-const facialHarmonyAfter = "https://placehold.co/600x400/e2e8f0/1e293b?text=Depois+Harmonização";
+// URLs de imagens reais para exemplos
+const teethWhiteningBefore = "https://images.pexels.com/photos/3845587/pexels-photo-3845587.jpeg?auto=compress&cs=tinysrgb&w=600";
+const teethWhiteningAfter = "https://images.pexels.com/photos/3764013/pexels-photo-3764013.jpeg?auto=compress&cs=tinysrgb&w=600";
+const botoxBefore = "https://images.pexels.com/photos/3763152/pexels-photo-3763152.jpeg?auto=compress&cs=tinysrgb&w=600";
+const botoxAfter = "https://images.pexels.com/photos/6724353/pexels-photo-6724353.jpeg?auto=compress&cs=tinysrgb&w=600";
+const dentalImplantBefore = "https://images.pexels.com/photos/4269697/pexels-photo-4269697.jpeg?auto=compress&cs=tinysrgb&w=600";
+const dentalImplantAfter = "https://images.pexels.com/photos/3762453/pexels-photo-3762453.jpeg?auto=compress&cs=tinysrgb&w=600";
+const veneersBefore = "https://images.pexels.com/photos/3845542/pexels-photo-3845542.jpeg?auto=compress&cs=tinysrgb&w=600";
+const veneersAfter = "https://images.pexels.com/photos/6627404/pexels-photo-6627404.jpeg?auto=compress&cs=tinysrgb&w=600";
+const facialHarmonyBefore = "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=600";
+const facialHarmonyAfter = "https://images.pexels.com/photos/4662958/pexels-photo-4662958.jpeg?auto=compress&cs=tinysrgb&w=600";
 
 // Componente para mostrar antes e depois
 function BeforeAfterCard({
@@ -35,17 +35,23 @@ function BeforeAfterCard({
   testimonial: string;
 }) {
   return (
-    <Card className="mb-8 overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
-        <div className="space-y-4">
-          <h3 className="text-2xl font-bold text-primary">{title}</h3>
-          <p className="text-muted-foreground">{description}</p>
-          
-          <div className="flex flex-col border rounded-lg overflow-hidden">
-            <div className="bg-destructive/10 p-2 text-center font-medium">
-              ANTES
+    <Card className="mb-8 overflow-hidden shadow-lg border-0">
+      <div className="p-4 md:p-6 flex flex-col">
+        {/* Título e descrição */}
+        <div className="mb-6">
+          <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 text-transparent bg-clip-text mb-2">
+            {title}
+          </h3>
+          <p className="text-muted-foreground text-sm md:text-base">{description}</p>
+        </div>
+
+        {/* Imagens antes/depois */}
+        <div className="flex flex-col md:flex-row gap-6 mb-6">
+          <div className="flex-1 flex flex-col border rounded-lg overflow-hidden shadow-md">
+            <div className="bg-destructive/20 p-3 text-center font-medium text-destructive text-sm uppercase tracking-wider">
+              Antes
             </div>
-            <div className="h-[250px] overflow-hidden flex items-center justify-center bg-muted">
+            <div className="h-48 sm:h-64 md:h-80 overflow-hidden">
               <img
                 src={beforeImage}
                 alt={`${title} antes`}
@@ -54,11 +60,11 @@ function BeforeAfterCard({
             </div>
           </div>
           
-          <div className="flex flex-col border rounded-lg overflow-hidden">
-            <div className="bg-primary/10 p-2 text-center font-medium">
-              DEPOIS
+          <div className="flex-1 flex flex-col border rounded-lg overflow-hidden shadow-md">
+            <div className="bg-primary/20 p-3 text-center font-medium text-primary text-sm uppercase tracking-wider">
+              Depois
             </div>
-            <div className="h-[250px] overflow-hidden flex items-center justify-center bg-muted">
+            <div className="h-48 sm:h-64 md:h-80 overflow-hidden">
               <img
                 src={afterImage}
                 alt={`${title} depois`}
@@ -68,36 +74,36 @@ function BeforeAfterCard({
           </div>
         </div>
         
-        <div className="space-y-6 flex flex-col justify-between">
-          <div className="bg-primary/5 p-6 rounded-lg space-y-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-12 w-12 border-2 border-primary">
-                <AvatarFallback>{patientName.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h4 className="font-bold">{patientName}</h4>
-                <p className="text-sm text-muted-foreground">{patientAge} anos</p>
-              </div>
-            </div>
-            
-            <div className="relative">
-              <div className="absolute -left-4 -top-4 text-6xl text-primary opacity-20">"</div>
-              <blockquote className="pl-6 italic text-lg relative z-10">
-                {testimonial}
-              </blockquote>
-              <div className="absolute -right-4 bottom-0 text-6xl text-primary opacity-20">"</div>
+        {/* Depoimento */}
+        <div className="bg-primary/5 p-5 rounded-xl mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <Avatar className="h-16 w-16 border-2 border-primary shadow-md">
+              <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
+                {patientName.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h4 className="font-bold text-lg">{patientName}</h4>
+              <p className="text-sm text-muted-foreground">{patientAge} anos</p>
             </div>
           </div>
           
-          <div className="bg-primary text-primary-foreground p-4 rounded-lg shadow-lg">
-            <h4 className="font-bold mb-2">Quer resultados como esse?</h4>
-            <p className="mb-4 text-sm">Agende uma consulta de avaliação GRATUITA hoje mesmo!</p>
-            <div className="flex justify-center">
-              <button className="bg-white text-primary hover:bg-primary-foreground px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105">
-                QUERO AGENDAR AGORA
-              </button>
-            </div>
+          <div className="relative mx-4">
+            <div className="absolute -left-6 -top-6 text-7xl text-primary/20">"</div>
+            <blockquote className="italic text-base md:text-lg relative z-10 px-4 py-2">
+              {testimonial}
+            </blockquote>
+            <div className="absolute -right-6 -bottom-6 text-7xl text-primary/20">"</div>
           </div>
+        </div>
+        
+        {/* CTA */}
+        <div className="bg-gradient-to-r from-primary to-primary/80 p-6 rounded-xl shadow-lg text-white text-center">
+          <h4 className="font-bold text-xl mb-3">Quer resultados como esse?</h4>
+          <p className="mb-5">Agende uma consulta de avaliação GRATUITA hoje mesmo!</p>
+          <button className="bg-white text-primary hover:bg-primary-foreground px-8 py-3 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-md">
+            AGENDAR AGORA
+          </button>
         </div>
       </div>
     </Card>
@@ -111,22 +117,26 @@ export default function BeforeAfterPage() {
     <MainLayout>
       <div className="container mx-auto py-8">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold mb-2 bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
-            Antes & Depois
+          <h1 className="text-3xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-primary to-primary/60 text-transparent bg-clip-text">
+            Transformações Reais
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Resultados reais de transformações realizadas pela nossa equipe. Veja o impacto que podemos ter no seu sorriso e autoestima!
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto px-4">
+            Veja o impacto que nossos tratamentos podem ter no seu sorriso e autoestima!
+            Resultados surpreendentes realizados pela nossa equipe de especialistas.
           </p>
         </div>
         
         <Tabs defaultValue="teeth-whitening" className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-8">
-            <TabsTrigger value="teeth-whitening">Clareamento</TabsTrigger>
-            <TabsTrigger value="botox">Botox</TabsTrigger>
-            <TabsTrigger value="dental-implant">Implantes</TabsTrigger>
-            <TabsTrigger value="veneers">Lentes</TabsTrigger>
-            <TabsTrigger value="facial-harmony">Harmonização</TabsTrigger>
-          </TabsList>
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 rounded-full blur-xl opacity-70 -z-10"></div>
+            <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 p-1 rounded-full bg-background/80 backdrop-blur-sm border shadow-md">
+              <TabsTrigger value="teeth-whitening" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-2">Clareamento</TabsTrigger>
+              <TabsTrigger value="botox" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-2">Botox</TabsTrigger>
+              <TabsTrigger value="dental-implant" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-2">Implantes</TabsTrigger>
+              <TabsTrigger value="veneers" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-2">Lentes</TabsTrigger>
+              <TabsTrigger value="facial-harmony" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-2">Harmonização</TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="teeth-whitening">
             <BeforeAfterCard
