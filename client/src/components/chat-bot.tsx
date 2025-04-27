@@ -754,6 +754,351 @@ export function ChatBot() {
       return workflowResponse;
     }
     
+    // Respostas específicas para perguntas sobre procedimentos dentários
+    // Novas respostas adicionadas conforme solicitado pelo cliente
+    if (lowerText.includes("siso") || lowerText.includes("juízo") || lowerText.includes("juizo")) {
+      if (lowerText.includes("tirar") || lowerText.includes("arrancar") || lowerText.includes("extrair") || lowerText.includes("extraí")) {
+        return {
+          id: Date.now().toString(),
+          sender: 'bot',
+          content: "Claro! E olha, tirar o siso com a gente é super tranquilo, viu? Temos técnicas modernas que deixam o procedimento rápido e confortável. Quer que eu te passe uma oferta especial para extração hoje? 😁",
+          timestamp: new Date(),
+          sentiment: 'neutral'
+        };
+      }
+      
+      if (lowerText.includes("cara inchada") || lowerText.includes("inchaço") || lowerText.includes("inchado")) {
+        return {
+          id: Date.now().toString(),
+          sender: 'bot',
+          content: "Provavelmente é o siso, sim! 😬 Mas não se preocupe, a gente faz a avaliação e resolve isso com todo cuidado pra você sair aliviado(a)!",
+          timestamp: new Date(),
+          sentiment: 'neutral'
+        };
+      }
+    }
+    
+    if (lowerText.includes("dente") && (lowerText.includes("podre") || lowerText.includes("estragado"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Fica tranquilo(a)! Nós somos especialistas em salvar sorrisos! ❤️ Dá pra restaurar ou até reconstruir o dente, dependendo do caso. Vamos agendar uma avaliação sem compromisso?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("consertar") && lowerText.includes("sorriso")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Dá SIM e vai ficar incrível! ✨ Trabalhamos com estética dental de última geração para devolver a confiança no seu sorriso. Vamos marcar um horário para ver o que combina mais com você?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("dente quebrado") || (lowerText.includes("dente") && lowerText.includes("quebrou"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Calma, estamos aqui pra te ajudar! 🛟 Conseguimos restaurar o dente rapidinho e deixar seu sorriso novinho em folha! Quer que eu veja o melhor horário pra te encaixar hoje mesmo?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("sorriso") && lowerText.includes("branc")) || lowerText.includes("clareamento")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Já pensou sair com aquele sorriso de revista? 📸 A gente faz clareamento profissional seguro e com resultados incríveis. E hoje tem oferta especial, quer aproveitar?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("dói") || lowerText.includes("doi") || lowerText.includes("dor")) && lowerText.includes("arrancar")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Pode ficar tranquilo(a)! Usamos anestesia potente e técnicas modernas pra você nem sentir! 💤 A maioria dos pacientes até se surpreende de tão tranquilo que é. Vamos agendar?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("dente") && (lowerText.includes("doendo") || lowerText.includes("dói") || lowerText.includes("doi") || lowerText.includes("dor"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Dor de dente ninguém merece! 😢 Vamos cuidar de você com todo carinho, sem sofrimento. Nossa prioridade é acabar com essa dor o mais rápido possível. Que tal um atendimento prioritário?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("latejando") || lowerText.includes("canal")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Pode ser mesmo, mas fique tranquilo(a)! 🙌 Fazer canal hoje em dia é simples e alivia muito! Agendamos rapidinho e ainda parcelamos o tratamento pra você não se preocupar.",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("canal") && (lowerText.includes("morto") || lowerText.includes("dente morto"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Sim, é importante tratar! 😌 Nosso tratamento é rápido, moderno e confortável. Vamos salvar seu sorriso juntos? Aproveita que estamos com condições especiais hoje!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("aparelho") && (lowerText.includes("soltou") || lowerText.includes("quebrou"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Sem estresse! 😅 A gente arruma pra você rapidinho! E ainda fazemos um check-up pra garantir que tá tudo certinho. Vamos agendar?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("gengiva") && (lowerText.includes("sangra") || lowerText.includes("sangrando"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Pode ser só uma limpeza que tá precisando, mas também pode ser sinal de gengivite. 😬 Melhor a gente ver direitinho. Agendamos uma consulta de avaliação para você?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("porcelana") || lowerText.includes("faceta")) && lowerText.includes("dente")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Perfeito! ✨ As facetas de porcelana são maravilhosas pra deixar seu sorriso lindo, natural e duradouro. E dá pra parcelar! Vamos agendar seu orçamento personalizado?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("dente") && (lowerText.includes("torto") || lowerText.includes("tortos") || lowerText.includes("arruma"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Com certeza! 🙌 Seja com aparelho tradicional ou alternativas mais discretas, a gente tem a solução ideal pra você. Bora transformar esse sorriso?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("sem aparelho") || lowerText.includes("aparelho não")) && (lowerText.includes("sorriso") || lowerText.includes("dente"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Dá sim! 😁 Trabalhamos com lentes de contato dental e outras técnicas estéticas que corrigem imperfeições sem precisar de aparelho. Vamos conversar?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("mau hálito") || lowerText.includes("mau halito") || lowerText.includes("bafo")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Pode ser algo simples como placa bacteriana ou gengivite. 😷 Mas fica tranquilo(a), que com uma limpeza e orientação correta a gente resolve! Vamos marcar uma avaliação?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("orçamento") && (lowerText.includes("gratis") || lowerText.includes("grátis") || lowerText.includes("gratuito"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Claro! 😃 A avaliação inicial é gratuita para você conhecer o que precisa e receber o melhor plano de tratamento. Quer que eu reserve um horário pra você?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("sem dor") || ((lowerText.includes("dói") || lowerText.includes("doi") || lowerText.includes("dor")) && lowerText.includes("não"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Tem sim! 😌 Trabalhamos com anestesia moderna e muita experiência pra garantir seu conforto. Nosso lema é cuidar de você sem sofrimento!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("trato") || lowerText.includes("cuidar")) && lowerText.includes("sorriso")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Show! 🚀 Cuidar do sorriso é investir em autoestima. Limpeza, clareamento, correções... montamos o plano perfeito pra você sair brilhando. Vamos começar?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("anestesia") && (lowerText.includes("medo") || lowerText.includes("receio") || lowerText.includes("pavor"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Relaxa! 😁 Nossa anestesia é segura e praticamente indolor. E nossa equipe é treinada pra te deixar super tranquilo(a). Seu conforto é nossa prioridade!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("dente") && (lowerText.includes("preto") || lowerText.includes("escuro") || lowerText.includes("escurecido"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Não se preocupe, sempre tem solução! 🙌 Pode ser uma restauração, uma limpeza profunda ou outro tratamento estético. Vamos cuidar disso juntos?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("lente") || lowerText.includes("lentes")) && (lowerText.includes("dente") || lowerText.includes("dental"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Sim! As famosas lentes de contato dental! 😍 Seu sorriso vai ficar alinhado, branquíssimo e super natural. Vamos agendar uma avaliação sem compromisso?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("dente") && (lowerText.includes("mole") || lowerText.includes("mexendo"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Melhor vir avaliar! 👨‍⚕️ Dente mole pode ser gengiva, trauma ou outro fator. Cuidar cedo é fundamental pra salvar o dente!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("salvar") && lowerText.includes("dente")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Sempre tentamos salvar o dente antes de qualquer outro procedimento! 🛡️ Tratamentos modernos tornam isso cada vez mais possível. Vamos avaliar?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("pagar") || lowerText.includes("pagamento")) && 
+        (lowerText.includes("cartão") || lowerText.includes("cartao") || lowerText.includes("parcela"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Sim, sem problemas! 😃 Facilitamos pra você cuidar do sorriso sem pesar no bolso. Até 10x no cartão em alguns casos! Quer que eu calcule pra você?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("branqueamento") || lowerText.includes("clareamento")) && lowerText.includes("rápido")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Sim! 😁 Temos clareamento a laser que deixa o sorriso até 5x mais branco em poucas sessões! E hoje tem promoção, hein!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("tapa") && (lowerText.includes("visual") || lowerText.includes("sorriso"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Perfeito! 😍 Nada como um sorriso novo pra dar aquele upgrade! Harmonização facial, estética dental... vamos deixar você ainda mais incrível!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("sensíve") || lowerText.includes("sensivel") || lowerText.includes("água gelada")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Sensibilidade é super comum! 😥 Vamos ver se é algo simples de resolver com limpeza, tratamento ou até produtos específicos. Agendamos?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("placa bacteriana") || (lowerText.includes("dente") && lowerText.includes("esquisito"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Placa a gente remove fácil com uma limpeza profissional! 😁 E você já sai do consultório sentindo a diferença. Quer reservar seu horário?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if ((lowerText.includes("dente") || lowerText.includes("dentes")) && (lowerText.includes("separado") || lowerText.includes("aberto") || lowerText.includes("espaço"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Dá sim! ✨ Muitas vezes conseguimos corrigir com facetas ou lentes de contato dental. Um sorriso alinhado pode estar mais perto do que você imagina!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("limpar") && lowerText.includes("clarear") && lowerText.includes("ajeitar")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Aí sim! 😍 E a gente ama cuidar de sorrisos completos! Montamos um pacote personalizado pra você sair daqui transformado(a)! Vamos montar o seu?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("sorriso") && lowerText.includes("feio")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Não existe sorriso feio, só sorriso que ainda não foi cuidado por nós! 😍 Vem com a gente que vamos deixar você amando seu espelho!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("trauma") && lowerText.includes("dentista")) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "Mais que de boa! 🥰 Somos especialistas em atendimento humanizado. Sem pressão, com calma e muito carinho. Você vai se surpreender positivamente!",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
+    if (lowerText.includes("sorriso") && (lowerText.includes("artista") || lowerText.includes("famoso") || lowerText.includes("celebridade"))) {
+      return {
+        id: Date.now().toString(),
+        sender: 'bot',
+        content: "E você merece! 🎬✨ Trabalhamos com estética de alto nível pra deixar seu sorriso digno de capa de revista! Vamos marcar uma avaliação VIP pra você?",
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+    }
+    
     // Verificação especial para situações de luto ou perda de familiar (prioridade máxima)
     if ((lowerText.includes("irmão") || lowerText.includes("irmã") || lowerText.includes("pai") || 
         lowerText.includes("mãe") || lowerText.includes("mãe") || lowerText.includes("filho") || 
