@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileNav } from "@/components/ui/mobile-nav";
+import { ChatBot } from "@/components/chat-bot";
 import { useMobile } from "@/hooks/use-mobile";
 import { Bell, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           {children}
         </main>
       </div>
+      
+      {/* Chatbot flutuante */}
+      <ChatBot />
     </div>
   );
 }
