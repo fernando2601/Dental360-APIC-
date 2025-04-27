@@ -4,10 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// URLs de imagens confiáveis para o projeto
-// Usando links de imagens de sites populares que permitem acesso direto
-const teethWhiteningImageUrl = "https://media.istockphoto.com/id/1311454368/photo/beautiful-woman-smile.jpg?s=612x612&w=0&k=20&c=xW0I4Yz0XJswJl0qO0H3_Uq7MonDV2Mn-8I65jPSHbM=";
-const botoxImageUrl = "https://media.istockphoto.com/id/1369589255/photo/beautiful-mature-woman-face-close-up-before-after-cosmetic-procedures-antiaging-and-facelift.jpg?s=612x612&w=0&k=20&c=lbFKjERf_d8Tglu0umsVTmfQyjX8HGKDx8c5sK_6Soc=";
+// URLs de imagens SVG criadas localmente (garantia de funcionamento)
+const teethWhiteningImageUrl = "/teeth-before-after.svg";
+const botoxImageUrl = "/botox-before-after.svg";
 
 // Imagens para outras categorias (Pixabay/recursos gratuitos)
 const dentalImplantBeforeUrl = "https://cdn.pixabay.com/photo/2021/12/05/10/44/caries-6847656_1280.jpg"; // Dente faltando
