@@ -69,16 +69,16 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Client updated successfully.",
+        title: "Sucesso",
+        description: "Paciente atualizado com sucesso.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
       setIsEditDialogOpen(false);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to update client. Please try again.",
+        title: "Erro",
+        description: "Falha ao atualizar paciente. Por favor, tente novamente.",
         variant: "destructive",
       });
     },
@@ -93,8 +93,8 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Client deleted successfully.",
+        title: "Sucesso",
+        description: "Paciente excluído com sucesso.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
       setIsDeleteDialogOpen(false);
@@ -102,8 +102,8 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete client. Please try again.",
+        title: "Erro",
+        description: "Falha ao excluir paciente. Por favor, tente novamente.",
         variant: "destructive",
       });
     },
