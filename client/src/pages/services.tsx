@@ -335,9 +335,9 @@ export default function Services() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Create New Service</DialogTitle>
+            <DialogTitle>Criar Novo Serviço</DialogTitle>
             <DialogDescription>
-              Add a new service to your clinic offerings.
+              Adicione um novo serviço às ofertas da clínica.
             </DialogDescription>
           </DialogHeader>
           
@@ -348,9 +348,9 @@ export default function Services() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service Name</FormLabel>
+                    <FormLabel>Nome do Serviço</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Dental Cleaning" />
+                      <Input {...field} placeholder="Limpeza Dental" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
