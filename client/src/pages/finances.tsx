@@ -47,8 +47,12 @@ export default function Finances() {
   
   // Obter o parâmetro tab da URL
   const [location] = useLocation();
-  const params = new URLSearchParams(location.split('?')[1]);
+  const params = new URLSearchParams(location.split('?')[1] || '');
   const activeTab = params.get('tab') || 'dashboard';
+  
+  // Log para debug
+  console.log("URL atual:", location);
+  console.log("Tab ativa:", activeTab);
 
   // Initialize form
   const form = useForm<TransactionFormValues>({
@@ -66,17 +70,17 @@ export default function Finances() {
   });
 
   // Fetch financial transactions
-  const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
+  const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery({
     queryKey: ['/api/financial-transactions'],
   });
 
   // Fetch clients for reference
-  const { data: clients } = useQuery({
+  const { data: clients = [] } = useQuery({
     queryKey: ['/api/clients'],
   });
 
   // Fetch appointments for reference
-  const { data: appointments } = useQuery({
+  const { data: appointments = [] } = useQuery({
     queryKey: ['/api/appointments'],
   });
 
@@ -119,16 +123,20 @@ export default function Finances() {
   }
 
   // Calculate financial summary
-  const totalIncome = transactions?.filter((t: any) => t.type === "income")
-    .reduce((sum: number, t: any) => sum + Number(t.amount), 0) || 0;
+  const totalIncome = Array.isArray(transactions)
+    ? transactions.filter((t: any) => t.type === "income")
+        .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+    : 0;
   
-  const totalExpenses = transactions?.filter((t: any) => t.type === "expense")
-    .reduce((sum: number, t: any) => sum + Number(t.amount), 0) || 0;
+  const totalExpenses = Array.isArray(transactions)
+    ? transactions.filter((t: any) => t.type === "expense")
+        .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+    : 0;
   
   const netIncome = totalIncome - totalExpenses;
 
   // Get recent transactions
-  const recentTransactions = transactions
+  const recentTransactions = Array.isArray(transactions)
     ? [...transactions]
         .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 10)
@@ -343,7 +351,9 @@ export default function Finances() {
                   </div>
                   <div className="divide-y">
                     {recentTransactions.map((transaction: any) => {
-                      const client = clients?.find((c: any) => c.id === transaction.clientId);
+                      const client = Array.isArray(clients) 
+                        ? clients.find((c: any) => c.id === transaction.clientId) 
+                        : null;
                       
                       return (
                         <div key={transaction.id} className="grid grid-cols-7 p-4 hover:bg-muted/50">
@@ -465,20 +475,22 @@ export default function Finances() {
               <div className="bg-muted/30 p-4 rounded-lg">
                 <h3 className="text-sm font-medium mb-3">Principais Despesas Recentes</h3>
                 <div className="divide-y">
-                  {recentTransactions
-                    .filter((t: any) => t.type === "expense")
-                    .slice(0, 5)
-                    .map((expense: any) => (
-                      <div key={expense.id} className="py-3 flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">{expense.description || expense.category}</p>
-                          <p className="text-xs text-muted-foreground">{formatDate(expense.date)}</p>
-                        </div>
-                        <div className="text-destructive font-semibold">
-                          {formatCurrency(expense.amount)}
-                        </div>
-                      </div>
-                    ))}
+                  {Array.isArray(recentTransactions) 
+                    ? recentTransactions
+                        .filter((t: any) => t.type === "expense")
+                        .slice(0, 5)
+                        .map((expense: any) => (
+                          <div key={expense.id} className="py-3 flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">{expense.description || expense.category}</p>
+                              <p className="text-xs text-muted-foreground">{formatDate(expense.date)}</p>
+                            </div>
+                            <div className="text-destructive font-semibold">
+                              {formatCurrency(expense.amount)}
+                            </div>
+                          </div>
+                        ))
+                    : <div>Nenhuma despesa registrada</div>}
                 </div>
               </div>
             </CardContent>
