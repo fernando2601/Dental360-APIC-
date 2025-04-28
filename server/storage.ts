@@ -13,7 +13,13 @@ export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserPassword(id: number, password: string): Promise<User | undefined>;
+  updateUserLastLogin(id: number): Promise<User | undefined>;
+  updateUserResetToken(id: number, token: string, expiry: Date): Promise<User | undefined>;
+  clearUserResetToken(id: number): Promise<User | undefined>;
   
   // Clients
   getClients(): Promise<Client[]>;
@@ -328,6 +334,54 @@ export class MemStorage implements IStorage {
     const user: User = { ...insertUser, id, createdAt: now };
     this.users.set(id, user);
     return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email
+    );
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.resetToken === token
+    );
+  }
+
+  async updateUserPassword(id: number, password: string): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updated = { ...user, password };
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  async updateUserLastLogin(id: number): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updated = { ...user, lastLogin: new Date() };
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  async updateUserResetToken(id: number, token: string, expiry: Date): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updated = { ...user, resetToken: token, resetTokenExpiry: expiry };
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  async clearUserResetToken(id: number): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updated = { ...user, resetToken: null, resetTokenExpiry: null };
+    this.users.set(id, updated);
+    return updated;
   }
 
   // Client methods
