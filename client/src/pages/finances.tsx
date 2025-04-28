@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation, Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,6 +44,11 @@ export default function Finances() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Obter o parâmetro tab da URL
+  const [location] = useLocation();
+  const params = new URLSearchParams(location.split('?')[1]);
+  const activeTab = params.get('tab') || 'dashboard';
 
   // Initialize form
   const form = useForm<TransactionFormValues>({
@@ -175,7 +181,9 @@ export default function Finances() {
       </div>
 
       {/* Main Financial Navigation */}
-      <Tabs defaultValue="dashboard" className="w-full">
+      <Tabs value={activeTab} className="w-full" onValueChange={(value) => {
+        window.history.pushState(null, '', `/finances?tab=${value}`);
+      }}>
         <TabsList className="mb-4 flex flex-wrap">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="cash-flow">Fluxo de Caixa</TabsTrigger>
