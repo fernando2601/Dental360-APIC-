@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Textarea } from "@/components/ui/textarea";
 import ClientTable from "@/components/client-table";
+import * as XLSX from 'xlsx';
 
 // Form schema for client
 const clientFormSchema = z.object({
@@ -133,12 +134,22 @@ export default function Clients() {
       return;
     }
 
-    // Extrair informações adicionais das notas em campos separados
+    // Formatar data para visualização
+    const formatDate = (dateString: string | null | undefined) => {
+      if (!dateString) return "";
+      // Verifica se a data está no formato ISO ou apenas data
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? dateString : date.toLocaleDateString('pt-BR');
+    };
+
+    // Extrair informações adicionais das notas e formatar adequadamente
     const processedClients = clients.map((client: any) => {
       // Extrair informações das notas
       let instagram = "";
       let frequencia = "";
       let clienteDesde = "";
+      let alergias = "";
+      let preferencias = "";
       
       if (client.notes) {
         // Extrair Instagram
@@ -158,44 +169,113 @@ export default function Clients() {
         if (clienteDesdeMatch) {
           clienteDesde = clienteDesdeMatch[1].trim();
         }
+
+        // Extrair Alergias
+        const alergiasMatch = client.notes.match(/Alérgico a ([^.]+)/);
+        if (alergiasMatch) {
+          alergias = alergiasMatch[1].trim();
+        }
+
+        // Extrair Preferências
+        const preferenciaMatch = client.notes.match(/Prefere ([^.]+)/);
+        if (preferenciaMatch) {
+          preferencias = preferenciaMatch[1].trim();
+        }
       }
       
+      // Calcular idade a partir da data de nascimento, se disponível
+      let idade = "";
+      if (client.birthday) {
+        const birthDate = new Date(client.birthday);
+        const today = new Date();
+        if (!isNaN(birthDate.getTime())) {
+          let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            calculatedAge--;
+          }
+          
+          idade = calculatedAge.toString();
+        }
+      }
+
+      // Criar objeto com dados processados
       return {
-        ...client,
-        instagram,
-        frequencia,
-        clienteDesde
+        'Nome Completo': client.fullName,
+        'Email': client.email,
+        'Telefone': client.phone,
+        'Endereço': client.address || '',
+        'Data de Nascimento': formatDate(client.birthday),
+        'Idade': idade,
+        'Instagram': instagram,
+        'Frequência de Visita': frequencia,
+        'Cliente Desde': clienteDesde,
+        'Alergias': alergias,
+        'Preferências': preferencias,
+        'Data de Cadastro': formatDate(client.createdAt),
+        'Observações Completas': client.notes || ''
       };
     });
 
-    // Create CSV content with additional extracted fields
-    const headers = ["Nome Completo", "Email", "Telefone", "Endereço", "Data de Nascimento", "Instagram", "Frequência", "Cliente Desde", "Observações"];
-    const csvContent = [
-      headers.join(","),
-      ...processedClients.map((client: any) => [
-        `"${client.fullName}"`,
-        `"${client.email}"`,
-        `"${client.phone}"`,
-        `"${client.address || ""}"`,
-        `"${client.birthday || ""}"`,
-        `"${client.instagram || ""}"`,
-        `"${client.frequencia || ""}"`,
-        `"${client.clienteDesde || ""}"`,
-        `"${client.notes || ""}"`
-      ].join(","))
-    ].join("\n");
+    // Criar planilha
+    const worksheet = XLSX.utils.json_to_sheet(processedClients);
+    
+    // Definir larguras das colunas (em caracteres)
+    const columnWidths = [
+      { wch: 25 }, // Nome Completo
+      { wch: 25 }, // Email
+      { wch: 15 }, // Telefone
+      { wch: 35 }, // Endereço
+      { wch: 15 }, // Data de Nascimento
+      { wch: 8 },  // Idade
+      { wch: 15 }, // Instagram
+      { wch: 15 }, // Frequência de Visita
+      { wch: 15 }, // Cliente Desde
+      { wch: 25 }, // Alergias
+      { wch: 25 }, // Preferências
+      { wch: 15 }, // Data de Cadastro
+      { wch: 60 }  // Observações Completas
+    ];
+    worksheet['!cols'] = columnWidths;
 
-    // Create download link (Excel-compatible CSV with UTF-8 BOM)
-    const BOM = "\uFEFF"; // UTF-8 BOM
-    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "pacientes_dentalspa.csv");
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Criar workbook e adicionar a planilha
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Pacientes");
+
+    // Criar segunda planilha com estatísticas
+    const estatisticas = [
+      { 'Estatística': 'Total de Pacientes', 'Valor': processedClients.length },
+      { 'Estatística': 'Pacientes com Instagram', 'Valor': processedClients.filter(c => c.Instagram).length },
+      { 'Estatística': 'Frequência mais comum', 'Valor': getMostCommon(processedClients.map(c => c['Frequência de Visita']).filter(Boolean)) }
+    ];
+    
+    const estatisticasSheet = XLSX.utils.json_to_sheet(estatisticas);
+    estatisticasSheet['!cols'] = [{ wch: 30 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(workbook, estatisticasSheet, "Estatísticas");
+
+    // Exportar para arquivo Excel
+    XLSX.writeFile(workbook, "Pacientes_DentalSPA.xlsx");
+  }
+  
+  // Função auxiliar para encontrar o valor mais comum em um array
+  function getMostCommon(arr: string[]): string {
+    if (arr.length === 0) return "N/A";
+    
+    const frequency: {[key: string]: number} = {};
+    let maxFreq = 0;
+    let mostCommon = "";
+    
+    for (const item of arr) {
+      frequency[item] = (frequency[item] || 0) + 1;
+      
+      if (frequency[item] > maxFreq) {
+        maxFreq = frequency[item];
+        mostCommon = item;
+      }
+    }
+    
+    return mostCommon || "N/A";
   }
 
   return (

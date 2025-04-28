@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { formatCurrency } from "@/lib/utils";
 import InventoryTable from "@/components/inventory-table";
+import * as XLSX from 'xlsx';
 
 // Form schema for inventory item
 const inventoryFormSchema = z.object({
@@ -103,7 +104,7 @@ export default function Inventory() {
     return categoryMatch && searchMatch;
   });
 
-  // Export inventory as CSV
+  // Export inventory as XLSX (Excel)
   function exportInventory() {
     if (!inventory || inventory.length === 0) {
       toast({
@@ -114,32 +115,74 @@ export default function Inventory() {
       return;
     }
 
-    // Create CSV content
-    const headers = ["Nome", "Categoria", "Descrição", "Quantidade", "Unidade", "Limite", "Preço", "Última Reposição"];
-    const csvContent = [
-      headers.join(","),
-      ...inventory.map((item: any) => [
-        `"${item.name}"`,
-        `"${item.category}"`,
-        `"${item.description || ""}"`,
-        item.quantity,
-        `"${item.unit}"`,
-        item.threshold,
-        item.price,
-        `"${item.lastRestocked ? new Date(item.lastRestocked).toISOString() : ""}"`
-      ].join(","))
-    ].join("\n");
+    // Formatar data para visualização
+    const formatDate = (dateString: string | null | undefined) => {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
 
-    // Create download link
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "inventory.csv");
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Formatar preço para visualização
+    const formatPrice = (price: number | string | null | undefined) => {
+      if (price === null || price === undefined) return "R$ 0,00";
+      
+      // Converter para número se for string
+      const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+      
+      // Formatar como moeda brasileira
+      return numericPrice.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    };
+
+    // Preparar dados para exportação
+    const worksheetData = inventory.map((item: any) => ({
+      'Nome do Item': item.name,
+      'Categoria': item.category,
+      'Descrição': item.description || '',
+      'Quantidade': item.quantity,
+      'Unidade': item.unit,
+      'Limite para Reposição': item.threshold,
+      'Preço': formatPrice(item.price),
+      'Preço (Valor)': typeof item.price === 'string' ? parseFloat(item.price) : item.price,
+      'Última Reposição': formatDate(item.lastRestocked),
+      'Status': item.quantity <= item.threshold ? "Necessita Reposição" : "Estoque Adequado"
+    }));
+
+    // Criar planilha
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    
+    // Definir larguras das colunas (em caracteres)
+    const columnWidths = [
+      { wch: 25 }, // Nome do Item
+      { wch: 15 }, // Categoria
+      { wch: 35 }, // Descrição
+      { wch: 12 }, // Quantidade
+      { wch: 15 }, // Unidade
+      { wch: 20 }, // Limite para Reposição
+      { wch: 15 }, // Preço
+      { wch: 15 }, // Preço (Valor)
+      { wch: 20 }, // Última Reposição
+      { wch: 20 }  // Status
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Configurar estilos e cores (limitado no XLSX)
+    // Observe que o xlsx básico tem suporte limitado para formatação
+
+    // Criar workbook e adicionar a planilha
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Inventário");
+
+    // Exportar para arquivo Excel
+    XLSX.writeFile(workbook, "Inventario_DentalSPA.xlsx");
   }
 
   return (
