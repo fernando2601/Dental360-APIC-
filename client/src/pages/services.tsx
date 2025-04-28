@@ -3,17 +3,21 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Plus, Filter, Loader2 } from "lucide-react";
+import { Plus, Filter, Loader2, Gift, Award, Medal, Trophy, Tag, Percent, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import ServiceCard from "@/components/service-card";
+import { formatCurrency } from "@/lib/utils";
 
 // Form schema for service
 const serviceFormSchema = z.object({
@@ -94,54 +98,238 @@ export default function Services() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Services Management</h1>
-          <p className="text-muted-foreground">Create and manage services offered by your clinic.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Serviços & Fidelização</h1>
+          <p className="text-muted-foreground">Gerenciamento de serviços e programa de fidelidade da clínica.</p>
         </div>
         <Button className="mt-4 md:mt-0" onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          New Service
+          Novo Serviço
         </Button>
       </div>
 
-      {/* Category filters */}
-      <div className="flex flex-wrap gap-2">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={categoryFilter === category ? "default" : "outline"}
-            size="sm"
-            onClick={() => setCategoryFilter(category)}
-          >
-            {category === "all" ? "All" : category}
-          </Button>
-        ))}
-      </div>
+      <Tabs defaultValue="services" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="services">Serviços</TabsTrigger>
+          <TabsTrigger value="loyalty">Programa de Fidelidade</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="services">
+          {/* Category filters */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={categoryFilter === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCategoryFilter(category)}
+              >
+                {category === "all" ? "Todos" : category}
+              </Button>
+            ))}
+          </div>
 
-      {/* Services Grid */}
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : !filteredServices || filteredServices.length === 0 ? (
-        <div className="text-center py-12 border rounded-lg">
-          <h3 className="font-medium text-lg mb-2">No services found</h3>
-          <p className="text-muted-foreground mb-6">
-            {categoryFilter === "all" 
-              ? "There are no services in the system yet." 
-              : `There are no services in the ${categoryFilter} category.`}
-          </p>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Service
-          </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServices.map((service: any) => (
-            <ServiceCard key={service.id} service={service} />
-          ))}
-        </div>
-      )}
+          {/* Services Grid */}
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : !filteredServices || filteredServices.length === 0 ? (
+            <div className="text-center py-12 border rounded-lg">
+              <h3 className="font-medium text-lg mb-2">Nenhum serviço encontrado</h3>
+              <p className="text-muted-foreground mb-6">
+                {categoryFilter === "all" 
+                  ? "Não há serviços cadastrados no sistema ainda." 
+                  : `Não há serviços na categoria ${categoryFilter}.`}
+              </p>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar Serviço
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredServices.map((service: any) => (
+                <ServiceCard key={service.id} service={service} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="loyalty">
+          <div className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg">
+                    <Medal className="mr-2 h-5 w-5 text-primary" />
+                    Programa Smile
+                  </CardTitle>
+                  <CardDescription>Fidelização básica para novos pacientes</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Pontos por visita:</span>
+                      <Badge>10 pontos</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Pontos para resgatar:</span>
+                      <Badge variant="outline">100 pontos</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Benefício:</span>
+                      <Badge variant="secondary">Limpeza grátis</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Ideal para pacientes que visitam a clínica regularmente para consultas de rotina.
+                    </p>
+                    <Button variant="outline" className="w-full mt-2">
+                      <Users className="mr-2 h-4 w-4" />
+                      32 pacientes ativos
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg">
+                    <Award className="mr-2 h-5 w-5 text-primary" />
+                    Programa Premium
+                  </CardTitle>
+                  <CardDescription>Para pacientes de tratamentos estéticos</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Pontos por visita:</span>
+                      <Badge>20 pontos</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Pontos por recomendação:</span>
+                      <Badge>50 pontos</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Benefício:</span>
+                      <Badge variant="secondary">Desconto de 15%</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Para pacientes que realizaram tratamentos estéticos ou harmonização facial.
+                    </p>
+                    <Button variant="outline" className="w-full mt-2">
+                      <Users className="mr-2 h-4 w-4" />
+                      18 pacientes ativos
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg">
+                    <Trophy className="mr-2 h-5 w-5 text-primary" />
+                    Programa VIP
+                  </CardTitle>
+                  <CardDescription>Pacientes prioritários de alto valor</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Gasto mínimo anual:</span>
+                      <Badge>{formatCurrency(10000)}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Desconto fixo:</span>
+                      <Badge variant="secondary">10% em todos serviços</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Benefícios exclusivos:</span>
+                      <Badge variant="outline">Horários prioritários</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Pacientes que realizam múltiplos tratamentos de alto valor na clínica.
+                    </p>
+                    <Button variant="outline" className="w-full mt-2">
+                      <Users className="mr-2 h-4 w-4" />
+                      7 pacientes ativos
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Análise de fidelização</CardTitle>
+                <CardDescription>Métricas do programa de fidelidade e resgate de benefícios</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="bg-muted rounded-lg p-4">
+                    <h4 className="font-medium text-sm mb-3 flex items-center">
+                      <Gift className="mr-2 h-4 w-4 text-primary" />
+                      Total de resgates
+                    </h4>
+                    <div className="text-2xl font-bold">42</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Últimos 12 meses
+                    </p>
+                  </div>
+                  
+                  <div className="bg-muted rounded-lg p-4">
+                    <h4 className="font-medium text-sm mb-3 flex items-center">
+                      <Percent className="mr-2 h-4 w-4 text-primary" />
+                      Taxa de conversão
+                    </h4>
+                    <div className="text-2xl font-bold">68%</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      De recomendações para clientes
+                    </p>
+                  </div>
+                  
+                  <div className="bg-muted rounded-lg p-4">
+                    <h4 className="font-medium text-sm mb-3 flex items-center">
+                      <Tag className="mr-2 h-4 w-4 text-primary" />
+                      Valor médio descontado
+                    </h4>
+                    <div className="text-2xl font-bold">{formatCurrency(560)}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Por cliente fidelizado
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-6">
+                  <h4 className="font-medium mb-3">Benefícios mais resgatados</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="flex items-center">
+                        <Gift className="mr-2 h-4 w-4 text-muted-foreground" />
+                        Limpeza dental gratuita
+                      </span>
+                      <Badge>18 resgates</Badge>
+                    </div>
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="flex items-center">
+                        <Gift className="mr-2 h-4 w-4 text-muted-foreground" />
+                        Desconto em harmonização
+                      </span>
+                      <Badge>14 resgates</Badge>
+                    </div>
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="flex items-center">
+                        <Gift className="mr-2 h-4 w-4 text-muted-foreground" />
+                        Consulta de avaliação estética grátis
+                      </span>
+                      <Badge>10 resgates</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Create Service Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -252,10 +440,10 @@ export default function Services() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
-                      <FormLabel>Active</FormLabel>
-                      <FormDescription className="text-xs">
-                        Make this service available for booking
-                      </FormDescription>
+                      <FormLabel>Ativo</FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Disponibilizar este serviço para agendamento
+                      </p>
                     </div>
                     <FormControl>
                       <Switch
