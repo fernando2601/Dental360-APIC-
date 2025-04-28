@@ -3,11 +3,13 @@ import { Sidebar } from "@/components/ui/sidebar";
 import { MobileNav } from "@/components/ui/mobile-nav";
 import { ChatBot } from "@/components/chat-bot";
 import { useMobile } from "@/hooks/use-mobile";
-import { Bell, Settings, Menu } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { Bell, Settings, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useLocation } from "wouter";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -16,6 +18,17 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const isMobile = useMobile();
+  const { user, logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
+
+  // Função para fazer logout
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        setLocation("/auth");
+      }
+    });
+  };
 
   useEffect(() => {
     if (!isMobile) {
@@ -67,6 +80,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </Button>
               <Separator orientation="vertical" className="h-8" />
               <ThemeToggle />
+              <Separator orientation="vertical" className="h-8" />
+              <Button 
+                variant="destructive" 
+                onClick={handleLogout}
+                className="gap-2"
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sair</span>
+              </Button>
             </div>
           </div>
         </header>
