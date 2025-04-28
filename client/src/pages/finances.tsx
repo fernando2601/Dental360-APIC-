@@ -45,10 +45,8 @@ export default function Finances() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Obter o parâmetro tab da URL
-  const [location] = useLocation();
-  const params = new URLSearchParams(location.split('?')[1] || '');
-  const activeTab = params.get('tab') || 'dashboard';
+  // Controle de aba diretamente com estado, sem depender da URL
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   // Initialize form
   const form = useForm<TransactionFormValues>({
@@ -184,12 +182,10 @@ export default function Finances() {
         </Card>
       </div>
 
-      {/* Main Financial Content Based on URL tab parameter */}
-      <Tabs value={activeTab} className="w-full" onValueChange={(value) => {
-        window.history.pushState(null, '', `/finances?tab=${value}`);
-      }}>
-        <div className="hidden">
-          <TabsList>
+      {/* Main Financial Content Based on active tab state */}
+      <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
+        <div className="mb-6">
+          <TabsList className="w-full">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="cash-flow">Fluxo de Caixa</TabsTrigger>
             <TabsTrigger value="transactions">Transações</TabsTrigger>

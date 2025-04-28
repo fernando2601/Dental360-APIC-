@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,43 +86,7 @@ export function Sidebar({ className }: SidebarProps) {
             <NavLink href="/clients" icon={<Users className="h-4 w-4" />} label="Pacientes" collapsed={collapsed} active={location === "/clients"} />
             <NavLink href="/inventory" icon={<Package className="h-4 w-4" />} label="Estoque" collapsed={collapsed} active={location === "/inventory"} />
             
-            <NavSubmenu 
-              icon={<DollarSign className="h-4 w-4" />} 
-              label="Finanças" 
-              collapsed={collapsed} 
-              active={location.startsWith("/finances")}
-            >
-              <SubNavLink 
-                href="/finances?tab=dashboard" 
-                icon={<LayoutDashboard className="h-4 w-4" />} 
-                label="Dashboard" 
-                active={location === "/finances" || location === "/finances?tab=dashboard"} 
-              />
-              <SubNavLink 
-                href="/finances?tab=cash-flow" 
-                icon={<LineChart className="h-4 w-4" />} 
-                label="Fluxo de Caixa" 
-                active={location === "/finances?tab=cash-flow"} 
-              />
-              <SubNavLink 
-                href="/finances?tab=transactions" 
-                icon={<Receipt className="h-4 w-4" />} 
-                label="Transações" 
-                active={location === "/finances?tab=transactions"} 
-              />
-              <SubNavLink 
-                href="/finances?tab=expenses" 
-                icon={<BarChart className="h-4 w-4" />} 
-                label="Despesas" 
-                active={location === "/finances?tab=expenses"} 
-              />
-              <SubNavLink 
-                href="/finances?tab=projections" 
-                icon={<TrendingUp className="h-4 w-4" />} 
-                label="Projeções" 
-                active={location === "/finances?tab=projections"} 
-              />
-            </NavSubmenu>
+            <NavLink href="/finances" icon={<DollarSign className="h-4 w-4" />} label="Finanças" collapsed={collapsed} active={location.startsWith("/finances")} />
             
             <NavLink href="/services" icon={<FileText className="h-4 w-4" />} label="Serviços" collapsed={collapsed} active={location === "/services"} />
             <NavLink href="/staff" icon={<UserCircle className="h-4 w-4" />} label="Equipe" collapsed={collapsed} active={location === "/staff"} />
@@ -222,9 +186,10 @@ interface NavSubmenuProps {
   collapsed: boolean;
   active: boolean;
   children: React.ReactNode;
+  onTabSelect?: (tab: string) => void;
 }
 
-function NavSubmenu({ icon, label, collapsed, active, children }: NavSubmenuProps) {
+function NavSubmenu({ icon, label, collapsed, active, children, onTabSelect }: NavSubmenuProps) {
   const [isOpen, setIsOpen] = useState(active);
 
   return (
@@ -247,7 +212,24 @@ function NavSubmenu({ icon, label, collapsed, active, children }: NavSubmenuProp
       </div>
       {!collapsed && isOpen && (
         <div className="pl-8 space-y-1">
-          {children}
+          {onTabSelect 
+            ? React.Children.map(children, (child) => {
+                if (React.isValidElement(child)) {
+                  return React.cloneElement(child, {
+                    onClick: (e: React.MouseEvent) => {
+                      e.preventDefault();
+                      // Extrair o tab do href: "/finances?tab=dashboard" -> "dashboard"
+                      const tabMatch = child.props.href?.match(/\?tab=([^&]+)/);
+                      if (tabMatch && tabMatch[1]) {
+                        onTabSelect(tabMatch[1]);
+                      }
+                    }
+                  });
+                }
+                return child;
+              })
+            : children
+          }
         </div>
       )}
     </div>
@@ -259,11 +241,12 @@ interface SubNavLinkProps {
   icon: React.ReactNode;
   label: string;
   active: boolean;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
-function SubNavLink({ href, icon, label, active }: SubNavLinkProps) {
+function SubNavLink({ href, icon, label, active, onClick }: SubNavLinkProps) {
   return (
-    <a href={href} className="no-underline">
+    <a href={href} className="no-underline" onClick={onClick}>
       <div
         className={cn(
           "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent cursor-pointer",
