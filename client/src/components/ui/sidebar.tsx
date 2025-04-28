@@ -263,7 +263,7 @@ interface SubNavLinkProps {
 
 function SubNavLink({ href, icon, label, active }: SubNavLinkProps) {
   return (
-    <Link href={href}>
+    <a href={href} className="no-underline">
       <div
         className={cn(
           "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent cursor-pointer",
@@ -273,7 +273,7 @@ function SubNavLink({ href, icon, label, active }: SubNavLinkProps) {
         {icon}
         <span>{label}</span>
       </div>
-    </Link>
+    </a>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -49,10 +49,6 @@ export default function Finances() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split('?')[1] || '');
   const activeTab = params.get('tab') || 'dashboard';
-  
-  // Log para debug
-  console.log("URL atual:", location);
-  console.log("Tab ativa:", activeTab);
 
   // Initialize form
   const form = useForm<TransactionFormValues>({
