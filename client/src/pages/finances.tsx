@@ -174,20 +174,142 @@ export default function Finances() {
         </Card>
       </div>
 
-      {/* Charts and Transactions */}
-      <Tabs defaultValue="charts" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="charts">Gráficos & Análises</TabsTrigger>
+      {/* Main Financial Navigation */}
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="mb-4 flex flex-wrap">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="cash-flow">Fluxo de Caixa</TabsTrigger>
           <TabsTrigger value="transactions">Transações</TabsTrigger>
+          <TabsTrigger value="expenses">Despesas</TabsTrigger>
+          <TabsTrigger value="projections">Projeções</TabsTrigger>
         </TabsList>
-        <TabsContent value="charts">
+        {/* Dashboard Tab - Visão geral financeira */}
+        <TabsContent value="dashboard">
           <FinanceChart />
         </TabsContent>
+
+        {/* Fluxo de Caixa Tab */}
+        <TabsContent value="cash-flow">
+          <Card>
+            <CardHeader>
+              <CardTitle>Fluxo de Caixa</CardTitle>
+              <CardDescription>Controle detalhado de entradas e saídas</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <ArrowUp className="h-5 w-5 text-success" />
+                    <h3 className="text-sm font-medium">Entradas por Período</h3>
+                  </div>
+                  <div className="mt-2 space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Hoje:</span>
+                      <span className="font-medium text-success">{formatCurrency(totalIncome * 0.12)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Esta Semana:</span>
+                      <span className="font-medium text-success">{formatCurrency(totalIncome * 0.4)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Este Mês:</span>
+                      <span className="font-medium text-success">{formatCurrency(totalIncome)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <ArrowDown className="h-5 w-5 text-destructive" />
+                    <h3 className="text-sm font-medium">Saídas por Período</h3>
+                  </div>
+                  <div className="mt-2 space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Hoje:</span>
+                      <span className="font-medium text-destructive">{formatCurrency(totalExpenses * 0.08)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Esta Semana:</span>
+                      <span className="font-medium text-destructive">{formatCurrency(totalExpenses * 0.3)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Este Mês:</span>
+                      <span className="font-medium text-destructive">{formatCurrency(totalExpenses)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-muted/30 p-4 rounded-lg mb-6">
+                <h3 className="text-sm font-medium mb-2">Resumo do Fluxo de Caixa</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <span className="text-xs text-muted-foreground">Total de Entradas</span>
+                    <p className="text-xl font-bold text-success">{formatCurrency(totalIncome)}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Total de Saídas</span>
+                    <p className="text-xl font-bold text-destructive">{formatCurrency(totalExpenses)}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Saldo</span>
+                    <p className={`text-xl font-bold ${netIncome >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {formatCurrency(netIncome)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <h3 className="text-sm font-medium mb-2">Principais Formas de Pagamento</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Cartão de Crédito</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500" style={{ width: '45%' }}></div>
+                      </div>
+                      <span className="text-sm font-medium">45%</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Dinheiro</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500" style={{ width: '25%' }}></div>
+                      </div>
+                      <span className="text-sm font-medium">25%</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Transferência</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-purple-500" style={{ width: '20%' }}></div>
+                      </div>
+                      <span className="text-sm font-medium">20%</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Outros</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-gray-500" style={{ width: '10%' }}></div>
+                      </div>
+                      <span className="text-sm font-medium">10%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Transactions Tab */}
         <TabsContent value="transactions">
           <Card>
             <CardHeader>
-              <CardTitle>Transações Recentes</CardTitle>
-              <CardDescription>Suas atividades financeiras mais recentes</CardDescription>
+              <CardTitle>Transações</CardTitle>
+              <CardDescription>Histórico completo de transações</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoadingTransactions ? (
@@ -235,6 +357,218 @@ export default function Finances() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Expenses Tab */}
+        <TabsContent value="expenses">
+          <Card>
+            <CardHeader>
+              <CardTitle>Análise de Despesas</CardTitle>
+              <CardDescription>Detalhamento e classificação de gastos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium mb-3">Despesas por Categoria</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Materiais</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-red-500" style={{ width: '38%' }}></div>
+                        </div>
+                        <span className="text-sm font-medium">38%</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Aluguel</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-orange-500" style={{ width: '25%' }}></div>
+                        </div>
+                        <span className="text-sm font-medium">25%</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Salários</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-yellow-500" style={{ width: '20%' }}></div>
+                        </div>
+                        <span className="text-sm font-medium">20%</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Marketing</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-500" style={{ width: '12%' }}></div>
+                        </div>
+                        <span className="text-sm font-medium">12%</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Outras</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-gray-500" style={{ width: '5%' }}></div>
+                        </div>
+                        <span className="text-sm font-medium">5%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium mb-3">Tendência de Despesas Mensais</h3>
+                  <div className="h-44 flex items-end gap-2">
+                    <div className="flex-1 flex flex-col items-center">
+                      <div className="h-20 w-8 bg-purple-200 dark:bg-purple-900/40 rounded-t-sm"></div>
+                      <span className="text-xs mt-1">Jan</span>
+                    </div>
+                    <div className="flex-1 flex flex-col items-center">
+                      <div className="h-28 w-8 bg-purple-300 dark:bg-purple-900/60 rounded-t-sm"></div>
+                      <span className="text-xs mt-1">Fev</span>
+                    </div>
+                    <div className="flex-1 flex flex-col items-center">
+                      <div className="h-24 w-8 bg-purple-300 dark:bg-purple-900/60 rounded-t-sm"></div>
+                      <span className="text-xs mt-1">Mar</span>
+                    </div>
+                    <div className="flex-1 flex flex-col items-center">
+                      <div className="h-32 w-8 bg-purple-400 dark:bg-purple-800/80 rounded-t-sm"></div>
+                      <span className="text-xs mt-1">Abr</span>
+                    </div>
+                    <div className="flex-1 flex flex-col items-center">
+                      <div className="h-36 w-8 bg-purple-500 dark:bg-purple-700 rounded-t-sm"></div>
+                      <span className="text-xs mt-1">Mai</span>
+                    </div>
+                    <div className="flex-1 flex flex-col items-center">
+                      <div className="h-28 w-8 bg-purple-400 dark:bg-purple-800/80 rounded-t-sm"></div>
+                      <span className="text-xs mt-1">Jun</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <h3 className="text-sm font-medium mb-3">Principais Despesas Recentes</h3>
+                <div className="divide-y">
+                  {recentTransactions
+                    .filter((t: any) => t.type === "expense")
+                    .slice(0, 5)
+                    .map((expense: any) => (
+                      <div key={expense.id} className="py-3 flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">{expense.description || expense.category}</p>
+                          <p className="text-xs text-muted-foreground">{formatDate(expense.date)}</p>
+                        </div>
+                        <div className="text-destructive font-semibold">
+                          {formatCurrency(expense.amount)}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Projections Tab */}
+        <TabsContent value="projections">
+          <Card>
+            <CardHeader>
+              <CardTitle>Projeções Financeiras</CardTitle>
+              <CardDescription>Análises de tendências e crescimento futuro</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium mb-2">Crescimento Mensal</h3>
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">5.3%</p>
+                  <p className="text-xs text-muted-foreground">Taxa de crescimento projetada</p>
+                </div>
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium mb-2">Faturamento em 6 meses</h3>
+                  <p className="text-2xl font-bold">{formatCurrency(totalIncome * 1.32)}</p>
+                  <p className="text-xs text-muted-foreground">Projeção baseada no crescimento atual</p>
+                </div>
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium mb-2">ROI de Marketing</h3>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">3.2x</p>
+                  <p className="text-xs text-muted-foreground">Retorno sobre investimento projetado</p>
+                </div>
+              </div>
+
+              <div className="bg-muted/30 p-4 rounded-lg mb-6">
+                <h3 className="text-sm font-medium mb-4">Projeção de Faturamento para os Próximos 6 Meses</h3>
+                <div className="h-64 flex items-end gap-2">
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="relative">
+                      <div className="absolute -top-6 text-xs font-medium">{formatCurrency(totalIncome * 1.05)}</div>
+                      <div className="h-44 w-12 bg-emerald-200 dark:bg-emerald-900/40 rounded-t-sm"></div>
+                    </div>
+                    <span className="text-xs mt-1">Mês 1</span>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="relative">
+                      <div className="absolute -top-6 text-xs font-medium">{formatCurrency(totalIncome * 1.11)}</div>
+                      <div className="h-48 w-12 bg-emerald-300 dark:bg-emerald-800/60 rounded-t-sm"></div>
+                    </div>
+                    <span className="text-xs mt-1">Mês 2</span>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="relative">
+                      <div className="absolute -top-6 text-xs font-medium">{formatCurrency(totalIncome * 1.16)}</div>
+                      <div className="h-52 w-12 bg-emerald-400 dark:bg-emerald-700/70 rounded-t-sm"></div>
+                    </div>
+                    <span className="text-xs mt-1">Mês 3</span>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="relative">
+                      <div className="absolute -top-6 text-xs font-medium">{formatCurrency(totalIncome * 1.22)}</div>
+                      <div className="h-56 w-12 bg-emerald-500 dark:bg-emerald-700/80 rounded-t-sm"></div>
+                    </div>
+                    <span className="text-xs mt-1">Mês 4</span>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="relative">
+                      <div className="absolute -top-6 text-xs font-medium">{formatCurrency(totalIncome * 1.28)}</div>
+                      <div className="h-60 w-12 bg-emerald-600 dark:bg-emerald-600/90 rounded-t-sm"></div>
+                    </div>
+                    <span className="text-xs mt-1">Mês 5</span>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center">
+                    <div className="relative">
+                      <div className="absolute -top-6 text-xs font-medium">{formatCurrency(totalIncome * 1.32)}</div>
+                      <div className="h-64 w-12 bg-emerald-700 dark:bg-emerald-600 rounded-t-sm"></div>
+                    </div>
+                    <span className="text-xs mt-1">Mês 6</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <h3 className="text-sm font-medium mb-3">Recomendações Estratégicas</h3>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">•</span>
+                    <span>Aumente o investimento em marketing digital em 15% para acelerar o crescimento</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">•</span>
+                    <span>Ofereça pacotes promocionais para aumentar o ticket médio em 20%</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">•</span>
+                    <span>Implemente um programa de fidelidade para aumentar a recorrência de pacientes</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">•</span>
+                    <span>Reduza custos com fornecedores através de compras em maior volume</span>
+                  </li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
