@@ -91,6 +91,7 @@ export function Sidebar({ className }: SidebarProps) {
             
             <NavLink href="/services" icon={<FileText className="h-4 w-4" />} label="Serviços" collapsed={collapsed} active={location === "/services"} />
             <NavLink href="/staff" icon={<UserCircle className="h-4 w-4" />} label="Equipe" collapsed={collapsed} active={location === "/staff"} />
+            <NavLink href="/knowledge" icon={<BookOpen className="h-4 w-4" />} label="Área de Aprendizado" collapsed={collapsed} active={location === "/knowledge"} />
             <NavLink href="/whatsapp" icon={<FaWhatsapp className="h-4 w-4" />} label="WhatsApp" collapsed={collapsed} active={location === "/whatsapp"} />
             <NavLink href="/packages" icon={<Gift className="h-4 w-4" />} label="Pacotes" collapsed={collapsed} active={location === "/packages"} />
             <NavLink href="/subscriptions" icon={<BadgePercent className="h-4 w-4" />} label="Assinatura" collapsed={collapsed} active={location === "/subscriptions"} />
