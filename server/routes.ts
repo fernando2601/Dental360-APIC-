@@ -1,6 +1,7 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 import { z } from "zod";
 import { 
   insertClientSchema, 
@@ -12,8 +13,10 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configurar autenticação
+  const { authMiddleware, adminMiddleware } = setupAuth(app);
   // Client routes
-  app.get("/api/clients", async (req: Request, res: Response) => {
+  app.get("/api/clients", authMiddleware, async (req: Request, res: Response) => {
     try {
       const clients = await storage.getClients();
       res.json(clients);
@@ -291,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Financial Transaction routes
-  app.get("/api/financial-transactions", async (req: Request, res: Response) => {
+  app.get("/api/financial-transactions", authMiddleware, async (req: Request, res: Response) => {
     try {
       const { start, end } = req.query;
       let transactions;
@@ -309,7 +312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/financial-transactions", async (req: Request, res: Response) => {
+  app.post("/api/financial-transactions", authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
     try {
       const validatedData = insertFinancialTransactionSchema.parse(req.body);
       const transaction = await storage.createFinancialTransaction(validatedData);
