@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
   const loginMutation = useMutation({
