@@ -130,8 +130,66 @@ Cuide-se bem! 😊`,
       category: 'Higiene',
       tags: ['escovação', 'higiene', 'limpeza'],
       dateAdded: '2025-02-10',
-      type: 'video',
-      url: 'https://www.youtube.com/watch?v=example',
+      type: 'text',
+      content: `Como Escovar os Dentes Corretamente
+
+Escovar os dentes da maneira certa é essencial para manter a saúde bucal, prevenir cáries, gengivite e mau hálito. Siga este passo a passo para uma higiene bucal eficiente:
+
+1. Escolha a Escova e o Creme Dental Adequados
+Use uma escova de cerdas macias para não machucar a gengiva.
+
+O creme dental deve conter flúor para fortalecer o esmalte dos dentes.
+
+2. Posicione a Escova Corretamente
+Incline a escova em um ângulo de 45 graus em relação à gengiva.
+
+Faça movimentos suaves e circulares (não use força excessiva).
+
+3. Passo a Passo da Escovação
+✅ Etapa 1: Superfícies externas
+
+Comece pelos dentes superiores, escovando de cima para baixo.
+
+Repita nos dentes inferiores, escovando de baixo para cima.
+
+✅ Etapa 2: Superfícies internas
+
+Incline a escova verticalmente para limpar a parte de trás dos dentes frontais.
+
+✅ Etapa 3: Superfícies de mastigação
+
+Faça movimentos de vai e vem para remover resíduos de alimentos.
+
+✅ Etapa 4: Limpeza da língua
+
+Use a escova ou um limpador de língua para remover bactérias e evitar mau hálito.
+
+4. Tempo de Escovação
+Escove por pelo menos 2 minutos (30 segundos por quadrante da boca).
+
+Uma dica é usar um timer ou escovar ouvindo uma música curta.
+
+5. Enxágue e Finalização
+Cuspa o excesso de creme dental, mas não enxágue demais (o flúor precisa agir).
+
+Use fio dental antes ou depois da escovação para limpar entre os dentes.
+
+6. Cuidados Adicionais
+Troque a escova a cada 3 meses ou quando as cerdas estiverem gastas.
+
+Evite escovar os dentes com muita força para não desgastar o esmalte ou retrair a gengiva.
+
+Se usar aparelho ortodôntico, utilize escovas especiais ou passa-fio.
+
+Quando Escovar?
+Pelo menos 2 vezes ao dia (de manhã e antes de dormir).
+
+O ideal é escovar após as refeições, mas espere 30 minutos se consumiu algo ácido (como frutas cítricas ou refrigerantes).
+
+👉 Lembre-se: A escovação correta previne cáries, tártaro e doenças gengivais. Visite o dentista a cada 6 meses para check-ups!
+
+Sorria com saúde! 😁`,
+      url: '/materials/como-escovar-dentes.pdf',
     },
     {
       id: '3',
@@ -627,37 +685,51 @@ Assinatura do Profissional`,
                         Adicionado em {new Date(material.dateAdded).toLocaleDateString('pt-BR')}
                       </span>
                       <div className="flex gap-2">
-                        {material.content && (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4 mr-1" />
+                              Ver
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl">
+                            <DialogHeader>
+                              <DialogTitle>{material.title}</DialogTitle>
+                              <DialogDescription>{material.description}</DialogDescription>
+                            </DialogHeader>
+                            <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                              <div className="whitespace-pre-line text-sm">
+                                {material.content || (
+                                  <div className="flex flex-col items-center justify-center h-full">
+                                    <p className="text-muted-foreground mb-4">Visualização não disponível diretamente.</p>
+                                    <Button onClick={() => window.open(material.url, '_blank')}>
+                                      <Download className="h-4 w-4 mr-1" />
+                                      Abrir arquivo original
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            </ScrollArea>
+                            <DialogFooter className="flex justify-between items-center mt-4">
+                              <span className="text-xs text-muted-foreground">
+                                Atualizado em {new Date(material.dateAdded).toLocaleDateString('pt-BR')}
+                              </span>
+                              <Button onClick={() => {
+                                // Aqui seria a função para gerar PDF
+                                // Como exemplo, abrimos o URL do material
+                                window.open(material.url, '_blank');
+                              }}>
+                                <FileDown className="h-4 w-4 mr-1" />
+                                Baixar como PDF
                               </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-4xl">
-                              <DialogHeader>
-                                <DialogTitle>{material.title}</DialogTitle>
-                                <DialogDescription>{material.description}</DialogDescription>
-                              </DialogHeader>
-                              <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
-                                <div className="whitespace-pre-line text-sm">
-                                  {material.content}
-                                </div>
-                              </ScrollArea>
-                              <DialogFooter className="flex justify-between items-center mt-4">
-                                <span className="text-xs text-muted-foreground">
-                                  Atualizado em {new Date(material.dateAdded).toLocaleDateString('pt-BR')}
-                                </span>
-                                <Button>
-                                  <FileDown className="h-4 w-4 mr-1" />
-                                  Baixar como PDF
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        )}
-                        <Button variant="outline" size="sm">
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(material.url, '_blank')}
+                        >
                           <Download className="h-4 w-4 mr-1" />
                           Baixar
                         </Button>
@@ -801,10 +873,34 @@ Assinatura do Profissional`,
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm">
-                              <Bookmark className="h-4 w-4" />
-                              <span className="sr-only">Salvar</span>
-                            </Button>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                  <span className="sr-only">Ver</span>
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl">
+                                <DialogHeader>
+                                  <DialogTitle>{form.title}</DialogTitle>
+                                  <DialogDescription>{form.description}</DialogDescription>
+                                </DialogHeader>
+                                <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                  <div className="whitespace-pre-line text-sm font-mono">
+                                    {form.content}
+                                  </div>
+                                </ScrollArea>
+                                <DialogFooter className="flex justify-between items-center mt-4">
+                                  <span className="text-xs text-muted-foreground">
+                                    Atualizado em {new Date(form.lastUpdated).toLocaleDateString('pt-BR')}
+                                  </span>
+                                  <Button>
+                                    <FileDown className="h-4 w-4 mr-1" />
+                                    Baixar como PDF
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
                             <Button variant="outline" size="sm">
                               <Download className="h-4 w-4" />
                               <span className="sr-only">Baixar</span>
