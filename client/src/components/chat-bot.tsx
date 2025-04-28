@@ -1057,20 +1057,22 @@ export function ChatBot() {
             </CardTitle>
             <div className="flex space-x-1">
               <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7"
+                variant="outline" 
+                size="sm" 
+                className="h-7 px-2 text-xs flex items-center gap-1"
                 onClick={toggleMinimize}
               >
-                {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                {isMinimized ? <Maximize2 className="h-3.5 w-3.5 mr-1" /> : <Minimize2 className="h-3.5 w-3.5 mr-1" />}
+                {isMinimized ? "Expandir" : "Minimizar"}
               </Button>
               <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7"
+                variant="outline" 
+                size="sm" 
+                className="h-7 px-2 text-xs flex items-center gap-1 text-destructive border-destructive hover:bg-destructive/10"
                 onClick={toggleChat}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5 mr-1" />
+                Fechar
               </Button>
             </div>
           </CardHeader>
@@ -1078,7 +1080,7 @@ export function ChatBot() {
           {!isMinimized && (
             <>
               <CardContent className="p-0">
-                <ScrollArea className="h-[350px] p-3">
+                <ScrollArea className="h-[280px] p-3">
                   {messages.map((message) => (
                     <div
                       key={message.id}
