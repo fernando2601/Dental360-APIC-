@@ -75,7 +75,7 @@ export function Sidebar({ className }: SidebarProps) {
                 Principal
               </h3>
             </div>
-            <NavLink href="/" icon={<Home className="h-4 w-4" />} label="Dashboard" collapsed={collapsed} active={location === "/"} />
+            <NavLink href="/" icon={<Home className="h-4 w-4" />} label="Início" collapsed={collapsed} active={location === "/"} />
             <NavLink href="/appointments" icon={<Calendar className="h-4 w-4" />} label="Agendamentos" collapsed={collapsed} active={location === "/appointments"} />
             <NavLink href="/clients" icon={<Users className="h-4 w-4" />} label="Pacientes" collapsed={collapsed} active={location === "/clients"} />
             <NavLink href="/inventory" icon={<Package className="h-4 w-4" />} label="Estoque" collapsed={collapsed} active={location === "/inventory"} />

@@ -36,7 +36,7 @@ export function MobileNav() {
           <span className="font-bold text-lg">DentalSpa</span>
         </div>
         <nav className="flex flex-col gap-2 mt-4">
-          <NavItem href="/" icon={<Home className="h-5 w-5" />} label="Dashboard" onClick={() => setOpen(false)} />
+          <NavItem href="/" icon={<Home className="h-5 w-5" />} label="Início" onClick={() => setOpen(false)} />
           <NavItem href="/appointments" icon={<Calendar className="h-5 w-5" />} label="Agendamentos" onClick={() => setOpen(false)} />
           <NavItem href="/clients" icon={<Users className="h-5 w-5" />} label="Pacientes" onClick={() => setOpen(false)} />
           <NavItem href="/inventory" icon={<Package className="h-5 w-5" />} label="Estoque" onClick={() => setOpen(false)} />
