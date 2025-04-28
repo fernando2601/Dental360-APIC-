@@ -8,21 +8,21 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(amount: number | string): string {
   const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("pt-BR", {
     style: "currency",
-    currency: "USD",
+    currency: "BRL",
     minimumFractionDigits: 2,
   }).format(numAmount);
 }
 
 export function formatDate(dateString: string | Date): string {
   const date = typeof dateString === "string" ? new Date(dateString) : dateString;
-  return format(date, "MMM dd, yyyy");
+  return format(date, "dd/MM/yyyy");
 }
 
 export function formatDateTime(dateString: string | Date): string {
   const date = typeof dateString === "string" ? new Date(dateString) : dateString;
-  return format(date, "MMM dd, yyyy h:mm a");
+  return format(date, "dd/MM/yyyy HH:mm");
 }
 
 export function formatTimeAgo(dateString: string | Date): string {
@@ -62,11 +62,11 @@ export function getDaysUntilBirthday(birthdayString: string): number | null {
 
 export function getRandomGreeting(): string {
   const greetings = [
-    "Hello",
-    "Welcome back",
-    "Good day",
-    "Greetings",
-    "Hi there",
+    "Olá",
+    "Bem-vindo(a) de volta",
+    "Bom dia",
+    "Saudações",
+    "Oi",
   ];
   return greetings[Math.floor(Math.random() * greetings.length)];
 }
