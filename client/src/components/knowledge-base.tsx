@@ -732,15 +732,12 @@ Assinatura do Profissional`,
                         ))}
                       </div>
                     </CardContent>
-                    <CardFooter className="p-4 pt-3 mt-auto flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 border-t">
-                      <span className="text-xs text-muted-foreground">
-                        Adicionado em {new Date(material.dateAdded).toLocaleDateString('pt-BR')}
-                      </span>
-                      <div className="flex gap-2 w-full lg:w-auto justify-end">
+                    <CardFooter className="p-4 pt-3 mt-auto flex justify-end gap-2 border-t">
+                      <div className="flex gap-2">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-1" />
+                            <Button variant="outline" size="sm" className="w-[90px]">
+                              <Eye className="h-4 w-4 mr-2" />
                               Ver
                             </Button>
                           </DialogTrigger>
@@ -780,13 +777,14 @@ Assinatura do Profissional`,
                         <Button 
                           variant="outline" 
                           size="sm"
+                          className="w-[140px]"
                           onClick={() => 
                             material.content 
                               ? generatePDF(material.title, material.content)
                               : window.open(material.url, '_blank')
                           }
                         >
-                          <FileDown className="h-4 w-4 mr-1" />
+                          <FileDown className="h-4 w-4 mr-2" />
                           Baixar como PDF
                         </Button>
                       </div>
