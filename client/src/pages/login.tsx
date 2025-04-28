@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Nome de usuário é obrigatório"),
@@ -63,6 +63,9 @@ type ResetPasswordRequestFormValues = z.infer<typeof resetPasswordRequestSchema>
 export default function LoginPage() {
   const { user, loginMutation, registerMutation, resetPasswordRequestMutation } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("login");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -213,9 +216,28 @@ export default function LoginPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Senha</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Sua senha" {...field} />
-                          </FormControl>
+                          <div className="relative">
+                            <FormControl>
+                              <Input 
+                                type={showLoginPassword ? "text" : "password"} 
+                                placeholder="Sua senha" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowLoginPassword(!showLoginPassword)}
+                            >
+                              {showLoginPassword ? (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -316,9 +338,28 @@ export default function LoginPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Senha</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Crie uma senha forte" {...field} />
-                          </FormControl>
+                          <div className="relative">
+                            <FormControl>
+                              <Input 
+                                type={showRegisterPassword ? "text" : "password"} 
+                                placeholder="Crie uma senha forte" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                            >
+                              {showRegisterPassword ? (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -330,9 +371,28 @@ export default function LoginPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Confirme a Senha</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Repita sua senha" {...field} />
-                          </FormControl>
+                          <div className="relative">
+                            <FormControl>
+                              <Input 
+                                type={showConfirmPassword ? "text" : "password"} 
+                                placeholder="Repita sua senha" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                              {showConfirmPassword ? (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}

@@ -168,13 +168,13 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    // Importar a função para criar hash predefinido
-    const { createPredefinedHash } = await import("./auth");
+        // Criar usuários diretamente com senhas em texto puro para DEMO
+    // Em um ambiente de produção real, NUNCA faça isso
     
     // Create admin user
     this.createUser({
       username: "admin",
-      password: createPredefinedHash("admin123"),
+      password: "admin123", // Senha em texto puro para DEMO
       fullName: "Administrador",
       role: "admin",
       email: "admin@clinicadental.com",
@@ -184,7 +184,7 @@ export class MemStorage implements IStorage {
     // Create requested admin user
     this.createUser({
       username: "nerifernando",
-      password: createPredefinedHash("@Brazucas"),
+      password: "@Brazucas", // Senha em texto puro para DEMO
       fullName: "Neri Fernando",
       role: "admin",
       email: "nerifernando2@gmail.com",
@@ -194,12 +194,18 @@ export class MemStorage implements IStorage {
     // Create non-admin user with same password
     this.createUser({
       username: "funcionario",
-      password: createPredefinedHash("@Brazucas"),
+      password: "@Brazucas", // Senha em texto puro para DEMO
       fullName: "Funcionário Padrão",
       role: "staff",
       email: "funcionario@clinicadental.com",
       phone: "555-456-7890"
     });
+    
+    // Imprimindo credenciais no console para facilitar debug
+    console.log("USUÁRIOS CRIADOS COM SUCESSO:");
+    console.log("- admin/admin123");
+    console.log("- nerifernando/@Brazucas");
+    console.log("- funcionario/@Brazucas");
 
     // Create a dentist
     const dentist = this.createUser({

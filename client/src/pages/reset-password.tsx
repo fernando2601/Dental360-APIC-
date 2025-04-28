@@ -23,7 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const resetPasswordSchema = z
@@ -48,6 +48,8 @@ export default function ResetPasswordPage() {
   const [, setLocation] = useLocation();
   const [token, setToken] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { resetPasswordMutation } = useAuth();
 
   useEffect(() => {
@@ -155,9 +157,28 @@ export default function ResetPasswordPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nova Senha</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Digite sua nova senha" {...field} />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input 
+                          type={showPassword ? "text" : "password"} 
+                          placeholder="Digite sua nova senha" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -169,9 +190,28 @@ export default function ResetPasswordPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Confirme a Nova Senha</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Repita sua nova senha" {...field} />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input 
+                          type={showConfirmPassword ? "text" : "password"} 
+                          placeholder="Repita sua nova senha" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
