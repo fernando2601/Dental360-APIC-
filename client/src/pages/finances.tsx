@@ -180,17 +180,20 @@ export default function Finances() {
         </Card>
       </div>
 
-      {/* Main Financial Navigation */}
+      {/* Main Financial Content Based on URL tab parameter */}
       <Tabs value={activeTab} className="w-full" onValueChange={(value) => {
         window.history.pushState(null, '', `/finances?tab=${value}`);
       }}>
-        <TabsList className="mb-4 flex flex-wrap">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="cash-flow">Fluxo de Caixa</TabsTrigger>
-          <TabsTrigger value="transactions">Transações</TabsTrigger>
-          <TabsTrigger value="expenses">Despesas</TabsTrigger>
-          <TabsTrigger value="projections">Projeções</TabsTrigger>
-        </TabsList>
+        <div className="hidden">
+          <TabsList>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="cash-flow">Fluxo de Caixa</TabsTrigger>
+            <TabsTrigger value="transactions">Transações</TabsTrigger>
+            <TabsTrigger value="expenses">Despesas</TabsTrigger>
+            <TabsTrigger value="projections">Projeções</TabsTrigger>
+          </TabsList>
+        </div>
+        
         {/* Dashboard Tab - Visão geral financeira */}
         <TabsContent value="dashboard">
           <FinanceChart />
