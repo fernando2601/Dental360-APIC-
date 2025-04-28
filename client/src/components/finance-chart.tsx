@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -42,15 +43,38 @@ export function FinanceChart() {
     queryKey: ['/api/services'],
   });
 
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [pieData, setPieData] = useState<any[]>([]);
-  const [projectionData, setProjectionData] = useState<any[]>([]);
-  const [reportData, setReportData] = useState<any>({
+  type ChartDataItem = {
+    name: string;
+    income: number;
+    expenses: number;
+    date?: Date;
+    month?: number;
+    year?: number;
+    projected?: boolean;
+  };
+
+  type PieChartItem = {
+    name: string;
+    value: number;
+  };
+
+  type ReportMetrics = {
+    topServices: any[];
+    monthlyGrowth: number;
+    averageTicket: number;
+    cashOnlyDiscount: number;
+    recurrenceRate: number;
+  };
+
+  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
+  const [pieData, setPieData] = useState<PieChartItem[]>([]);
+  const [projectionData, setProjectionData] = useState<ChartDataItem[]>([]);
+  const [reportData, setReportData] = useState<ReportMetrics>({
     topServices: [],
     monthlyGrowth: 0,
     averageTicket: 0,
-    cashOnlyDiscount: 0,
-    recurrenceRate: 0
+    cashOnlyDiscount: 5, // 5% discount for cash payments
+    recurrenceRate: 68 // 68% of clients return
   });
   
   useEffect(() => {
