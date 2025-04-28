@@ -1,685 +1,594 @@
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format, addMonths, subMonths } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { formatCurrency } from "@/lib/utils";
-import { User, BarChart3, Calendar, TrendingUp, Users, CircleDollarSign } from "lucide-react";
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatCurrency } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { UserRound, MessageSquare, Calendar, ArrowUpRight, TrendingUp, Users, Clock } from 'lucide-react';
 
-// Cores para os gráficos
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#FF6B6B"];
+const AnalyticsDashboards = () => {
+  const [activeTab, setActiveTab] = useState('chatbot');
 
-// Componente de análise de conversão do ChatBot
-export function ChatbotConversionAnalytics() {
-  // Dados simulados para demonstração
+  // Dados para a análise de conversão do ChatBot
   const chatbotData = [
-    { month: "Jan", totalConversations: 120, bookings: 28, conversionRate: 23.3 },
-    { month: "Fev", totalConversations: 150, bookings: 42, conversionRate: 28.0 },
-    { month: "Mar", totalConversations: 180, bookings: 58, conversionRate: 32.2 },
-    { month: "Abr", totalConversations: 210, bookings: 73, conversionRate: 34.8 },
-    { month: "Mai", totalConversations: 250, bookings: 95, conversionRate: 38.0 },
-    { month: "Jun", totalConversations: 230, bookings: 93, conversionRate: 40.4 },
+    { month: 'Jan', mensagens: 220, conversoes: 45, taxa: 20.5 },
+    { month: 'Fev', mensagens: 240, conversoes: 52, taxa: 21.7 },
+    { month: 'Mar', mensagens: 310, conversoes: 68, taxa: 21.9 },
+    { month: 'Abr', mensagens: 280, conversoes: 70, taxa: 25.0 },
+    { month: 'Mai', mensagens: 350, conversoes: 98, taxa: 28.0 },
+    { month: 'Jun', mensagens: 390, conversoes: 120, taxa: 30.8 },
   ];
 
-  const suggestionData = [
-    { name: "Extração de Siso", value: 42, count: 26 },
-    { name: "Clareamento Dental", value: 28, count: 18 },
-    { name: "Aplicação de Botox", value: 22, count: 14 },
-    { name: "Consulta Geral", value: 8, count: 5 },
+  // Dados para análise de sazonalidade
+  const seasonalityData = [
+    { month: 'Jan', limpeza: 28, clareamento: 12, botox: 8, harmonizacao: 5 },
+    { month: 'Fev', limpeza: 32, clareamento: 18, botox: 11, harmonizacao: 7 },
+    { month: 'Mar', limpeza: 35, clareamento: 23, botox: 15, harmonizacao: 9 },
+    { month: 'Abr', limpeza: 30, clareamento: 28, botox: 14, harmonizacao: 11 },
+    { month: 'Mai', limpeza: 24, clareamento: 32, botox: 10, harmonizacao: 15 },
+    { month: 'Jun', limpeza: 20, clareamento: 25, botox: 7, harmonizacao: 18 },
   ];
 
-  const procedureData = [
-    { name: "Procedimentos Dentais", value: 65 },
-    { name: "Harmonização Facial", value: 35 },
+  // Dados para análise de lealdade
+  const loyaltyData = [
+    { name: 'Novos', value: 35, color: '#94a3b8' },
+    { name: 'Ocasionais', value: 45, color: '#3b82f6' },
+    { name: 'Regulares', value: 15, color: '#10b981' },
+    { name: 'Premium', value: 5, color: '#8b5cf6' },
   ];
 
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-primary" />
-            Análise de Conversão do ChatBot
-          </CardTitle>
-          <CardDescription>
-            Dados de conversão de interações do ChatBot em agendamentos
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-500" />
-                Total de Conversas
-              </h3>
-              <p className="text-2xl font-bold">1,140</p>
-              <p className="text-xs text-muted-foreground">Últimos 6 meses</p>
-            </div>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-green-500" />
-                Agendamentos
-              </h3>
-              <p className="text-2xl font-bold">389</p>
-              <p className="text-xs text-muted-foreground">Via ChatBot (6 meses)</p>
-            </div>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-purple-500" />
-                Taxa de Conversão
-              </h3>
-              <p className="text-2xl font-bold">34.1%</p>
-              <p className="text-xs text-muted-foreground">Média dos últimos 6 meses</p>
-            </div>
-          </div>
+  // Dados para tabela de frases mais efetivas
+  const topPhrases = [
+    { 
+      phrase: "Promoção especial de clareamento este mês!", 
+      uses: 85, 
+      conversions: 32, 
+      rate: "37.6%" 
+    },
+    { 
+      phrase: "Agende hoje e ganhe avaliação gratuita de harmonização!", 
+      uses: 64, 
+      conversions: 23, 
+      rate: "35.9%" 
+    },
+    { 
+      phrase: "Primeira consulta com 50% de desconto!", 
+      uses: 72, 
+      conversions: 25, 
+      rate: "34.7%" 
+    },
+    { 
+      phrase: "Dor de dente? Temos horários de emergência!", 
+      uses: 58, 
+      conversions: 19, 
+      rate: "32.8%" 
+    },
+    { 
+      phrase: "Pacote completo de estética: Clareamento + Harmonização", 
+      uses: 43, 
+      conversions: 14, 
+      rate: "32.6%" 
+    },
+  ];
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-4">Evolução da Taxa de Conversão</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={chatbotData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.1} />
-                    <XAxis dataKey="month" />
-                    <YAxis unit="%" />
-                    <Tooltip 
-                      formatter={(value: any) => [`${value}%`, 'Taxa de Conversão']}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff'
-                      }}
-                    />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="conversionRate" 
-                      name="Taxa de Conversão"
-                      stroke="#8884d8" 
-                      strokeWidth={2}
-                      activeDot={{ r: 8 }} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-4">Interações vs. Agendamentos</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={chatbotData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.1} />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff'
-                      }}
-                    />
-                    <Legend />
-                    <Bar dataKey="totalConversations" name="Total de Conversas" fill="#0088FE" />
-                    <Bar dataKey="bookings" name="Agendamentos" fill="#00C49F" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-4">Sugestões que Geram Mais Agendamentos</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={suggestionData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {suggestionData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value, name, props) => [
-                        `${value}%`,
-                        `${props.payload.name} (${props.payload.count} agendamentos)`
-                      ]}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff'
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-4">Tipos de Procedimentos Agendados</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={procedureData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {procedureData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value) => [`${value}%`, 'Percentual']}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff'
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-// Componente de análise de sazonalidade e tendências
-export function SeasonalityTrendsAnalytics() {
-  // Dados de sazonalidade ao longo do ano
-  const monthlyData = [
-    { name: "Jan", dental: 35000, harmonization: 25000, total: 60000 },
-    { name: "Fev", dental: 32000, harmonization: 28000, total: 60000 },
-    { name: "Mar", dental: 40000, harmonization: 30000, total: 70000 },
-    { name: "Abr", dental: 38000, harmonization: 32000, total: 70000 },
-    { name: "Mai", dental: 42000, harmonization: 38000, total: 80000 },
-    { name: "Jun", dental: 48000, harmonization: 42000, total: 90000 },
-    { name: "Jul", dental: 52000, harmonization: 48000, total: 100000 },
-    { name: "Ago", dental: 58000, harmonization: 52000, total: 110000 },
-    { name: "Set", dental: 62000, harmonization: 58000, total: 120000 },
-    { name: "Out", dental: 55000, harmonization: 55000, total: 110000 },
-    { name: "Nov", dental: 48000, harmonization: 52000, total: 100000 },
-    { name: "Dez", dental: 45000, harmonization: 55000, total: 100000 },
+  // Dados para tabela de clientes fiéis
+  const loyalCustomers = [
+    { name: "Maria Silva", visits: 12, revenue: 8450, lastVisit: "Há 2 semanas", status: "Premium" },
+    { name: "João Oliveira", visits: 8, revenue: 5820, lastVisit: "Há 1 mês", status: "Regular" },
+    { name: "Ana Santos", visits: 10, revenue: 7230, lastVisit: "Há 3 dias", status: "Premium" },
+    { name: "Carlos Ferreira", visits: 7, revenue: 4320, lastVisit: "Há 2 meses", status: "Regular" },
+    { name: "Beatriz Lima", visits: 14, revenue: 9540, lastVisit: "Há 1 semana", status: "Premium" },
   ];
   
-  // Dados para comparação anual
-  const yearlyComparisonData = [
-    { name: "2023", dental: 450000, harmonization: 380000, total: 830000 },
-    { name: "2024", dental: 520000, harmonization: 465000, total: 985000 },
-    { name: "2025", dental: 605000, harmonization: 565000, total: 1170000 }, // Projeção
-  ];
-
-  // Dados de previsão de demanda por procedimento
-  const forecastData = [
-    { procedimento: "Botox Facial", tendencia: "alta", crescimento: 28, demanda: "muito alta" },
-    { procedimento: "Clareamento Dental", tendencia: "estável", crescimento: 12, demanda: "alta" },
-    { procedimento: "Implantes Dentais", tendencia: "alta", crescimento: 22, demanda: "muito alta" },
-    { procedimento: "Preenchimento Labial", tendencia: "alta", crescimento: 18, demanda: "alta" },
-    { procedimento: "Aparelho Ortodôntico", tendencia: "estável", crescimento: 8, demanda: "média" },
+  // Horários de pico para agendamentos
+  const peakHours = [
+    { hour: '8-10h', count: 15 },
+    { hour: '10-12h', count: 28 },
+    { hour: '12-14h', count: 12 },
+    { hour: '14-16h', count: 18 },
+    { hour: '16-18h', count: 32 },
+    { hour: '18-20h', count: 25 },
+    { hour: '20-22h', count: 8 },
   ];
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            Análise de Sazonalidade e Tendências
-          </CardTitle>
-          <CardDescription>
-            Padrões sazonais, crescimento anual e previsões de demanda
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="chatbot">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Análise do ChatBot
+          </TabsTrigger>
+          <TabsTrigger value="seasonality">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Sazonalidade e Tendências
+          </TabsTrigger>
+          <TabsTrigger value="loyalty">
+            <Users className="h-4 w-4 mr-2" />
+            Análise de Lealdade
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Análise do ChatBot */}
+        <TabsContent value="chatbot">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-blue-500" />
-                Período de Alta Demanda
-              </h3>
-              <p className="text-2xl font-bold">Set-Out</p>
-              <p className="text-xs text-muted-foreground">Meses com maior faturamento</p>
-            </div>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-green-500" />
-                Crescimento Anual
-              </h3>
-              <p className="text-2xl font-bold">18.7%</p>
-              <p className="text-xs text-muted-foreground">Comparado ao ano anterior</p>
-            </div>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <CircleDollarSign className="w-4 h-4 text-purple-500" />
-                Previsão para 2025
-              </h3>
-              <p className="text-2xl font-bold">{formatCurrency(1170000)}</p>
-              <p className="text-xs text-muted-foreground">Faturamento anual projetado</p>
-            </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Total de Conversas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <MessageSquare className="h-5 w-5 mr-2 text-primary" />
+                  <div className="text-2xl font-bold">1,790</div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">+15% em relação ao período anterior</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Conversões</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-2 text-primary" />
+                  <div className="text-2xl font-bold">453</div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">+23% em relação ao período anterior</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Taxa de Conversão</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <ArrowUpRight className="h-5 w-5 mr-2 text-emerald-500" />
+                  <div className="text-2xl font-bold">25.3%</div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">+7% em relação ao período anterior</p>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="bg-muted/30 p-4 rounded-lg mb-6">
-            <h3 className="text-sm font-medium mb-4">Receita Mensal por Categoria (Último Ano)</h3>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={monthlyData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.1} />
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `R$${value / 1000}k`} />
-                  <Tooltip 
-                    formatter={(value) => [`R$ ${value.toLocaleString('pt-BR')}`, '']}
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                      border: 'none',
-                      borderRadius: '4px',
-                      color: '#fff'
-                    }}
-                  />
-                  <Legend />
-                  <Bar dataKey="dental" name="Procedimentos Dentais" stackId="a" fill="#0088FE" />
-                  <Bar dataKey="harmonization" name="Harmonização Facial" stackId="a" fill="#00C49F" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-4">Comparação de Faturamento Anual</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={yearlyComparisonData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.1} />
-                    <XAxis dataKey="name" />
-                    <YAxis tickFormatter={(value) => `R$${value / 1000}k`} />
-                    <Tooltip 
-                      formatter={(value) => [`R$ ${value.toLocaleString('pt-BR')}`, '']}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff'
-                      }}
-                    />
-                    <Legend />
-                    <Bar dataKey="dental" name="Procedimentos Dentais" fill="#0088FE" />
-                    <Bar dataKey="harmonization" name="Harmonização Facial" fill="#00C49F" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-3">Previsão de Demanda por Procedimento</h3>
-              <div className="overflow-hidden">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-muted-foreground/20">
-                      <th className="px-4 py-2 text-left font-medium">Procedimento</th>
-                      <th className="px-4 py-2 text-left font-medium">Tendência</th>
-                      <th className="px-4 py-2 text-left font-medium">Crescimento</th>
-                      <th className="px-4 py-2 text-left font-medium">Demanda</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {forecastData.map((item, index) => (
-                      <tr key={index} className={index !== forecastData.length - 1 ? "border-b border-muted-foreground/10" : ""}>
-                        <td className="px-4 py-3">{item.procedimento}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            item.tendencia === "alta" 
-                              ? "bg-green-500/20 text-green-500" 
-                              : item.tendencia === "estável"
-                              ? "bg-blue-500/20 text-blue-500"
-                              : "bg-red-500/20 text-red-500"
-                          }`}>
-                            {item.tendencia}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">{item.crescimento}%</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            item.demanda === "muito alta" 
-                              ? "bg-purple-500/20 text-purple-500" 
-                              : item.demanda === "alta"
-                              ? "bg-blue-500/20 text-blue-500"
-                              : "bg-yellow-500/20 text-yellow-500"
-                          }`}>
-                            {item.demanda}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-// Componente de análise de lealdade de clientes
-export function ClientLoyaltyAnalytics() {
-  // Dados para segmentação de clientes
-  const clientSegmentData = [
-    { name: "Primeira Visita", value: 30 },
-    { name: "Ocasionais", value: 25 },
-    { name: "Regulares", value: 30 },
-    { name: "Frequentes", value: 15 },
-  ];
-
-  // Dados de renovação de tratamentos
-  const renewalData = [
-    { month: "Jan", rate: 45 },
-    { month: "Fev", rate: 48 },
-    { month: "Mar", rate: 52 },
-    { month: "Abr", rate: 55 },
-    { month: "Mai", rate: 62 },
-    { month: "Jun", rate: 68 },
-  ];
-
-  // Dados de valor do cliente ao longo do tempo
-  const clientValueData = [
-    { month: 1, valor: 450 },
-    { month: 3, valor: 850 },
-    { month: 6, valor: 1200 },
-    { month: 12, valor: 2400 },
-    { month: 24, valor: 4800 },
-  ];
-
-  // Dados para oportunidades de up-selling
-  const upsellData = [
-    { 
-      cliente: "Clareamento", 
-      oportunidade: "Facetas de Porcelana", 
-      chance: "alta", 
-      valorEstimado: 3800 
-    },
-    { 
-      cliente: "Botox", 
-      oportunidade: "Preenchimento Labial", 
-      chance: "média", 
-      valorEstimado: 1200 
-    },
-    { 
-      cliente: "Limpeza Dental", 
-      oportunidade: "Clareamento", 
-      chance: "alta", 
-      valorEstimado: 950 
-    },
-    { 
-      cliente: "Extração Dental", 
-      oportunidade: "Implante", 
-      chance: "média", 
-      valorEstimado: 4500 
-    },
-    { 
-      cliente: "Consulta Rotina", 
-      oportunidade: "Lentes de Contato Dental", 
-      chance: "baixa", 
-      valorEstimado: 6200 
-    },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary" />
-            Análise de Lealdade de Clientes
-          </CardTitle>
-          <CardDescription>
-            Segmentação, retenção e oportunidades de aumento de valor
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-500" />
-                Taxa de Retenção
-              </h3>
-              <p className="text-2xl font-bold">67%</p>
-              <p className="text-xs text-muted-foreground">Média dos últimos 6 meses</p>
-            </div>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <CircleDollarSign className="w-4 h-4 text-green-500" />
-                Valor Médio por Cliente
-              </h3>
-              <p className="text-2xl font-bold">{formatCurrency(1850)}</p>
-              <p className="text-xs text-muted-foreground">Anual</p>
-            </div>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-purple-500" />
-                Potencial de Up-selling
-              </h3>
-              <p className="text-2xl font-bold">{formatCurrency(450000)}</p>
-              <p className="text-xs text-muted-foreground">Estimado para próximos 6 meses</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-4">Segmentação de Clientes</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={clientSegmentData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+            <Card className="lg:col-span-3">
+              <CardHeader>
+                <CardTitle>Evolução de Conversões do ChatBot</CardTitle>
+                <CardDescription>Análise de mensagens e conversões mensais</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={chatbotData}
+                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
                     >
-                      {clientSegmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value) => [`${value}%`, 'Percentual']}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff'
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                      <XAxis dataKey="month" />
+                      <YAxis yAxisId="left" orientation="left" stroke="#10b981" />
+                      <YAxis yAxisId="right" orientation="right" stroke="#3b82f6" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar yAxisId="left" dataKey="mensagens" name="Total de Mensagens" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      <Bar yAxisId="right" dataKey="conversoes" name="Conversões" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-4">Taxa de Renovação de Tratamentos</h3>
-              <div className="h-64">
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Top Frases de Conversão</CardTitle>
+                <CardDescription>Frases que mais convertem clientes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Frase</TableHead>
+                        <TableHead className="text-right">Conv.</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {topPhrases.map((phrase, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium truncate max-w-[180px]">
+                            {phrase.phrase}
+                          </TableCell>
+                          <TableCell className="text-right">{phrase.rate}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+              <CardFooter className="border-t px-6 py-3">
+                <p className="text-xs text-muted-foreground">
+                  Baseado nas últimas 500 conversas do ChatBot
+                </p>
+              </CardFooter>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Análise de Taxa de Conversão</CardTitle>
+              <CardDescription>Tendência de efetividade ao longo do tempo</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
-                    data={renewalData}
+                    data={chatbotData}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.1} />
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                     <XAxis dataKey="month" />
-                    <YAxis unit="%" />
-                    <Tooltip 
-                      formatter={(value: any) => [`${value}%`, 'Taxa de Renovação']}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff'
-                      }}
-                    />
+                    <YAxis domain={[0, 40]} />
+                    <Tooltip />
                     <Legend />
                     <Line 
                       type="monotone" 
-                      dataKey="rate" 
-                      name="Taxa de Renovação"
-                      stroke="#00C49F" 
-                      strokeWidth={2}
-                      activeDot={{ r: 8 }} 
+                      dataKey="taxa" 
+                      name="Taxa de Conversão (%)" 
+                      stroke="#8b5cf6" 
+                      strokeWidth={3}
+                      dot={{ r: 6 }}
+                      activeDot={{ r: 8 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Análise de Sazonalidade */}
+        <TabsContent value="seasonality">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Melhor Mês</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">Maio</div>
+                <p className="text-xs text-muted-foreground mt-1">Para serviços de Clareamento</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Serviço em Alta</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">Harmonização</div>
+                <p className="text-xs text-muted-foreground mt-1">+35% de crescimento</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Pico de Horário</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">16h às 18h</div>
+                <p className="text-xs text-muted-foreground mt-1">32 agendamentos em média</p>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-4">Valor do Cliente ao Longo do Tempo</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={clientValueData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.1} />
-                    <XAxis 
-                      dataKey="month" 
-                      label={{ 
-                        value: 'Meses', 
-                        position: 'insideBottomRight', 
-                        offset: -10 
-                      }} 
-                    />
-                    <YAxis 
-                      tickFormatter={(value) => `R$${value}`}
-                      label={{ 
-                        value: 'Valor gasto', 
-                        angle: -90, 
-                        position: 'insideLeft'
-                      }} 
-                    />
-                    <Tooltip 
-                      formatter={(value) => [`R$ ${value.toLocaleString('pt-BR')}`, 'Valor Médio']}
-                      labelFormatter={(value) => `Mês ${value}`}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(22, 22, 22, 0.8)', 
-                        border: 'none',
-                        borderRadius: '4px',
-                        color: '#fff'
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="valor" 
-                      name="Valor Médio"
-                      stroke="#8884d8" 
-                      strokeWidth={2}
-                      activeDot={{ r: 8 }} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tendências Sazonais por Serviço</CardTitle>
+                <CardDescription>Variação de procura ao longo do ano</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={seasonalityData}
+                      margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="limpeza" name="Limpeza Dental" stroke="#3b82f6" strokeWidth={2} />
+                      <Line type="monotone" dataKey="clareamento" name="Clareamento" stroke="#10b981" strokeWidth={2} />
+                      <Line type="monotone" dataKey="botox" name="Botox" stroke="#8b5cf6" strokeWidth={2} />
+                      <Line type="monotone" dataKey="harmonizacao" name="Harmonização" stroke="#f97316" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h3 className="text-sm font-medium mb-3">Oportunidades de Up-selling</h3>
-              <div className="overflow-hidden">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-muted-foreground/20">
-                      <th className="px-4 py-2 text-left font-medium">Perfil</th>
-                      <th className="px-4 py-2 text-left font-medium">Sugestão</th>
-                      <th className="px-4 py-2 text-left font-medium">Chance</th>
-                      <th className="px-4 py-2 text-left font-medium">Valor</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {upsellData.map((item, index) => (
-                      <tr key={index} className={index !== upsellData.length - 1 ? "border-b border-muted-foreground/10" : ""}>
-                        <td className="px-4 py-3">{item.cliente}</td>
-                        <td className="px-4 py-3">{item.oportunidade}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            item.chance === "alta" 
-                              ? "bg-green-500/20 text-green-500" 
-                              : item.chance === "média"
-                              ? "bg-yellow-500/20 text-yellow-500"
-                              : "bg-red-500/20 text-red-500"
-                          }`}>
-                            {item.chance}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">{formatCurrency(item.valorEstimado)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Horários de Pico</CardTitle>
+                <CardDescription>Quando os pacientes mais agendam</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={peakHours}
+                      margin={{ top: 20, right: 10, left: 10, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                      <XAxis dataKey="hour" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" name="Agendamentos" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+              <CardFooter className="border-t px-6 py-3">
+                <p className="text-xs text-muted-foreground flex items-center">
+                  <Clock className="h-3.5 w-3.5 mr-1" />
+                  Dados baseados nos últimos 90 dias
+                </p>
+              </CardFooter>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Previsões e Recomendações</CardTitle>
+              <CardDescription>Estratégias baseadas em dados sazonais</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <h4 className="font-medium mb-2">Próximos 3 meses</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                        Julho
+                      </Badge>
+                      <p className="text-sm">Aumento esperado de 22% em clareamentos.</p>
+                      <p className="text-xs text-muted-foreground">Promover pacotes especiais de estética.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Badge variant="outline" className="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
+                        Agosto
+                      </Badge>
+                      <p className="text-sm">Crescimento de 18% em harmonização facial.</p>
+                      <p className="text-xs text-muted-foreground">Webinar educativo sobre procedimentos estéticos.</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Badge variant="outline" className="bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
+                        Setembro
+                      </Badge>
+                      <p className="text-sm">Volta às aulas - aumento de 30% em limpeza.</p>
+                      <p className="text-xs text-muted-foreground">Campanha focada em pais e estudantes.</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-medium mb-2">Otimização de Agenda</h4>
+                  <p className="text-sm">Baseado nos horários de pico:</p>
+                  <ul className="mt-2 space-y-1">
+                    <li className="text-sm flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Adicionar mais profissionais entre 16h e 18h</span>
+                    </li>
+                    <li className="text-sm flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Oferecer descontos em horários menos procurados (8-10h e 20-22h)</span>
+                    </li>
+                    <li className="text-sm flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>Reservar horários de 10-12h para procedimentos mais longos</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Análise de Lealdade */}
+        <TabsContent value="loyalty">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Clientes Fiéis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <UserRound className="h-5 w-5 mr-2 text-primary" />
+                  <div className="text-2xl font-bold">20%</div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Clientes Premium e Regulares</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Valor Médio</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatCurrency(7080)}</div>
+                <p className="text-xs text-muted-foreground mt-1">Gasto médio por cliente fiel</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Taxa de Retenção</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <ArrowUpRight className="h-5 w-5 mr-2 text-emerald-500" />
+                  <div className="text-2xl font-bold">85%</div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Em clientes Premium</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Segmentação de Clientes</CardTitle>
+                <CardDescription>Distribuição por categoria de fidelidade</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-72 flex items-center justify-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={loyaltyData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={110}
+                        paddingAngle={2}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false}
+                      >
+                        {loyaltyData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => [`${value}%`, 'Porcentagem']} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-3">
+              <CardHeader>
+                <CardTitle>Top Clientes Fiéis</CardTitle>
+                <CardDescription>Clientes com maior valor e frequência</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead className="text-right">Visitas</TableHead>
+                        <TableHead className="text-right">Receita</TableHead>
+                        <TableHead>Última Visita</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {loyalCustomers.map((customer, i) => (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">{customer.name}</TableCell>
+                          <TableCell className="text-right">{customer.visits}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(customer.revenue)}</TableCell>
+                          <TableCell>{customer.lastVisit}</TableCell>
+                          <TableCell>
+                            <Badge variant={customer.status === "Premium" ? "default" : "outline"}>
+                              {customer.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Estratégias de Fidelização</CardTitle>
+              <CardDescription>Recomendações para aumentar a lealdade dos clientes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 p-2 rounded-full">
+                      <UserRound className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-medium">Clientes Ocasionais</h3>
+                  </div>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                      <span>Enviar lembretes personalizados para check-ups</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                      <span>Oferecer desconto de 10% na próxima visita</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                      <span>Compartilhar conteúdo educativo via email</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 p-2 rounded-full">
+                      <UserRound className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-medium">Clientes Regulares</h3>
+                  </div>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-green-600 dark:text-green-400 font-bold">•</span>
+                      <span>Implementar programa de pontos por visita</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-green-600 dark:text-green-400 font-bold">•</span>
+                      <span>Oferecer consulas preferenciais em horários de pico</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-green-600 dark:text-green-400 font-bold">•</span>
+                      <span>Enviar brindes em datas comemorativas</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 p-2 rounded-full">
+                      <UserRound className="h-5 w-5" />
+                    </div>
+                    <h3 className="font-medium">Clientes Premium</h3>
+                  </div>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-purple-600 dark:text-purple-400 font-bold">•</span>
+                      <span>Acesso a lançamentos de novos tratamentos</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-purple-600 dark:text-purple-400 font-bold">•</span>
+                      <span>Descontos exclusivos em pacotes de harmonização</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-purple-600 dark:text-purple-400 font-bold">•</span>
+                      <span>Atendimento com acesso direto via WhatsApp</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="border-t px-6 py-3">
+              <p className="text-xs text-muted-foreground">
+                As estratégias acima podem aumentar a taxa de retenção em até 35%
+              </p>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+};
 
-// Componente principal que agrupa todas as análises
-export default function AnalyticsDashboards() {
-  return (
-    <Tabs defaultValue="chatbot" className="w-full">
-      <TabsList className="mb-6">
-        <TabsTrigger value="chatbot">Conversão do ChatBot</TabsTrigger>
-        <TabsTrigger value="seasonality">Sazonalidade e Tendências</TabsTrigger>
-        <TabsTrigger value="loyalty">Lealdade de Clientes</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="chatbot">
-        <ChatbotConversionAnalytics />
-      </TabsContent>
-      
-      <TabsContent value="seasonality">
-        <SeasonalityTrendsAnalytics />
-      </TabsContent>
-      
-      <TabsContent value="loyalty">
-        <ClientLoyaltyAnalytics />
-      </TabsContent>
-    </Tabs>
-  );
-}
+export default AnalyticsDashboards;

@@ -67,11 +67,13 @@ export default function Finances() {
   // Fetch financial transactions
   const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery({
     queryKey: ['/api/financial-transactions'],
+    retry: false, // Se falhar, não tenta de novo
   });
 
   // Fetch clients for reference
   const { data: clients = [] } = useQuery({
     queryKey: ['/api/clients'],
+    retry: false,
   });
 
   // Fetch appointments for reference
