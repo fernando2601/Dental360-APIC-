@@ -18,6 +18,7 @@ import Packages from "@/pages/packages";
 import Subscriptions from "@/pages/subscriptions";
 import ClinicInfo from "@/pages/clinic-info";
 import BeforeAfter from "@/pages/before-after";
+import Knowledge from "@/pages/knowledge";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import ResetPassword from "@/pages/reset-password";
@@ -46,6 +47,7 @@ function Router() {
             <Route path="/subscriptions" component={Subscriptions} />
             <Route path="/clinic-info" component={ClinicInfo} />
             <Route path="/before-after" component={BeforeAfter} />
+            <Route path="/knowledge" component={Knowledge} />
             <Route path="/settings" component={Settings} />
             <Route component={NotFound} />
           </Switch>

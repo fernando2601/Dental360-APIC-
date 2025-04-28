@@ -28,7 +28,8 @@ import {
   LineChart,
   Receipt,
   BarChart,
-  TrendingUp
+  TrendingUp,
+  BookOpen
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { useMobile } from "@/hooks/use-mobile";
