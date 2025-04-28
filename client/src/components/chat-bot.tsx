@@ -1057,22 +1057,20 @@ export function ChatBot() {
             </CardTitle>
             <div className="flex space-x-1">
               <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-7 px-2 text-xs flex items-center gap-1"
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7"
                 onClick={toggleMinimize}
               >
-                {isMinimized ? <Maximize2 className="h-3.5 w-3.5 mr-1" /> : <Minimize2 className="h-3.5 w-3.5 mr-1" />}
-                {isMinimized ? "Expandir" : "Minimizar"}
+                {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
               </Button>
               <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-7 px-2 text-xs flex items-center gap-1 text-destructive border-destructive hover:bg-destructive/10"
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                 onClick={toggleChat}
               >
-                <X className="h-3.5 w-3.5 mr-1" />
-                Fechar
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </CardHeader>
@@ -1080,7 +1078,7 @@ export function ChatBot() {
           {!isMinimized && (
             <>
               <CardContent className="p-0">
-                <ScrollArea className="h-[280px] p-3">
+                <ScrollArea className="h-[220px] p-3">
                   {messages.map((message) => (
                     <div
                       key={message.id}
@@ -1135,12 +1133,12 @@ export function ChatBot() {
                 </ScrollArea>
               </CardContent>
               {/* AI Suggestions */}
-              <div className="p-2 border-t">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 border-t">
+                <div className="flex items-center gap-1 mb-1">
                   <Sparkles className="h-3 w-3 text-primary" />
                   <span className="text-xs font-medium text-muted-foreground">Sugestões de IA</span>
                 </div>
-                <div className="flex flex-wrap gap-2 mb-3">
+                <div className="flex flex-wrap gap-1 mb-1">
                   {currentSuggestions.map((suggestion) => (
                     <Badge
                       key={suggestion.id}
@@ -1152,7 +1150,7 @@ export function ChatBot() {
                         'outline'
                       }
                       className={cn(
-                        "cursor-pointer transition-colors text-sm",
+                        "cursor-pointer transition-colors text-xs",
                         suggestion.type === 'appointment' && "bg-blue-500 hover:bg-blue-600",
                         suggestion.type === 'service' && "bg-green-500 hover:bg-green-600",
                         suggestion.type === 'payment' && "border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white",
@@ -1167,7 +1165,7 @@ export function ChatBot() {
                 </div>
               </div>
               
-              <CardFooter className="border-t p-2">
+              <CardFooter className="border-t p-1.5">
                 <div className="flex w-full items-center gap-2">
                   <Input
                     placeholder="Digite sua mensagem..."
