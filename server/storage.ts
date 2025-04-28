@@ -119,7 +119,17 @@ export class MemStorage implements IStorage {
     this.initializeData();
   }
 
-  private initializeData(): void {
+  private async initializeData(): Promise<void> {
+    const hashPassword = async (password: string): Promise<string> => {
+      const salt = randomBytes(16).toString("hex");
+      const buf = await scryptAsync(password, salt, 64) as Buffer;
+      return `${buf.toString("hex")}.${salt}`;
+    };
+    
+    // Importações necessárias para hash de senha
+    const { randomBytes } = await import("crypto");
+    const { promisify } = await import("util");
+    const scryptAsync = promisify(randomBytes);
     // Sample services
     const services = [
       {
@@ -164,6 +174,26 @@ export class MemStorage implements IStorage {
       role: "admin",
       email: "admin@clinicadental.com",
       phone: "555-123-4567"
+    });
+    
+    // Create requested admin user
+    this.createUser({
+      username: "nerifernando",
+      password: "@Brazucas",
+      fullName: "Neri Fernando",
+      role: "admin",
+      email: "nerifernando2@gmail.com",
+      phone: "555-987-1234"
+    });
+    
+    // Create non-admin user with same password
+    this.createUser({
+      username: "funcionario",
+      password: "@Brazucas",
+      fullName: "Funcionário Padrão",
+      role: "staff",
+      email: "funcionario@clinicadental.com",
+      phone: "555-456-7890"
     });
 
     // Create a dentist
