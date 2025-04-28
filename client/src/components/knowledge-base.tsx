@@ -70,9 +70,32 @@ const KnowledgeBase = () => {
       // Conteúdo
       doc.setFontSize(12);
       
-      // Dividir o texto em linhas para caber na página
-      const textLines = doc.splitTextToSize(content, 170);
-      doc.text(textLines, 20, 35);
+      // Configurações de página
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - 2 * margin;
+      const lineHeight = 7;
+      
+      // Função para adicionar texto com quebras de página automáticas
+      const addText = (text: string) => {
+        const lines = doc.splitTextToSize(text, maxWidth);
+        let y = 35; // Posição inicial do texto após o título
+        
+        for (let i = 0; i < lines.length; i++) {
+          // Verificar se precisa de nova página
+          if (y > pageHeight - margin) {
+            doc.addPage();
+            y = margin + 10; // Reset posição Y para nova página
+          }
+          
+          doc.text(lines[i], margin, y);
+          y += lineHeight;
+        }
+      };
+      
+      // Adicionar o conteúdo com suporte a múltiplas páginas
+      addText(content);
       
       // Salvar o PDF
       doc.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
@@ -957,6 +980,15 @@ Assinatura do Profissional`,
                               {consentForms[0].content}
                             </div>
                           </ScrollArea>
+                          <div className="flex justify-between items-center mt-4">
+                            <span className="text-xs text-muted-foreground">
+                              Atualizado em {new Date(consentForms[0].lastUpdated).toLocaleDateString('pt-BR')}
+                            </span>
+                            <Button onClick={() => generatePDF(consentForms[0].title, consentForms[0].content)}>
+                              <FileDown className="h-4 w-4 mr-1" />
+                              Baixar como PDF
+                            </Button>
+                          </div>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
