@@ -712,7 +712,7 @@ Assinatura do Profissional`,
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredMaterials.map((material) => (
-                  <Card key={material.id} className="overflow-hidden">
+                  <Card key={material.id} className="overflow-hidden flex flex-col h-full">
                     <CardHeader className="p-4 pb-2">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center">
@@ -722,7 +722,7 @@ Assinatura do Profissional`,
                         <Badge variant="outline">{material.category}</Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-4 pt-0">
+                    <CardContent className="p-4 pt-0 flex-grow">
                       <p className="text-sm text-muted-foreground mb-2">{material.description}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {material.tags.map((tag, index) => (
@@ -732,11 +732,11 @@ Assinatura do Profissional`,
                         ))}
                       </div>
                     </CardContent>
-                    <CardFooter className="p-4 pt-0 flex justify-between items-center">
+                    <CardFooter className="p-4 pt-3 mt-auto flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 border-t">
                       <span className="text-xs text-muted-foreground">
                         Adicionado em {new Date(material.dateAdded).toLocaleDateString('pt-BR')}
                       </span>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 w-full lg:w-auto justify-end">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm">
