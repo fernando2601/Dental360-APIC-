@@ -210,7 +210,7 @@ export class MemStorage implements IStorage {
     // Create a dentist
     const dentist = this.createUser({
       username: "drsilva",
-      password: createPredefinedHash("password123"),
+      password: "password123", // Senha em texto puro para DEMO
       fullName: "Dra. Ana Silva",
       role: "dentista",
       email: "silva@clinicadental.com",
