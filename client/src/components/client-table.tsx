@@ -181,11 +181,28 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
         <TableBody>
           {clients.map((client) => (
             <TableRow key={client.id}>
-              <TableCell className="font-medium">{client.fullName}</TableCell>
+              <TableCell>
+                <div className="font-medium">{client.fullName}</div>
+                {client.notes && client.notes.includes("Instagram:") && (
+                  <div className="text-xs text-primary mt-1">
+                    {client.notes.match(/Instagram: (@[^\s.,]+)/)?.[1] || ""}
+                  </div>
+                )}
+                {client.notes && client.notes.includes("Frequência:") && (
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-semibold">Freq:</span> {client.notes.match(/Frequência: ([^.,]+)/)?.[1].trim() || ""}
+                  </div>
+                )}
+              </TableCell>
               <TableCell>
                 <div className="flex flex-col">
                   <span>{client.email}</span>
                   <span className="text-muted-foreground text-sm">{client.phone}</span>
+                  {client.notes && client.notes.includes("Cliente desde:") && (
+                    <span className="text-xs text-muted-foreground">
+                      Desde: {client.notes.match(/Cliente desde: ([^.,]+)/)?.[1].trim() || ""}
+                    </span>
+                  )}
                 </div>
               </TableCell>
               <TableCell className="hidden md:table-cell">
@@ -279,6 +296,38 @@ export default function ClientTable({ clients, isLoading }: ClientTableProps) {
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground mb-1">Observações</h4>
                 <p className="whitespace-pre-wrap">{selectedClient.notes || "Sem observações"}</p>
+                
+                {/* Informações extraídas das notas */}
+                {selectedClient.notes && (
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t">
+                    {selectedClient.notes.includes("Instagram:") && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Instagram:</span>
+                        <span className="text-primary font-medium">
+                          {selectedClient.notes.match(/Instagram: (@[^\s.,]+)/)?.[1]}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {selectedClient.notes.includes("Frequência:") && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Frequência:</span>
+                        <span>
+                          {selectedClient.notes.match(/Frequência: ([^.,]+)/)?.[1].trim()}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {selectedClient.notes.includes("Cliente desde:") && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Cliente desde:</span>
+                        <span>
+                          {selectedClient.notes.match(/Cliente desde: ([^.,]+)/)?.[1].trim()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             

@@ -73,15 +73,47 @@ export default function Clients() {
     queryKey: ['/api/clients'],
   });
 
-  // Filter clients based on search query
+  // Filter clients based on search query with enhanced search
   const filteredClients = clients?.filter((client: any) => {
     if (!searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
+    
+    // Extrair informações das notas para busca
+    let instagram = "";
+    let frequencia = "";
+    let clienteDesde = "";
+    
+    if (client.notes) {
+      // Extrair Instagram
+      const instagramMatch = client.notes.match(/Instagram: (@[^\s.,]+)/);
+      if (instagramMatch) {
+        instagram = instagramMatch[1].toLowerCase();
+      }
+      
+      // Extrair Frequência
+      const frequenciaMatch = client.notes.match(/Frequência: ([^.,]+)/);
+      if (frequenciaMatch) {
+        frequencia = frequenciaMatch[1].trim().toLowerCase();
+      }
+      
+      // Extrair Cliente desde
+      const clienteDesdeMatch = client.notes.match(/Cliente desde: ([^.,]+)/);
+      if (clienteDesdeMatch) {
+        clienteDesde = clienteDesdeMatch[1].trim().toLowerCase();
+      }
+    }
+    
     return (
       client.fullName.toLowerCase().includes(query) ||
       client.email.toLowerCase().includes(query) ||
-      client.phone.includes(query)
+      client.phone.includes(query) ||
+      (client.address && client.address.toLowerCase().includes(query)) ||
+      (client.birthday && client.birthday.toLowerCase().includes(query)) ||
+      (client.notes && client.notes.toLowerCase().includes(query)) ||
+      instagram.includes(query) ||
+      frequencia.includes(query) ||
+      clienteDesde.includes(query)
     );
   });
 
@@ -90,7 +122,7 @@ export default function Clients() {
     createClient.mutate(values);
   }
 
-  // Export clients as CSV
+  // Export clients as Excel (XLSX)
   function exportClients() {
     if (!clients || clients.length === 0) {
       toast({
@@ -101,26 +133,65 @@ export default function Clients() {
       return;
     }
 
-    // Create CSV content
-    const headers = ["Nome Completo", "Email", "Telefone", "Endereço", "Data de Nascimento", "Observações"];
+    // Extrair informações adicionais das notas em campos separados
+    const processedClients = clients.map((client: any) => {
+      // Extrair informações das notas
+      let instagram = "";
+      let frequencia = "";
+      let clienteDesde = "";
+      
+      if (client.notes) {
+        // Extrair Instagram
+        const instagramMatch = client.notes.match(/Instagram: (@[^\s.,]+)/);
+        if (instagramMatch) {
+          instagram = instagramMatch[1];
+        }
+        
+        // Extrair Frequência
+        const frequenciaMatch = client.notes.match(/Frequência: ([^.,]+)/);
+        if (frequenciaMatch) {
+          frequencia = frequenciaMatch[1].trim();
+        }
+        
+        // Extrair Cliente desde
+        const clienteDesdeMatch = client.notes.match(/Cliente desde: ([^.,]+)/);
+        if (clienteDesdeMatch) {
+          clienteDesde = clienteDesdeMatch[1].trim();
+        }
+      }
+      
+      return {
+        ...client,
+        instagram,
+        frequencia,
+        clienteDesde
+      };
+    });
+
+    // Create CSV content with additional extracted fields
+    const headers = ["Nome Completo", "Email", "Telefone", "Endereço", "Data de Nascimento", "Instagram", "Frequência", "Cliente Desde", "Observações"];
     const csvContent = [
       headers.join(","),
-      ...clients.map((client: any) => [
+      ...processedClients.map((client: any) => [
         `"${client.fullName}"`,
         `"${client.email}"`,
         `"${client.phone}"`,
         `"${client.address || ""}"`,
         `"${client.birthday || ""}"`,
+        `"${client.instagram || ""}"`,
+        `"${client.frequencia || ""}"`,
+        `"${client.clienteDesde || ""}"`,
         `"${client.notes || ""}"`
       ].join(","))
     ].join("\n");
 
-    // Create download link
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    // Create download link (Excel-compatible CSV with UTF-8 BOM)
+    const BOM = "\uFEFF"; // UTF-8 BOM
+    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", "clients.csv");
+    link.setAttribute("download", "pacientes_dentalspa.csv");
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -151,11 +222,14 @@ export default function Clients() {
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar pacientes..."
+            placeholder="Buscar por nome, email, telefone, Instagram, frequência..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            Busque por qualquer informação: nome, contato, endereço, frequência, Instagram, data de registro, etc.
+          </p>
         </div>
       </div>
 
