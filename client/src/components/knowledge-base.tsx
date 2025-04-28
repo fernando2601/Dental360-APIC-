@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, FileText, Download, BookOpen, FileCheck, Info, Bookmark, Star, FilePlus } from 'lucide-react';
+import { Search, FileText, Download, BookOpen, FileCheck, Info, Bookmark, Star, FilePlus, Eye, FileDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
 
 // Tipo para materiais
 interface Material {
@@ -61,7 +62,65 @@ const KnowledgeBase = () => {
       category: 'Cirúrgico',
       tags: ['pós-operatório', 'extração', 'siso'],
       dateAdded: '2025-03-15',
-      type: 'pdf',
+      type: 'text',
+      content: `Cuidados Pós-Operatórios para Extração de Siso
+
+A extração do siso é um procedimento comum, mas requer alguns cuidados após a cirurgia para garantir uma recuperação tranquila e evitar complicações. Siga estas orientações:
+
+1. Controle do Sangramento
+Mantenha uma gaze esterilizada sobre o local da extração por cerca de 30 a 60 minutos, pressionando levemente.
+
+Se o sangramento persistir, troque a gaze e evite cuspir ou enxaguar a boca nas primeiras horas.
+
+Evite atividades físicas intensas nas primeiras 24 horas, pois podem aumentar o sangramento.
+
+2. Alimentação
+Nos primeiros dias, prefira alimentos frios ou mornos e pastosos, como sorvetes (sem pedaços), iogurte, purê e sopas geladas.
+
+Evite alimentos quentes, duros, picantes ou ácidos nos primeiros dias.
+
+Mastigue do lado oposto ao da extração.
+
+3. Higiene Bucal
+Nas primeiras 24 horas, evite escovar os dentes próximo ao local da cirurgia ou bochechar vigorosamente.
+
+Após o primeiro dia, faça bochechos leves com água morna e sal (1 colher de chá de sal em um copo de água) para ajudar na cicatrização.
+
+Continue escovando os outros dentes normalmente, mas com cuidado ao redor da área operada.
+
+4. Inchaço e Dor
+O inchaço é normal e pode atingir o pico em 48 a 72 horas. Use compressas frias (gelo envolto em um pano) no rosto, próximo à região, por 20 minutos a cada hora no primeiro dia.
+
+Tome os analgésicos e anti-inflamatórios prescritos pelo dentista conforme a orientação.
+
+Evite aspirina, pois pode aumentar o sangramento.
+
+5. Repouso e Posição
+Mantenha a cabeça elevada (usando travesseiros extras) nas primeiras noites para reduzir o inchaço.
+
+Evite deitar de lado no local da extração.
+
+6. Evite Hábitos que Atrassam a Cicatrização
+NÃO fume pelo menos por 72 horas, pois o cigarro prejudica a cicatrização e pode causar infecção.
+
+NÃO use canudo nas primeiras 24 horas, pois a sucção pode deslocar o coágulo e causar alvéolo seco.
+
+Evite bebidas alcoólicas enquanto estiver tomando medicamentos.
+
+7. Sinais de Complicação (Procure o Dentista se...)
+Sangramento excessivo que não para após 2 horas.
+
+Dor intensa e persistente mesmo com medicação.
+
+Inchaço que piora após 3 dias.
+
+Febre, pus ou mau cheiro na região.
+
+Dificuldade para abrir a boca ou engolir após alguns dias.
+
+Seguindo essas recomendações, a recuperação será mais rápida e confortável. Em caso de dúvidas, sempre consulte seu dentista!
+
+Cuide-se bem! 😊`,
       url: '/materials/cuidados-pos-extracao.pdf',
     },
     {
@@ -567,10 +626,42 @@ Assinatura do Profissional`,
                       <span className="text-xs text-muted-foreground">
                         Adicionado em {new Date(material.dateAdded).toLocaleDateString('pt-BR')}
                       </span>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-1" />
-                        {material.type === 'text' ? 'Ver' : 'Baixar'}
-                      </Button>
+                      <div className="flex gap-2">
+                        {material.content && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl">
+                              <DialogHeader>
+                                <DialogTitle>{material.title}</DialogTitle>
+                                <DialogDescription>{material.description}</DialogDescription>
+                              </DialogHeader>
+                              <ScrollArea className="h-[60vh] w-full rounded-md border p-4">
+                                <div className="whitespace-pre-line text-sm">
+                                  {material.content}
+                                </div>
+                              </ScrollArea>
+                              <DialogFooter className="flex justify-between items-center mt-4">
+                                <span className="text-xs text-muted-foreground">
+                                  Atualizado em {new Date(material.dateAdded).toLocaleDateString('pt-BR')}
+                                </span>
+                                <Button>
+                                  <FileDown className="h-4 w-4 mr-1" />
+                                  Baixar como PDF
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-1" />
+                          Baixar
+                        </Button>
+                      </div>
                     </CardFooter>
                   </Card>
                 ))}
