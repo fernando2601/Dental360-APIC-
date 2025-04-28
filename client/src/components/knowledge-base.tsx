@@ -777,7 +777,7 @@ Assinatura do Profissional`,
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="w-[140px]"
+                          className="w-[80px]"
                           onClick={() => 
                             material.content 
                               ? generatePDF(material.title, material.content)
@@ -785,7 +785,7 @@ Assinatura do Profissional`,
                           }
                         >
                           <FileDown className="h-4 w-4 mr-2" />
-                          Baixar como PDF
+                          PDF
                         </Button>
                       </div>
                     </CardFooter>
