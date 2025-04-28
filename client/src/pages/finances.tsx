@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Plus, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 import FinanceChart from "@/components/finance-chart";
+import AnalyticsDashboards from "@/components/analytics-dashboards";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 // Form schema for transaction
@@ -191,6 +192,7 @@ export default function Finances() {
             <TabsTrigger value="transactions">Transações</TabsTrigger>
             <TabsTrigger value="expenses">Despesas</TabsTrigger>
             <TabsTrigger value="projections">Projeções</TabsTrigger>
+            <TabsTrigger value="analytics">Análises Avançadas</TabsTrigger>
           </TabsList>
         </div>
         
