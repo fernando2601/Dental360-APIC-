@@ -183,6 +183,95 @@ export class MemStorage implements IStorage {
       this.createService(service);
     });
 
+    // Criar 10 pacientes fictícios
+    const pacientes = [
+      {
+        fullName: "Roberto Almeida",
+        email: "roberto.almeida@email.com",
+        phone: "(11) 99827-6543",
+        address: "Rua das Flores, 123 - Vila Mariana, São Paulo-SP",
+        birthday: "1985-06-15",
+        notes: "Prefere agendamentos no final da tarde. Frequência: Semestral. Instagram: @robalmeida. Cliente desde: jan/2019. Alérgico a anestesia com epinefrina."
+      },
+      {
+        fullName: "Amanda Costa",
+        email: "amanda.costa@email.com",
+        phone: "(11) 98765-4321",
+        address: "Av. Paulista, 1000 - Bela Vista, São Paulo-SP",
+        birthday: "1990-03-25",
+        notes: "Prefere pagamentos em PIX. Frequência: Trimestral. Instagram: @amandacosta90. Cliente desde: nov/2020. Indica muitos pacientes."
+      },
+      {
+        fullName: "Carlos Eduardo Martins",
+        email: "carlos.martins@email.com",
+        phone: "(11) 97654-3210",
+        address: "Rua Augusta, 789 - Consolação, São Paulo-SP",
+        birthday: "1978-11-10",
+        notes: "Tem ansiedade em tratamentos dentários. Frequência: Anual. Instagram: @carlosedu78. Cliente desde: mar/2018. Trabalha em horários flexíveis."
+      },
+      {
+        fullName: "Juliana Peixoto",
+        email: "juliana.peixoto@email.com",
+        phone: "(11) 96543-2109",
+        address: "Alameda Santos, 456 - Jardins, São Paulo-SP",
+        birthday: "1992-08-17",
+        notes: "Interessada em harmonização facial. Frequência: Bimestral. Instagram: @jujupeixoto. Cliente desde: fev/2021. Influenciadora digital com 50k seguidores."
+      },
+      {
+        fullName: "Ricardo Oliveira",
+        email: "ricardo.oliveira@email.com",
+        phone: "(11) 95432-1098",
+        address: "Rua Vergueiro, 321 - Vila Mariana, São Paulo-SP",
+        birthday: "1975-04-30",
+        notes: "Prefere atendimento com Dr. Silva. Frequência: Semestral. Instagram: @ricardooli. Cliente desde: mai/2017. Executivo, prefere horários no início da manhã."
+      },
+      {
+        fullName: "Patrícia Mendes",
+        email: "patricia.mendes@email.com",
+        phone: "(11) 94321-0987",
+        address: "Rua Oscar Freire, 654 - Jardins, São Paulo-SP",
+        birthday: "1988-09-22",
+        notes: "Histórico de bruxismo. Frequência: Trimestral. Instagram: @patimendes. Cliente desde: set/2019. Dificuldade com anestesia local."
+      },
+      {
+        fullName: "Fernando Carvalho",
+        email: "fernando.carvalho@email.com",
+        phone: "(11) 93210-9876",
+        address: "Av. Rebouças, 987 - Pinheiros, São Paulo-SP",
+        birthday: "1983-12-05",
+        notes: "Prefere receber lembretes por WhatsApp. Frequência: Semestral. Instagram: @fernandocarv. Cliente desde: jul/2020. Profissional autônomo."
+      },
+      {
+        fullName: "Camila Rodrigues",
+        email: "camila.rodrigues@email.com",
+        phone: "(11) 92109-8765",
+        address: "Rua Pamplona, 234 - Jardim Paulista, São Paulo-SP",
+        birthday: "1995-02-14",
+        notes: "Interesse em tratamentos estéticos. Frequência: Mensal. Instagram: @camilarodrigues95. Cliente desde: dez/2021. Prefere pagar em parcelas."
+      },
+      {
+        fullName: "Marcelo Santos",
+        email: "marcelo.santos@email.com",
+        phone: "(11) 91098-7654",
+        address: "Rua da Consolação, 543 - Consolação, São Paulo-SP",
+        birthday: "1972-07-20",
+        notes: "Hipertenso, toma medicação controlada. Frequência: Anual. Instagram: @celosantos72. Cliente desde: abr/2016. Professor universitário."
+      },
+      {
+        fullName: "Aline Ferreira",
+        email: "aline.ferreira@email.com",
+        phone: "(11) 90987-6543",
+        address: "Av. Brigadeiro Faria Lima, 876 - Itaim Bibi, São Paulo-SP",
+        birthday: "1987-05-08",
+        notes: "Indicada pela Juliana Peixoto. Frequência: Bimestral. Instagram: @alineferreira87. Cliente desde: out/2020. Sempre faz botox a cada 6 meses."
+      }
+    ];
+
+    // Adicionar os pacientes ao sistema
+    pacientes.forEach((paciente) => {
+      this.createClient(paciente);
+    });
+
     // Create chat templates
     this.createChatTemplate({
       title: "Informações sobre Procedimento de Botox",
