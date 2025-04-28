@@ -589,6 +589,19 @@ export default function Finances() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Analytics Tab - Análises Avançadas */}
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Análises Avançadas</CardTitle>
+              <CardDescription>Métricas e insights para otimização do negócio</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AnalyticsDashboards />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Create Transaction Dialog */}
