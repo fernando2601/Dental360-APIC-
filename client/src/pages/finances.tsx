@@ -741,11 +741,13 @@ export default function Finances() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="">Nenhum</SelectItem>
-                          {clients?.map((client: any) => (
-                            <SelectItem key={client.id} value={client.id.toString()}>
-                              {client.fullName}
-                            </SelectItem>
-                          ))}
+                          {Array.isArray(clients) 
+                            ? clients.map((client: any) => (
+                                <SelectItem key={client.id} value={client.id.toString()}>
+                                  {client.fullName}
+                                </SelectItem>
+                              ))
+                            : null}
                         </SelectContent>
                       </Select>
                       <FormMessage />
