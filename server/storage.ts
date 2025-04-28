@@ -183,7 +183,7 @@ export class MemStorage implements IStorage {
     
     // Create requested admin user
     this.createUser({
-      username: "nerifernando",
+      username: "nerifernando2@gmail.com", // Usando o email como username
       password: "@Brazucas", // Senha em texto puro para DEMO
       fullName: "Neri Fernando",
       role: "admin",
@@ -204,7 +204,7 @@ export class MemStorage implements IStorage {
     // Imprimindo credenciais no console para facilitar debug
     console.log("USUÁRIOS CRIADOS COM SUCESSO:");
     console.log("- admin/admin123");
-    console.log("- nerifernando/@Brazucas");
+    console.log("- nerifernando2@gmail.com/@Brazucas");
     console.log("- funcionario/@Brazucas");
 
     // Create a dentist
