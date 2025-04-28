@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
+import { jsPDF } from 'jspdf';
 
 // Tipo para materiais
 interface Material {
@@ -52,6 +53,34 @@ interface Form {
 const KnowledgeBase = () => {
   const [activeTab, setActiveTab] = useState('materials');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Função para gerar e baixar PDF
+  const generatePDF = (title: string, content: string) => {
+    try {
+      const doc = new jsPDF();
+      
+      // Configuração de título
+      doc.setFontSize(18);
+      doc.text(title, 20, 20);
+      
+      // Linha separadora
+      doc.setLineWidth(0.5);
+      doc.line(20, 25, 190, 25);
+      
+      // Conteúdo
+      doc.setFontSize(12);
+      
+      // Dividir o texto em linhas para caber na página
+      const textLines = doc.splitTextToSize(content, 170);
+      doc.text(textLines, 20, 35);
+      
+      // Salvar o PDF
+      doc.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      alert("Erro ao gerar o PDF. Por favor, tente novamente.");
+    }
+  };
 
   // Dados de exemplo para materiais educativos
   const educationalMaterials: Material[] = [
@@ -714,11 +743,11 @@ Assinatura do Profissional`,
                               <span className="text-xs text-muted-foreground">
                                 Atualizado em {new Date(material.dateAdded).toLocaleDateString('pt-BR')}
                               </span>
-                              <Button onClick={() => {
-                                // Aqui seria a função para gerar PDF
-                                // Como exemplo, abrimos o URL do material
-                                window.open(material.url, '_blank');
-                              }}>
+                              <Button onClick={() => 
+                                material.content 
+                                  ? generatePDF(material.title, material.content)
+                                  : window.open(material.url, '_blank')
+                              }>
                                 <FileDown className="h-4 w-4 mr-1" />
                                 Baixar como PDF
                               </Button>
@@ -894,14 +923,18 @@ Assinatura do Profissional`,
                                   <span className="text-xs text-muted-foreground">
                                     Atualizado em {new Date(form.lastUpdated).toLocaleDateString('pt-BR')}
                                   </span>
-                                  <Button>
+                                  <Button onClick={() => generatePDF(form.title, form.content)}>
                                     <FileDown className="h-4 w-4 mr-1" />
                                     Baixar como PDF
                                   </Button>
                                 </DialogFooter>
                               </DialogContent>
                             </Dialog>
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => generatePDF(form.title, form.content)}
+                            >
                               <Download className="h-4 w-4" />
                               <span className="sr-only">Baixar</span>
                             </Button>
