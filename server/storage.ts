@@ -115,8 +115,10 @@ export class MemStorage implements IStorage {
     this.currentTransactionID = 1;
     this.currentTemplateID = 1;
     
-    // Initialize with some sample data
-    this.initializeData();
+    // Initialize with some sample data (async)
+    this.initializeData().catch(error => {
+      console.error("Erro ao inicializar dados:", error);
+    });
   }
 
   private async initializeData(): Promise<void> {
@@ -166,10 +168,13 @@ export class MemStorage implements IStorage {
       }
     ];
 
+    // Importar a função para criar hash predefinido
+    const { createPredefinedHash } = await import("./auth");
+    
     // Create admin user
     this.createUser({
       username: "admin",
-      password: "admin123",
+      password: createPredefinedHash("admin123"),
       fullName: "Administrador",
       role: "admin",
       email: "admin@clinicadental.com",
@@ -179,7 +184,7 @@ export class MemStorage implements IStorage {
     // Create requested admin user
     this.createUser({
       username: "nerifernando",
-      password: "@Brazucas",
+      password: createPredefinedHash("@Brazucas"),
       fullName: "Neri Fernando",
       role: "admin",
       email: "nerifernando2@gmail.com",
@@ -189,7 +194,7 @@ export class MemStorage implements IStorage {
     // Create non-admin user with same password
     this.createUser({
       username: "funcionario",
-      password: "@Brazucas",
+      password: createPredefinedHash("@Brazucas"),
       fullName: "Funcionário Padrão",
       role: "staff",
       email: "funcionario@clinicadental.com",
@@ -199,7 +204,7 @@ export class MemStorage implements IStorage {
     // Create a dentist
     const dentist = this.createUser({
       username: "drsilva",
-      password: "password123",
+      password: createPredefinedHash("password123"),
       fullName: "Dra. Ana Silva",
       role: "dentista",
       email: "silva@clinicadental.com",

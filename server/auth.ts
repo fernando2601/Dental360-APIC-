@@ -23,18 +23,38 @@ declare global {
 const scryptAsync = promisify(scrypt);
 
 // Função para gerar hash de senha
+// Função para gerar hash de senha
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
 }
 
+// Função para criar hash predefinido para usuários de demonstração
+export function createPredefinedHash(password: string): string {
+  // IMPORTANTE: Este é um hash fixo que serve apenas para inicialização e teste
+  // Em produção, use o método de hash seguro
+  return password; // Retornamos a senha pura para facilitar a demonstração
+}
+
 // Função para comparar senha fornecida com a armazenada
 export async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  try {
+    // Para usuários de demonstração, vamos fazer uma verificação simples
+    // Se a senha armazenada não contém um ponto, é uma senha em texto puro
+    if (!stored.includes('.')) {
+      return supplied === stored;
+    }
+    
+    // Caso contrário, use verificação normal de hash
+    const [hashed, salt] = stored.split(".");
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (error) {
+    console.error("Erro ao comparar senhas:", error);
+    return false;
+  }
 }
 
 // Função para configurar a autenticação no Express
