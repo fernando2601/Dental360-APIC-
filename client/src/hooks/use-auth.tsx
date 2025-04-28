@@ -108,10 +108,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/me"], null);
+      // Invalidar todas as queries que dependem de autenticação
+      queryClient.invalidateQueries();
+      // Limpar o cache de todas as queries
+      queryClient.clear();
+      
       toast({
         title: "Logout realizado com sucesso",
         description: "Você foi desconectado com segurança.",
       });
+      
+      // Forçar um redirecionamento
+      window.location.href = "/login";
     },
     onError: (error: Error) => {
       toast({

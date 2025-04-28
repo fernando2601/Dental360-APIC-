@@ -31,11 +31,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   // Função para fazer logout
   const handleLogout = () => {
-    logoutMutation.mutate(undefined, {
-      onSuccess: () => {
-        setLocation("/auth");
-      }
-    });
+    // Chamar a mutação de logout, o redirecionamento é feito diretamente no hook de autenticação
+    logoutMutation.mutate();
   };
 
   useEffect(() => {
