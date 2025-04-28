@@ -780,10 +780,14 @@ Assinatura do Profissional`,
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => window.open(material.url, '_blank')}
+                          onClick={() => 
+                            material.content 
+                              ? generatePDF(material.title, material.content)
+                              : window.open(material.url, '_blank')
+                          }
                         >
-                          <Download className="h-4 w-4 mr-1" />
-                          Baixar
+                          <FileDown className="h-4 w-4 mr-1" />
+                          Baixar como PDF
                         </Button>
                       </div>
                     </CardFooter>
