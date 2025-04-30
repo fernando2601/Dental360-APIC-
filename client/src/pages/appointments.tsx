@@ -141,13 +141,25 @@ export default function Appointments() {
   };
 
   // Time slots for the day
-  const timeSlots = Array(14).fill(0).map((_, i) => {
-    const hour = i + 8; // Start from 8 AM
-    return {
-      hour,
-      displayHour: `${hour}:00`,
-    };
-  });
+  const timeSlots = [
+    { hour: 8, displayHour: "8:00" },
+    { hour: 9, displayHour: "9:00" },
+    { hour: 10, displayHour: "10:00" },
+    { hour: 11, displayHour: "11:00" },
+    { hour: 12, displayHour: "12:00" },
+    { hour: 12, displayHour: "12:30" },
+    { hour: 13, displayHour: "13:00" },
+    { hour: 13, displayHour: "13:30" },
+    { hour: 14, displayHour: "14:00" },
+    { hour: 14, displayHour: "14:30" },
+    { hour: 15, displayHour: "15:00" },
+    { hour: 15, displayHour: "15:30" },
+    { hour: 16, displayHour: "16:00" },
+    { hour: 16, displayHour: "16:30" },
+    { hour: 17, displayHour: "17:00" },
+    { hour: 17, displayHour: "17:30" },
+    { hour: 18, displayHour: "18:00" },
+  ];
 
   // Get appointments for a specific hour and day
   const getAppointmentsForTimeSlot = (date: Date, hour: number) => {
@@ -177,7 +189,7 @@ export default function Appointments() {
             {weekDays.map((day, index) => (
               <div 
                 key={index} 
-                className={`text-center py-2 ${day.isToday ? "bg-primary text-primary-foreground rounded-t-lg" : ""}`}
+                className="text-center py-2"
               >
                 <div className="text-sm font-medium">{day.day}</div>
                 <div className="text-xs text-muted-foreground">{day.weekday}</div>
@@ -197,7 +209,7 @@ export default function Appointments() {
                   return (
                     <div 
                       key={`${slotIndex}-${dayIndex}`} 
-                      className={`border-r relative ${day.isToday ? "bg-primary/5" : ""}`}
+                      className="border-r relative"
                     >
                       {slotAppointments.map((appointment: any, i: number) => (
                         <div 
