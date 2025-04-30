@@ -142,23 +142,21 @@ export default function Appointments() {
 
   // Time slots for the day
   const timeSlots = [
-    { hour: 8, displayHour: "8:00" },
-    { hour: 9, displayHour: "9:00" },
+    { hour: 7, displayHour: "07:00" },
+    { hour: 8, displayHour: "08:00" },
+    { hour: 9, displayHour: "09:00" },
     { hour: 10, displayHour: "10:00" },
     { hour: 11, displayHour: "11:00" },
     { hour: 12, displayHour: "12:00" },
-    { hour: 12, displayHour: "12:30" },
     { hour: 13, displayHour: "13:00" },
-    { hour: 13, displayHour: "13:30" },
     { hour: 14, displayHour: "14:00" },
-    { hour: 14, displayHour: "14:30" },
     { hour: 15, displayHour: "15:00" },
-    { hour: 15, displayHour: "15:30" },
     { hour: 16, displayHour: "16:00" },
-    { hour: 16, displayHour: "16:30" },
     { hour: 17, displayHour: "17:00" },
-    { hour: 17, displayHour: "17:30" },
     { hour: 18, displayHour: "18:00" },
+    { hour: 19, displayHour: "19:00" },
+    { hour: 20, displayHour: "20:00" },
+    { hour: 21, displayHour: "21:00" },
   ];
 
   // Get appointments for a specific hour and day
@@ -201,7 +199,7 @@ export default function Appointments() {
           <div className="relative pl-16">
             {timeSlots.map((slot, slotIndex) => (
               <div key={slotIndex} className="grid grid-cols-7 border-b h-14">
-                <div className="absolute -left-16 text-xs text-muted-foreground flex items-center h-14 w-14 justify-end pr-2">
+                <div className="absolute -left-14 text-sm font-medium text-foreground flex items-center h-14 w-14 justify-end pr-2">
                   {slot.displayHour}
                 </div>
                 {weekDays.map((day, dayIndex) => {
@@ -272,7 +270,7 @@ export default function Appointments() {
       </div>
 
       <Card>
-        <CardContent className="p-4 pt-6">
+        <CardContent className="p-4 pt-6 pl-[50px]">
           {renderCalendarView()}
         </CardContent>
       </Card>
