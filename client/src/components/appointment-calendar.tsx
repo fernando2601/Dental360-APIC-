@@ -372,10 +372,7 @@ export function AppointmentCalendar() {
 
   return (
     <Card className="col-span-full shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
-        <CardTitle className="text-2xl font-bold">Calendário de Agendamentos</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0 sm:p-2">
+      <CardContent className="p-0">
         {isLoading ? (
           <div className="flex items-center justify-center h-[600px]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -407,6 +404,21 @@ export function AppointmentCalendar() {
                   Dia
                 </li>
               </ul>
+            </div>
+            <div className="flex justify-end items-center gap-4 p-4 border-b">
+              <div className="flex-1 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Hoje</span>
+                  <button className="px-1 text-lg">&lt;</button>
+                  <span className="text-sm font-medium">27 de abr. - 3 de mai. de 2025</span>
+                  <button className="px-1 text-lg">&gt;</button>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button className="bg-gray-100 hover:bg-gray-200 text-sm font-medium py-1 px-3 rounded">
+                    Semana
+                  </button>
+                </div>
+              </div>
             </div>
             <div id="calendar" className="h-[700px] p-2 calendar-custom" />
           </div>

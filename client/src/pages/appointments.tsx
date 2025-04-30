@@ -30,7 +30,7 @@ const appointmentFormSchema = z.object({
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
-export default function Appointments() {
+export default function Agenda() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -107,29 +107,138 @@ export default function Appointments() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gerenciamento de Agendamentos</h1>
-          <p className="text-muted-foreground">Agende e gerencie consultas de clientes.</p>
-        </div>
-        <Button className="mt-4 md:mt-0" onClick={() => setIsCreateDialogOpen(true)}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Agenda</h1>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Agendamento
         </Button>
       </div>
 
-      <Tabs defaultValue="calendar" className="w-full">
-        <TabsList>
-          <TabsTrigger value="calendar">Visualização em Calendário</TabsTrigger>
-          <TabsTrigger value="list">Visualização em Lista</TabsTrigger>
-        </TabsList>
-        <TabsContent value="calendar" className="mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Sidebar - Mini calendário e Filtros */}
+        <div className="md:col-span-1 space-y-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-md">Visão geral</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Mini Calendário - Simplificado */}
+              <div className="text-center border rounded-md p-4 mb-4">
+                <div className="flex justify-between items-center mb-4">
+                  <button className="text-sm">&lt;</button>
+                  <span className="font-medium">Maio 2025</span>
+                  <button className="text-sm">&gt;</button>
+                </div>
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  <div className="text-xs text-muted-foreground">D</div>
+                  <div className="text-xs text-muted-foreground">S</div>
+                  <div className="text-xs text-muted-foreground">T</div>
+                  <div className="text-xs text-muted-foreground">Q</div>
+                  <div className="text-xs text-muted-foreground">Q</div>
+                  <div className="text-xs text-muted-foreground">S</div>
+                  <div className="text-xs text-muted-foreground">S</div>
+                </div>
+                <div className="grid grid-cols-7 gap-1">
+                  {Array.from({ length: 31 }).map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`text-xs p-1 rounded-full w-6 h-6 flex items-center justify-center mx-auto
+                        ${i === 29 ? 'bg-primary text-white' : 'hover:bg-muted cursor-pointer'}`}
+                    >
+                      {i + 1}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <h3 className="font-medium mb-2">Relatório de agendamentos</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Agendados hoje:</span>
+                  <span className="font-medium">3</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Pendentes:</span>
+                  <span className="font-medium">12</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Concluídos (mês):</span>
+                  <span className="font-medium">48</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-md">Filtros</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Profissional</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos os profissionais" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os profissionais</SelectItem>
+                    {staff?.map((s: any) => (
+                      <SelectItem key={s.id} value={s.id.toString()}>
+                        {s.user?.fullName || `Staff #${s.id}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Serviços</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos os serviços" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os serviços</SelectItem>
+                    {services?.map((service: any) => (
+                      <SelectItem key={service.id} value={service.id.toString()}>
+                        {service.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos os status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os status</SelectItem>
+                    <SelectItem value="scheduled">Agendado</SelectItem>
+                    <SelectItem value="completed">Concluído</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
+                    <SelectItem value="no-show">Não compareceu</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="pt-2">
+                <Button variant="outline" className="w-full">
+                  Aplicar Filtros
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Calendário Principal */}
+        <div className="md:col-span-3">
           <AppointmentCalendar />
-        </TabsContent>
-        <TabsContent value="list" className="mt-4">
-          <ListView />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
       {/* Create Appointment Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
