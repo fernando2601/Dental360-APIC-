@@ -198,10 +198,10 @@ export default function Appointments() {
           </div>
 
           {/* Time slots */}
-          <div className="relative">
+          <div className="relative pl-16">
             {timeSlots.map((slot, slotIndex) => (
               <div key={slotIndex} className="grid grid-cols-7 border-b h-14">
-                <div className="absolute -left-12 text-xs text-muted-foreground flex items-center h-14">
+                <div className="absolute -left-16 text-xs text-muted-foreground flex items-center h-14 w-14 justify-end pr-2">
                   {slot.displayHour}
                 </div>
                 {weekDays.map((day, dayIndex) => {
