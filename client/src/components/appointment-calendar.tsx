@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,13 @@ import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 // Definição da localização portuguesa para o calendário
 const ptBrLocale = {
@@ -38,59 +45,8 @@ const ptBrLocale = {
   weekText: 'Sm',
   allDayText: 'Todo o dia',
   moreLinkText: 'mais',
-  noEventsText: 'Sem eventos para mostrar',
-  dayHeaderFormat: { weekday: 'long' },
-  weekdays: {
-    shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
-    longhand: [
-      'Domingo',
-      'Segunda-feira',
-      'Terça-feira',
-      'Quarta-feira',
-      'Quinta-feira',
-      'Sexta-feira',
-      'Sábado',
-    ],
-  },
-  months: {
-    shorthand: [
-      'Jan',
-      'Fev',
-      'Mar',
-      'Abr',
-      'Mai',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Set',
-      'Out',
-      'Nov',
-      'Dez',
-    ],
-    longhand: [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
-    ],
-  },
+  noEventsText: 'Sem eventos para mostrar'
 };
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { insertAppointmentSchema } from "@shared/schema";
 
 // Extend the appointment schema with client validation
 const appointmentFormSchema = z.object({
@@ -105,7 +61,7 @@ const appointmentFormSchema = z.object({
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
-export function AppointmentCalendar() {
+function AppointmentCalendar() {
   const [calendarApi, setCalendarApi] = useState<Calendar | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -113,19 +69,19 @@ export function AppointmentCalendar() {
   const queryClient = useQueryClient();
 
   // Fetch data
-  const { data: appointments, isLoading: isLoadingAppointments } = useQuery({
+  const { data: appointments = [], isLoading: isLoadingAppointments } = useQuery({
     queryKey: ['/api/appointments'],
   });
 
-  const { data: clients, isLoading: isLoadingClients } = useQuery({
+  const { data: clients = [], isLoading: isLoadingClients } = useQuery({
     queryKey: ['/api/clients'],
   });
 
-  const { data: staff, isLoading: isLoadingStaff } = useQuery({
+  const { data: staff = [], isLoading: isLoadingStaff } = useQuery({
     queryKey: ['/api/staff'],
   });
 
-  const { data: services, isLoading: isLoadingServices } = useQuery({
+  const { data: services = [], isLoading: isLoadingServices } = useQuery({
     queryKey: ['/api/services'],
   });
 
@@ -133,9 +89,9 @@ export function AppointmentCalendar() {
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues: {
-      clientId: '',
-      staffId: '',
-      serviceId: '',
+      clientId: 1,
+      staffId: 1,
+      serviceId: 1,
       startTime: '',
       endTime: '',
       status: 'scheduled',
@@ -151,17 +107,25 @@ export function AppointmentCalendar() {
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Appointment created successfully.",
+        title: "Sucesso",
+        description: "Agendamento criado com sucesso.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
       setIsDialogOpen(false);
-      form.reset();
+      form.reset({
+        clientId: 1,
+        staffId: 1,
+        serviceId: 1,
+        startTime: '',
+        endTime: '',
+        status: 'scheduled',
+        notes: '',
+      });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create appointment. Please try again.",
+        title: "Erro",
+        description: "Falha ao criar agendamento. Por favor, tente novamente.",
         variant: "destructive",
       });
     },
@@ -174,8 +138,7 @@ export function AppointmentCalendar() {
       !isLoadingClients &&
       !isLoadingStaff &&
       !isLoadingServices &&
-      !calendarApi &&
-      appointments
+      !calendarApi
     ) {
       const calendarEl = document.getElementById('calendar');
       if (!calendarEl) return;
@@ -184,33 +147,7 @@ export function AppointmentCalendar() {
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
         initialView: 'timeGridWeek',
         locale: ptBrLocale,
-        headerToolbar: {
-          left: 'prev,next hoje',
-          center: 'title',
-          right: 'viewMenu',
-        },
-        buttonText: {
-          today: 'Hoje',
-          month: 'Mês',
-          week: 'Semana',
-          day: 'Dia',
-        },
-        titleFormat: { 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric'
-        },
-        customButtons: {
-          viewMenu: {
-            text: '📅 Semana',
-            click: function() {
-              const customDropdown = document.getElementById('view-dropdown');
-              if (customDropdown) {
-                customDropdown.classList.toggle('hidden');
-              }
-            }
-          }
-        },
+        headerToolbar: false, // Desabilita a barra de ferramentas padrão
         slotMinTime: '07:00:00',
         slotMaxTime: '20:00:00',
         allDaySlot: false,
@@ -229,13 +166,13 @@ export function AppointmentCalendar() {
         dayCellClassNames: 'rounded-md bg-slate-50/50',
         slotLabelClassNames: 'text-sm font-medium text-slate-500',
         events: appointments.map((appointment: any) => {
-          const client = clients?.find((c: any) => c.id === appointment.clientId);
-          const service = services?.find((s: any) => s.id === appointment.serviceId);
-          const staff = staff?.find((s: any) => s.id === appointment.staffId);
+          const client = clients.find((c: any) => c.id === appointment.clientId);
+          const service = services.find((s: any) => s.id === appointment.serviceId);
+          const staffMember = staff.find((s: any) => s.id === appointment.staffId);
           
           return {
             id: appointment.id.toString(),
-            title: client?.fullName || 'Cliente',
+            title: client ? client.fullName : 'Cliente',
             start: appointment.startTime,
             end: appointment.endTime,
             backgroundColor: getStatusColor(appointment.status),
@@ -248,9 +185,9 @@ export function AppointmentCalendar() {
               serviceId: appointment.serviceId,
               status: appointment.status,
               notes: appointment.notes,
-              clientName: client?.fullName,
-              serviceName: service?.name,
-              staffName: staff?.user?.fullName || `Profissional #${appointment.staffId}`,
+              clientName: client ? client.fullName : 'Cliente',
+              serviceName: service ? service.name : 'Serviço',
+              staffName: staffMember && staffMember.user ? staffMember.user.fullName : `Profissional #${appointment.staffId}`,
             },
           };
         }),
@@ -294,19 +231,11 @@ export function AppointmentCalendar() {
         calendar.destroy();
       };
     }
-  }, [appointments, isLoadingAppointments, isLoadingClients, isLoadingStaff, isLoadingServices]);
+  }, [appointments, isLoadingAppointments, isLoadingClients, isLoadingStaff, isLoadingServices, calendarApi, form]);
 
   // Format date for datetime-local input
   function formatDateTimeForInput(date: Date) {
     return format(date, "yyyy-MM-dd'T'HH:mm");
-  }
-
-  // Get appointment title
-  function getAppointmentTitle(appointment: any) {
-    const client = clients?.find((c: any) => c.id === appointment.clientId);
-    const service = services?.find((s: any) => s.id === appointment.serviceId);
-    
-    return `${client?.fullName || 'Cliente'}`;
   }
 
   // Get status color
@@ -331,7 +260,7 @@ export function AppointmentCalendar() {
   function calculateEndTime(serviceId: string, startTimeStr: string) {
     if (!serviceId || !startTimeStr) return;
 
-    const service = services?.find((s: any) => s.id === Number(serviceId));
+    const service = services.find((s: any) => s.id === Number(serviceId));
     if (!service) return;
 
     const startTime = new Date(startTimeStr);
@@ -346,78 +275,83 @@ export function AppointmentCalendar() {
     createAppointment.mutate(values);
   }
 
+  // Navegação do calendário
+  function navigatePrev() {
+    if (calendarApi) {
+      calendarApi.prev();
+    }
+  }
+
+  function navigateNext() {
+    if (calendarApi) {
+      calendarApi.next();
+    }
+  }
+
+  function navigateToday() {
+    if (calendarApi) {
+      calendarApi.today();
+    }
+  }
+
+  function changeView(viewName: string) {
+    if (calendarApi) {
+      calendarApi.changeView(viewName);
+    }
+  }
+
   const isLoading = isLoadingAppointments || isLoadingClients || isLoadingStaff || isLoadingServices;
 
-  const handleViewChange = (view: string) => {
-    if (calendarApi) {
-      calendarApi.changeView(view);
-      
-      // Atualizar o texto do botão dropdown
-      let buttonText = 'Semana';
-      if (view === 'dayGridMonth') buttonText = 'Mês';
-      else if (view === 'timeGridDay') buttonText = 'Dia';
-      
-      const viewButton = document.querySelector('.fc-viewMenu-button');
-      if (viewButton) {
-        viewButton.textContent = `📅 ${buttonText}`;
-      }
-      
-      // Esconder o dropdown
-      const dropdown = document.getElementById('view-dropdown');
-      if (dropdown) {
-        dropdown.classList.add('hidden');
-      }
-    }
-  };
-
   return (
-    <Card className="col-span-full shadow-lg">
+    <Card className="shadow-lg">
       <CardContent className="p-0">
         {isLoading ? (
           <div className="flex items-center justify-center h-[600px]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="relative">
-            {/* Dropdown de seleção de visualização */}
-            <div 
-              id="view-dropdown" 
-              className="absolute hidden right-0 top-12 z-10 bg-white shadow-lg rounded-md overflow-hidden border"
-            >
-              <ul className="py-1">
-                <li 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                  onClick={() => handleViewChange('dayGridMonth')}
+          <div>
+            <div className="flex justify-between items-center p-4 border-b">
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-sm font-medium"
+                  onClick={navigateToday}
                 >
-                  Mês
-                </li>
-                <li 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                  onClick={() => handleViewChange('timeGridWeek')}
+                  Hoje
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="px-1 text-lg"
+                  onClick={navigatePrev}
                 >
-                  Semana
-                </li>
-                <li 
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                  onClick={() => handleViewChange('timeGridDay')}
+                  &lt;
+                </Button>
+                <span className="text-sm font-medium">
+                  27 de abr. - 3 de mai. de 2025
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="px-1 text-lg"
+                  onClick={navigateNext}
                 >
-                  Dia
-                </li>
-              </ul>
-            </div>
-            <div className="flex justify-end items-center gap-4 p-4 border-b">
-              <div className="flex-1 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">Hoje</span>
-                  <button className="px-1 text-lg">&lt;</button>
-                  <span className="text-sm font-medium">27 de abr. - 3 de mai. de 2025</span>
-                  <button className="px-1 text-lg">&gt;</button>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button className="bg-gray-100 hover:bg-gray-200 text-sm font-medium py-1 px-3 rounded">
-                    Semana
-                  </button>
-                </div>
+                  &gt;
+                </Button>
+              </div>
+              <div className="flex items-center gap-1">
+                <Select defaultValue="week">
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="Semana" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="month" onClick={() => changeView('dayGridMonth')}>Mês</SelectItem>
+                    <SelectItem value="week" onClick={() => changeView('timeGridWeek')}>Semana</SelectItem>
+                    <SelectItem value="day" onClick={() => changeView('timeGridDay')}>Dia</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div id="calendar" className="h-[700px] p-2 calendar-custom" />
@@ -453,7 +387,7 @@ export function AppointmentCalendar() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {clients?.map((client: any) => (
+                          {clients.map((client: any) => (
                             <SelectItem key={client.id} value={client.id.toString()}>
                               {client.fullName}
                             </SelectItem>
@@ -475,7 +409,6 @@ export function AppointmentCalendar() {
                         value={field.value.toString()}
                         onValueChange={(value) => {
                           field.onChange(value);
-                          // Update end time based on service duration
                           calculateEndTime(value, form.getValues('startTime'));
                         }}
                       >
@@ -485,7 +418,7 @@ export function AppointmentCalendar() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {services?.map((service: any) => (
+                          {services.map((service: any) => (
                             <SelectItem key={service.id} value={service.id.toString()}>
                               {service.name} ({service.duration} min)
                             </SelectItem>
@@ -513,7 +446,7 @@ export function AppointmentCalendar() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {staff?.map((s: any) => (
+                          {staff.map((s: any) => (
                             <SelectItem key={s.id} value={s.id.toString()}>
                               {s.user?.fullName || `Profissional #${s.id}`}
                             </SelectItem>
@@ -538,7 +471,6 @@ export function AppointmentCalendar() {
                             type="datetime-local"
                             onChange={(e) => {
                               field.onChange(e);
-                              // Update end time when start time changes
                               calculateEndTime(form.getValues('serviceId'), e.target.value);
                             }}
                           />
