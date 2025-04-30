@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import MainLayout from "./layouts/main-layout";
 import Dashboard from "@/pages/dashboard";
 import Appointments from "@/pages/appointments";
+import AgendaPage from "@/pages/agenda"; // New Agenda page
 import Clients from "@/pages/clients";
 import Inventory from "@/pages/inventory";
 import Finances from "@/pages/finances";
@@ -36,7 +37,8 @@ function Router() {
         <MainLayout>
           <Switch>
             <Route path="/" component={Dashboard} />
-            <Route path="/appointments" component={Appointments} />
+            <Route path="/appointments" component={AgendaPage} /> {/* Updated to use new agenda page */}
+            <Route path="/agenda" component={AgendaPage} /> {/* Additional route for clarity */}
             <Route path="/clients" component={Clients} />
             <Route path="/inventory" component={Inventory} />
             <Route path="/finances" component={Finances} />
