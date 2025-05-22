@@ -936,7 +936,7 @@ function VisaoGeral() {
       </div>
 
       {/* Cards informativos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-blue-50 border-blue-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -1096,9 +1096,63 @@ function VisaoGeral() {
               </div>
               <span className="font-medium text-pink-700">Ociosidade por sala</span>
             </div>
-            <Button variant="ghost" size="sm" className="text-pink-600 p-0 h-auto">
-              ver mais
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-pink-600 p-0 h-auto">
+                  ver mais
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh]">
+                <DialogHeader>
+                  <DialogTitle>Ociosidade por sala</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  {/* Estado vazio */}
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                      <AlertCircle className="w-6 h-6 text-purple-500" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Hmm, está vazio por aqui!</h3>
+                    <p className="text-gray-500 text-center">Nenhum registro encontrado.</p>
+                  </div>
+                  
+                  {/* Controles de paginação */}
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center gap-2">
+                      <Select value="25">
+                        <SelectTrigger className="w-40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10 por página</SelectItem>
+                          <SelectItem value="25">25 por página</SelectItem>
+                          <SelectItem value="50">50 por página</SelectItem>
+                          <SelectItem value="100">100 por página</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronLeft className="w-4 h-4" />
+                        <ChevronLeft className="w-4 h-4 -ml-1" />
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 -ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <div className="mt-3 text-center">
               <AlertCircle className="h-8 w-8 mx-auto text-gray-400 mb-2" />
               <p className="text-sm text-gray-600">Não há nada aqui!</p>
@@ -1115,9 +1169,73 @@ function VisaoGeral() {
               </div>
               <span className="font-medium text-yellow-700">Ociosidade por profissional</span>
             </div>
-            <Button variant="ghost" size="sm" className="text-yellow-600 p-0 h-auto">
-              ver mais
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-yellow-600 p-0 h-auto">
+                  ver mais
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh]">
+                <DialogHeader>
+                  <DialogTitle>Ociosidade por profissional</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  {/* Lista de profissionais */}
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="flex items-center justify-between py-2 px-4 border-b">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-bold text-white">1</span>
+                        </div>
+                        <span className="text-sm">FERNANDO FERREIRA</span>
+                      </div>
+                      <div className="flex items-center gap-8">
+                        <span className="text-sm font-medium">1</span>
+                        <span className="text-sm text-gray-500 w-12 text-right">98%</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Controles de paginação */}
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center gap-2">
+                      <Select value="25">
+                        <SelectTrigger className="w-40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10 por página</SelectItem>
+                          <SelectItem value="25">25 por página</SelectItem>
+                          <SelectItem value="50">50 por página</SelectItem>
+                          <SelectItem value="100">100 por página</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronLeft className="w-4 h-4" />
+                        <ChevronLeft className="w-4 h-4 -ml-1" />
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <Button variant="default" size="sm" className="bg-purple-600 text-white">
+                        1
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 -ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -1138,9 +1256,73 @@ function VisaoGeral() {
               </div>
               <span className="font-medium text-purple-700">Procedimentos mais frequentes</span>
             </div>
-            <Button variant="ghost" size="sm" className="text-purple-600 p-0 h-auto">
-              ver mais
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-purple-600 p-0 h-auto">
+                  ver mais
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh]">
+                <DialogHeader>
+                  <DialogTitle>Procedimentos mais frequentes</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  {/* Lista de procedimentos */}
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="flex items-center justify-between py-2 px-4 border-b">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-bold text-white">1</span>
+                        </div>
+                        <span className="text-sm">Clareamento a Laser</span>
+                      </div>
+                      <div className="flex items-center gap-8">
+                        <span className="text-sm font-medium">1</span>
+                        <span className="text-sm text-gray-500 w-12 text-right">100%</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Controles de paginação */}
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center gap-2">
+                      <Select value="25">
+                        <SelectTrigger className="w-40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10 por página</SelectItem>
+                          <SelectItem value="25">25 por página</SelectItem>
+                          <SelectItem value="50">50 por página</SelectItem>
+                          <SelectItem value="100">100 por página</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronLeft className="w-4 h-4" />
+                        <ChevronLeft className="w-4 h-4 -ml-1" />
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <Button variant="default" size="sm" className="bg-purple-600 text-white">
+                        1
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled>
+                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 -ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
