@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, BarChart3, FileText, Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertCircle, RefreshCw, UserX, PauseCircle, PlayCircle, Check, Menu, X } from "lucide-react";
+import { Calendar, BarChart3, FileText, Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertCircle, RefreshCw, UserX, PauseCircle, PlayCircle, Check, Menu, X, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -412,48 +412,113 @@ function VisaoGeral() {
           {/* Filtros expandidos */}
           {isFiltersExpanded && (
             <div className="space-y-4 pt-4 border-t">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Período com calendário */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-purple-600 flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Período
-                  </label>
-                  <div className="text-sm text-gray-600">18/05/2025 - 24/05/2025</div>
+              <div className="flex gap-6">
+                {/* Seção esquerda - Filtros em colunas */}
+                <div className="flex flex-col gap-4 w-80">
+                  {/* Período */}
+                  <div className="space-y-3">
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Período
+                    </Button>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="hoje" className="text-purple-600" />
+                        <span>Hoje</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="esta-semana" className="text-purple-600" />
+                        <span>Esta semana</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="este-mes" className="text-purple-600" />
+                        <span>Este mês</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="ultimos-7" className="text-purple-600" />
+                        <span>Últimos 7 dias</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="ultimos-30" className="text-purple-600" />
+                        <span>Últimos 30 dias</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Profissionais */}
+                  <div className="space-y-3">
+                    <Button variant="outline" className="w-full flex items-center gap-2">
+                      <UserX className="w-4 h-4" />
+                      Profissionais
+                    </Button>
+                  </div>
+                  
+                  {/* Status */}
+                  <div className="space-y-3">
+                    <Button variant="outline" className="w-full">
+                      Status
+                    </Button>
+                  </div>
                 </div>
                 
-                {/* Profissionais */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    Profissionais
-                  </label>
-                  <Select value={profissionalFilter} onValueChange={setProfissionalFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todos">Todos</SelectItem>
-                      <SelectItem value="dr-silva">Dr. Silva</SelectItem>
-                      <SelectItem value="dra-santos">Dra. Santos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {/* Status */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-600">Status</label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todos">Todos</SelectItem>
-                      <SelectItem value="agendado">Agendado</SelectItem>
-                      <SelectItem value="confirmado">Confirmado</SelectItem>
-                      <SelectItem value="cancelado">Cancelado</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Seção direita - Calendário */}
+                <div className="flex-1">
+                  <div className="bg-white rounded-lg p-4 border">
+                    {/* Header do calendário */}
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="font-medium">Período</span>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm">
+                          <ChevronLeft className="w-4 h-4" />
+                        </Button>
+                        <span className="font-medium">Mai 2025</span>
+                        <Button variant="ghost" size="sm">
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Dias da semana */}
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => (
+                        <div key={index} className="text-center text-sm font-medium text-gray-500 p-2">
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Calendário */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {/* Dias do mês anterior */}
+                      {[27, 28, 29, 30].map((day) => (
+                        <div key={`prev-${day}`} className="text-center p-2 text-gray-300 text-sm">
+                          {day}
+                        </div>
+                      ))}
+                      
+                      {/* Dias do mês atual */}
+                      {Array.from({length: 31}, (_, i) => i + 1).map((day) => (
+                        <div 
+                          key={day} 
+                          className={`text-center p-2 text-sm cursor-pointer hover:bg-gray-100 rounded ${
+                            day === 18 ? 'bg-purple-600 text-white rounded' : 
+                            day === 24 ? 'bg-purple-600 text-white rounded' :
+                            day >= 18 && day <= 24 ? 'bg-purple-100 text-purple-600' : ''
+                          }`}
+                        >
+                          {day}
+                        </div>
+                      ))}
+                      
+                      {/* Dias do próximo mês */}
+                      {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                        <div key={`next-${day}`} className="text-center p-2 text-gray-300 text-sm">
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
