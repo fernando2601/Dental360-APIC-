@@ -266,35 +266,290 @@ function MiniCalendar() {
 }
 
 function VisaoGeral() {
+  const [periodFilter, setPeriodFilter] = useState("diaria");
+  
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Visão Geral</h2>
+    <div className="space-y-6 p-6">
+      {/* Header com filtros */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Visão Geral</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Filtros</span>
+          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">1 filtro aplicado</span>
+          <Button variant="ghost" size="sm" className="text-purple-600">
+            Limpar filtros
+          </Button>
+        </div>
+      </div>
+
+      {/* Cards de estatísticas principais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="border-l-4 border-l-green-500">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Agendamentos Hoje</span>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total de agendamentos</p>
+                <p className="text-2xl font-bold">1</p>
+              </div>
+              <div className="text-green-500 text-sm font-medium flex items-center gap-1">
+                <span>↗</span> 0%
+              </div>
             </div>
-            <p className="text-2xl font-bold mt-2">0</p>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="border-l-4 border-l-blue-500">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Esta Semana</span>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Ociosidade</p>
+                <p className="text-2xl font-bold">98 %</p>
+              </div>
+              <div className="text-red-500 text-sm font-medium flex items-center gap-1">
+                <span>↘</span> -2%
+              </div>
             </div>
-            <p className="text-2xl font-bold mt-2">0</p>
           </CardContent>
         </Card>
+        
+        <Card className="border-l-4 border-l-purple-500">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Pacientes na lista de espera</p>
+                <p className="text-2xl font-bold">0</p>
+              </div>
+              <div className="text-green-500 text-sm font-medium flex items-center gap-1">
+                <span>↗</span> 0%
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos principais */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Agendamentos por período */}
         <Card>
           <CardContent className="p-6">
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Este Mês</span>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Agendamentos por período</h3>
+                <div className="flex gap-2">
+                  {["Diária", "Semanal", "Mensal", "Anual"].map((period) => (
+                    <Button
+                      key={period}
+                      variant={period === "Diária" ? "default" : "ghost"}
+                      size="sm"
+                      className={period === "Diária" ? "bg-purple-600 text-white" : ""}
+                    >
+                      {period}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Gráfico simples */}
+              <div className="h-40 flex items-end justify-center space-x-2">
+                <div className="w-8 bg-gray-200 h-4"></div>
+                <div className="w-8 bg-gray-200 h-6"></div>
+                <div className="w-8 bg-gray-200 h-8"></div>
+                <div className="w-8 bg-green-400 h-32"></div>
+                <div className="w-8 bg-gray-200 h-10"></div>
+                <div className="w-8 bg-gray-200 h-6"></div>
+                <div className="w-8 bg-gray-200 h-4"></div>
+              </div>
+              
+              <div className="text-center text-sm text-muted-foreground">
+                <span className="text-green-600">—</span> Agendamentos
+                <span className="ml-4 text-purple-600">--</span> Média
+              </div>
             </div>
-            <p className="text-2xl font-bold mt-2">0</p>
+          </CardContent>
+        </Card>
+
+        {/* Agendamentos por status */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Agendamentos por status</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 text-purple-500" />
+                  <span className="text-sm">Agendado</span>
+                  <span className="text-xs text-muted-foreground">1</span>
+                </div>
+                <span className="text-sm font-medium">100%</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm">Confirmado</span>
+                  <span className="text-xs text-muted-foreground">0</span>
+                </div>
+                <span className="text-sm font-medium">0%</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <UserX className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">Não compareceu</span>
+                  <span className="text-xs text-muted-foreground">0</span>
+                </div>
+                <span className="text-sm font-medium">0%</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span className="text-sm">Concluído</span>
+                  <span className="text-xs text-muted-foreground">0</span>
+                </div>
+                <span className="text-sm font-medium">0%</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-red-500" />
+                  <span className="text-sm">Cancelado</span>
+                  <span className="text-xs text-muted-foreground">0</span>
+                </div>
+                <span className="text-sm font-medium">0%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Cards informativos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-medium text-blue-700">Pacientes mais frequentes</span>
+            </div>
+            <Button variant="ghost" size="sm" className="text-blue-600 p-0 h-auto">
+              ver mais
+            </Button>
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold">1</span>
+                </div>
+                <span className="text-sm">Clara Ribeiro (Paciente)</span>
+                <span className="text-xs text-muted-foreground ml-auto">100%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-pink-50 border-pink-200">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center">
+                <AlertCircle className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-medium text-pink-700">Ociosidade por sala</span>
+            </div>
+            <Button variant="ghost" size="sm" className="text-pink-600 p-0 h-auto">
+              ver mais
+            </Button>
+            <div className="mt-3 text-center">
+              <AlertCircle className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+              <p className="text-sm text-gray-600">Não há nada aqui!</p>
+              <p className="text-xs text-gray-500">Nenhuma venda encontrada para os filtros selecionados</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-yellow-50 border-yellow-200">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                <Clock className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-medium text-yellow-700">Ociosidade por profissional</span>
+            </div>
+            <Button variant="ghost" size="sm" className="text-yellow-600 p-0 h-auto">
+              ver mais
+            </Button>
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold">1</span>
+                </div>
+                <span className="text-sm">FERNANDO FERREIRA</span>
+                <span className="text-xs text-muted-foreground ml-auto">98%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-purple-50 border-purple-200">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-white" />
+              </div>
+              <span className="font-medium text-purple-700">Procedimentos mais frequentes</span>
+            </div>
+            <Button variant="ghost" size="sm" className="text-purple-600 p-0 h-auto">
+              ver mais
+            </Button>
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold">1</span>
+                </div>
+                <span className="text-sm">Clareamento a Laser</span>
+                <span className="text-xs text-muted-foreground ml-auto">100%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos de movimento */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Dias mais movimentados */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Dias mais movimentados</h3>
+            <div className="h-40 flex items-end justify-center space-x-1">
+              {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"].map((day, index) => (
+                <div key={day} className="flex flex-col items-center">
+                  <div 
+                    className={`w-8 ${index === 3 ? 'bg-purple-500 h-32' : 'bg-gray-200 h-8'}`}
+                  ></div>
+                  <span className="text-xs text-muted-foreground mt-1">{day}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Horários mais movimentados */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Horários mais movimentados</h3>
+            <div className="h-40 grid grid-cols-12 gap-1">
+              {Array.from({ length: 24 }, (_, i) => (
+                <div key={i} className="flex flex-col">
+                  <div 
+                    className={`w-full ${i >= 16 && i <= 17 ? 'bg-purple-500' : 'bg-gray-200'} ${i >= 16 && i <= 17 ? 'h-20' : 'h-2'}`}
+                  ></div>
+                  {i % 4 === 0 && (
+                    <span className="text-xs text-muted-foreground mt-1 transform -rotate-45 origin-left">
+                      {i}h
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
