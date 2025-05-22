@@ -27,26 +27,50 @@
   font-size: 0.9rem !important;
 }
 
-/* Horários no lado esquerdo - PRINCIPAL FIX */
+/* Horários no lado esquerdo - FORÇAR APARIÇÃO */
+.calendar-custom .fc-timegrid-axis {
+  display: block !important;
+  visibility: visible !important;
+  width: 80px !important;
+  min-width: 80px !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-right: 3px solid rgba(139, 92, 246, 0.3) !important;
+}
+
 .calendar-custom .fc-timegrid-slot-label {
-  font-size: 0.85rem !important;
-  color: hsl(var(--purple-600)) !important;
-  font-weight: 600 !important;
-  padding: 8px 12px !important;
-  background: rgba(139, 92, 246, 0.05) !important;
-  border-right: 2px solid rgba(139, 92, 246, 0.2) !important;
+  display: block !important;
+  visibility: visible !important;
+  font-size: 1rem !important;
+  color: hsl(var(--purple-700)) !important;
+  font-weight: 700 !important;
+  padding: 12px 8px !important;
+  background: rgba(139, 92, 246, 0.08) !important;
   text-align: center !important;
-  min-width: 60px !important;
+  min-width: 80px !important;
+  width: 80px !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
 }
 
 .calendar-custom .fc-timegrid-slot-label-cushion {
-  color: hsl(var(--purple-600)) !important;
-  font-weight: 600 !important;
+  display: block !important;
+  visibility: visible !important;
+  color: hsl(var(--purple-700)) !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
 }
 
-.calendar-custom .fc-timegrid-axis {
-  background: rgba(139, 92, 246, 0.05) !important;
-  border-right: 2px solid rgba(139, 92, 246, 0.2) !important;
+.calendar-custom .fc-timegrid-axis-cushion {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Forçar coluna de tempo a aparecer */
+.calendar-custom .fc-timegrid-body {
+  border-left: none !important;
+}
+
+.calendar-custom .fc-timegrid-divider {
+  display: block !important;
 }
 
 .calendar-custom .fc-event {

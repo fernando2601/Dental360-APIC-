@@ -147,11 +147,11 @@ function AppointmentCalendar() {
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
         initialView: 'timeGridWeek',
         locale: ptBrLocale,
-        headerToolbar: false, // Desabilita a barra de ferramentas padrão
-        slotMinTime: '06:00:00',
-        slotMaxTime: '22:00:00',
-        slotDuration: '00:30:00', // Intervalos de 30 minutos
-        slotLabelInterval: '01:00:00', // Mostra label a cada hora
+        headerToolbar: false,
+        slotMinTime: '00:00:00',  // 24 horas completas
+        slotMaxTime: '24:00:00',
+        slotDuration: '01:00:00', // Intervalos de 1 hora
+        slotLabelInterval: '01:00:00', // Label a cada hora
         allDaySlot: false,
         height: 700,
         editable: true,
@@ -159,17 +159,16 @@ function AppointmentCalendar() {
         selectMirror: true,
         dayMaxEvents: true,
         nowIndicator: true,
-        scrollTime: '08:00:00', // Começa visualização às 8h
+        scrollTime: '08:00:00',
         slotLabelFormat: {
-          hour: '2-digit',
+          hour: 'numeric',
           minute: '2-digit',
           hour12: false,
-          meridiem: false
+          omitZeroMinute: true
         },
         dayHeaderFormat: { 
-          weekday: 'long', 
-          day: 'numeric',
-          month: 'short'
+          weekday: 'short', 
+          day: 'numeric'
         },
         // Personalizações de estilo
         dayCellClassNames: 'rounded-md bg-slate-50/50',
