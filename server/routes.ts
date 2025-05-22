@@ -467,6 +467,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint para relatórios de agendamentos com filtros
+  app.get("/api/appointment-reports", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const { 
+        startDate, 
+        endDate, 
+        status, 
+        professionalId, 
+        clientId, 
+        convenio,
+        page = 1, 
+        limit = 25 
+      } = req.query;
+
+      // Buscar agendamentos com filtros
+      let appointments = await storage.getAppointments();
+      
+      // Aplicar filtros de data
+      if (startDate && endDate) {
+        const start = new Date(startDate as string);
+        const end = new Date(endDate as string);
+        appointments = appointments.filter(apt => {
+          const aptDate = new Date(apt.startTime);
+          return aptDate >= start && aptDate <= end;
+        });
+      }
+
+      // Aplicar filtro de status
+      if (status && status !== 'todos') {
+        appointments = appointments.filter(apt => apt.status === status);
+      }
+
+      // Aplicar filtro de profissional
+      if (professionalId) {
+        appointments = appointments.filter(apt => apt.staffId === Number(professionalId));
+      }
+
+      // Aplicar filtro de cliente
+      if (clientId) {
+        appointments = appointments.filter(apt => apt.clientId === Number(clientId));
+      }
+
+      // Buscar dados relacionados
+      const clients = await storage.getClients();
+      const staff = await storage.getStaffMembers();
+      const services = await storage.getServices();
+
+      // Enriquecer os dados dos agendamentos
+      const enrichedAppointments = appointments.map(appointment => {
+        const client = clients.find(c => c.id === appointment.clientId);
+        const professional = staff.find(s => s.id === appointment.staffId);
+        const service = services.find(s => s.id === appointment.serviceId);
+
+        return {
+          ...appointment,
+          client: client ? {
+            id: client.id,
+            name: client.name,
+            avatar: client.name.split(' ').map(n => n[0]).join('').toUpperCase()
+          } : null,
+          professional: professional ? {
+            id: professional.id,
+            name: professional.name,
+            avatar: professional.name.split(' ').map(n => n[0]).join('').toUpperCase()
+          } : null,
+          service: service ? {
+            id: service.id,
+            name: service.name,
+            category: service.category,
+            duration: service.duration
+          } : null
+        };
+      });
+
+      // Paginação
+      const pageNum = Number(page);
+      const limitNum = Number(limit);
+      const startIndex = (pageNum - 1) * limitNum;
+      const endIndex = startIndex + limitNum;
+      const paginatedAppointments = enrichedAppointments.slice(startIndex, endIndex);
+
+      // Contar por status
+      const statusCounts = {
+        agendado: appointments.filter(a => a.status === 'scheduled').length,
+        confirmado: appointments.filter(a => a.status === 'confirmed').length,
+        remarcado: appointments.filter(a => a.status === 'rescheduled').length,
+        concluido: appointments.filter(a => a.status === 'completed').length,
+        cancelado: appointments.filter(a => a.status === 'cancelled').length,
+        naoCompareceu: appointments.filter(a => a.status === 'no_show').length,
+        todos: appointments.length
+      };
+
+      res.json({
+        appointments: paginatedAppointments,
+        pagination: {
+          currentPage: pageNum,
+          totalPages: Math.ceil(enrichedAppointments.length / limitNum),
+          totalItems: enrichedAppointments.length,
+          itemsPerPage: limitNum
+        },
+        statusCounts
+      });
+
+    } catch (error) {
+      console.error("Error fetching appointment reports:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Endpoint para buscar opções de filtros
+  app.get("/api/filter-options", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const clients = await storage.getClients();
+      const staff = await storage.getStaffMembers();
+      
+      const convenios = [
+        "Porto Seguro", "SulAmérica", "Bradesco Saúde", "Unimed", "Amil", 
+        "NotreDame Intermédica", "Hapvida", "Prevent Senior", "São Cristóvão",
+        "Golden Cross", "Allianz Saúde", "Particular"
+      ];
+
+      const statusOptions = [
+        { key: "scheduled", label: "Agendado" },
+        { key: "confirmed", label: "Confirmado" },
+        { key: "rescheduled", label: "Remarcado" },
+        { key: "completed", label: "Concluído" },
+        { key: "cancelled", label: "Cancelado" },
+        { key: "no_show", label: "Não compareceram" }
+      ];
+
+      res.json({
+        clients: clients.map(c => ({
+          id: c.id,
+          name: c.name,
+          email: c.email
+        })),
+        professionals: staff.map(s => ({
+          id: s.id,
+          name: s.name,
+          specialization: s.specialization
+        })),
+        convenios,
+        statusOptions
+      });
+
+    } catch (error) {
+      console.error("Error fetching filter options:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Initialize the HTTP server
   const httpServer = createServer(app);
   return httpServer;

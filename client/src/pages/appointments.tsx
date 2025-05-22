@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Calendar, BarChart3, FileText, Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertCircle, RefreshCw, UserX, PauseCircle, PlayCircle, Check, Menu, X, User } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -1454,31 +1455,30 @@ function RelatorioAgendamentos() {
     "Golden Cross", "Allianz Saúde", "Particular"
   ];
 
-  // Dados mockados que serão substituídos por dados reais do backend
-  const allPatients = [
-    "Clara Ribeiro", "Fernando Ferreira", "Maria Santos", "João Silva",
-    "Ana Costa", "Pedro Oliveira", "Lucia Mendes", "Carlos Alberto"
-  ];
+  // Hooks para buscar dados reais do backend
+  const { data: filterOptions } = useQuery({
+    queryKey: ['/api/filter-options'],
+    enabled: true
+  });
 
-  const allProfessionals = [
-    "Dr. Fernando Silva", "Dra. Marina Costa", "Dr. Ricardo Santos",
-    "Dra. Juliana Alves", "Dr. Paulo Mendes"
-  ];
+  const { data: reportDataResponse, isLoading } = useQuery({
+    queryKey: ['/api/appointment-reports', {
+      startDate: '2025-05-18',
+      endDate: '2025-05-24',
+      status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
+      professionalId: selectedProfessionals.length > 0 ? selectedProfessionals[0] : undefined,
+      clientId: selectedPatients.length > 0 ? selectedPatients[0] : undefined,
+      page: currentPage,
+      limit: itemsPerPage
+    }],
+    enabled: true
+  });
 
-  // Dados mock para relatório
-  const reportData = [
-    {
-      id: 1,
-      procedimento: "Clareamento a Laser",
-      paciente: { nome: "Clara Ribeiro", avatar: "CR" },
-      profissional: { nome: "FERNANDO", avatar: "F" },
-      duracao: "60 min",
-      agendadoPara: "22/05/2025 16:36",
-      status: "concluido"
-    }
-  ];
-
-  const statusCounts = {
+  // Dados reais do backend
+  const allPatients = filterOptions?.clients?.map((c: any) => c.fullName) || [];
+  const allProfessionals = filterOptions?.professionals?.map((p: any) => p.specialization) || [];
+  const reportData = reportDataResponse?.appointments || [];
+  const realStatusCounts = reportDataResponse?.statusCounts || {
     agendado: 0,
     confirmado: 0,
     naoCompareceu: 0,
