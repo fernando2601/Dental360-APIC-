@@ -1505,25 +1505,141 @@ function RelatorioAgendamentos() {
         {/* Painel de filtros avançados */}
         {showFilters && (
           <Card className="p-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              <Button variant="default" className="bg-purple-600 text-white justify-start">
-                📅 Período
-              </Button>
-              <Button variant="outline" className="justify-start">
-                🔄 Status
-              </Button>
-              <Button variant="outline" className="justify-start">
-                👤 Profissionais
-              </Button>
-              <Button variant="outline" className="justify-start">
-                👥 Pacientes
-              </Button>
-              <Button variant="outline" className="justify-start">
-                ❤️ Convênio
-              </Button>
-              <Button variant="outline" className="justify-start">
-                ⚙️ Mais
-              </Button>
+            <div className="flex gap-6">
+              {/* Lado esquerdo - Filtros */}
+              <div className="w-48 space-y-2">
+                <Button variant="default" className="w-full bg-purple-600 text-white justify-start">
+                  📅 Período
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  🔄 Status
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  👤 Profissionais
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  👥 Pacientes
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  ❤️ Convênio
+                </Button>
+              </div>
+
+              {/* Lado direito - Conteúdo do filtro */}
+              <div className="flex-1">
+                <div className="flex gap-6">
+                  {/* Opções de período */}
+                  <div className="space-y-3">
+                    <h3 className="font-medium">Período</h3>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="hoje" className="rounded" />
+                        <span className="text-sm">Hoje</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="semana" className="rounded" />
+                        <span className="text-sm">Esta semana</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="mes" className="rounded" />
+                        <span className="text-sm">Este mês</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="7dias" className="rounded" />
+                        <span className="text-sm">Últimos 7 dias</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="radio" name="periodo" value="30dias" className="rounded" />
+                        <span className="text-sm">Últimos 30 dias</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Calendário */}
+                  <div className="flex-1">
+                    <div className="bg-white border rounded-lg p-4">
+                      {/* Cabeçalho do calendário */}
+                      <div className="flex items-center justify-between mb-4">
+                        <button className="p-1 hover:bg-gray-100 rounded">
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <h3 className="font-medium">Mai 2025</h3>
+                        <button className="p-1 hover:bg-gray-100 rounded">
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Dias da semana */}
+                      <div className="grid grid-cols-7 gap-1 mb-2">
+                        {["D", "S", "T", "Q", "Q", "S", "S"].map((day, index) => (
+                          <div key={index} className="text-center text-xs font-medium text-gray-500 py-2">
+                            {day}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Dias do mês */}
+                      <div className="grid grid-cols-7 gap-1">
+                        {/* Linha 1 */}
+                        {[27, 28, 29, 30, 1, 2, 3].map((day, index) => (
+                          <button
+                            key={index}
+                            className={`p-2 text-sm rounded hover:bg-gray-100 ${
+                              day < 10 && index >= 4 ? "text-gray-900" : "text-gray-400"
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        ))}
+
+                        {/* Linha 2 */}
+                        {[4, 5, 6, 7, 8, 9, 10].map((day) => (
+                          <button key={day} className="p-2 text-sm rounded hover:bg-gray-100 text-gray-900">
+                            {day}
+                          </button>
+                        ))}
+
+                        {/* Linha 3 */}
+                        {[11, 12, 13, 14, 15, 16, 17].map((day) => (
+                          <button key={day} className="p-2 text-sm rounded hover:bg-gray-100 text-gray-900">
+                            {day}
+                          </button>
+                        ))}
+
+                        {/* Linha 4 - com dias selecionados */}
+                        {[18, 19, 20, 21, 22, 23, 24].map((day) => (
+                          <button
+                            key={day}
+                            className={`p-2 text-sm rounded ${
+                              day === 18 || day === 24
+                                ? "bg-purple-600 text-white"
+                                : day >= 19 && day <= 23
+                                ? "bg-purple-100 text-purple-900"
+                                : "hover:bg-gray-100 text-gray-900"
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        ))}
+
+                        {/* Linha 5 */}
+                        {[25, 26, 27, 28, 29, 30, 31].map((day) => (
+                          <button key={day} className="p-2 text-sm rounded hover:bg-gray-100 text-gray-900">
+                            {day}
+                          </button>
+                        ))}
+
+                        {/* Linha 6 */}
+                        {[1, 2, 3, 4, 5, 6, 7].map((day, index) => (
+                          <button key={index} className="p-2 text-sm rounded hover:bg-gray-100 text-gray-400">
+                            {day}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </Card>
         )}
