@@ -148,20 +148,29 @@ function AppointmentCalendar() {
         initialView: 'timeGridWeek',
         locale: ptBrLocale,
         headerToolbar: false, // Desabilita a barra de ferramentas padrão
-        slotMinTime: '07:00:00',
-        slotMaxTime: '20:00:00',
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00',
+        slotDuration: '00:30:00', // Intervalos de 30 minutos
+        slotLabelInterval: '01:00:00', // Mostra label a cada hora
         allDaySlot: false,
-        height: 'auto',
+        height: 700,
         editable: true,
         selectable: true,
         selectMirror: true,
         dayMaxEvents: true,
+        nowIndicator: true,
+        scrollTime: '08:00:00', // Começa visualização às 8h
         slotLabelFormat: {
           hour: '2-digit',
           minute: '2-digit',
-          hour12: false
+          hour12: false,
+          meridiem: false
         },
-        dayHeaderFormat: { weekday: 'short', day: 'numeric', omitCommas: true },
+        dayHeaderFormat: { 
+          weekday: 'long', 
+          day: 'numeric',
+          month: 'short'
+        },
         // Personalizações de estilo
         dayCellClassNames: 'rounded-md bg-slate-50/50',
         slotLabelClassNames: 'text-sm font-medium text-slate-500',

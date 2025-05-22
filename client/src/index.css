@@ -2,100 +2,146 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Personalização do calendário de agendamentos */
+/* Personalização do calendário de agendamentos com esquema roxo/azul */
+.calendar-custom {
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(59, 130, 246, 0.05));
+}
+
 .calendar-custom .fc-day-today {
-  background-color: rgba(240, 245, 255, 0.6) !important;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1)) !important;
 }
 
 .calendar-custom .fc-col-header-cell {
-  background-color: #f0f5ff;
-  padding: 8px 0;
+  background: linear-gradient(90deg, hsl(var(--purple-500)), hsl(var(--blue-500)));
+  padding: 12px 0;
+  border: none !important;
 }
 
 .calendar-custom .fc-col-header-cell-cushion {
   font-weight: 600;
-  color: #4b5563;
+  color: white !important;
   text-decoration: none !important;
   padding: 8px;
+  font-size: 0.9rem !important;
 }
 
+/* Horários no lado esquerdo - PRINCIPAL FIX */
 .calendar-custom .fc-timegrid-slot-label {
-  font-size: 0.8rem;
-  color: #6b7280;
+  font-size: 0.85rem !important;
+  color: hsl(var(--purple-600)) !important;
+  font-weight: 600 !important;
+  padding: 8px 12px !important;
+  background: rgba(139, 92, 246, 0.05) !important;
+  border-right: 2px solid rgba(139, 92, 246, 0.2) !important;
+  text-align: center !important;
+  min-width: 60px !important;
+}
+
+.calendar-custom .fc-timegrid-slot-label-cushion {
+  color: hsl(var(--purple-600)) !important;
+  font-weight: 600 !important;
+}
+
+.calendar-custom .fc-timegrid-axis {
+  background: rgba(139, 92, 246, 0.05) !important;
+  border-right: 2px solid rgba(139, 92, 246, 0.2) !important;
 }
 
 .calendar-custom .fc-event {
-  border-radius: 6px;
+  border-radius: 8px;
   border: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.15s ease;
-  padding: 2px;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+  padding: 4px;
+  backdrop-filter: blur(10px);
 }
 
 .calendar-custom .fc-event:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
 }
 
 .calendar-custom .fc-daygrid-day-top {
   justify-content: center;
-  padding-top: 5px;
+  padding-top: 8px;
 }
 
 .calendar-custom .fc-daygrid-day-number {
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: hsl(var(--purple-600));
   text-decoration: none;
+  font-size: 0.9rem !important;
+  padding: 6px !important;
 }
 
 .calendar-custom .fc-toolbar-title {
-  font-size: 1.25rem !important;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 1.4rem !important;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .calendar-custom .fc-button-primary {
-  background-color: #2563eb !important;
-  border-color: #2563eb !important;
-  box-shadow: none !important;
-  font-weight: 500;
+  background: var(--gradient-primary) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+  font-weight: 600;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
 }
 
 .calendar-custom .fc-button-primary:hover {
-  background-color: #1d4ed8 !important;
-  border-color: #1d4ed8 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
 }
 
-/* Estilo para o botão do dropdown de visualização */
-.calendar-custom .fc-viewMenu-button {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 4px !important;
-  padding: 6px 12px !important;
-  font-size: 0.875rem !important;
-  border-radius: 6px !important;
+/* Linhas do grid com cores suaves */
+.calendar-custom .fc-timegrid-slot {
+  border-color: rgba(139, 92, 246, 0.1) !important;
 }
 
-/* Deixar números de dias menores */
-.calendar-custom .fc-daygrid-day-number {
-  font-size: 0.8rem !important;
-  padding: 4px !important;
-  opacity: 0.8 !important;
+.calendar-custom .fc-timegrid-col {
+  border-color: rgba(139, 92, 246, 0.1) !important;
 }
 
-.calendar-custom .fc-col-header-cell-cushion {
-  font-size: 0.85rem !important;
-}
-
+/* Indicador de tempo atual */
 .calendar-custom .fc-timegrid-now-indicator-line {
-  border-color: #ef4444;
-  border-width: 2px;
+  border-color: #8b5cf6 !important;
+  border-width: 3px !important;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 .calendar-custom .fc-timegrid-now-indicator-arrow {
-  border-color: #ef4444;
-  border-width: 5px;
+  border-color: #8b5cf6 !important;
+  border-width: 6px !important;
+}
+
+/* Slots de tempo melhorados */
+.calendar-custom .fc-timegrid-slot-lane {
+  border-color: rgba(139, 92, 246, 0.08) !important;
+}
+
+/* Scrollbar personalizada */
+.calendar-custom .fc-scroller::-webkit-scrollbar {
+  width: 8px;
+}
+
+.calendar-custom .fc-scroller::-webkit-scrollbar-track {
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 4px;
+}
+
+.calendar-custom .fc-scroller::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 4px;
+}
+
+.calendar-custom .fc-scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-secondary);
 }
 
 :root {
