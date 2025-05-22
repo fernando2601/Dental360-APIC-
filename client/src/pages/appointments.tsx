@@ -317,6 +317,22 @@ function VisaoGeral() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [profissionalFilter, setProfissionalFilter] = useState("todos");
   
+  // Função para limpar filtros da Visão Geral
+  const clearOverviewFilters = () => {
+    setStatusFilter("todos");
+    setProfissionalFilter("todos");
+  };
+  
+  // Contar filtros ativos na Visão Geral
+  const getActiveOverviewFiltersCount = () => {
+    let count = 0;
+    if (statusFilter !== "todos") count++;
+    if (profissionalFilter !== "todos") count++;
+    return count;
+  };
+  
+  const activeOverviewFiltersCount = getActiveOverviewFiltersCount();
+  
   // Mock data baseado nos filtros
   const getFilteredData = () => {
     const baseData = {
@@ -351,8 +367,18 @@ function VisaoGeral() {
         <h2 className="text-2xl font-bold">Visão Geral</h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Filtros</span>
-          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">1 filtro aplicado</span>
-          <Button variant="ghost" size="sm" className="text-purple-600">
+          {activeOverviewFiltersCount > 0 && (
+            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+              {activeOverviewFiltersCount} filtro{activeOverviewFiltersCount > 1 ? 's' : ''} aplicado{activeOverviewFiltersCount > 1 ? 's' : ''}
+            </span>
+          )}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-purple-600"
+            onClick={clearOverviewFilters}
+            disabled={activeOverviewFiltersCount === 0}
+          >
             Limpar filtros
           </Button>
         </div>
