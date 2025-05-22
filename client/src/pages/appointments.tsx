@@ -36,6 +36,23 @@ const menuItems = [
 function MiniCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    status: "todos",
+    profissional: "todos", 
+    paciente: "todos",
+    procedimento: "todos",
+    sala: "todas"
+  });
+  
+  const clearFilters = () => {
+    setFilters({
+      status: "todos",
+      profissional: "todos",
+      paciente: "todos", 
+      procedimento: "todos",
+      sala: "todas"
+    });
+  };
   
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -98,7 +115,7 @@ function MiniCalendar() {
         <CardContent className="p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-medium">Filtros</h4>
-            <Button variant="ghost" size="sm" className="text-primary">
+            <Button variant="ghost" size="sm" className="text-primary" onClick={clearFilters}>
               Limpar filtros
             </Button>
           </div>
@@ -106,7 +123,7 @@ function MiniCalendar() {
           {/* Status */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Status</label>
-            <Select defaultValue="todos">
+            <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
               <SelectTrigger className="border-purple-200 focus:ring-purple-500">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
@@ -169,7 +186,7 @@ function MiniCalendar() {
           {/* Profissional */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Profissional</label>
-            <Select defaultValue="todos">
+            <Select value={filters.profissional} onValueChange={(value) => setFilters({...filters, profissional: value})}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
@@ -184,12 +201,14 @@ function MiniCalendar() {
           {/* Paciente */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Paciente</label>
-            <Select defaultValue="todos">
+            <Select value={filters.paciente} onValueChange={(value) => setFilters({...filters, paciente: value})}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="clara">Clara Ribeiro</SelectItem>
+                <SelectItem value="fernando">Fernando Ferreira</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -197,7 +216,7 @@ function MiniCalendar() {
           {/* Procedimento */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Procedimento</label>
-            <Select defaultValue="todos">
+            <Select value={filters.procedimento} onValueChange={(value) => setFilters({...filters, procedimento: value})}>
               <SelectTrigger>
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
@@ -205,6 +224,7 @@ function MiniCalendar() {
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="limpeza">Limpeza Dental</SelectItem>
                 <SelectItem value="canal">Tratamento de Canal</SelectItem>
+                <SelectItem value="clareamento">Clareamento a Laser</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -212,7 +232,7 @@ function MiniCalendar() {
           {/* Sala de atendimento */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Sala de atendimento</label>
-            <Select defaultValue="todas">
+            <Select value={filters.sala} onValueChange={(value) => setFilters({...filters, sala: value})}>
               <SelectTrigger>
                 <SelectValue placeholder="Todas" />
               </SelectTrigger>
@@ -220,6 +240,7 @@ function MiniCalendar() {
                 <SelectItem value="todas">Todas</SelectItem>
                 <SelectItem value="sala1">Sala 1</SelectItem>
                 <SelectItem value="sala2">Sala 2</SelectItem>
+                <SelectItem value="sala3">Sala 3</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -267,6 +288,35 @@ function MiniCalendar() {
 
 function VisaoGeral() {
   const [periodFilter, setPeriodFilter] = useState("diaria");
+  const [statusFilter, setStatusFilter] = useState("todos");
+  const [profissionalFilter, setProfissionalFilter] = useState("todos");
+  
+  // Mock data baseado nos filtros
+  const getFilteredData = () => {
+    const baseData = {
+      totalAgendamentos: periodFilter === "diaria" ? 1 : periodFilter === "semanal" ? 7 : periodFilter === "mensal" ? 25 : 150,
+      ociosidade: periodFilter === "diaria" ? 98 : periodFilter === "semanal" ? 85 : periodFilter === "mensal" ? 75 : 45,
+      listaEspera: 0
+    };
+    
+    return baseData;
+  };
+  
+  const getChartData = () => {
+    switch(periodFilter) {
+      case "semanal":
+        return [12, 15, 8, 25, 18, 22, 10];
+      case "mensal":
+        return [45, 32, 28, 55, 38, 42, 35, 48, 52, 41, 39, 47];
+      case "anual":
+        return [180, 165, 142, 198, 175, 156, 189, 201, 178, 192, 167, 185];
+      default: // diaria
+        return [2, 4, 3, 8, 5, 6, 1];
+    }
+  };
+  
+  const data = getFilteredData();
+  const chartData = getChartData();
   
   return (
     <div className="space-y-6 p-6">
@@ -289,10 +339,10 @@ function VisaoGeral() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total de agendamentos</p>
-                <p className="text-2xl font-bold">1</p>
+                <p className="text-2xl font-bold">{data.totalAgendamentos}</p>
               </div>
               <div className="text-green-500 text-sm font-medium flex items-center gap-1">
-                <span>↗</span> 0%
+                <span>↗</span> {periodFilter === "diaria" ? "0%" : periodFilter === "semanal" ? "15%" : periodFilter === "mensal" ? "25%" : "45%"}
               </div>
             </div>
           </CardContent>
@@ -303,10 +353,10 @@ function VisaoGeral() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Ociosidade</p>
-                <p className="text-2xl font-bold">98 %</p>
+                <p className="text-2xl font-bold">{data.ociosidade} %</p>
               </div>
               <div className="text-red-500 text-sm font-medium flex items-center gap-1">
-                <span>↘</span> -2%
+                <span>↘</span> -{periodFilter === "diaria" ? "2%" : periodFilter === "semanal" ? "8%" : periodFilter === "mensal" ? "15%" : "25%"}
               </div>
             </div>
           </CardContent>
@@ -317,7 +367,7 @@ function VisaoGeral() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Pacientes na lista de espera</p>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-2xl font-bold">{data.listaEspera}</p>
               </div>
               <div className="text-green-500 text-sm font-medium flex items-center gap-1">
                 <span>↗</span> 0%
@@ -339,9 +389,10 @@ function VisaoGeral() {
                   {["Diária", "Semanal", "Mensal", "Anual"].map((period) => (
                     <Button
                       key={period}
-                      variant={period === "Diária" ? "default" : "ghost"}
+                      variant={periodFilter === period.toLowerCase() ? "default" : "ghost"}
                       size="sm"
-                      className={period === "Diária" ? "bg-purple-600 text-white" : ""}
+                      className={periodFilter === period.toLowerCase() ? "bg-purple-600 text-white" : ""}
+                      onClick={() => setPeriodFilter(period.toLowerCase())}
                     >
                       {period}
                     </Button>
@@ -349,15 +400,42 @@ function VisaoGeral() {
                 </div>
               </div>
               
-              {/* Gráfico simples */}
+              {/* Gráfico dinâmico */}
               <div className="h-40 flex items-end justify-center space-x-2">
-                <div className="w-8 bg-gray-200 h-4"></div>
-                <div className="w-8 bg-gray-200 h-6"></div>
-                <div className="w-8 bg-gray-200 h-8"></div>
-                <div className="w-8 bg-green-400 h-32"></div>
-                <div className="w-8 bg-gray-200 h-10"></div>
-                <div className="w-8 bg-gray-200 h-6"></div>
-                <div className="w-8 bg-gray-200 h-4"></div>
+                {chartData.map((value, index) => {
+                  const maxValue = Math.max(...chartData);
+                  const height = (value / maxValue) * 120;
+                  const isHighest = value === maxValue;
+                  
+                  return (
+                    <div key={index} className="flex flex-col items-center">
+                      <div 
+                        className={`w-8 transition-all duration-500 ${isHighest ? 'bg-green-400' : 'bg-gray-200'}`}
+                        style={{ height: `${height}px` }}
+                      ></div>
+                      {periodFilter === "diaria" && (
+                        <span className="text-xs text-muted-foreground mt-1">
+                          {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"][index]}
+                        </span>
+                      )}
+                      {periodFilter === "semanal" && (
+                        <span className="text-xs text-muted-foreground mt-1">
+                          S{index + 1}
+                        </span>
+                      )}
+                      {periodFilter === "mensal" && index % 2 === 0 && (
+                        <span className="text-xs text-muted-foreground mt-1">
+                          {index + 1}
+                        </span>
+                      )}
+                      {periodFilter === "anual" && (
+                        <span className="text-xs text-muted-foreground mt-1">
+                          {["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"][index]}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
               
               <div className="text-center text-sm text-muted-foreground">
