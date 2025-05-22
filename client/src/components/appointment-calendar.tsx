@@ -221,13 +221,12 @@ function AppointmentCalendar() {
   const isLoading = isLoadingAppointments || isLoadingClients || isLoadingStaff || isLoadingServices;
 
   return (
-    <Card className="shadow-lg glass-card">
-      <CardHeader className="header-gradient text-white">
+    <Card>
+      <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle className="text-2xl font-bold">Agenda</CardTitle>
           <Button 
             onClick={() => setIsDialogOpen(true)}
-            className="btn-gradient"
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Agendamento
@@ -238,9 +237,8 @@ function AppointmentCalendar() {
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-2">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className="text-white hover:bg-white/20"
               onClick={navigateToday}
             >
               Hoje
@@ -248,18 +246,16 @@ function AppointmentCalendar() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-white hover:bg-white/20"
               onClick={navigatePrev}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-lg font-semibold text-white">
+            <span className="text-sm font-medium text-muted-foreground">
               {format(weekDays[0], 'dd MMM', { locale: ptBR })} - {format(weekDays[6], 'dd MMM yyyy', { locale: ptBR })}
             </span>
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-white hover:bg-white/20"
               onClick={navigateNext}
             >
               <ChevronRight className="h-4 w-4" />
