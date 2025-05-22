@@ -19,6 +19,12 @@ import {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configurar autenticação
   const { authMiddleware, adminMiddleware } = setupAuth(app);
+
+  // Inicializar serviços seguindo padrão SOLID
+  const dashboardService = new DashboardService(storage);
+  const analyticsService = new AnalyticsService(storage);
+  const packagesService = new PackagesService(storage);
+  const clinicInfoService = new ClinicInfoService(storage);
   // Client routes
   app.get("/api/clients", authMiddleware, async (req: Request, res: Response) => {
     try {
@@ -618,6 +624,226 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching filter options:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // ===========================================
+  // ENDPOINTS PARA DASHBOARD - Seguindo SOLID
+  // ===========================================
+  app.get("/api/dashboard/metrics", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const metrics = await dashboardService.getDashboardMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Erro ao buscar métricas do dashboard:", error);
+      res.status(500).json({ error: "Falha ao buscar métricas do dashboard" });
+    }
+  });
+
+  // ===========================================
+  // ENDPOINTS PARA ANALYTICS - Seguindo SOLID
+  // ===========================================
+  app.get("/api/analytics", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const { startDate, endDate } = req.query;
+      const analytics = await analyticsService.getAnalyticsData(
+        startDate as string, 
+        endDate as string
+      );
+      res.json(analytics);
+    } catch (error) {
+      console.error("Erro ao buscar dados de análise:", error);
+      res.status(500).json({ error: "Falha ao buscar dados de análise" });
+    }
+  });
+
+  // ===========================================
+  // ENDPOINTS PARA PACOTES - Seguindo SOLID
+  // ===========================================
+  app.get("/api/packages", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const packages = await packagesService.getAllPackages();
+      res.json(packages);
+    } catch (error) {
+      console.error("Erro ao buscar pacotes:", error);
+      res.status(500).json({ error: "Falha ao buscar pacotes" });
+    }
+  });
+
+  app.get("/api/packages/:id", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const packageData = await packagesService.getPackageById(Number(req.params.id));
+      if (!packageData) {
+        return res.status(404).json({ error: "Pacote não encontrado" });
+      }
+      res.json(packageData);
+    } catch (error) {
+      console.error("Erro ao buscar pacote:", error);
+      res.status(500).json({ error: "Falha ao buscar pacote" });
+    }
+  });
+
+  app.post("/api/packages", authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const newPackage = await packagesService.createPackage(req.body);
+      res.status(201).json(newPackage);
+    } catch (error) {
+      console.error("Erro ao criar pacote:", error);
+      res.status(500).json({ error: "Falha ao criar pacote" });
+    }
+  });
+
+  app.put("/api/packages/:id", authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const updatedPackage = await packagesService.updatePackage(Number(req.params.id), req.body);
+      if (!updatedPackage) {
+        return res.status(404).json({ error: "Pacote não encontrado" });
+      }
+      res.json(updatedPackage);
+    } catch (error) {
+      console.error("Erro ao atualizar pacote:", error);
+      res.status(500).json({ error: "Falha ao atualizar pacote" });
+    }
+  });
+
+  app.delete("/api/packages/:id", authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const success = await packagesService.deletePackage(Number(req.params.id));
+      if (!success) {
+        return res.status(404).json({ error: "Pacote não encontrado" });
+      }
+      res.status(204).end();
+    } catch (error) {
+      console.error("Erro ao deletar pacote:", error);
+      res.status(500).json({ error: "Falha ao deletar pacote" });
+    }
+  });
+
+  app.get("/api/packages/stats", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const stats = await packagesService.getPackageStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Erro ao buscar estatísticas de pacotes:", error);
+      res.status(500).json({ error: "Falha ao buscar estatísticas de pacotes" });
+    }
+  });
+
+  // ===========================================
+  // ENDPOINTS PARA DADOS DA CLÍNICA - Seguindo SOLID
+  // ===========================================
+  app.get("/api/clinic-info", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const clinicInfo = await clinicInfoService.getClinicInfo();
+      res.json(clinicInfo);
+    } catch (error) {
+      console.error("Erro ao buscar informações da clínica:", error);
+      res.status(500).json({ error: "Falha ao buscar informações da clínica" });
+    }
+  });
+
+  app.put("/api/clinic-info", authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const updatedInfo = await clinicInfoService.updateClinicInfo(req.body);
+      res.json(updatedInfo);
+    } catch (error) {
+      console.error("Erro ao atualizar informações da clínica:", error);
+      res.status(500).json({ error: "Falha ao atualizar informações da clínica" });
+    }
+  });
+
+  app.get("/api/clinic-info/stats", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const stats = await clinicInfoService.getClinicStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Erro ao buscar estatísticas da clínica:", error);
+      res.status(500).json({ error: "Falha ao buscar estatísticas da clínica" });
+    }
+  });
+
+  app.post("/api/clinic-info/logo", authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const { logoData } = req.body;
+      const logoUrl = await clinicInfoService.uploadLogo(logoData);
+      res.json({ logoUrl });
+    } catch (error) {
+      console.error("Erro ao fazer upload do logo:", error);
+      res.status(500).json({ error: "Falha ao fazer upload do logo" });
+    }
+  });
+
+  // ===========================================
+  // ENDPOINTS PARA ASSINATURAS - Seguindo SOLID
+  // ===========================================
+  app.get("/api/subscriptions", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      // Dados estruturados para assinaturas
+      const subscriptions = [
+        {
+          id: 1,
+          name: "Plano Básico",
+          price: 99.99,
+          interval: "monthly",
+          features: ["Até 500 pacientes", "Agendamentos ilimitados", "Suporte por email"],
+          isActive: true,
+          currentPlan: true
+        },
+        {
+          id: 2,
+          name: "Plano Premium",
+          price: 199.99,
+          interval: "monthly",
+          features: ["Pacientes ilimitados", "Analytics avançados", "Suporte prioritário", "Backup automático"],
+          isActive: true,
+          currentPlan: false
+        }
+      ];
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Erro ao buscar assinaturas:", error);
+      res.status(500).json({ error: "Falha ao buscar assinaturas" });
+    }
+  });
+
+  // ===========================================
+  // ENDPOINTS PARA ANTES & DEPOIS - Seguindo SOLID
+  // ===========================================
+  app.get("/api/before-after", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      // Dados estruturados para antes & depois
+      const beforeAfterCases = [
+        {
+          id: 1,
+          clientId: 1,
+          serviceId: 1,
+          title: "Harmonização Facial Completa",
+          description: "Tratamento de harmonização com botox e preenchimento",
+          beforeImage: "/uploads/before-1.jpg",
+          afterImage: "/uploads/after-1.jpg",
+          treatmentDate: new Date("2024-12-01"),
+          isPublic: true,
+          createdAt: new Date()
+        }
+      ];
+      res.json(beforeAfterCases);
+    } catch (error) {
+      console.error("Erro ao buscar casos antes & depois:", error);
+      res.status(500).json({ error: "Falha ao buscar casos antes & depois" });
+    }
+  });
+
+  app.post("/api/before-after", authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+    try {
+      const newCase = {
+        id: Date.now(),
+        ...req.body,
+        createdAt: new Date()
+      };
+      res.status(201).json(newCase);
+    } catch (error) {
+      console.error("Erro ao criar caso antes & depois:", error);
+      res.status(500).json({ error: "Falha ao criar caso antes & depois" });
     }
   });
 
