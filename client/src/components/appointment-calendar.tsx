@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +12,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2 } from "lucide-react";
-import { format } from 'date-fns';
-import { Calendar } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import { Loader2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { format, addDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -26,27 +23,37 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-// Definição da localização portuguesa para o calendário
-const ptBrLocale = {
-  code: 'pt-br',
-  week: {
-    dow: 0, // Domingo como primeiro dia da semana
-    doy: 4, // A semana que contém Jan 4 é a primeira semana do ano
-  },
-  buttonText: {
-    prev: 'Anterior',
-    next: 'Próximo',
-    today: 'Hoje',
-    month: 'Mês',
-    week: 'Semana',
-    day: 'Dia',
-    list: 'Lista',
-  },
-  weekText: 'Sm',
-  allDayText: 'Todo o dia',
-  moreLinkText: 'mais',
-  noEventsText: 'Sem eventos para mostrar'
-};
+// Interface para agendamento
+interface Appointment {
+  id: number;
+  clientId: number;
+  staffId: number;
+  serviceId: number;
+  startTime: string;
+  endTime: string;
+  status: string;
+  notes?: string;
+  createdAt: string;
+}
+
+// Interface para client, service, staff
+interface Client {
+  id: number;
+  fullName: string;
+}
+
+interface Service {
+  id: number;
+  name: string;
+  duration: number;
+}
+
+interface Staff {
+  id: number;
+  user?: {
+    fullName: string;
+  };
+}
 
 // Extend the appointment schema with client validation
 const appointmentFormSchema = z.object({
@@ -62,9 +69,10 @@ const appointmentFormSchema = z.object({
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
 function AppointmentCalendar() {
-  const [calendarApi, setCalendarApi] = useState<Calendar | null>(null);
+  const [currentWeek, setCurrentWeek] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 0 }));
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedHour, setSelectedHour] = useState<number>(8);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,6 +92,12 @@ function AppointmentCalendar() {
   const { data: services = [], isLoading: isLoadingServices } = useQuery({
     queryKey: ['/api/services'],
   });
+
+  // Gerar dias da semana
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeek, i));
+  
+  // Gerar horários (0-23)
+  const hours = Array.from({ length: 24 }, (_, i) => i);
 
   // Create appointment form
   const form = useForm<AppointmentFormValues>({
@@ -112,15 +126,7 @@ function AppointmentCalendar() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/appointments'] });
       setIsDialogOpen(false);
-      form.reset({
-        clientId: 1,
-        staffId: 1,
-        serviceId: 1,
-        startTime: '',
-        endTime: '',
-        status: 'scheduled',
-        notes: '',
-      });
+      form.reset();
     },
     onError: () => {
       toast({
@@ -131,115 +137,31 @@ function AppointmentCalendar() {
     },
   });
 
-  // Initialize calendar after data is loaded
-  useEffect(() => {
-    if (
-      !isLoadingAppointments &&
-      !isLoadingClients &&
-      !isLoadingStaff &&
-      !isLoadingServices &&
-      !calendarApi
-    ) {
-      const calendarEl = document.getElementById('calendar');
-      if (!calendarEl) return;
+  // Função para lidar com clique na célula de horário
+  const handleCellClick = (day: Date, hour: number) => {
+    const appointmentDate = new Date(day);
+    appointmentDate.setHours(hour, 0, 0, 0);
+    const endDate = new Date(appointmentDate);
+    endDate.setHours(hour + 1, 0, 0, 0);
+    
+    setSelectedDate(appointmentDate);
+    setSelectedHour(hour);
+    form.setValue('startTime', formatDateTimeForInput(appointmentDate));
+    form.setValue('endTime', formatDateTimeForInput(endDate));
+    setIsDialogOpen(true);
+  };
 
-      const calendar = new Calendar(calendarEl, {
-        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-        initialView: 'timeGridWeek',
-        locale: ptBrLocale,
-        headerToolbar: false,
-        slotMinTime: '00:00:00',  // 24 horas completas
-        slotMaxTime: '24:00:00',
-        slotDuration: '01:00:00', // Intervalos de 1 hora
-        slotLabelInterval: '01:00:00', // Label a cada hora
-        allDaySlot: false,
-        height: 700,
-        editable: true,
-        selectable: true,
-        selectMirror: true,
-        dayMaxEvents: true,
-        nowIndicator: true,
-        scrollTime: '08:00:00',
-        slotLabelFormat: {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: false,
-          omitZeroMinute: true
-        },
-        dayHeaderFormat: { 
-          weekday: 'short', 
-          day: 'numeric'
-        },
-        // Personalizações de estilo
-        dayCellClassNames: 'rounded-md bg-slate-50/50',
-        slotLabelClassNames: 'text-sm font-medium text-slate-500',
-        events: appointments.map((appointment: any) => {
-          const client = clients.find((c: any) => c.id === appointment.clientId);
-          const service = services.find((s: any) => s.id === appointment.serviceId);
-          const staffMember = staff.find((s: any) => s.id === appointment.staffId);
-          
-          return {
-            id: appointment.id.toString(),
-            title: client ? client.fullName : 'Cliente',
-            start: appointment.startTime,
-            end: appointment.endTime,
-            backgroundColor: getStatusColor(appointment.status),
-            borderColor: getStatusColor(appointment.status),
-            textColor: '#ffffff',
-            classNames: 'rounded-md shadow-sm',
-            extendedProps: {
-              clientId: appointment.clientId,
-              staffId: appointment.staffId,
-              serviceId: appointment.serviceId,
-              status: appointment.status,
-              notes: appointment.notes,
-              clientName: client ? client.fullName : 'Cliente',
-              serviceName: service ? service.name : 'Serviço',
-              staffName: staffMember && staffMember.user ? staffMember.user.fullName : `Profissional #${appointment.staffId}`,
-            },
-          };
-        }),
-        eventContent: function(arg) {
-          const timeText = arg.timeText;
-          const title = arg.event.title;
-          const serviceName = arg.event.extendedProps.serviceName;
-          
-          return { 
-            html: `
-              <div class="p-1">
-                <div class="text-xs font-semibold">${timeText}</div>
-                <div class="text-sm font-medium">${title}</div>
-                ${serviceName ? `<div class="text-xs opacity-90">${serviceName}</div>` : ''}
-              </div>
-            `
-          };
-        },
-        select: (info) => {
-          // Handle date selection - open appointment form
-          setSelectedDate(info.start);
-          const endTime = new Date(info.start);
-          endTime.setMinutes(endTime.getMinutes() + 60); // Default 1-hour appointment
-          
-          form.setValue('startTime', formatDateTimeForInput(info.start));
-          form.setValue('endTime', formatDateTimeForInput(endTime));
-          
-          setIsDialogOpen(true);
-        },
-        eventClick: (info) => {
-          // Handle event click - open appointment details
-          console.log('Event clicked:', info.event);
-          // Implement appointment details view
-        },
-      });
-
-      calendar.render();
-      setCalendarApi(calendar);
-
-      return () => {
-        calendar.destroy();
-      };
-    }
-  }, [appointments, isLoadingAppointments, isLoadingClients, isLoadingStaff, isLoadingServices, calendarApi, form]);
+  // Função para verificar se existe agendamento em um horário específico
+  const getAppointmentForSlot = (day: Date, hour: number) => {
+    return (appointments as Appointment[]).find(appointment => {
+      const startTime = new Date(appointment.startTime);
+      const appointmentDay = startTime.toDateString();
+      const dayString = day.toDateString();
+      const appointmentHour = startTime.getHours();
+      
+      return appointmentDay === dayString && appointmentHour === hour;
+    });
+  };
 
   // Format date for datetime-local input
   function formatDateTimeForInput(date: Date) {
@@ -284,85 +206,126 @@ function AppointmentCalendar() {
   }
 
   // Navegação do calendário
-  function navigatePrev() {
-    if (calendarApi) {
-      calendarApi.prev();
-    }
-  }
+  const navigatePrev = () => {
+    setCurrentWeek(subWeeks(currentWeek, 1));
+  };
 
-  function navigateNext() {
-    if (calendarApi) {
-      calendarApi.next();
-    }
-  }
+  const navigateNext = () => {
+    setCurrentWeek(addWeeks(currentWeek, 1));
+  };
 
-  function navigateToday() {
-    if (calendarApi) {
-      calendarApi.today();
-    }
-  }
-
-  function changeView(viewName: string) {
-    if (calendarApi) {
-      calendarApi.changeView(viewName);
-    }
-  }
+  const navigateToday = () => {
+    setCurrentWeek(startOfWeek(new Date(), { weekStartsOn: 0 }));
+  };
 
   const isLoading = isLoadingAppointments || isLoadingClients || isLoadingStaff || isLoadingServices;
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg glass-card">
+      <CardHeader className="header-gradient text-white">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-2xl font-bold">Agenda</CardTitle>
+          <Button 
+            onClick={() => setIsDialogOpen(true)}
+            className="btn-gradient"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Agendamento
+          </Button>
+        </div>
+        
+        {/* Navegação da semana */}
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-white hover:bg-white/20"
+              onClick={navigateToday}
+            >
+              Hoje
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-white hover:bg-white/20"
+              onClick={navigatePrev}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-lg font-semibold text-white">
+              {format(weekDays[0], 'dd MMM', { locale: ptBR })} - {format(weekDays[6], 'dd MMM yyyy', { locale: ptBR })}
+            </span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-white hover:bg-white/20"
+              onClick={navigateNext}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+
       <CardContent className="p-0">
         {isLoading ? (
           <div className="flex items-center justify-center h-[600px]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div>
-            <div className="flex justify-between items-center p-4 border-b">
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-sm font-medium"
-                  onClick={navigateToday}
-                >
-                  Hoje
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="px-1 text-lg"
-                  onClick={navigatePrev}
-                >
-                  &lt;
-                </Button>
-                <span className="text-sm font-medium">
-                  27 de abr. - 3 de mai. de 2025
-                </span>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="px-1 text-lg"
-                  onClick={navigateNext}
-                >
-                  &gt;
-                </Button>
+          <div className="custom-calendar">
+            {/* Header com dias da semana */}
+            <div className="calendar-header">
+              <div className="hour-column-header"></div>
+              {weekDays.map((day, index) => (
+                <div key={index} className="day-header">
+                  <div className="day-name">{format(day, 'EEEE', { locale: ptBR })}</div>
+                  <div className="day-number">{format(day, 'd')}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Grid principal */}
+            <div className="calendar-grid">
+              {/* Coluna de horas */}
+              <div className="hours-column">
+                {hours.map((hour) => (
+                  <div key={hour} className="hour-label">
+                    {hour.toString().padStart(2, '0')}:00
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center gap-1">
-                <Select defaultValue="week">
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue placeholder="Semana" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="month" onClick={() => changeView('dayGridMonth')}>Mês</SelectItem>
-                    <SelectItem value="week" onClick={() => changeView('timeGridWeek')}>Semana</SelectItem>
-                    <SelectItem value="day" onClick={() => changeView('timeGridDay')}>Dia</SelectItem>
-                  </SelectContent>
-                </Select>
+
+              {/* Grid de dias */}
+              <div className="days-grid">
+                {weekDays.map((day, dayIndex) => (
+                  <div key={dayIndex} className="day-column">
+                    {hours.map((hour) => {
+                      const appointment = getAppointmentForSlot(day, hour);
+                      return (
+                        <div
+                          key={hour}
+                          className={`hour-cell ${appointment ? 'has-appointment' : ''}`}
+                          onClick={() => !appointment && handleCellClick(day, hour)}
+                        >
+                          {appointment && (
+                            <div className="appointment-block">
+                              <div className="appointment-client">
+                                {(clients as Client[]).find(c => c.id === appointment.clientId)?.fullName || 'Cliente'}
+                              </div>
+                              <div className="appointment-service">
+                                {(services as Service[]).find(s => s.id === appointment.serviceId)?.name || 'Serviço'}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             </div>
-            <div id="calendar" className="h-[700px] p-2 calendar-custom" />
           </div>
         )}
 

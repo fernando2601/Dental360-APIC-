@@ -149,22 +149,157 @@
   border-color: rgba(139, 92, 246, 0.08) !important;
 }
 
+/* Calendário customizado com 24 horas */
+.custom-calendar {
+  height: 700px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.02), rgba(59, 130, 246, 0.02));
+}
+
+.calendar-header {
+  display: flex;
+  background: linear-gradient(90deg, hsl(var(--purple-500)), hsl(var(--blue-500)));
+  border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+}
+
+.hour-column-header {
+  width: 80px;
+  min-width: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border-right: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.day-header {
+  flex: 1;
+  padding: 16px 8px;
+  text-align: center;
+  color: white;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.day-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.day-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.calendar-grid {
+  display: flex;
+  height: calc(100% - 80px);
+  overflow-y: auto;
+}
+
+.hours-column {
+  width: 80px;
+  min-width: 80px;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.08), rgba(59, 130, 246, 0.08));
+  border-right: 3px solid rgba(139, 92, 246, 0.3);
+}
+
+.hour-label {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: hsl(var(--purple-700));
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.05);
+  transition: all 0.3s ease;
+}
+
+.hour-label:hover {
+  background: rgba(139, 92, 246, 0.1);
+  transform: scale(1.05);
+}
+
+.days-grid {
+  display: flex;
+  flex: 1;
+}
+
+.day-column {
+  flex: 1;
+  border-right: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.hour-cell {
+  height: 60px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hour-cell:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+  transform: scale(1.02);
+  box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.hour-cell.has-appointment {
+  background: var(--gradient-primary);
+  cursor: default;
+}
+
+.hour-cell.has-appointment:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+}
+
+.appointment-block {
+  padding: 8px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-client {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointment-service {
+  font-size: 0.7rem;
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Scrollbar personalizada */
-.calendar-custom .fc-scroller::-webkit-scrollbar {
+.calendar-grid::-webkit-scrollbar {
   width: 8px;
 }
 
-.calendar-custom .fc-scroller::-webkit-scrollbar-track {
+.calendar-grid::-webkit-scrollbar-track {
   background: rgba(139, 92, 246, 0.1);
   border-radius: 4px;
 }
 
-.calendar-custom .fc-scroller::-webkit-scrollbar-thumb {
+.calendar-grid::-webkit-scrollbar-thumb {
   background: var(--gradient-primary);
   border-radius: 4px;
 }
 
-.calendar-custom .fc-scroller::-webkit-scrollbar-thumb:hover {
+.calendar-grid::-webkit-scrollbar-thumb:hover {
   background: var(--gradient-secondary);
 }
 
