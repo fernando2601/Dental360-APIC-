@@ -53,7 +53,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="absolute top-3 left-3 z-50 md:hidden"
+              className="absolute top-3 left-3 z-50 md:hidden bg-white/90 backdrop-blur-sm hover:bg-white/80 shadow-lg"
             >
               <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle Menu</span>
@@ -68,23 +68,25 @@ export default function MainLayout({ children }: MainLayoutProps) {
       {/* Main Content */}
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Top Navigation */}
-        <header className="border-b bg-card z-10">
+        <header className="border-b glass-card z-10 backdrop-blur-xl bg-white/70 dark:bg-gray-900/70">
           <div className="flex h-16 items-center px-4 sm:px-6">
             <div className={isMobile ? "ml-10" : ""}>
-              <h1 className="text-xl font-heading font-bold">Clínica DentalSpa</h1>
+              <h1 className="text-xl font-heading font-bold gradient-text animate-pulse-slow">
+                Clínica DentalSpa
+              </h1>
             </div>
 
             <div className="ml-auto flex items-center space-x-4">
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors">
+                <Bell className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 <span className="sr-only">Notificações</span>
               </Button>
               
               {/* Dropdown Menu de Configurações */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Settings className="h-5 w-5" />
+                  <Button variant="ghost" size="icon" className="relative hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors">
+                    <Settings className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <span className="sr-only">Configurações</span>
                   </Button>
                 </DropdownMenuTrigger>
