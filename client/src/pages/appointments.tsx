@@ -316,6 +316,7 @@ function VisaoGeral() {
   const [periodFilter, setPeriodFilter] = useState("diaria");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [profissionalFilter, setProfissionalFilter] = useState("todos");
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
   
   // Função para limpar filtros da Visão Geral
   const clearOverviewFilters = () => {
@@ -363,26 +364,102 @@ function VisaoGeral() {
   return (
     <div className="space-y-6 p-6">
       {/* Header com filtros */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Visão Geral</h2>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Filtros</span>
-          {activeOverviewFiltersCount > 0 && (
-            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-              {activeOverviewFiltersCount} filtro{activeOverviewFiltersCount > 1 ? 's' : ''} aplicado{activeOverviewFiltersCount > 1 ? 's' : ''}
-            </span>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Filtros</span>
+              {activeOverviewFiltersCount > 0 && (
+                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                  {activeOverviewFiltersCount} filtro aplicado
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-purple-600"
+                onClick={clearOverviewFilters}
+                disabled={activeOverviewFiltersCount === 0}
+              >
+                Limpar filtros
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
+              >
+                {isFiltersExpanded ? "Recolher" : "Expandir"}
+              </Button>
+            </div>
+          </div>
+          
+          {/* Filtro de período sempre visível */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm text-gray-600">Período:</span>
+            <span className="bg-gray-100 px-3 py-1 rounded text-sm">18/05/2025 - 24/05/2025</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-purple-600"
+              onClick={() => setIsFiltersExpanded(true)}
+            >
+              + Adicionar filtro
+            </Button>
+          </div>
+          
+          {/* Filtros expandidos */}
+          {isFiltersExpanded && (
+            <div className="space-y-4 pt-4 border-t">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Período com calendário */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-purple-600 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Período
+                  </label>
+                  <div className="text-sm text-gray-600">18/05/2025 - 24/05/2025</div>
+                </div>
+                
+                {/* Profissionais */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Profissionais
+                  </label>
+                  <Select value={profissionalFilter} onValueChange={setProfissionalFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="dr-silva">Dr. Silva</SelectItem>
+                      <SelectItem value="dra-santos">Dra. Santos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Status */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="agendado">Agendado</SelectItem>
+                      <SelectItem value="confirmado">Confirmado</SelectItem>
+                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
           )}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-purple-600"
-            onClick={clearOverviewFilters}
-            disabled={activeOverviewFiltersCount === 0}
-          >
-            Limpar filtros
-          </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Cards de estatísticas principais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
