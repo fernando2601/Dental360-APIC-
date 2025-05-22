@@ -55,21 +55,23 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "group border-r bg-card transition-all duration-300 ease-in-out",
+        "group border-r sidebar-gradient transition-all duration-300 ease-in-out shadow-2xl",
         collapsed ? "w-[70px]" : "w-[240px]",
         className
       )}
     >
       <div className="flex h-full flex-col">
-        <div className="flex h-14 items-center border-b px-3">
+        <div className="flex h-14 items-center border-b border-white/20 px-3">
           <div className={cn("flex items-center gap-2", collapsed && "justify-center w-full")}>
-            <Zap className="h-6 w-6 text-primary" />
-            {!collapsed && <span className="font-heading font-bold text-xl">DentalSpa</span>}
+            <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm animate-float">
+              <Zap className="h-6 w-6 text-white" />
+            </div>
+            {!collapsed && <span className="font-heading font-bold text-xl text-white">DentalSpa</span>}
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className={cn("ml-auto h-8 w-8", collapsed && "hidden group-hover:flex absolute right-2")}
+            className={cn("ml-auto h-8 w-8 hover:bg-white/20 text-white", collapsed && "hidden group-hover:flex absolute right-2")}
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -78,7 +80,7 @@ export function Sidebar({ className }: SidebarProps) {
         <ScrollArea className="flex-1">
           <nav className="flex flex-col gap-2 p-2">
             <div className="px-4 py-2">
-              <h3 className={cn("text-xs font-medium text-muted-foreground", collapsed && "sr-only")}>
+              <h3 className={cn("text-xs font-medium text-white/70", collapsed && "sr-only")}>
                 Principal
               </h3>
             </div>
@@ -99,7 +101,7 @@ export function Sidebar({ className }: SidebarProps) {
             <NavLink href="/before-after" icon={<Images className="h-4 w-4" />} label="Antes & Depois" collapsed={collapsed} active={location === "/before-after"} />
             
             <div className="px-4 py-2 mt-4">
-              <h3 className={cn("text-xs font-medium text-muted-foreground", collapsed && "sr-only")}>
+              <h3 className={cn("text-xs font-medium text-white/70", collapsed && "sr-only")}>
                 IA & Análises
               </h3>
             </div>
@@ -127,16 +129,16 @@ export function Sidebar({ className }: SidebarProps) {
             />
           </nav>
         </ScrollArea>
-        <Separator />
+        <Separator className="bg-white/20" />
         <div className="p-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+            <div className="h-8 w-8 rounded-full bg-white/25 text-white flex items-center justify-center font-bold backdrop-blur-sm">
               DS
             </div>
             {!collapsed && (
               <div className="space-y-1">
-                <p className="text-sm font-medium">Dr. Sarah</p>
-                <p className="text-xs text-muted-foreground">Administrator</p>
+                <p className="text-sm font-medium text-white">Dr. Sarah</p>
+                <p className="text-xs text-white/60">Administrator</p>
               </div>
             )}
           </div>
@@ -160,20 +162,22 @@ function NavLink({ href, icon, label, collapsed, active, notification }: NavLink
     <Link href={href}>
       <div
         className={cn(
-          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-accent cursor-pointer",
-          active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground",
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-white/20 cursor-pointer group",
+          active ? "bg-white/25 text-white shadow-lg backdrop-blur-sm" : "text-white/80 hover:text-white",
           collapsed && "justify-center"
         )}
       >
-        {icon}
-        {!collapsed && <span>{label}</span>}
+        <div className={cn("transition-transform group-hover:scale-110", active && "scale-110")}>
+          {icon}
+        </div>
+        {!collapsed && <span className="font-medium">{label}</span>}
         {!collapsed && notification && (
-          <Badge className="ml-auto" variant="secondary">
+          <Badge className="ml-auto bg-white/20 text-white border-white/30" variant="outline">
             {notification}
           </Badge>
         )}
         {collapsed && notification && (
-          <Badge className="absolute right-2 top-1" variant="secondary">
+          <Badge className="absolute right-2 top-1 bg-white/20 text-white border-white/30" variant="outline">
             {notification}
           </Badge>
         )}
