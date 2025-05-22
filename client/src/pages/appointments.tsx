@@ -54,6 +54,19 @@ function MiniCalendar() {
     });
   };
   
+  // Contar filtros ativos
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (filters.status !== "todos") count++;
+    if (filters.profissional !== "todos") count++;
+    if (filters.paciente !== "todos") count++;
+    if (filters.procedimento !== "todos") count++;
+    if (filters.sala !== "todas") count++;
+    return count;
+  };
+  
+  const activeFiltersCount = getActiveFiltersCount();
+  
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -114,8 +127,21 @@ function MiniCalendar() {
       <Card>
         <CardContent className="p-4 space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="font-medium">Filtros</h4>
-            <Button variant="ghost" size="sm" className="text-primary" onClick={clearFilters}>
+            <div className="flex items-center gap-2">
+              <h4 className="font-medium">Filtros</h4>
+              {activeFiltersCount > 0 && (
+                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full font-medium">
+                  {activeFiltersCount} filtro{activeFiltersCount > 1 ? 's' : ''} aplicado{activeFiltersCount > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-primary" 
+              onClick={clearFilters}
+              disabled={activeFiltersCount === 0}
+            >
               Limpar filtros
             </Button>
           </div>
