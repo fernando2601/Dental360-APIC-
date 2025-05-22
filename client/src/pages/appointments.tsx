@@ -951,42 +951,43 @@ function VisaoGeral() {
                   ver mais
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+              <DialogContent className="max-w-4xl max-h-[80vh]">
                 <DialogHeader>
                   <DialogTitle>Pacientes mais frequentes</DialogTitle>
                 </DialogHeader>
                 
-                <div className="flex flex-col h-full">
-                  {/* Tabela */}
-                  <div className="flex-1 overflow-auto">
-                    <table className="w-full">
-                      <thead className="border-b">
-                        <tr>
-                          <th className="text-left py-3 px-4">Ranking de Pacientes mais frequentes</th>
-                          <th className="text-left py-3 px-4">Quantidade</th>
-                          <th className="text-left py-3 px-4">Porcentagem</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentPatients.map((patient, index) => (
-                          <tr key={index} className="border-b hover:bg-gray-50">
-                            <td className="py-3 px-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                                  <span className="text-xs font-bold">{startIndex + index + 1}</span>
-                                </div>
-                                <span>{patient.nome} (Paciente)</span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-4">{patient.consultas}</td>
-                            <td className="py-3 px-4">{patient.porcentagem}%</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                <div className="space-y-4">
+                  {/* Conteúdo principal */}
+                  {allPatients.length === 0 ? (
+                    /* Estado vazio */
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                        <AlertCircle className="w-6 h-6 text-purple-500" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Hmm, está vazio por aqui!</h3>
+                      <p className="text-gray-500 text-center">Nenhum registro encontrado.</p>
+                    </div>
+                  ) : (
+                    /* Lista de pacientes */
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {currentPatients.map((patient, index) => (
+                        <div key={index} className="flex items-center justify-between py-2 px-4 border-b">
+                          <div className="flex items-center gap-3">
+                            <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                              <span className="text-xs font-bold text-white">{startIndex + index + 1}</span>
+                            </div>
+                            <span className="text-sm">{patient.nome} (Paciente)</span>
+                          </div>
+                          <div className="flex items-center gap-8">
+                            <span className="text-sm font-medium">{patient.consultas}</span>
+                            <span className="text-sm text-gray-500 w-12 text-right">{patient.porcentagem}%</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   
-                  {/* Controles de paginação */}
+                  {/* Controles de paginação - sempre visíveis */}
                   <div className="flex items-center justify-between pt-4 border-t">
                     <div className="flex items-center gap-2">
                       <Select value={itemsPerPage.toString()} onValueChange={(value) => {
@@ -1010,7 +1011,7 @@ function VisaoGeral() {
                         variant="ghost" 
                         size="sm"
                         onClick={() => setCurrentPage(1)}
-                        disabled={currentPage === 1}
+                        disabled={currentPage === 1 || allPatients.length === 0}
                       >
                         <ChevronLeft className="w-4 h-4" />
                         <ChevronLeft className="w-4 h-4 -ml-1" />
@@ -1019,43 +1020,45 @@ function VisaoGeral() {
                         variant="ghost" 
                         size="sm"
                         onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
+                        disabled={currentPage === 1 || allPatients.length === 0}
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
                       
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          let pageNum;
-                          if (totalPages <= 5) {
-                            pageNum = i + 1;
-                          } else if (currentPage <= 3) {
-                            pageNum = i + 1;
-                          } else if (currentPage >= totalPages - 2) {
-                            pageNum = totalPages - 4 + i;
-                          } else {
-                            pageNum = currentPage - 2 + i;
-                          }
-                          
-                          return (
-                            <Button
-                              key={pageNum}
-                              variant={currentPage === pageNum ? "default" : "ghost"}
-                              size="sm"
-                              className={currentPage === pageNum ? "bg-purple-600 text-white" : ""}
-                              onClick={() => setCurrentPage(pageNum)}
-                            >
-                              {pageNum}
-                            </Button>
-                          );
-                        })}
-                      </div>
+                      {allPatients.length > 0 && (
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNum;
+                            if (totalPages <= 5) {
+                              pageNum = i + 1;
+                            } else if (currentPage <= 3) {
+                              pageNum = i + 1;
+                            } else if (currentPage >= totalPages - 2) {
+                              pageNum = totalPages - 4 + i;
+                            } else {
+                              pageNum = currentPage - 2 + i;
+                            }
+                            
+                            return (
+                              <Button
+                                key={pageNum}
+                                variant={currentPage === pageNum ? "default" : "ghost"}
+                                size="sm"
+                                className={currentPage === pageNum ? "bg-purple-600 text-white" : ""}
+                                onClick={() => setCurrentPage(pageNum)}
+                              >
+                                {pageNum}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      )}
                       
                       <Button 
                         variant="ghost" 
                         size="sm"
                         onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
+                        disabled={currentPage === totalPages || allPatients.length === 0}
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
@@ -1063,7 +1066,7 @@ function VisaoGeral() {
                         variant="ghost" 
                         size="sm"
                         onClick={() => setCurrentPage(totalPages)}
-                        disabled={currentPage === totalPages}
+                        disabled={currentPage === totalPages || allPatients.length === 0}
                       >
                         <ChevronRight className="w-4 h-4" />
                         <ChevronRight className="w-4 h-4 -ml-1" />
