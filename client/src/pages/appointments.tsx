@@ -1429,10 +1429,19 @@ function RelatorioAgendamentos() {
   const [searchTerm, setSearchTerm] = useState("");
   
   // Estados dos filtros
-  const [selectedStatuses, setSelectedStatuses] = useState([]);
-  const [selectedProfessionals, setSelectedProfessionals] = useState([]);
-  const [selectedPatients, setSelectedPatients] = useState([]);
-  const [selectedConvenios, setSelectedConvenios] = useState([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedProfessionals, setSelectedProfessionals] = useState<string[]>([]);
+  const [selectedPatients, setSelectedPatients] = useState<string[]>([]);
+  const [selectedConvenios, setSelectedConvenios] = useState<string[]>([]);
+
+  // Função para limpar TODOS os filtros
+  const clearAllFilters = () => {
+    setSelectedStatuses([]);
+    setSelectedProfessionals([]);
+    setSelectedPatients([]);
+    setSelectedConvenios([]);
+    setSearchTerm("");
+  };
 
   // Opções de filtros
   const statusOptions = [
@@ -1675,7 +1684,7 @@ function RelatorioAgendamentos() {
                           🔍
                         </button>
                       </div>
-                      <Button variant="ghost" className="text-purple-600">
+                      <Button variant="ghost" className="text-purple-600" onClick={clearAllFilters}>
                         Limpar
                       </Button>
                     </div>
@@ -1718,7 +1727,7 @@ function RelatorioAgendamentos() {
                           🔍
                         </button>
                       </div>
-                      <Button variant="ghost" className="text-purple-600">
+                      <Button variant="ghost" className="text-purple-600" onClick={clearAllFilters}>
                         Limpar
                       </Button>
                     </div>
@@ -1761,7 +1770,7 @@ function RelatorioAgendamentos() {
                           🔍
                         </button>
                       </div>
-                      <Button variant="ghost" className="text-purple-600">
+                      <Button variant="ghost" className="text-purple-600" onClick={clearAllFilters}>
                         Limpar
                       </Button>
                     </div>
@@ -1804,7 +1813,7 @@ function RelatorioAgendamentos() {
                           🔍
                         </button>
                       </div>
-                      <Button variant="ghost" className="text-purple-600">
+                      <Button variant="ghost" className="text-purple-600" onClick={clearAllFilters}>
                         Limpar
                       </Button>
                     </div>
