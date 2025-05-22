@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, BarChart3, FileText, Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertCircle, RefreshCw, UserX, PauseCircle, PlayCircle, Check } from "lucide-react";
+import { Calendar, BarChart3, FileText, Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertCircle, RefreshCw, UserX, PauseCircle, PlayCircle, Check, Menu, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -572,6 +572,7 @@ function RelatorioAgendamentos() {
 
 export default function Appointments() {
   const [currentView, setCurrentView] = useState<ViewType>("agenda");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const renderContent = () => {
     switch (currentView) {
@@ -587,42 +588,66 @@ export default function Appointments() {
   };
 
   return (
-    <div className="flex gap-6">
+    <div className="flex">
+      {/* Botão para abrir/fechar sidebar */}
+      {!isSidebarOpen && (
+        <Button
+          variant="outline"
+          size="icon"
+          className="fixed top-4 left-4 z-50 shadow-lg"
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          <Menu className="h-4 w-4" />
+        </Button>
+      )}
+
       {/* Sidebar de navegação */}
-      <div className="w-64 shrink-0">
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-4">Agenda</h3>
-            <nav className="space-y-2">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Button
-                    key={item.id}
-                    variant={currentView === item.id ? "default" : "ghost"}
-                    className={cn(
-                      "w-full justify-start gap-2 h-auto p-3",
-                      currentView === item.id && "bg-primary text-primary-foreground"
-                    )}
-                    onClick={() => setCurrentView(item.id)}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <div className="text-left">
-                      <div className="font-medium">{item.label}</div>
-                    </div>
-                  </Button>
-                );
-              })}
-            </nav>
-          </CardContent>
-        </Card>
-        
-        {/* Mini calendário e filtros - aparece apenas quando "Agenda" está selecionada */}
-        {currentView === "agenda" && <MiniCalendar />}
-      </div>
+      {isSidebarOpen && (
+        <div className="w-64 shrink-0 relative">
+          {/* Botão para fechar sidebar */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 z-10"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          
+          <Card>
+            <CardContent className="p-4 pt-12">
+              <h3 className="font-semibold mb-4">Agenda</h3>
+              <nav className="space-y-2">
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Button
+                      key={item.id}
+                      variant={currentView === item.id ? "default" : "ghost"}
+                      className={cn(
+                        "w-full justify-start gap-2 h-auto p-3",
+                        currentView === item.id && "bg-primary text-primary-foreground"
+                      )}
+                      onClick={() => setCurrentView(item.id)}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <div className="text-left">
+                        <div className="font-medium">{item.label}</div>
+                      </div>
+                    </Button>
+                  );
+                })}
+              </nav>
+            </CardContent>
+          </Card>
+          
+          {/* Mini calendário e filtros - aparece apenas quando "Agenda" está selecionada */}
+          {currentView === "agenda" && <MiniCalendar />}
+        </div>
+      )}
 
       {/* Conteúdo principal */}
-      <div className="flex-1">
+      <div className={cn("flex-1 transition-all duration-300", isSidebarOpen ? "ml-6" : "ml-0")}>
         {renderContent()}
       </div>
     </div>
