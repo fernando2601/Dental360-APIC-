@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -322,6 +323,9 @@ function VisaoGeral() {
   const [showStatusSearch, setShowStatusSearch] = useState(false);
   const [profissionalSearch, setProfissionalSearch] = useState("");
   const [statusSearch, setStatusSearch] = useState("");
+  const [showFrequentPatientsModal, setShowFrequentPatientsModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
   
   // Função para limpar filtros da Visão Geral
   const clearOverviewFilters = () => {
@@ -414,6 +418,39 @@ function VisaoGeral() {
         ];
     }
   };
+  
+  // Dados dos pacientes mais frequentes
+  const getFrequentPatientsData = () => {
+    return [
+      { nome: "Clara Ribeiro", consultas: 12, porcentagem: 15.2 },
+      { nome: "Fernando Ferreira", consultas: 8, porcentagem: 10.1 },
+      { nome: "Maria Santos", consultas: 7, porcentagem: 8.9 },
+      { nome: "João Silva", consultas: 6, porcentagem: 7.6 },
+      { nome: "Ana Costa", consultas: 5, porcentagem: 6.3 },
+      { nome: "Pedro Oliveira", consultas: 5, porcentagem: 6.3 },
+      { nome: "Lucia Mendes", consultas: 4, porcentagem: 5.1 },
+      { nome: "Carlos Alberto", consultas: 4, porcentagem: 5.1 },
+      { nome: "Patricia Lima", consultas: 3, porcentagem: 3.8 },
+      { nome: "Roberto Souza", consultas: 3, porcentagem: 3.8 },
+      { nome: "Juliana Alves", consultas: 3, porcentagem: 3.8 },
+      { nome: "Marcos Paulo", consultas: 2, porcentagem: 2.5 },
+      { nome: "Sandra Dias", consultas: 2, porcentagem: 2.5 },
+      { nome: "Ricardo Gomes", consultas: 2, porcentagem: 2.5 },
+      { nome: "Angela Rosa", consultas: 2, porcentagem: 2.5 },
+      { nome: "Daniel Campos", consultas: 1, porcentagem: 1.3 },
+      { nome: "Fernanda Cruz", consultas: 1, porcentagem: 1.3 },
+      { nome: "Antonio Neves", consultas: 1, porcentagem: 1.3 },
+      { nome: "Beatriz Martins", consultas: 1, porcentagem: 1.3 },
+      { nome: "Eduardo Rocha", consultas: 1, porcentagem: 1.3 }
+    ];
+  };
+  
+  // Lógica de paginação
+  const allPatients = getFrequentPatientsData();
+  const totalPages = Math.ceil(allPatients.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPatients = allPatients.slice(startIndex, endIndex);
   
   const data = getFilteredData();
   const chartData = getChartData();
@@ -908,9 +945,134 @@ function VisaoGeral() {
               </div>
               <span className="font-medium text-blue-700">Pacientes mais frequentes</span>
             </div>
-            <Button variant="ghost" size="sm" className="text-blue-600 p-0 h-auto">
-              ver mais
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-blue-600 p-0 h-auto">
+                  ver mais
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+                <DialogHeader>
+                  <DialogTitle>Pacientes mais frequentes</DialogTitle>
+                </DialogHeader>
+                
+                <div className="flex flex-col h-full">
+                  {/* Tabela */}
+                  <div className="flex-1 overflow-auto">
+                    <table className="w-full">
+                      <thead className="border-b">
+                        <tr>
+                          <th className="text-left py-3 px-4">Ranking de Pacientes mais frequentes</th>
+                          <th className="text-left py-3 px-4">Quantidade</th>
+                          <th className="text-left py-3 px-4">Porcentagem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentPatients.map((patient, index) => (
+                          <tr key={index} className="border-b hover:bg-gray-50">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                                  <span className="text-xs font-bold">{startIndex + index + 1}</span>
+                                </div>
+                                <span>{patient.nome} (Paciente)</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">{patient.consultas}</td>
+                            <td className="py-3 px-4">{patient.porcentagem}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Controles de paginação */}
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center gap-2">
+                      <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                        setItemsPerPage(parseInt(value));
+                        setCurrentPage(1);
+                      }}>
+                        <SelectTrigger className="w-40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10 por página</SelectItem>
+                          <SelectItem value="25">25 por página</SelectItem>
+                          <SelectItem value="50">50 por página</SelectItem>
+                          <SelectItem value="100">100 por página</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <ChevronLeft className="w-4 h-4 -ml-1" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                          
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={currentPage === pageNum ? "default" : "ghost"}
+                              size="sm"
+                              className={currentPage === pageNum ? "bg-purple-600 text-white" : ""}
+                              onClick={() => setCurrentPage(pageNum)}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 -ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
