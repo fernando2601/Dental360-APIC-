@@ -3,6 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
+import { DashboardService } from "./services/dashboard.service";
+import { AnalyticsService } from "./services/analytics.service";
+import { PackagesService } from "./services/packages.service";
+import { ClinicInfoService } from "./services/clinic-info.service";
 import { 
   insertClientSchema, 
   insertServiceSchema, 
