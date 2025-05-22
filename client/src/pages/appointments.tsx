@@ -317,6 +317,11 @@ function VisaoGeral() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [profissionalFilter, setProfissionalFilter] = useState("todos");
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
+  const [selectedPeriodOption, setSelectedPeriodOption] = useState("este-mes");
+  const [showProfissionalSearch, setShowProfissionalSearch] = useState(false);
+  const [showStatusSearch, setShowStatusSearch] = useState(false);
+  const [profissionalSearch, setProfissionalSearch] = useState("");
+  const [statusSearch, setStatusSearch] = useState("");
   
   // Função para limpar filtros da Visão Geral
   const clearOverviewFilters = () => {
@@ -336,25 +341,72 @@ function VisaoGeral() {
   
   // Mock data baseado nos filtros
   const getFilteredData = () => {
-    const baseData = {
-      totalAgendamentos: periodFilter === "diaria" ? 1 : periodFilter === "semanal" ? 7 : periodFilter === "mensal" ? 25 : 150,
-      ociosidade: periodFilter === "diaria" ? 98 : periodFilter === "semanal" ? 85 : periodFilter === "mensal" ? 75 : 45,
-      listaEspera: 0
-    };
-    
-    return baseData;
+    // Dados baseados na seleção do período
+    switch(selectedPeriodOption) {
+      case "hoje":
+        return { totalAgendamentos: 3, ociosidade: 85, listaEspera: 1 };
+      case "esta-semana":
+        return { totalAgendamentos: 15, ociosidade: 65, listaEspera: 2 };
+      case "este-mes":
+        return { totalAgendamentos: 89, ociosidade: 25, listaEspera: 5 };
+      case "ultimos-7":
+        return { totalAgendamentos: 12, ociosidade: 70, listaEspera: 1 };
+      case "ultimos-30":
+        return { totalAgendamentos: 156, ociosidade: 15, listaEspera: 8 };
+      default:
+        return { totalAgendamentos: 89, ociosidade: 25, listaEspera: 5 };
+    }
   };
   
   const getChartData = () => {
-    switch(periodFilter) {
-      case "semanal":
-        return [12, 15, 8, 25, 18, 22, 10];
-      case "mensal":
-        return [45, 32, 28, 55, 38, 42, 35, 48, 52, 41, 39, 47];
-      case "anual":
-        return [180, 165, 142, 198, 175, 156, 189, 201, 178, 192, 167, 185];
-      default: // diaria
-        return [2, 4, 3, 8, 5, 6, 1];
+    switch(selectedPeriodOption) {
+      case "hoje":
+        return Array.from({length: 24}, (_, i) => Math.floor(Math.random() * 3)); // 24 horas
+      case "esta-semana":
+        return [8, 12, 15, 9, 18, 22, 11]; // 7 dias
+      case "este-mes":
+        return Array.from({length: 31}, (_, i) => Math.floor(Math.random() * 8 + 1)); // 31 dias
+      case "ultimos-7":
+        return [5, 8, 12, 7, 15, 18, 9]; // 7 dias
+      case "ultimos-30":
+        return Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 12 + 2)); // 30 dias
+      default:
+        return Array.from({length: 31}, (_, i) => Math.floor(Math.random() * 8 + 1));
+    }
+  };
+  
+  const getStatusData = () => {
+    const total = getFilteredData().totalAgendamentos;
+    if (statusFilter !== "todos") {
+      // Se um status específico foi selecionado, mostre apenas esse
+      return [
+        { name: statusFilter, value: total, color: "bg-purple-500" }
+      ];
+    }
+    
+    // Distribuição baseada no período selecionado
+    switch(selectedPeriodOption) {
+      case "hoje":
+        return [
+          { name: "Agendado", value: 1, color: "bg-purple-500" },
+          { name: "Confirmado", value: 0, color: "bg-blue-500" },
+          { name: "Não compareceu", value: 0, color: "bg-gray-500" },
+          { name: "Concluído", value: 0, color: "bg-green-500" }
+        ];
+      case "este-mes":
+        return [
+          { name: "Agendado", value: 25, color: "bg-purple-500" },
+          { name: "Confirmado", value: 20, color: "bg-blue-500" },
+          { name: "Não compareceu", value: 15, color: "bg-gray-500" },
+          { name: "Concluído", value: 29, color: "bg-green-500" }
+        ];
+      default:
+        return [
+          { name: "Agendado", value: 8, color: "bg-purple-500" },
+          { name: "Confirmado", value: 5, color: "bg-blue-500" },
+          { name: "Não compareceu", value: 1, color: "bg-gray-500" },
+          { name: "Concluído", value: 1, color: "bg-green-500" }
+        ];
     }
   };
   
@@ -424,23 +476,58 @@ function VisaoGeral() {
                     
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="hoje" className="text-purple-600" />
+                        <input 
+                          type="radio" 
+                          name="periodo" 
+                          value="hoje" 
+                          checked={selectedPeriodOption === "hoje"}
+                          onChange={(e) => setSelectedPeriodOption(e.target.value)}
+                          className="text-purple-600" 
+                        />
                         <span>Hoje</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="esta-semana" className="text-purple-600" />
+                        <input 
+                          type="radio" 
+                          name="periodo" 
+                          value="esta-semana" 
+                          checked={selectedPeriodOption === "esta-semana"}
+                          onChange={(e) => setSelectedPeriodOption(e.target.value)}
+                          className="text-purple-600" 
+                        />
                         <span>Esta semana</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="este-mes" className="text-purple-600" />
+                        <input 
+                          type="radio" 
+                          name="periodo" 
+                          value="este-mes" 
+                          checked={selectedPeriodOption === "este-mes"}
+                          onChange={(e) => setSelectedPeriodOption(e.target.value)}
+                          className="text-purple-600" 
+                        />
                         <span>Este mês</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="ultimos-7" className="text-purple-600" />
+                        <input 
+                          type="radio" 
+                          name="periodo" 
+                          value="ultimos-7" 
+                          checked={selectedPeriodOption === "ultimos-7"}
+                          onChange={(e) => setSelectedPeriodOption(e.target.value)}
+                          className="text-purple-600" 
+                        />
                         <span>Últimos 7 dias</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="ultimos-30" className="text-purple-600" />
+                        <input 
+                          type="radio" 
+                          name="periodo" 
+                          value="ultimos-30" 
+                          checked={selectedPeriodOption === "ultimos-30"}
+                          onChange={(e) => setSelectedPeriodOption(e.target.value)}
+                          className="text-purple-600" 
+                        />
                         <span>Últimos 30 dias</span>
                       </div>
                     </div>
@@ -448,7 +535,11 @@ function VisaoGeral() {
                   
                   {/* Profissionais */}
                   <div className="space-y-3">
-                    <Button variant="outline" className="w-full flex items-center gap-2">
+                    <Button 
+                      variant={showProfissionalSearch ? "default" : "outline"} 
+                      className={`w-full flex items-center gap-2 ${showProfissionalSearch ? 'bg-purple-600 text-white' : ''}`}
+                      onClick={() => setShowProfissionalSearch(!showProfissionalSearch)}
+                    >
                       <UserX className="w-4 h-4" />
                       Profissionais
                     </Button>
@@ -456,69 +547,181 @@ function VisaoGeral() {
                   
                   {/* Status */}
                   <div className="space-y-3">
-                    <Button variant="outline" className="w-full">
+                    <Button 
+                      variant={showStatusSearch ? "default" : "outline"}
+                      className={`w-full ${showStatusSearch ? 'bg-purple-600 text-white' : ''}`}
+                      onClick={() => setShowStatusSearch(!showStatusSearch)}
+                    >
                       Status
                     </Button>
                   </div>
                 </div>
                 
-                {/* Seção direita - Calendário */}
+                {/* Seção direita - Conteúdo dinâmico */}
                 <div className="flex-1">
-                  <div className="bg-white rounded-lg p-4 border">
-                    {/* Header do calendário */}
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-medium">Período</span>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
-                          <ChevronLeft className="w-4 h-4" />
-                        </Button>
-                        <span className="font-medium">Mai 2025</span>
-                        <Button variant="ghost" size="sm">
-                          <ChevronRight className="w-4 h-4" />
-                        </Button>
+                  {/* Busca de Profissionais */}
+                  {showProfissionalSearch && (
+                    <div className="bg-white rounded-lg p-4 border">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">Profissionais</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-purple-600"
+                            onClick={() => setProfissionalFilter("todos")}
+                          >
+                            Limpar
+                          </Button>
+                        </div>
+                        
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Digite"
+                            value={profissionalSearch}
+                            onChange={(e) => setProfissionalSearch(e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          <div 
+                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
+                            onClick={() => setProfissionalFilter("fernando-neri")}
+                          >
+                            FERNANDO FERREIRA NERI
+                          </div>
+                          <div 
+                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
+                            onClick={() => setProfissionalFilter("dra-santos")}
+                          >
+                            DRA. SANTOS
+                          </div>
+                          <div 
+                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
+                            onClick={() => setProfissionalFilter("dr-silva")}
+                          >
+                            DR. SILVA
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    
-                    {/* Dias da semana */}
-                    <div className="grid grid-cols-7 gap-1 mb-2">
-                      {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => (
-                        <div key={index} className="text-center text-sm font-medium text-gray-500 p-2">
-                          {day}
+                  )}
+                  
+                  {/* Busca de Status */}
+                  {showStatusSearch && (
+                    <div className="bg-white rounded-lg p-4 border">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">Status</span>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-purple-600"
+                            onClick={() => setStatusFilter("todos")}
+                          >
+                            Limpar
+                          </Button>
                         </div>
-                      ))}
+                        
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Digite"
+                            value={statusSearch}
+                            onChange={(e) => setStatusSearch(e.target.value)}
+                            className="w-full px-3 py-2 border rounded-lg text-sm"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          <div 
+                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
+                            onClick={() => setStatusFilter("agendado")}
+                          >
+                            Agendado
+                          </div>
+                          <div 
+                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
+                            onClick={() => setStatusFilter("confirmado")}
+                          >
+                            Confirmado
+                          </div>
+                          <div 
+                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
+                            onClick={() => setStatusFilter("remarcado")}
+                          >
+                            Remarcado
+                          </div>
+                          <div 
+                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
+                            onClick={() => setStatusFilter("cancelado")}
+                          >
+                            Cancelado
+                          </div>
+                          <div 
+                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
+                            onClick={() => setStatusFilter("nao-compareceu")}
+                          >
+                            Não compareceu
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    
-                    {/* Calendário */}
-                    <div className="grid grid-cols-7 gap-1">
-                      {/* Dias do mês anterior */}
-                      {[27, 28, 29, 30].map((day) => (
-                        <div key={`prev-${day}`} className="text-center p-2 text-gray-300 text-sm">
-                          {day}
+                  )}
+                  
+                  {/* Calendário menor (só quando Período está ativo) */}
+                  {!showProfissionalSearch && !showStatusSearch && (
+                    <div className="bg-white rounded-lg p-3 border max-w-xs">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium">Mai 2025</span>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm">
+                            <ChevronLeft className="w-3 h-3" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <ChevronRight className="w-3 h-3" />
+                          </Button>
                         </div>
-                      ))}
+                      </div>
                       
-                      {/* Dias do mês atual */}
-                      {Array.from({length: 31}, (_, i) => i + 1).map((day) => (
-                        <div 
-                          key={day} 
-                          className={`text-center p-2 text-sm cursor-pointer hover:bg-gray-100 rounded ${
-                            day === 18 ? 'bg-purple-600 text-white rounded' : 
-                            day === 24 ? 'bg-purple-600 text-white rounded' :
-                            day >= 18 && day <= 24 ? 'bg-purple-100 text-purple-600' : ''
-                          }`}
-                        >
-                          {day}
-                        </div>
-                      ))}
+                      <div className="grid grid-cols-7 gap-1 mb-1">
+                        {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => (
+                          <div key={index} className="text-center text-xs text-gray-500 p-1">
+                            {day}
+                          </div>
+                        ))}
+                      </div>
                       
-                      {/* Dias do próximo mês */}
-                      {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                        <div key={`next-${day}`} className="text-center p-2 text-gray-300 text-sm">
-                          {day}
-                        </div>
-                      ))}
+                      <div className="grid grid-cols-7 gap-1">
+                        {[27, 28, 29, 30].map((day) => (
+                          <div key={`prev-${day}`} className="text-center p-1 text-gray-300 text-xs">
+                            {day}
+                          </div>
+                        ))}
+                        
+                        {Array.from({length: 31}, (_, i) => i + 1).map((day) => (
+                          <div 
+                            key={day} 
+                            className={`text-center p-1 text-xs cursor-pointer hover:bg-gray-100 rounded ${
+                              day === 18 ? 'bg-purple-600 text-white' : 
+                              day === 24 ? 'bg-purple-600 text-white' :
+                              day >= 18 && day <= 24 ? 'bg-purple-100 text-purple-600' : ''
+                            }`}
+                          >
+                            {day}
+                          </div>
+                        ))}
+                        
+                        {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                          <div key={`next-${day}`} className="text-center p-1 text-gray-300 text-xs">
+                            {day}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
