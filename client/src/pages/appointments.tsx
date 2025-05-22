@@ -1733,8 +1733,8 @@ function RelatorioAgendamentos() {
                     </div>
                     <div className="max-h-48 overflow-y-auto space-y-2">
                       {allProfessionals
-                        .filter(prof => prof.toLowerCase().includes(searchTerm.toLowerCase()))
-                        .map((professional) => (
+                        .filter((prof: any) => prof.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map((professional: any) => (
                         <label key={professional} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
                           <input 
                             type="checkbox" 
@@ -1776,8 +1776,8 @@ function RelatorioAgendamentos() {
                     </div>
                     <div className="max-h-48 overflow-y-auto space-y-2">
                       {allPatients
-                        .filter(patient => patient.toLowerCase().includes(searchTerm.toLowerCase()))
-                        .map((patient) => (
+                        .filter((patient: any) => patient.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map((patient: any) => (
                         <label key={patient} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
                           <input 
                             type="checkbox" 

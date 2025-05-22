@@ -524,13 +524,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...appointment,
           client: client ? {
             id: client.id,
-            name: client.name,
-            avatar: client.name.split(' ').map(n => n[0]).join('').toUpperCase()
+            name: client.fullName,
+            avatar: client.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase()
           } : null,
           professional: professional ? {
             id: professional.id,
-            name: professional.name,
-            avatar: professional.name.split(' ').map(n => n[0]).join('').toUpperCase()
+            name: professional.specialization,
+            avatar: professional.specialization.split(' ').map((n: string) => n[0]).join('').toUpperCase()
           } : null,
           service: service ? {
             id: service.id,
@@ -600,12 +600,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         clients: clients.map(c => ({
           id: c.id,
-          name: c.name,
+          fullName: c.fullName,
           email: c.email
         })),
         professionals: staff.map(s => ({
           id: s.id,
-          name: s.name,
           specialization: s.specialization
         })),
         convenios,
