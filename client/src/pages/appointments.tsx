@@ -1848,12 +1848,12 @@ function RelatorioAgendamentos() {
         {/* Contadores de status */}
         <div className="flex gap-6">
           {[
-            { key: "agendado", label: "Agendado", color: "purple", count: statusCounts.agendado },
-            { key: "confirmado", label: "Confirmado", color: "blue", count: statusCounts.confirmado },
-            { key: "naoCompareceu", label: "Não compareceu", color: "gray", count: statusCounts.naoCompareceu },
-            { key: "concluido", label: "Concluído", color: "green", count: statusCounts.concluido },
-            { key: "cancelado", label: "Cancelado", color: "red", count: statusCounts.cancelado },
-            { key: "todos", label: "Todos", color: "blue", count: statusCounts.todos }
+            { key: "agendado", label: "Agendado", color: "purple", count: realStatusCounts.agendado },
+            { key: "confirmado", label: "Confirmado", color: "blue", count: realStatusCounts.confirmado },
+            { key: "naoCompareceu", label: "Não compareceu", color: "gray", count: realStatusCounts.naoCompareceu },
+            { key: "concluido", label: "Concluído", color: "green", count: realStatusCounts.concluido },
+            { key: "cancelado", label: "Cancelado", color: "red", count: realStatusCounts.cancelado },
+            { key: "todos", label: "Todos", color: "blue", count: realStatusCounts.todos }
           ].map((status) => (
             <button
               key={status.key}
