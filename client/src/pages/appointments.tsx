@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, BarChart3, FileText, Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, BarChart3, FileText, Clock, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertCircle, RefreshCw, UserX, PauseCircle, PlayCircle, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -107,15 +107,61 @@ function MiniCalendar() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">Status</label>
             <Select defaultValue="todos">
-              <SelectTrigger>
+              <SelectTrigger className="border-purple-200 focus:ring-purple-500">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="agendado">Agendado</SelectItem>
-                <SelectItem value="confirmado">Confirmado</SelectItem>
-                <SelectItem value="realizado">Realizado</SelectItem>
-                <SelectItem value="cancelado">Cancelado</SelectItem>
+              <SelectContent className="border-purple-200">
+                <SelectItem value="todos" className="flex items-center gap-2">
+                  Todos
+                </SelectItem>
+                <SelectItem value="agendado" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 text-purple-500" />
+                    Agendado
+                  </div>
+                </SelectItem>
+                <SelectItem value="confirmado" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                    Confirmado
+                  </div>
+                </SelectItem>
+                <SelectItem value="remarcado" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-orange-500" />
+                    Remarcado
+                  </div>
+                </SelectItem>
+                <SelectItem value="cancelado" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <XCircle className="h-4 w-4 text-red-500" />
+                    Cancelado
+                  </div>
+                </SelectItem>
+                <SelectItem value="nao-compareceu" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <UserX className="h-4 w-4 text-gray-500" />
+                    Não compareceu
+                  </div>
+                </SelectItem>
+                <SelectItem value="aguardando" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <PauseCircle className="h-4 w-4 text-yellow-500" />
+                    Aguardando
+                  </div>
+                </SelectItem>
+                <SelectItem value="em-atendimento" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <PlayCircle className="h-4 w-4 text-green-500" />
+                    Em atendimento
+                  </div>
+                </SelectItem>
+                <SelectItem value="concluido" className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-emerald-600" />
+                    Concluído
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
