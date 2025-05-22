@@ -1420,12 +1420,262 @@ function VisaoGeral() {
 }
 
 function RelatorioAgendamentos() {
+  const [selectedPeriod, setSelectedPeriod] = useState("custom");
+  const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [selectedStatus, setSelectedStatus] = useState("todos");
+
+  // Dados mock para relatório
+  const reportData = [
+    {
+      id: 1,
+      procedimento: "Clareamento a Laser",
+      paciente: { nome: "Clara Ribeiro", avatar: "CR" },
+      profissional: { nome: "FERNANDO", avatar: "F" },
+      duracao: "60 min",
+      agendadoPara: "22/05/2025 16:36",
+      status: "concluido"
+    }
+  ];
+
+  const statusCounts = {
+    agendado: 0,
+    confirmado: 0,
+    naoCompareceu: 0,
+    concluido: 1,
+    cancelado: 0,
+    todos: 1
+  };
+
+  const totalPages = Math.ceil(reportData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = reportData.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Relatório de Agendamentos</h2>
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold">Relatório de agendamentos</h2>
+          <span className="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">Treglatro</span>
+        </div>
+        <div className="flex gap-2">
+          <Select defaultValue="acoes">
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="acoes">Ações em lote</SelectItem>
+              <SelectItem value="excluir">Excluir selecionados</SelectItem>
+              <SelectItem value="exportar">Exportar selecionados</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select defaultValue="exportar">
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="exportar">Exportar</SelectItem>
+              <SelectItem value="pdf">PDF</SelectItem>
+              <SelectItem value="excel">Excel</SelectItem>
+              <SelectItem value="csv">CSV</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded">
+            <span className="text-sm">Período:</span>
+            <span className="text-sm font-medium">18/05/2025 - 24/05/2025</span>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-purple-600"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            + Adicionar filtro
+          </Button>
+        </div>
+
+        {/* Painel de filtros avançados */}
+        {showFilters && (
+          <Card className="p-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <Button variant="default" className="bg-purple-600 text-white justify-start">
+                📅 Período
+              </Button>
+              <Button variant="outline" className="justify-start">
+                🔄 Status
+              </Button>
+              <Button variant="outline" className="justify-start">
+                👤 Profissionais
+              </Button>
+              <Button variant="outline" className="justify-start">
+                👥 Pacientes
+              </Button>
+              <Button variant="outline" className="justify-start">
+                ❤️ Convênio
+              </Button>
+              <Button variant="outline" className="justify-start">
+                ⚙️ Mais
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Contadores de status */}
+        <div className="flex gap-6">
+          {[
+            { key: "agendado", label: "Agendado", color: "purple", count: statusCounts.agendado },
+            { key: "confirmado", label: "Confirmado", color: "blue", count: statusCounts.confirmado },
+            { key: "naoCompareceu", label: "Não compareceu", color: "gray", count: statusCounts.naoCompareceu },
+            { key: "concluido", label: "Concluído", color: "green", count: statusCounts.concluido },
+            { key: "cancelado", label: "Cancelado", color: "red", count: statusCounts.cancelado },
+            { key: "todos", label: "Todos", color: "blue", count: statusCounts.todos }
+          ].map((status) => (
+            <button
+              key={status.key}
+              onClick={() => setSelectedStatus(status.key)}
+              className={`flex flex-col items-center gap-1 pb-2 border-b-2 transition-colors ${
+                selectedStatus === status.key
+                  ? `border-${status.color}-500 text-${status.color}-600`
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full bg-${status.color}-500`}></div>
+                <span className="text-sm font-medium">{status.label}</span>
+              </div>
+              <span className="text-lg font-bold">{status.count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tabela */}
       <Card>
-        <CardContent className="p-6">
-          <p className="text-muted-foreground">Relatórios detalhados em desenvolvimento...</p>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b">
+                <tr>
+                  <th className="text-left p-4">
+                    <input type="checkbox" className="rounded" />
+                  </th>
+                  <th className="text-left p-4">Procedimentos</th>
+                  <th className="text-left p-4">Paciente ↕</th>
+                  <th className="text-left p-4">Profissional ↕</th>
+                  <th className="text-left p-4">Duração ↕</th>
+                  <th className="text-left p-4">Agendado para ↕</th>
+                  <th className="text-left p-4">Status ↕</th>
+                  <th className="text-left p-4">⚙️</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentData.map((item) => (
+                  <tr key={item.id} className="border-b hover:bg-gray-50">
+                    <td className="p-4">
+                      <input type="checkbox" className="rounded" />
+                    </td>
+                    <td className="p-4">{item.procedimento}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-bold text-purple-600">{item.paciente.avatar}</span>
+                        </div>
+                        <span>{item.paciente.nome}...</span>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                          <span className="text-xs font-bold">{item.profissional.avatar}</span>
+                        </div>
+                        <span>{item.profissional.nome}...</span>
+                      </div>
+                    </td>
+                    <td className="p-4">{item.duracao}</td>
+                    <td className="p-4">{item.agendadoPara}</td>
+                    <td className="p-4">
+                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                        ✓ Concluído
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <Button variant="ghost" size="sm">⋮</Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginação */}
+          <div className="flex items-center justify-between p-4 border-t">
+            <div className="flex items-center gap-2">
+              <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                setItemsPerPage(parseInt(value));
+                setCurrentPage(1);
+              }}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 por página</SelectItem>
+                  <SelectItem value="25">25 por página</SelectItem>
+                  <SelectItem value="50">50 por página</SelectItem>
+                  <SelectItem value="100">100 por página</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 -ml-1" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              
+              <Button variant="default" size="sm" className="bg-purple-600 text-white">
+                1
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 -ml-1" />
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
