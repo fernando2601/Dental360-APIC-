@@ -1425,6 +1425,36 @@ function RelatorioAgendamentos() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [selectedStatus, setSelectedStatus] = useState("todos");
+  const [activeFilter, setActiveFilter] = useState("periodo");
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  // Estados dos filtros
+  const [selectedStatuses, setSelectedStatuses] = useState([]);
+  const [selectedProfessionals, setSelectedProfessionals] = useState([]);
+  const [selectedPatients, setSelectedPatients] = useState([]);
+  const [selectedConvenios, setSelectedConvenios] = useState([]);
+
+  // Opções de filtros
+  const statusOptions = [
+    "Agendado", "Confirmado", "Remarcado", "Cancelado", "Não compareceram"
+  ];
+
+  const convenioOptions = [
+    "Porto Seguro", "SulAmérica", "Bradesco Saúde", "Unimed", "Amil", 
+    "NotreDame Intermédica", "Hapvida", "Prevent Senior", "São Cristóvão",
+    "Golden Cross", "Allianz Saúde", "Particular"
+  ];
+
+  // Dados mockados que serão substituídos por dados reais do backend
+  const allPatients = [
+    "Clara Ribeiro", "Fernando Ferreira", "Maria Santos", "João Silva",
+    "Ana Costa", "Pedro Oliveira", "Lucia Mendes", "Carlos Alberto"
+  ];
+
+  const allProfessionals = [
+    "Dr. Fernando Silva", "Dra. Marina Costa", "Dr. Ricardo Santos",
+    "Dra. Juliana Alves", "Dr. Paulo Mendes"
+  ];
 
   // Dados mock para relatório
   const reportData = [
@@ -1508,137 +1538,299 @@ function RelatorioAgendamentos() {
             <div className="flex gap-6">
               {/* Lado esquerdo - Filtros */}
               <div className="w-48 space-y-2">
-                <Button variant="default" className="w-full bg-purple-600 text-white justify-start">
+                <Button 
+                  variant={activeFilter === "periodo" ? "default" : "outline"} 
+                  className={`w-full justify-start ${activeFilter === "periodo" ? "bg-purple-600 text-white" : ""}`}
+                  onClick={() => setActiveFilter("periodo")}
+                >
                   📅 Período
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant={activeFilter === "status" ? "default" : "outline"} 
+                  className={`w-full justify-start ${activeFilter === "status" ? "bg-purple-600 text-white" : ""}`}
+                  onClick={() => setActiveFilter("status")}
+                >
                   🔄 Status
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant={activeFilter === "profissionais" ? "default" : "outline"} 
+                  className={`w-full justify-start ${activeFilter === "profissionais" ? "bg-purple-600 text-white" : ""}`}
+                  onClick={() => setActiveFilter("profissionais")}
+                >
                   👤 Profissionais
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant={activeFilter === "pacientes" ? "default" : "outline"} 
+                  className={`w-full justify-start ${activeFilter === "pacientes" ? "bg-purple-600 text-white" : ""}`}
+                  onClick={() => setActiveFilter("pacientes")}
+                >
                   👥 Pacientes
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant={activeFilter === "convenio" ? "default" : "outline"} 
+                  className={`w-full justify-start ${activeFilter === "convenio" ? "bg-purple-600 text-white" : ""}`}
+                  onClick={() => setActiveFilter("convenio")}
+                >
                   ❤️ Convênio
                 </Button>
               </div>
 
               {/* Lado direito - Conteúdo do filtro */}
               <div className="flex-1">
-                <div className="flex gap-6">
-                  {/* Opções de período */}
-                  <div className="space-y-3">
-                    <h3 className="font-medium">Período</h3>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="hoje" className="rounded" />
-                        <span className="text-sm">Hoje</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="semana" className="rounded" />
-                        <span className="text-sm">Esta semana</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="mes" className="rounded" />
-                        <span className="text-sm">Este mês</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="7dias" className="rounded" />
-                        <span className="text-sm">Últimos 7 dias</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="radio" name="periodo" value="30dias" className="rounded" />
-                        <span className="text-sm">Últimos 30 dias</span>
-                      </label>
+                {activeFilter === "periodo" && (
+                  <div className="flex gap-6">
+                    {/* Opções de período */}
+                    <div className="space-y-3">
+                      <h3 className="font-medium">Período</h3>
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-2">
+                          <input type="radio" name="periodo" value="hoje" className="rounded" />
+                          <span className="text-sm">Hoje</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input type="radio" name="periodo" value="semana" className="rounded" />
+                          <span className="text-sm">Esta semana</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input type="radio" name="periodo" value="mes" className="rounded" />
+                          <span className="text-sm">Este mês</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input type="radio" name="periodo" value="7dias" className="rounded" />
+                          <span className="text-sm">Últimos 7 dias</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input type="radio" name="periodo" value="30dias" className="rounded" />
+                          <span className="text-sm">Últimos 30 dias</span>
+                        </label>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Calendário */}
-                  <div className="flex-1">
-                    <div className="bg-white border rounded-lg p-4">
-                      {/* Cabeçalho do calendário */}
-                      <div className="flex items-center justify-between mb-4">
-                        <button className="p-1 hover:bg-gray-100 rounded">
-                          <ChevronLeft className="w-4 h-4" />
-                        </button>
-                        <h3 className="font-medium">Mai 2025</h3>
-                        <button className="p-1 hover:bg-gray-100 rounded">
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      {/* Dias da semana */}
-                      <div className="grid grid-cols-7 gap-1 mb-2">
-                        {["D", "S", "T", "Q", "Q", "S", "S"].map((day, index) => (
-                          <div key={index} className="text-center text-xs font-medium text-gray-500 py-2">
-                            {day}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Dias do mês */}
-                      <div className="grid grid-cols-7 gap-1">
-                        {/* Linha 1 */}
-                        {[27, 28, 29, 30, 1, 2, 3].map((day, index) => (
-                          <button
-                            key={index}
-                            className={`p-2 text-sm rounded hover:bg-gray-100 ${
-                              day < 10 && index >= 4 ? "text-gray-900" : "text-gray-400"
-                            }`}
-                          >
-                            {day}
+                    {/* Calendário menor */}
+                    <div className="w-80">
+                      <div className="bg-white border rounded-lg p-3">
+                        {/* Cabeçalho do calendário */}
+                        <div className="flex items-center justify-between mb-3">
+                          <button className="p-1 hover:bg-gray-100 rounded">
+                            <ChevronLeft className="w-4 h-4" />
                           </button>
-                        ))}
-
-                        {/* Linha 2 */}
-                        {[4, 5, 6, 7, 8, 9, 10].map((day) => (
-                          <button key={day} className="p-2 text-sm rounded hover:bg-gray-100 text-gray-900">
-                            {day}
+                          <h3 className="font-medium text-sm">Mai 2025</h3>
+                          <button className="p-1 hover:bg-gray-100 rounded">
+                            <ChevronRight className="w-4 h-4" />
                           </button>
-                        ))}
+                        </div>
 
-                        {/* Linha 3 */}
-                        {[11, 12, 13, 14, 15, 16, 17].map((day) => (
-                          <button key={day} className="p-2 text-sm rounded hover:bg-gray-100 text-gray-900">
-                            {day}
-                          </button>
-                        ))}
+                        {/* Dias da semana */}
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                          {["D", "S", "T", "Q", "Q", "S", "S"].map((day, index) => (
+                            <div key={index} className="text-center text-xs font-medium text-gray-500 py-1">
+                              {day}
+                            </div>
+                          ))}
+                        </div>
 
-                        {/* Linha 4 - com dias selecionados */}
-                        {[18, 19, 20, 21, 22, 23, 24].map((day) => (
-                          <button
-                            key={day}
-                            className={`p-2 text-sm rounded ${
-                              day === 18 || day === 24
-                                ? "bg-purple-600 text-white"
-                                : day >= 19 && day <= 23
-                                ? "bg-purple-100 text-purple-900"
-                                : "hover:bg-gray-100 text-gray-900"
-                            }`}
-                          >
-                            {day}
-                          </button>
-                        ))}
-
-                        {/* Linha 5 */}
-                        {[25, 26, 27, 28, 29, 30, 31].map((day) => (
-                          <button key={day} className="p-2 text-sm rounded hover:bg-gray-100 text-gray-900">
-                            {day}
-                          </button>
-                        ))}
-
-                        {/* Linha 6 */}
-                        {[1, 2, 3, 4, 5, 6, 7].map((day, index) => (
-                          <button key={index} className="p-2 text-sm rounded hover:bg-gray-100 text-gray-400">
-                            {day}
-                          </button>
-                        ))}
+                        {/* Dias do mês */}
+                        <div className="grid grid-cols-7 gap-1">
+                          {[27, 28, 29, 30, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31].map((day, index) => {
+                            const isCurrentMonth = index >= 4 && index <= 34;
+                            const isSelected = day >= 18 && day <= 24 && isCurrentMonth;
+                            const isRangeStart = day === 18 && isCurrentMonth;
+                            const isRangeEnd = day === 24 && isCurrentMonth;
+                            
+                            return (
+                              <button
+                                key={index}
+                                className={`p-1 text-xs rounded hover:bg-gray-100 ${
+                                  !isCurrentMonth
+                                    ? "text-gray-400"
+                                    : isRangeStart || isRangeEnd
+                                    ? "bg-purple-600 text-white"
+                                    : isSelected
+                                    ? "bg-purple-100 text-purple-900"
+                                    : "text-gray-900"
+                                }`}
+                              >
+                                {day}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {activeFilter === "status" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          placeholder="Digite"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full px-3 py-2 border rounded-lg pr-10"
+                        />
+                        <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          🔍
+                        </button>
+                      </div>
+                      <Button variant="ghost" className="text-purple-600">
+                        Limpar
+                      </Button>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto space-y-2">
+                      {statusOptions
+                        .filter(status => status.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map((status) => (
+                        <label key={status} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedStatuses.includes(status)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedStatuses([...selectedStatuses, status]);
+                              } else {
+                                setSelectedStatuses(selectedStatuses.filter(s => s !== status));
+                              }
+                            }}
+                            className="rounded" 
+                          />
+                          <span className="text-sm">{status}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeFilter === "profissionais" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          placeholder="Digite"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full px-3 py-2 border rounded-lg pr-10"
+                        />
+                        <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          🔍
+                        </button>
+                      </div>
+                      <Button variant="ghost" className="text-purple-600">
+                        Limpar
+                      </Button>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto space-y-2">
+                      {allProfessionals
+                        .filter(prof => prof.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map((professional) => (
+                        <label key={professional} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedProfessionals.includes(professional)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedProfessionals([...selectedProfessionals, professional]);
+                              } else {
+                                setSelectedProfessionals(selectedProfessionals.filter(p => p !== professional));
+                              }
+                            }}
+                            className="rounded" 
+                          />
+                          <span className="text-sm">{professional}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeFilter === "pacientes" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          placeholder="Digite"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full px-3 py-2 border rounded-lg pr-10"
+                        />
+                        <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          🔍
+                        </button>
+                      </div>
+                      <Button variant="ghost" className="text-purple-600">
+                        Limpar
+                      </Button>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto space-y-2">
+                      {allPatients
+                        .filter(patient => patient.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map((patient) => (
+                        <label key={patient} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedPatients.includes(patient)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedPatients([...selectedPatients, patient]);
+                              } else {
+                                setSelectedPatients(selectedPatients.filter(p => p !== patient));
+                              }
+                            }}
+                            className="rounded" 
+                          />
+                          <span className="text-sm">{patient} (Paciente de exemplo)</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeFilter === "convenio" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          placeholder="Digite"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full px-3 py-2 border rounded-lg pr-10"
+                        />
+                        <button className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          🔍
+                        </button>
+                      </div>
+                      <Button variant="ghost" className="text-purple-600">
+                        Limpar
+                      </Button>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto space-y-2">
+                      {convenioOptions
+                        .filter(convenio => convenio.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map((convenio) => (
+                        <label key={convenio} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedConvenios.includes(convenio)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedConvenios([...selectedConvenios, convenio]);
+                              } else {
+                                setSelectedConvenios(selectedConvenios.filter(c => c !== convenio));
+                              }
+                            }}
+                            className="rounded" 
+                          />
+                          <span className="text-sm">{convenio}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </Card>
