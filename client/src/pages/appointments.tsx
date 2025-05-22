@@ -327,6 +327,11 @@ function VisaoGeral() {
   const clearOverviewFilters = () => {
     setStatusFilter("todos");
     setProfissionalFilter("todos");
+    setSelectedPeriodOption("este-mes");
+    setProfissionalSearch("");
+    setStatusSearch("");
+    setShowProfissionalSearch(false);
+    setShowStatusSearch(false);
   };
   
   // Contar filtros ativos na Visão Geral
@@ -538,7 +543,10 @@ function VisaoGeral() {
                     <Button 
                       variant={showProfissionalSearch ? "default" : "outline"} 
                       className={`w-full flex items-center gap-2 ${showProfissionalSearch ? 'bg-purple-600 text-white' : ''}`}
-                      onClick={() => setShowProfissionalSearch(!showProfissionalSearch)}
+                      onClick={() => {
+                        setShowProfissionalSearch(!showProfissionalSearch);
+                        setShowStatusSearch(false); // Esconder Status quando clicar em Profissionais
+                      }}
                     >
                       <UserX className="w-4 h-4" />
                       Profissionais
@@ -550,7 +558,10 @@ function VisaoGeral() {
                     <Button 
                       variant={showStatusSearch ? "default" : "outline"}
                       className={`w-full ${showStatusSearch ? 'bg-purple-600 text-white' : ''}`}
-                      onClick={() => setShowStatusSearch(!showStatusSearch)}
+                      onClick={() => {
+                        setShowStatusSearch(!showStatusSearch);
+                        setShowProfissionalSearch(false); // Esconder Profissionais quando clicar em Status
+                      }}
                     >
                       Status
                     </Button>
@@ -569,7 +580,10 @@ function VisaoGeral() {
                             variant="ghost" 
                             size="sm" 
                             className="text-purple-600"
-                            onClick={() => setProfissionalFilter("todos")}
+                            onClick={() => {
+                              setProfissionalFilter("todos");
+                              setProfissionalSearch("");
+                            }}
                           >
                             Limpar
                           </Button>
@@ -586,24 +600,22 @@ function VisaoGeral() {
                         </div>
                         
                         <div className="space-y-2 max-h-40 overflow-y-auto">
-                          <div 
-                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
-                            onClick={() => setProfissionalFilter("fernando-neri")}
-                          >
-                            FERNANDO FERREIRA NERI
-                          </div>
-                          <div 
-                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
-                            onClick={() => setProfissionalFilter("dra-santos")}
-                          >
-                            DRA. SANTOS
-                          </div>
-                          <div 
-                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
-                            onClick={() => setProfissionalFilter("dr-silva")}
-                          >
-                            DR. SILVA
-                          </div>
+                          {["FERNANDO FERREIRA NERI", "DRA. SANTOS", "DR. SILVA", "DR. CARLOS MENDES", "DRA. ANA PAULA"].filter(prof => 
+                            prof.toLowerCase().includes(profissionalSearch.toLowerCase())
+                          ).map((prof, index) => (
+                            <div 
+                              key={index}
+                              className={`p-2 hover:bg-gray-100 cursor-pointer rounded text-sm ${
+                                profissionalFilter === prof.toLowerCase().replace(/\s+/g, '-') ? 'bg-purple-100 text-purple-600' : ''
+                              }`}
+                              onClick={() => {
+                                setProfissionalFilter(prof.toLowerCase().replace(/\s+/g, '-'));
+                                setProfissionalSearch(prof);
+                              }}
+                            >
+                              {prof}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -619,7 +631,10 @@ function VisaoGeral() {
                             variant="ghost" 
                             size="sm" 
                             className="text-purple-600"
-                            onClick={() => setStatusFilter("todos")}
+                            onClick={() => {
+                              setStatusFilter("todos");
+                              setStatusSearch("");
+                            }}
                           >
                             Limpar
                           </Button>
@@ -636,36 +651,22 @@ function VisaoGeral() {
                         </div>
                         
                         <div className="space-y-2 max-h-40 overflow-y-auto">
-                          <div 
-                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
-                            onClick={() => setStatusFilter("agendado")}
-                          >
-                            Agendado
-                          </div>
-                          <div 
-                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
-                            onClick={() => setStatusFilter("confirmado")}
-                          >
-                            Confirmado
-                          </div>
-                          <div 
-                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
-                            onClick={() => setStatusFilter("remarcado")}
-                          >
-                            Remarcado
-                          </div>
-                          <div 
-                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
-                            onClick={() => setStatusFilter("cancelado")}
-                          >
-                            Cancelado
-                          </div>
-                          <div 
-                            className="p-2 hover:bg-gray-100 cursor-pointer rounded text-sm"
-                            onClick={() => setStatusFilter("nao-compareceu")}
-                          >
-                            Não compareceu
-                          </div>
+                          {["Agendado", "Confirmado", "Remarcado", "Cancelado", "Não compareceu"].filter(status => 
+                            status.toLowerCase().includes(statusSearch.toLowerCase())
+                          ).map((status, index) => (
+                            <div 
+                              key={index}
+                              className={`p-2 hover:bg-gray-100 cursor-pointer rounded text-sm ${
+                                statusFilter === status.toLowerCase().replace(/\s+/g, '-') ? 'bg-purple-100 text-purple-600' : ''
+                              }`}
+                              onClick={() => {
+                                setStatusFilter(status.toLowerCase().replace(/\s+/g, '-'));
+                                setStatusSearch(status);
+                              }}
+                            >
+                              {status}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
