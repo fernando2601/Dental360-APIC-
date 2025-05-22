@@ -1359,6 +1359,20 @@ function VisaoGeral() {
         <Card>
           <CardContent className="p-6">
             <h3 className="font-semibold mb-4">Horários mais movimentados</h3>
+            
+            {/* Cabeçalho dos dias da semana */}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8"></div> {/* Espaço para os horários */}
+              <div className="flex-1"></div> {/* Espaço para as barras */}
+              <div className="flex gap-1">
+                {["D", "S", "T", "Q", "Q", "S", "S"].map((day, dayIndex) => (
+                  <div key={dayIndex} className="w-4 text-xs text-center text-muted-foreground font-medium">
+                    {day}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
             <div className="space-y-1">
               {Array.from({ length: 24 }, (_, i) => {
                 const isActive = i >= 8 && i <= 17; // Horário comercial mais movimentado
