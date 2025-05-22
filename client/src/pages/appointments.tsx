@@ -1359,19 +1359,44 @@ function VisaoGeral() {
         <Card>
           <CardContent className="p-6">
             <h3 className="font-semibold mb-4">Horários mais movimentados</h3>
-            <div className="h-40 grid grid-cols-12 gap-1">
-              {Array.from({ length: 24 }, (_, i) => (
-                <div key={i} className="flex flex-col">
-                  <div 
-                    className={`w-full ${i >= 16 && i <= 17 ? 'bg-purple-500' : 'bg-gray-200'} ${i >= 16 && i <= 17 ? 'h-20' : 'h-2'}`}
-                  ></div>
-                  {i % 4 === 0 && (
-                    <span className="text-xs text-muted-foreground mt-1 transform -rotate-45 origin-left">
-                      {i}h
-                    </span>
-                  )}
-                </div>
-              ))}
+            <div className="space-y-1">
+              {Array.from({ length: 24 }, (_, i) => {
+                const isActive = i >= 8 && i <= 17; // Horário comercial mais movimentado
+                const intensity = isActive ? Math.random() * 0.8 + 0.2 : Math.random() * 0.2; // Intensidade da barra
+                
+                return (
+                  <div key={i} className="flex items-center gap-3">
+                    {/* Horário */}
+                    <div className="w-8 text-xs text-muted-foreground text-right">
+                      {i.toString().padStart(2, '0')}h
+                    </div>
+                    
+                    {/* Barra horizontal */}
+                    <div className="flex-1 bg-gray-100 h-3 rounded">
+                      <div 
+                        className={`h-full rounded ${isActive ? 'bg-purple-500' : 'bg-gray-300'}`}
+                        style={{ width: `${intensity * 100}%` }}
+                      ></div>
+                    </div>
+                    
+                    {/* Dias da semana abreviados */}
+                    <div className="flex gap-1">
+                      {["D", "S", "T", "Q", "Q", "S", "S"].map((day, dayIndex) => (
+                        <div 
+                          key={dayIndex} 
+                          className={`w-4 h-3 rounded-sm text-xs flex items-center justify-center ${
+                            isActive && dayIndex >= 1 && dayIndex <= 5 
+                              ? 'bg-purple-500 text-white' 
+                              : 'bg-gray-200 text-gray-500'
+                          }`}
+                        >
+                          {/* Pequenos pontos para simular atividade */}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
