@@ -7,6 +7,7 @@ import { DashboardService } from "./services/dashboard.service";
 import { AnalyticsService } from "./services/analytics.service";
 import { PackagesService } from "./services/packages.service";
 import { ClinicInfoService } from "./services/clinic-info.service";
+import { AppointmentReportsService } from "./services/appointment-reports.service";
 import { 
   insertClientSchema, 
   insertServiceSchema, 
@@ -25,6 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const analyticsService = new AnalyticsService(storage);
   const packagesService = new PackagesService(storage);
   const clinicInfoService = new ClinicInfoService(storage);
+  const appointmentReportsService = new AppointmentReportsService(storage);
   // Client routes
   app.get("/api/clients", authMiddleware, async (req: Request, res: Response) => {
     try {
@@ -477,7 +479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Endpoint para relatórios de agendamentos com filtros
+  // Endpoint para relatórios de agendamentos com filtros COMPLETOS
   app.get("/api/appointment-reports", authMiddleware, async (req: Request, res: Response) => {
     try {
       const { 
@@ -487,102 +489,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         professionalId, 
         clientId, 
         convenio,
+        sala,
         page = 1, 
         limit = 25 
       } = req.query;
 
-      // Buscar agendamentos com filtros
-      let appointments = await storage.getAppointments();
-      
-      // Aplicar filtros de data
-      if (startDate && endDate) {
-        const start = new Date(startDate as string);
-        const end = new Date(endDate as string);
-        appointments = appointments.filter(apt => {
-          const aptDate = new Date(apt.startTime);
-          return aptDate >= start && aptDate <= end;
-        });
-      }
-
-      // Aplicar filtro de status
-      if (status && status !== 'todos') {
-        appointments = appointments.filter(apt => apt.status === status);
-      }
-
-      // Aplicar filtro de profissional
-      if (professionalId) {
-        appointments = appointments.filter(apt => apt.staffId === Number(professionalId));
-      }
-
-      // Aplicar filtro de cliente
-      if (clientId) {
-        appointments = appointments.filter(apt => apt.clientId === Number(clientId));
-      }
-
-      // Buscar dados relacionados
-      const clients = await storage.getClients();
-      const staff = await storage.getStaffMembers();
-      const services = await storage.getServices();
-
-      // Enriquecer os dados dos agendamentos
-      const enrichedAppointments = appointments.map(appointment => {
-        const client = clients.find(c => c.id === appointment.clientId);
-        const professional = staff.find(s => s.id === appointment.staffId);
-        const service = services.find(s => s.id === appointment.serviceId);
-
-        return {
-          ...appointment,
-          client: client ? {
-            id: client.id,
-            name: client.fullName,
-            avatar: client.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase()
-          } : null,
-          professional: professional ? {
-            id: professional.id,
-            name: professional.specialization,
-            avatar: professional.specialization.split(' ').map((n: string) => n[0]).join('').toUpperCase()
-          } : null,
-          service: service ? {
-            id: service.id,
-            name: service.name,
-            category: service.category,
-            duration: service.duration
-          } : null
-        };
-      });
-
-      // Paginação
-      const pageNum = Number(page);
-      const limitNum = Number(limit);
-      const startIndex = (pageNum - 1) * limitNum;
-      const endIndex = startIndex + limitNum;
-      const paginatedAppointments = enrichedAppointments.slice(startIndex, endIndex);
-
-      // Contar por status
-      const statusCounts = {
-        agendado: appointments.filter(a => a.status === 'scheduled').length,
-        confirmado: appointments.filter(a => a.status === 'confirmed').length,
-        remarcado: appointments.filter(a => a.status === 'rescheduled').length,
-        concluido: appointments.filter(a => a.status === 'completed').length,
-        cancelado: appointments.filter(a => a.status === 'cancelled').length,
-        naoCompareceu: appointments.filter(a => a.status === 'no_show').length,
-        todos: appointments.length
+      // Preparar filtros para o serviço
+      const filters = {
+        startDate: startDate as string,
+        endDate: endDate as string,
+        status: status ? (Array.isArray(status) ? status as string[] : [status as string]) : undefined,
+        professionalId: professionalId ? Number(professionalId) : undefined,
+        clientId: clientId ? Number(clientId) : undefined,
+        convenio: convenio as string,
+        sala: sala as string,
+        page: Number(page),
+        limit: Number(limit)
       };
 
-      res.json({
-        appointments: paginatedAppointments,
-        pagination: {
-          currentPage: pageNum,
-          totalPages: Math.ceil(enrichedAppointments.length / limitNum),
-          totalItems: enrichedAppointments.length,
-          itemsPerPage: limitNum
-        },
-        statusCounts
-      });
+      // Usar o serviço robusto para buscar dados completos
+      const reportData = await appointmentReportsService.getAppointmentReports(filters);
+
+      res.json(reportData);
 
     } catch (error) {
-      console.error("Error fetching appointment reports:", error);
-      res.status(500).json({ error: "Internal server error" });
+      console.error("Erro ao buscar relatórios de agendamentos:", error);
+      res.status(500).json({ error: "Falha ao buscar relatórios de agendamentos" });
     }
   });
 
