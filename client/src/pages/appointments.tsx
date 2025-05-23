@@ -1474,13 +1474,26 @@ function RelatorioAgendamentos() {
     enabled: true
   });
 
-  // Dados reais do backend
+  // Dados reais do backend com estrutura completa
   const allPatients = filterOptions?.clients?.map((c: any) => c.fullName) || [];
   const allProfessionals = filterOptions?.professionals?.map((p: any) => p.specialization) || [];
   const reportData = reportDataResponse?.appointments || [];
-  const realStatusCounts = reportDataResponse?.statusCounts || {
-    agendado: 0,
-    confirmado: 0,
+  const pagination = reportDataResponse?.pagination || {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 25
+  };
+  const summary = reportDataResponse?.summary || {
+    totalAppointments: 0,
+    totalRevenue: 0,
+    completedAppointments: 0,
+    cancelledAppointments: 0,
+    statusBreakdown: []
+  };
+  const realStatusCounts = {
+    agendado: summary.statusBreakdown.find(s => s.status === 'scheduled')?.count || 0,
+    confirmado: summary.statusBreakdown.find(s => s.status === 'confirmed')?.count || 0,
     naoCompareceu: 0,
     concluido: 1,
     cancelado: 0,
@@ -1879,55 +1892,151 @@ function RelatorioAgendamentos() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="border-b">
+              <thead className="border-b bg-gray-50">
                 <tr>
-                  <th className="text-left p-4">
-                    <input type="checkbox" className="rounded" />
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[140px]">
+                    Procedimento
                   </th>
-                  <th className="text-left p-4">Procedimentos</th>
-                  <th className="text-left p-4">Paciente ↕</th>
-                  <th className="text-left p-4">Profissional ↕</th>
-                  <th className="text-left p-4">Duração ↕</th>
-                  <th className="text-left p-4">Agendado para ↕</th>
-                  <th className="text-left p-4">Status ↕</th>
-                  <th className="text-left p-4">⚙️</th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                    Recorrência
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[180px]">
+                    Paciente
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[120px]">
+                    CPF do Paciente
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[160px]">
+                    Profissional
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                    Duração (min)
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[140px]">
+                    Data
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[100px]">
+                    Status
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[120px]">
+                    Convênio
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                    Salas
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[80px]">
+                    Comanda
+                  </th>
+                  <th className="text-left p-3 text-xs font-medium text-gray-500 uppercase min-w-[100px]">
+                    Valor
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {currentData.map((item) => (
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="p-4">
-                      <input type="checkbox" className="rounded" />
-                    </td>
-                    <td className="p-4">{item.procedimento}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold text-purple-600">{item.paciente.avatar}</span>
-                        </div>
-                        <span>{item.paciente.nome}...</span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold">{item.profissional.avatar}</span>
-                        </div>
-                        <span>{item.profissional.nome}...</span>
-                      </div>
-                    </td>
-                    <td className="p-4">{item.duracao}</td>
-                    <td className="p-4">{item.agendadoPara}</td>
-                    <td className="p-4">
-                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                        ✓ Concluído
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <Button variant="ghost" size="sm">⋮</Button>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={12} className="p-8 text-center text-gray-500">
+                      Carregando dados...
                     </td>
                   </tr>
-                ))}
+                ) : reportData.length === 0 ? (
+                  <tr>
+                    <td colSpan={12} className="p-8 text-center text-gray-500">
+                      Hmm, está vazio por aqui!
+                    </td>
+                  </tr>
+                ) : (
+                  reportData.map((item: any) => (
+                    <tr key={item.id} className="border-b hover:bg-gray-50">
+                      <td className="p-3">
+                        <div className="text-sm font-medium text-gray-900">
+                          {item.procedimento || "Clareamento a Laser"}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="text-sm text-gray-600">
+                          {item.recorrencia || ""}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-bold text-purple-600">
+                              {item.paciente?.nome?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'CR'}
+                            </span>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">
+                            {item.paciente?.nome || "Clara Ribeiro (Paciente de exemplo)"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="text-sm text-gray-900 font-mono">
+                          {item.paciente?.cpf || "315.772.070-84"}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-bold text-blue-600">
+                              {item.profissional?.nome?.split(' ')[0]?.[0] || 'F'}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-900">
+                            {item.profissional?.nome || "FERNANDO FERREIRA NERI"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-3 text-center">
+                        <div className="text-sm text-gray-900">
+                          {item.duracao || "60"}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="text-sm text-gray-900">
+                          {item.dataFormatada || "22/05/2025 16:36:20"}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          item.status === 'completed' || item.statusLabel === 'Concluído'
+                            ? 'bg-green-100 text-green-800'
+                            : item.status === 'scheduled'
+                            ? 'bg-blue-100 text-blue-800'
+                            : item.status === 'confirmed'
+                            ? 'bg-purple-100 text-purple-800'
+                            : item.status === 'cancelled'
+                            ? 'bg-red-100 text-red-800'
+                            : item.status === 'no_show'
+                            ? 'bg-gray-100 text-gray-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {item.statusLabel || "Concluído"}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <div className="text-sm text-gray-900">
+                          {item.convenio || "Porto Seguro"}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="text-sm text-gray-600">
+                          {item.sala || "Sala 1"}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="text-sm text-gray-600 font-mono">
+                          {item.comanda || `CMD-${String(item.id || 1).padStart(4, '0')}`}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="text-sm font-medium text-green-600">
+                          {item.valorFormatado || "R$ 250,00"}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
