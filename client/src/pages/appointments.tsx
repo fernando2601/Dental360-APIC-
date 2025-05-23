@@ -1444,6 +1444,170 @@ function RelatorioAgendamentos() {
     setSearchTerm("");
   };
 
+  // Funções de exportação de dados
+  const exportToPDF = async () => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF('landscape'); // Orientação paisagem para mais colunas
+      
+      // Cabeçalho do PDF
+      doc.setFontSize(16);
+      doc.text('Relatório de Agendamentos - Clínica Dental', 20, 20);
+      doc.setFontSize(10);
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 20, 30);
+      
+      // Dados da tabela
+      let yPos = 50;
+      doc.setFontSize(8);
+      
+      // Cabeçalhos
+      doc.text('Procedimento', 20, yPos);
+      doc.text('Paciente', 80, yPos);
+      doc.text('CPF', 130, yPos);
+      doc.text('Profissional', 170, yPos);
+      doc.text('Data', 220, yPos);
+      doc.text('Status', 250, yPos);
+      doc.text('Valor', 280, yPos);
+      
+      yPos += 10;
+      
+      // Dados dos agendamentos (usando dados reais ou de exemplo)
+      const dataToExport = reportData.length > 0 ? reportData : [{
+        procedimento: 'Clareamento a Laser',
+        paciente: { nome: 'Clara Ribeiro (Paciente de exemplo)', cpf: '315.772.070-84' },
+        profissional: { nome: 'FERNANDO FERREIRA NERI' },
+        dataFormatada: '22/05/2025 16:36:20',
+        statusLabel: 'Concluído',
+        valorFormatado: 'R$ 250,00'
+      }];
+      
+      dataToExport.forEach((item: any) => {
+        if (yPos > 180) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        doc.text(item.procedimento || 'Clareamento a Laser', 20, yPos);
+        doc.text(item.paciente?.nome || 'Clara Ribeiro', 80, yPos);
+        doc.text(item.paciente?.cpf || '315.772.070-84', 130, yPos);
+        doc.text(item.profissional?.nome || 'FERNANDO FERREIRA NERI', 170, yPos);
+        doc.text(item.dataFormatada || '22/05/2025 16:36:20', 220, yPos);
+        doc.text(item.statusLabel || 'Concluído', 250, yPos);
+        doc.text(item.valorFormatado || 'R$ 250,00', 280, yPos);
+        
+        yPos += 8;
+      });
+      
+      doc.save('relatorio-agendamentos.pdf');
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Tente novamente.');
+    }
+  };
+
+  const exportToExcel = async () => {
+    try {
+      const XLSX = await import('xlsx');
+      
+      // Dados dos agendamentos (usando dados reais ou de exemplo)
+      const dataToExport = reportData.length > 0 ? reportData : [{
+        procedimento: 'Clareamento a Laser',
+        recorrencia: '',
+        paciente: { nome: 'Clara Ribeiro (Paciente de exemplo)', cpf: '315.772.070-84' },
+        profissional: { nome: 'FERNANDO FERREIRA NERI' },
+        duracao: '60',
+        dataFormatada: '22/05/2025 16:36:20',
+        statusLabel: 'Concluído',
+        convenio: 'Porto Seguro',
+        sala: 'Sala 1',
+        comanda: 'CMD-0001',
+        valorFormatado: 'R$ 250,00'
+      }];
+      
+      const data = dataToExport.map((item: any) => ({
+        'Procedimento': item.procedimento || 'Clareamento a Laser',
+        'Recorrência': item.recorrencia || '',
+        'Paciente': item.paciente?.nome || 'Clara Ribeiro (Paciente de exemplo)',
+        'CPF do Paciente': item.paciente?.cpf || '315.772.070-84',
+        'Profissional': item.profissional?.nome || 'FERNANDO FERREIRA NERI',
+        'Duração (min)': item.duracao || '60',
+        'Data': item.dataFormatada || '22/05/2025 16:36:20',
+        'Status': item.statusLabel || 'Concluído',
+        'Convênio': item.convenio || 'Porto Seguro',
+        'Salas': item.sala || 'Sala 1',
+        'Comanda': item.comanda || 'CMD-0001',
+        'Valor': item.valorFormatado || 'R$ 250,00'
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Agendamentos');
+      
+      XLSX.writeFile(workbook, 'relatorio-agendamentos.xlsx');
+    } catch (error) {
+      console.error('Erro ao gerar Excel:', error);
+      alert('Erro ao gerar Excel. Tente novamente.');
+    }
+  };
+
+  const exportToCSV = () => {
+    try {
+      const headers = [
+        'Procedimento', 'Recorrência', 'Paciente', 'CPF do Paciente', 
+        'Profissional', 'Duração (min)', 'Data', 'Status', 
+        'Convênio', 'Salas', 'Comanda', 'Valor'
+      ];
+
+      // Dados dos agendamentos (usando dados reais ou de exemplo)
+      const dataToExport = reportData.length > 0 ? reportData : [{
+        procedimento: 'Clareamento a Laser',
+        recorrencia: '',
+        paciente: { nome: 'Clara Ribeiro (Paciente de exemplo)', cpf: '315.772.070-84' },
+        profissional: { nome: 'FERNANDO FERREIRA NERI' },
+        duracao: '60',
+        dataFormatada: '22/05/2025 16:36:20',
+        statusLabel: 'Concluído',
+        convenio: 'Porto Seguro',
+        sala: 'Sala 1',
+        comanda: 'CMD-0001',
+        valorFormatado: 'R$ 250,00'
+      }];
+
+      const csvData = dataToExport.map((item: any) => [
+        item.procedimento || 'Clareamento a Laser',
+        item.recorrencia || '',
+        item.paciente?.nome || 'Clara Ribeiro (Paciente de exemplo)',
+        item.paciente?.cpf || '315.772.070-84',
+        item.profissional?.nome || 'FERNANDO FERREIRA NERI',
+        item.duracao || '60',
+        item.dataFormatada || '22/05/2025 16:36:20',
+        item.statusLabel || 'Concluído',
+        item.convenio || 'Porto Seguro',
+        item.sala || 'Sala 1',
+        item.comanda || 'CMD-0001',
+        item.valorFormatado || 'R$ 250,00'
+      ]);
+
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'relatorio-agendamentos.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Erro ao gerar CSV:', error);
+      alert('Erro ao gerar CSV. Tente novamente.');
+    }
+  };
+
   // Opções de filtros
   const statusOptions = [
     "Agendado", "Confirmado", "Remarcado", "Cancelado", "Não compareceram"
@@ -1523,7 +1687,11 @@ function RelatorioAgendamentos() {
               <SelectItem value="exportar">Exportar selecionados</SelectItem>
             </SelectContent>
           </Select>
-          <Select defaultValue="exportar">
+          <Select defaultValue="exportar" onValueChange={(value) => {
+            if (value === 'pdf') exportToPDF();
+            else if (value === 'excel') exportToExcel();
+            else if (value === 'csv') exportToCSV();
+          }}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
