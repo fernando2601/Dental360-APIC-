@@ -12,7 +12,7 @@ import Inventory from "@/pages/inventory";
 import Finances from "@/pages/finances";
 import Services from "@/pages/services";
 import Staff from "@/pages/staff";
-import Settings from "@/pages/settings";
+// Settings page removed completely
 import WhatsApp from "@/pages/whatsapp";
 import Packages from "@/pages/packages";
 import Subscriptions from "@/pages/subscriptions";
@@ -48,7 +48,7 @@ function Router() {
             <Route path="/clinic-info" component={ClinicInfo} />
             <Route path="/before-after" component={BeforeAfter} />
             <Route path="/knowledge" component={Knowledge} />
-            <Route path="/settings" component={Settings} />
+            {/* Settings route removed completely */}
             <Route component={NotFound} />
           </Switch>
         </MainLayout>
