@@ -5,59 +5,80 @@ namespace ClinicApi.Repositories
     public interface IPatientRepository
     {
         // CRUD Básico
-        Task<IEnumerable<Patient>> GetAllAsync();
-        Task<Patient?> GetByIdAsync(int id);
-        Task<Patient> CreateAsync(CreatePatientDto patient);
-        Task<Patient?> UpdateAsync(int id, CreatePatientDto patient);
-        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<Patient>> GetAllPatientsAsync();
+        Task<Patient?> GetPatientByIdAsync(int id);
+        Task<Patient> CreatePatientAsync(CreatePatientDto patientDto, int createdBy);
+        Task<Patient?> UpdatePatientAsync(int id, UpdatePatientDto patientDto);
+        Task<bool> DeletePatientAsync(int id);
 
-        // Patient Profile & Details
-        Task<PatientProfile> GetPatientProfileAsync(int id);
-        Task<IEnumerable<PatientSearchResult>> SearchPatientsAsync(string query);
-        Task<IEnumerable<PatientSearchResult>> GetPatientsWithFiltersAsync(
-            string? name = null, string? email = null, string? phone = null, string? cpf = null,
-            string? city = null, string? healthPlan = null, string? status = null,
-            DateTime? birthStart = null, DateTime? birthEnd = null,
-            int page = 1, int limit = 25);
-        Task<int> GetPatientsCountAsync(
-            string? name = null, string? email = null, string? phone = null, string? cpf = null,
-            string? city = null, string? healthPlan = null, string? status = null,
-            DateTime? birthStart = null, DateTime? birthEnd = null);
+        // Pesquisa e Filtros
+        Task<IEnumerable<Patient>> GetPatientsWithFiltersAsync(PatientFilters filters);
+        Task<int> GetPatientsCountAsync(PatientFilters filters);
+        Task<IEnumerable<Patient>> SearchPatientsAsync(string searchTerm);
+        Task<Patient?> GetPatientByCPFAsync(string cpf);
+        Task<Patient?> GetPatientByEmailAsync(string email);
+        Task<Patient?> GetPatientByPhoneAsync(string phone);
 
-        // Medical History
-        Task<IEnumerable<PatientMedicalHistory>> GetMedicalHistoryAsync(int patientId);
-        Task<PatientMedicalHistory> AddMedicalHistoryAsync(PatientMedicalHistory history);
-        Task<PatientMedicalHistory?> UpdateMedicalHistoryAsync(int id, PatientMedicalHistory history);
-        Task<bool> DeleteMedicalHistoryAsync(int id);
-
-        // Documents
-        Task<IEnumerable<PatientDocument>> GetPatientDocumentsAsync(int patientId);
-        Task<PatientDocument> AddDocumentAsync(PatientDocument document);
-        Task<bool> DeleteDocumentAsync(int id);
-
-        // Notes
-        Task<IEnumerable<PatientNote>> GetPatientNotesAsync(int patientId);
-        Task<PatientNote> AddNoteAsync(PatientNote note);
-        Task<PatientNote?> UpdateNoteAsync(int id, PatientNote note);
-        Task<bool> DeleteNoteAsync(int id);
-
-        // Analytics & Reports
+        // Analytics e Métricas
         Task<PatientAnalytics> GetPatientAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null);
-        Task<PatientDashboardMetrics> GetDashboardMetricsAsync();
-        Task<IEnumerable<PatientSegment>> GetPatientSegmentsAsync();
-        Task<IEnumerable<PatientBirthday>> GetBirthdaysAsync(DateTime? date = null);
+        Task<PatientMetrics> GetPatientMetricsAsync(int patientId);
+        Task<IEnumerable<PatientWithMetrics>> GetPatientsWithMetricsAsync(PatientFilters filters);
 
-        // Communications
+        // Segmentação
+        Task<IEnumerable<PatientSegmentation>> GetPatientSegmentationAsync();
+        Task<IEnumerable<Patient>> GetPatientsBySegmentAsync(string segment);
+        Task<bool> UpdatePatientSegmentAsync(int patientId, string segment);
+
+        // Distribuições
+        Task<IEnumerable<AgeDistribution>> GetAgeDistributionAsync();
+        Task<IEnumerable<GenderDistribution>> GetGenderDistributionAsync();
+        Task<IEnumerable<LocationDistribution>> GetLocationDistributionAsync();
+        Task<IEnumerable<MonthlyRegistration>> GetMonthlyRegistrationsAsync(int months = 12);
+
+        // Comunicação
         Task<IEnumerable<PatientCommunication>> GetPatientCommunicationsAsync(int patientId);
-        Task<PatientCommunication> AddCommunicationAsync(PatientCommunication communication);
+        Task<PatientCommunication> CreateCommunicationAsync(PatientCommunication communication);
+        Task<bool> UpdateCommunicationStatusAsync(int communicationId, string status, DateTime? deliveredAt = null, DateTime? readAt = null);
 
-        // Bulk Operations
-        Task<bool> BulkUpdatePatientsAsync(PatientBulkAction action);
-        Task<object> ExportPatientsAsync(PatientExportRequest request);
+        // Notas
+        Task<IEnumerable<PatientNote>> GetPatientNotesAsync(int patientId);
+        Task<PatientNote> CreatePatientNoteAsync(PatientNote note);
+        Task<PatientNote?> UpdatePatientNoteAsync(int noteId, string title, string content, string priority);
+        Task<bool> DeletePatientNoteAsync(int noteId);
 
-        // Statistics
-        Task<object> GetRetentionAnalysisAsync(DateTime startDate, DateTime endDate);
-        Task<object> GetPatientValueAnalysisAsync();
-        Task<object> GetGeographicDistributionAsync();
+        // Documentos
+        Task<IEnumerable<PatientDocument>> GetPatientDocumentsAsync(int patientId);
+        Task<PatientDocument> CreatePatientDocumentAsync(PatientDocument document);
+        Task<bool> DeletePatientDocumentAsync(int documentId);
+
+        // Operações em Lote
+        Task<bool> BulkUpdatePatientsAsync(PatientBulkAction action, int updatedBy);
+        Task<bool> BulkActivatePatientsAsync(int[] patientIds, int updatedBy);
+        Task<bool> BulkDeactivatePatientsAsync(int[] patientIds, string reason, int updatedBy);
+
+        // Relatórios
+        Task<PatientReport> GetPatientReportAsync(int patientId, DateTime? startDate = null, DateTime? endDate = null);
+        Task<IEnumerable<Patient>> GetPatientsForExportAsync(PatientExportRequest request);
+
+        // Insights e Recomendações
+        Task<IEnumerable<PatientInsight>> GetPatientInsightsAsync(DateTime? startDate = null, DateTime? endDate = null);
+        Task<IEnumerable<Patient>> GetInactivePatientsAsync(int daysSinceLastVisit = 90);
+        Task<IEnumerable<Patient>> GetHighValuePatientsAsync(decimal minimumValue = 1000);
+        Task<IEnumerable<Patient>> GetRiskPatientsAsync();
+
+        // Estatísticas do Dashboard
+        Task<object> GetDashboardMetricsAsync();
+        Task<object> GetPatientGrowthAsync(int months = 12);
+        Task<object> GetPatientRetentionAsync();
+
+        // Histórico
+        Task<IEnumerable<AppointmentSummary>> GetPatientAppointmentHistoryAsync(int patientId);
+        Task<IEnumerable<PaymentSummary>> GetPatientPaymentHistoryAsync(int patientId);
+        Task<bool> UpdateLastVisitAsync(int patientId, DateTime lastVisit);
+
+        // Validações
+        Task<bool> IsCPFExistsAsync(string cpf, int? excludePatientId = null);
+        Task<bool> IsEmailExistsAsync(string email, int? excludePatientId = null);
+        Task<bool> IsPhoneExistsAsync(string phone, int? excludePatientId = null);
     }
 }
