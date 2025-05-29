@@ -285,9 +285,19 @@ export class ServicesComponent implements OnInit {
   }
 
   private loadServices(): void {
-    this.http.get<Service[]>('https://localhost:5001/api/service').subscribe({
+    // Conectar com o sistema atual (React/Express) enquanto migra para Angular/.NET
+    this.http.get<any[]>('http://localhost:5000/api/services').subscribe({
       next: (data) => {
-        this.services = data;
+        // Mapear dados do sistema atual para o formato Angular/.NET
+        this.services = data.map(service => ({
+          id: service.id,
+          name: service.name,
+          category: service.category,
+          description: service.description,
+          price: service.price,
+          durationMinutes: service.duration,
+          isActive: service.active
+        }));
         this.applyFilter();
       },
       error: (error) => {
@@ -325,21 +335,38 @@ export class ServicesComponent implements OnInit {
   onSubmit(): void {
     if (this.serviceForm.valid) {
       this.isLoading = true;
-      const serviceData = this.serviceForm.value;
+      const serviceData = {
+        name: this.serviceForm.value.name,
+        category: this.serviceForm.value.category,
+        description: this.serviceForm.value.description,
+        price: this.serviceForm.value.price,
+        duration: this.serviceForm.value.durationMinutes,
+        active: this.serviceForm.value.isActive
+      };
 
       const request = this.editingService
-        ? this.http.put<Service>(`https://localhost:5001/api/service/${this.editingService.id}`, serviceData)
-        : this.http.post<Service>('https://localhost:5001/api/service', serviceData);
+        ? this.http.put<any>(`http://localhost:5000/api/services/${this.editingService.id}`, serviceData)
+        : this.http.post<any>('http://localhost:5000/api/services', serviceData);
 
       request.subscribe({
         next: (response) => {
+          const mappedService = {
+            id: response.id,
+            name: response.name,
+            category: response.category,
+            description: response.description,
+            price: response.price,
+            durationMinutes: response.duration,
+            isActive: response.active
+          };
+
           if (this.editingService) {
             const index = this.services.findIndex(s => s.id === this.editingService!.id);
             if (index !== -1) {
-              this.services[index] = response;
+              this.services[index] = mappedService;
             }
           } else {
-            this.services.push(response);
+            this.services.push(mappedService);
           }
           this.applyFilter();
           this.cancelForm();
@@ -361,7 +388,7 @@ export class ServicesComponent implements OnInit {
 
   deleteService(id: number): void {
     if (confirm('Tem certeza que deseja excluir este serviço?')) {
-      this.http.delete(`https://localhost:5001/api/service/${id}`).subscribe({
+      this.http.delete(`http://localhost:5000/api/services/${id}`).subscribe({
         next: () => {
           this.services = this.services.filter(s => s.id !== id);
           this.applyFilter();
