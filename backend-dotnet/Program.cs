@@ -46,6 +46,10 @@ builder.Services.AddScoped<IFinancialRepository, FinancialRepository>();
 builder.Services.AddScoped<IAgendaRepository, AgendaRepository>();
 builder.Services.AddScoped<IAgendaService, AgendaService>();
 
+// Patient Module - Complete 3-layer architecture with analytics and predictive features
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
