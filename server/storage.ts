@@ -6,7 +6,7 @@ import {
   appointments, Appointment, InsertAppointment,
   inventory, Inventory, InsertInventory,
   financialTransactions, FinancialTransaction, InsertFinancialTransaction,
-  chatTemplates, ChatTemplate, InsertChatTemplate
+  // chatTemplates removed completely
 } from "@shared/schema";
 
 export interface IStorage {
@@ -78,7 +78,7 @@ export class MemStorage implements IStorage {
   private appointments: Map<number, Appointment>;
   private inventoryItems: Map<number, Inventory>;
   private financialTransactions: Map<number, FinancialTransaction>;
-  private chatTemplates: Map<number, ChatTemplate>;
+  // chatTemplates removed completely
   
   private currentUserID: number;
   private currentClientID: number;
@@ -87,7 +87,7 @@ export class MemStorage implements IStorage {
   private currentAppointmentID: number;
   private currentInventoryID: number;
   private currentTransactionID: number;
-  private currentTemplateID: number;
+  // currentTemplateID removed
 
   constructor() {
     this.users = new Map();
@@ -97,7 +97,7 @@ export class MemStorage implements IStorage {
     this.appointments = new Map();
     this.inventoryItems = new Map();
     this.financialTransactions = new Map();
-    this.chatTemplates = new Map();
+    // chatTemplates map removed
     
     this.currentUserID = 1;
     this.currentClientID = 1;
@@ -106,7 +106,7 @@ export class MemStorage implements IStorage {
     this.currentAppointmentID = 1;
     this.currentInventoryID = 1;
     this.currentTransactionID = 1;
-    this.currentTemplateID = 1;
+    // currentTemplateID removed
     
     // Initialize with some sample data (async)
     this.initializeData().catch(error => {
@@ -624,64 +624,7 @@ export class MemStorage implements IStorage {
     return this.financialTransactions.delete(id);
   }
 
-  // Chat Template methods
-  async getChatTemplates(): Promise<ChatTemplate[]> {
-    return Array.from(this.chatTemplates.values());
-  }
-
-  async getChatTemplate(id: number): Promise<ChatTemplate | undefined> {
-    return this.chatTemplates.get(id);
-  }
-
-  async getChatTemplatesByCategory(category: string): Promise<ChatTemplate[]> {
-    return Array.from(this.chatTemplates.values()).filter(
-      (template) => template.category === category
-    );
-  }
-
-  async createChatTemplate(insertTemplate: InsertChatTemplate): Promise<ChatTemplate> {
-    const id = this.currentTemplateID++;
-    const now = new Date();
-    const template: ChatTemplate = { 
-      ...insertTemplate, 
-      id, 
-      usageCount: 0, 
-      lastUsed: null, 
-      createdAt: now, 
-      updatedAt: now 
-    };
-    this.chatTemplates.set(id, template);
-    return template;
-  }
-
-  async updateChatTemplate(id: number, updatedTemplate: Partial<InsertChatTemplate>): Promise<ChatTemplate | undefined> {
-    const template = this.chatTemplates.get(id);
-    if (!template) return undefined;
-    
-    const now = new Date();
-    const updated = { ...template, ...updatedTemplate, updatedAt: now };
-    this.chatTemplates.set(id, updated);
-    return updated;
-  }
-
-  async deleteChatTemplate(id: number): Promise<boolean> {
-    return this.chatTemplates.delete(id);
-  }
-
-  async incrementChatTemplateUsage(id: number): Promise<ChatTemplate | undefined> {
-    const template = this.chatTemplates.get(id);
-    if (!template) return undefined;
-    
-    const now = new Date();
-    const updated = { 
-      ...template, 
-      usageCount: template.usageCount + 1,
-      lastUsed: now,
-      updatedAt: now
-    };
-    this.chatTemplates.set(id, updated);
-    return updated;
-  }
+  // All chat template methods removed completely
 }
 
 export const storage = new MemStorage();
