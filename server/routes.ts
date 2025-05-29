@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
 import { DashboardService } from "./services/dashboard.service";
-import { AnalyticsService } from "./services/analytics.service";
+// AnalyticsService removed completely
 import { PackagesService } from "./services/packages.service";
 import { ClinicInfoService } from "./services/clinic-info.service";
 import { AppointmentReportsService } from "./services/appointment-reports.service";
@@ -23,7 +23,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Inicializar serviços seguindo padrão SOLID
   const dashboardService = new DashboardService(storage);
-  const analyticsService = new AnalyticsService(storage);
+  // AnalyticsService removed completely
   const packagesService = new PackagesService(storage);
   const clinicInfoService = new ClinicInfoService(storage);
   const appointmentReportsService = new AppointmentReportsService(storage);
@@ -436,22 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ===========================================
-  // ENDPOINTS PARA ANALYTICS - Seguindo SOLID
-  // ===========================================
-  app.get("/api/analytics", authMiddleware, async (req: Request, res: Response) => {
-    try {
-      const { startDate, endDate } = req.query;
-      const analytics = await analyticsService.getAnalyticsData(
-        startDate as string, 
-        endDate as string
-      );
-      res.json(analytics);
-    } catch (error) {
-      console.error("Erro ao buscar dados de análise:", error);
-      res.status(500).json({ error: "Falha ao buscar dados de análise" });
-    }
-  });
+  // Analytics endpoints removed completely
 
   // ===========================================
   // ENDPOINTS PARA PACOTES - Seguindo SOLID

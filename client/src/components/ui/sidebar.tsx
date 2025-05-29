@@ -100,33 +100,7 @@ export function Sidebar({ className }: SidebarProps) {
             <NavLink href="/clinic-info" icon={<Building className="h-4 w-4" />} label="Dados da Clínica" collapsed={collapsed} active={location === "/clinic-info"} />
             <NavLink href="/before-after" icon={<Images className="h-4 w-4" />} label="Antes & Depois" collapsed={collapsed} active={location === "/before-after"} />
             
-            <div className="px-4 py-2 mt-4">
-              <h3 className={cn("text-xs font-medium text-white/70", collapsed && "sr-only")}>
-                IA & Análises
-              </h3>
-            </div>
-            <NavLink 
-              href="/settings" 
-              icon={<MessageSquare className="h-4 w-4" />} 
-              label="Templates de Chatbot" 
-              collapsed={collapsed} 
-              active={location === "/settings"} 
-              notification={2}
-            />
-            <NavLink 
-              href="/analytics" 
-              icon={<BarChart2 className="h-4 w-4" />} 
-              label="Análises" 
-              collapsed={collapsed} 
-              active={location === "/analytics"} 
-            />
-            <NavLink 
-              href="/settings?tab=privacy" 
-              icon={<Settings className="h-4 w-4" />} 
-              label="Configurações de Privacidade" 
-              collapsed={collapsed} 
-              active={location.includes("/settings?tab=privacy")} 
-            />
+            {/* IA & Análises section completely removed */}
           </nav>
         </ScrollArea>
         <Separator className="bg-white/20" />

@@ -312,20 +312,7 @@ export class MemStorage implements IStorage {
       this.createClient(paciente);
     });
 
-    // Create chat templates
-    this.createChatTemplate({
-      title: "Informações sobre Procedimento de Botox",
-      category: "Informações de Tratamento",
-      content: "Nosso procedimento de Botox é um tratamento minimamente invasivo que envolve a injeção de pequenas quantidades de toxina botulínica purificada em músculos específicos para reduzir temporariamente a aparência de rugas e linhas finas. O procedimento leva aproximadamente 15-20 minutos, e a maioria dos pacientes experimenta desconforto mínimo. Os resultados geralmente aparecem dentro de 3-5 dias após o tratamento e duram cerca de 3-4 meses.",
-      active: true
-    });
-
-    this.createChatTemplate({
-      title: "Processo de Agendamento de Consultas",
-      category: "Agendamento de Consultas",
-      content: "Para agendar uma consulta, você pode usar nosso sistema de reservas online a qualquer momento ou ligar para nosso consultório durante o horário comercial (segunda a sexta, 9h-17h). Exigimos um aviso prévio de 24 horas para cancelamentos para evitar uma taxa de cancelamento.",
-      active: true
-    });
+    // Chat templates removed completely
 
     // Create inventory items
     this.createInventoryItem({
