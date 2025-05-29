@@ -6,6 +6,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configurar conexão com PostgreSQL
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
+    "Host=localhost;Database=clinic_db;Username=postgres;Password=postgres";
+
+builder.Services.AddSingleton(connectionString);
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
