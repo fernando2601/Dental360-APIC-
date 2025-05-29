@@ -80,6 +80,10 @@ builder.Services.AddScoped<IPackageService, PackageService>();
 builder.Services.AddScoped<IClinicInfoRepository, ClinicInfoRepository>();
 builder.Services.AddScoped<IClinicInfoService, ClinicInfoService>();
 
+// Before After Module - Complete case management with image gallery and ratings
+builder.Services.AddScoped<IBeforeAfterRepository, BeforeAfterRepository>();
+builder.Services.AddScoped<IBeforeAfterService, BeforeAfterService>();
+
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
