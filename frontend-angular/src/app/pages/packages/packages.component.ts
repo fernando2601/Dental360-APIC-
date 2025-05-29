@@ -308,49 +308,49 @@ interface ClinicInfo {
         
         <!-- Pacotes Ativos/Inativos -->
         <div *ngSwitchCase="'active'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div *ngFor="let package of filteredPackages" class="bg-white shadow rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+          <div *ngFor="let packageItem of filteredPackages" class="bg-white shadow rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300">
             <!-- Header do card com desconto -->
             <div class="relative bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4">
               <div class="flex justify-between items-start">
                 <div class="flex-1">
-                  <h3 class="font-bold text-lg mb-1">{{ package.name }}</h3>
-                  <span class="text-purple-100 text-sm">{{ package.category }}</span>
+                  <h3 class="font-bold text-lg mb-1">{{ packageItem.name }}</h3>
+                  <span class="text-purple-100 text-sm">{{ packageItem.category }}</span>
                 </div>
                 <div class="bg-white bg-opacity-20 rounded-full px-3 py-1">
-                  <span class="text-sm font-bold">{{ package.discountPercentage }}% OFF</span>
+                  <span class="text-sm font-bold">{{ packageItem.discountPercentage }}% OFF</span>
                 </div>
               </div>
-              <div *ngIf="package.isPopular" class="absolute top-2 left-2">
+              <div *ngIf="packageItem.isPopular" class="absolute top-2 left-2">
                 <span class="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">⭐ Popular</span>
               </div>
             </div>
 
             <!-- Conteúdo do card -->
             <div class="p-4">
-              <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ package.description }}</p>
+              <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ packageItem.description }}</p>
               
               <!-- Preços -->
               <div class="mb-4">
                 <div class="flex items-center space-x-2 mb-1">
-                  <span class="text-gray-400 line-through text-sm">{{ package.formattedOriginalPrice }}</span>
-                  <span class="text-2xl font-bold text-purple-600">{{ package.formattedFinalPrice }}</span>
+                  <span class="text-gray-400 line-through text-sm">{{ packageItem.formattedOriginalPrice }}</span>
+                  <span class="text-2xl font-bold text-purple-600">{{ packageItem.formattedFinalPrice }}</span>
                 </div>
-                <p class="text-green-600 text-sm font-medium">Economia: {{ package.formattedSavings }}</p>
+                <p class="text-green-600 text-sm font-medium">Economia: {{ packageItem.formattedSavings }}</p>
               </div>
 
               <!-- Informações adicionais -->
               <div class="space-y-2 text-sm text-gray-600 mb-4">
                 <div class="flex justify-between">
                   <span>Duração:</span>
-                  <span>{{ package.durationDays }} minutos</span>
+                  <span>{{ packageItem.durationDays }} minutos</span>
                 </div>
                 <div class="flex justify-between">
                   <span>Validade:</span>
-                  <span>{{ package.validityDays }} dias</span>
+                  <span>{{ packageItem.validityDays }} dias</span>
                 </div>
                 <div class="flex justify-between">
                   <span>Serviços:</span>
-                  <span>{{ package.services.length }} inclusos</span>
+                  <span>{{ packageItem.services.length }} inclusos</span>
                 </div>
               </div>
 
@@ -358,12 +358,12 @@ interface ClinicInfo {
               <div class="mb-4">
                 <h4 class="text-sm font-medium text-gray-900 mb-2">Serviços Incluídos:</h4>
                 <div class="space-y-1">
-                  <div *ngFor="let service of package.services.slice(0, 3)" class="flex items-center text-sm">
+                  <div *ngFor="let service of packageItem.services.slice(0, 3)" class="flex items-center text-sm">
                     <span class="text-green-500 mr-2">✓</span>
                     <span class="text-gray-700">{{ service.name }}</span>
                   </div>
-                  <div *ngIf="package.services.length > 3" class="text-sm text-purple-600">
-                    +{{ package.services.length - 3 }} mais serviços
+                  <div *ngIf="packageItem.services.length > 3" class="text-sm text-purple-600">
+                    +{{ packageItem.services.length - 3 }} mais serviços
                   </div>
                 </div>
               </div>
@@ -371,17 +371,17 @@ interface ClinicInfo {
               <!-- Ações -->
               <div class="flex space-x-2">
                 <button
-                  (click)="editPackage(package)"
+                  (click)="editPackage(packageItem)"
                   class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded text-sm font-medium"
                 >
                   Editar
                 </button>
                 <button
-                  (click)="togglePackageStatus(package)"
-                  [class]="package.isActive ? 'bg-red-100 hover:bg-red-200 text-red-700' : 'bg-green-100 hover:bg-green-200 text-green-700'"
+                  (click)="togglePackageStatus(packageItem)"
+                  [class]="packageItem.isActive ? 'bg-red-100 hover:bg-red-200 text-red-700' : 'bg-green-100 hover:bg-green-200 text-green-700'"
                   class="flex-1 px-3 py-2 rounded text-sm font-medium"
                 >
-                  {{ package.isActive ? 'Desativar' : 'Ativar' }}
+                  {{ packageItem.isActive ? 'Desativar' : 'Ativar' }}
                 </button>
               </div>
             </div>
@@ -397,13 +397,13 @@ interface ClinicInfo {
         <div *ngSwitchCase="'inactive'">
           <!-- Mesmo layout para pacotes inativos -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div *ngFor="let package of filteredPackages" class="bg-white shadow rounded-lg overflow-hidden opacity-75">
+            <div *ngFor="let packageItem of filteredPackages" class="bg-white shadow rounded-lg overflow-hidden opacity-75">
               <!-- Conteúdo similar ao ativo, mas com estilo diferente -->
               <div class="relative bg-gradient-to-r from-gray-400 to-gray-500 text-white p-4">
                 <div class="flex justify-between items-start">
                   <div class="flex-1">
-                    <h3 class="font-bold text-lg mb-1">{{ package.name }}</h3>
-                    <span class="text-gray-200 text-sm">{{ package.category }}</span>
+                    <h3 class="font-bold text-lg mb-1">{{ packageItem.name }}</h3>
+                    <span class="text-gray-200 text-sm">{{ packageItem.category }}</span>
                   </div>
                   <div class="bg-white bg-opacity-20 rounded-full px-3 py-1">
                     <span class="text-sm font-bold">Inativo</span>
@@ -411,16 +411,16 @@ interface ClinicInfo {
                 </div>
               </div>
               <div class="p-4">
-                <p class="text-gray-600 text-sm mb-4">{{ package.description }}</p>
+                <p class="text-gray-600 text-sm mb-4">{{ packageItem.description }}</p>
                 <div class="flex space-x-2">
                   <button
-                    (click)="editPackage(package)"
+                    (click)="editPackage(packageItem)"
                     class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm font-medium"
                   >
                     Editar
                   </button>
                   <button
-                    (click)="togglePackageStatus(package)"
+                    (click)="togglePackageStatus(packageItem)"
                     class="flex-1 bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded text-sm font-medium"
                   >
                     Ativar
@@ -828,8 +828,8 @@ export class PackagesComponent implements OnInit {
       };
 
       const request = this.editingPackage
-        ? this.http.put<Package>(`http://localhost:5000/api/packages/${this.editingPackage.id}`, packageData)
-        : this.http.post<Package>('http://localhost:5000/api/packages', packageData);
+        ? this.http.put<PackageItem>(`http://localhost:5000/api/packages/${this.editingPackage.id}`, packageData)
+        : this.http.post<PackageItem>('http://localhost:5000/api/packages', packageData);
 
       request.subscribe({
         next: (response) => {
@@ -870,18 +870,18 @@ export class PackagesComponent implements OnInit {
     }
   }
 
-  editPackage(package: Package): void {
-    this.editingPackage = package;
-    this.packageForm.patchValue(package);
+  editPackage(packageItem: PackageItem): void {
+    this.editingPackage = packageItem;
+    this.packageForm.patchValue(packageItem);
     this.showNewPackageForm = true;
   }
 
-  togglePackageStatus(package: Package): void {
-    const updatedPackage = { ...package, isActive: !package.isActive };
+  togglePackageStatus(packageItem: PackageItem): void {
+    const updatedPackage = { ...packageItem, isActive: !packageItem.isActive };
     
-    this.http.put<Package>(`http://localhost:5000/api/packages/${package.id}`, updatedPackage).subscribe({
+    this.http.put<PackageItem>(`http://localhost:5000/api/packages/${packageItem.id}`, updatedPackage).subscribe({
       next: (response) => {
-        const index = this.packages.findIndex(p => p.id === package.id);
+        const index = this.packages.findIndex(p => p.id === packageItem.id);
         if (index !== -1) {
           this.packages[index] = response;
         }
