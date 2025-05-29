@@ -72,6 +72,14 @@ builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<ILearningRepository, LearningRepository>();
 builder.Services.AddScoped<ILearningService, LearningService>();
 
+// Package Module - Complete 3-layer architecture with business logic and validation
+builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+
+// Clinic Info Module - Complete information management with validation
+builder.Services.AddScoped<IClinicInfoRepository, ClinicInfoRepository>();
+builder.Services.AddScoped<IClinicInfoService, ClinicInfoService>();
+
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
