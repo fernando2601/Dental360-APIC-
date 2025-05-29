@@ -57,6 +57,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'antes-depois',
+    loadComponent: () => import('./pages/before-after/before-after.component').then(m => m.BeforeAfterComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: '**',
     redirectTo: '/dashboard'
   }
