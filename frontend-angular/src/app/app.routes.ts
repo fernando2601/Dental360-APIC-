@@ -37,6 +37,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'servicos',
+    loadComponent: () => import('./pages/services/services.component').then(m => m.ServicesComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: '**',
     redirectTo: '/dashboard'
   }
