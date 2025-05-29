@@ -50,6 +50,10 @@ builder.Services.AddScoped<IAgendaService, AgendaService>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 
+// Inventory Module - Complete 3-layer architecture with smart features and optimization
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
