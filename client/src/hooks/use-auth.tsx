@@ -7,6 +7,7 @@ import {
 import { User } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import dotNetApi from "@/services/dotnet-api";
 
 type AuthContextType = {
   user: User | null;
@@ -50,12 +51,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      if (!res.ok) {
-        const errorResponse = await res.json();
-        throw new Error(errorResponse.message || "Erro ao fazer login");
+      try {
+        const response = await dotNetApi.login(credentials.username, credentials.password);
+        return response;
+      } catch (error) {
+        // Fallback para o sistema atual se .NET não estiver disponível
+        const res = await apiRequest("POST", "/api/login", credentials);
+        if (!res.ok) {
+          const errorResponse = await res.json();
+          throw new Error(errorResponse.message || "Erro ao fazer login");
+        }
+        return await res.json();
       }
-      return await res.json();
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/me"], user);
@@ -100,10 +107,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/logout");
-      if (!res.ok) {
-        const errorResponse = await res.json();
-        throw new Error(errorResponse.message || "Erro ao fazer logout");
+      try {
+        await dotNetApi.logout();
+      } catch (error) {
+        // Fallback para o sistema atual
+        const res = await apiRequest("POST", "/api/logout");
+        if (!res.ok) {
+          const errorResponse = await res.json();
+          throw new Error(errorResponse.message || "Erro ao fazer logout");
+        }
       }
     },
     onSuccess: () => {
