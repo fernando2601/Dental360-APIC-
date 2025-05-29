@@ -4,172 +4,174 @@ using ClinicApi.Models;
 
 namespace ClinicApi.Repositories
 {
+    public interface IServiceRepository
+    {
+        Task<IEnumerable<ServiceModel>> GetAllAsync();
+        Task<ServiceModel?> GetByIdAsync(int id);
+        Task<ServiceModel> CreateAsync(CreateServiceRequest request);
+        Task<ServiceModel?> UpdateAsync(int id, UpdateServiceRequest request);
+        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<ServiceModel>> GetByCategoryAsync(string category);
+        Task<ServiceStatsResponse> GetStatsAsync();
+        Task<IEnumerable<string>> GetCategoriesAsync();
+    }
+
     public class ServiceRepository : IServiceRepository
     {
-        private readonly IConfiguration _configuration;
         private readonly string _connectionString;
 
-        public ServiceRepository(IConfiguration configuration)
+        public ServiceRepository(string connectionString)
         {
-            _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("DefaultConnection") 
-                ?? Environment.GetEnvironmentVariable("DATABASE_URL") 
-                ?? throw new InvalidOperationException("Connection string not found");
+            _connectionString = connectionString;
         }
 
-        public async Task<IEnumerable<Service>> GetAllAsync()
+        public async Task<IEnumerable<ServiceModel>> GetAllAsync()
         {
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
             const string sql = @"
-                SELECT 
-                    id as Id,
-                    name as Name,
-                    category as Category,
-                    description as Description,
-                    price as Price,
-                    duration as Duration,
-                    is_active as IsActive,
-                    created_at as CreatedAt
+                SELECT id, name, category, description, price, duration_minutes, is_active, created_at, updated_at
                 FROM services 
-                WHERE is_active = true
                 ORDER BY name";
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<Service>(sql);
+            return await connection.QueryAsync<ServiceModel>(sql);
         }
 
-        public async Task<Service?> GetByIdAsync(int id)
+        public async Task<ServiceModel?> GetByIdAsync(int id)
         {
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
             const string sql = @"
-                SELECT 
-                    id as Id,
-                    name as Name,
-                    category as Category,
-                    description as Description,
-                    price as Price,
-                    duration as Duration,
-                    is_active as IsActive,
-                    created_at as CreatedAt
+                SELECT id, name, category, description, price, duration_minutes, is_active, created_at, updated_at
                 FROM services 
                 WHERE id = @Id";
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleOrDefaultAsync<Service>(sql, new { Id = id });
+            return await connection.QueryFirstOrDefaultAsync<ServiceModel>(sql, new { Id = id });
         }
 
-        public async Task<Service> CreateAsync(CreateServiceDto serviceDto)
+        public async Task<ServiceModel> CreateAsync(CreateServiceRequest request)
         {
-            const string sql = @"
-                INSERT INTO services (name, category, description, price, duration, is_active, created_at)
-                VALUES (@Name, @Category, @Description, @Price, @Duration, @IsActive, @CreatedAt)
-                RETURNING 
-                    id as Id,
-                    name as Name,
-                    category as Category,
-                    description as Description,
-                    price as Price,
-                    duration as Duration,
-                    is_active as IsActive,
-                    created_at as CreatedAt";
-
             using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleAsync<Service>(sql, new
+            await connection.OpenAsync();
+
+            const string sql = @"
+                INSERT INTO services (name, category, description, price, duration_minutes, is_active, created_at)
+                VALUES (@Name, @Category, @Description, @Price, @DurationMinutes, @IsActive, @CreatedAt)
+                RETURNING id, name, category, description, price, duration_minutes, is_active, created_at, updated_at";
+
+            var service = await connection.QueryFirstAsync<ServiceModel>(sql, new
             {
-                serviceDto.Name,
-                serviceDto.Category,
-                serviceDto.Description,
-                serviceDto.Price,
-                serviceDto.Duration,
-                serviceDto.IsActive,
+                request.Name,
+                request.Category,
+                request.Description,
+                request.Price,
+                request.DurationMinutes,
+                request.IsActive,
                 CreatedAt = DateTime.UtcNow
             });
+
+            return service;
         }
 
-        public async Task<Service?> UpdateAsync(int id, CreateServiceDto serviceDto)
+        public async Task<ServiceModel?> UpdateAsync(int id, UpdateServiceRequest request)
         {
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
             const string sql = @"
                 UPDATE services 
-                SET 
-                    name = @Name,
-                    category = @Category,
-                    description = @Description,
-                    price = @Price,
-                    duration = @Duration,
-                    is_active = @IsActive
+                SET name = @Name, 
+                    category = @Category, 
+                    description = @Description, 
+                    price = @Price, 
+                    duration_minutes = @DurationMinutes, 
+                    is_active = @IsActive, 
+                    updated_at = @UpdatedAt
                 WHERE id = @Id
-                RETURNING 
-                    id as Id,
-                    name as Name,
-                    category as Category,
-                    description as Description,
-                    price as Price,
-                    duration as Duration,
-                    is_active as IsActive,
-                    created_at as CreatedAt";
+                RETURNING id, name, category, description, price, duration_minutes, is_active, created_at, updated_at";
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleOrDefaultAsync<Service>(sql, new
+            return await connection.QueryFirstOrDefaultAsync<ServiceModel>(sql, new
             {
                 Id = id,
-                serviceDto.Name,
-                serviceDto.Category,
-                serviceDto.Description,
-                serviceDto.Price,
-                serviceDto.Duration,
-                serviceDto.IsActive
+                request.Name,
+                request.Category,
+                request.Description,
+                request.Price,
+                request.DurationMinutes,
+                request.IsActive,
+                UpdatedAt = DateTime.UtcNow
             });
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            const string sql = "UPDATE services SET is_active = false WHERE id = @Id";
-
             using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string sql = "DELETE FROM services WHERE id = @Id";
             var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
             return rowsAffected > 0;
         }
 
-        public async Task<IEnumerable<Service>> SearchAsync(string searchTerm)
+        public async Task<IEnumerable<ServiceModel>> GetByCategoryAsync(string category)
         {
-            const string sql = @"
-                SELECT 
-                    id as Id,
-                    name as Name,
-                    category as Category,
-                    description as Description,
-                    price as Price,
-                    duration as Duration,
-                    is_active as IsActive,
-                    created_at as CreatedAt
-                FROM services 
-                WHERE 
-                    is_active = true AND
-                    (name ILIKE @SearchTerm 
-                    OR category ILIKE @SearchTerm 
-                    OR description ILIKE @SearchTerm)
-                ORDER BY name";
-
             using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<Service>(sql, new { SearchTerm = $"%{searchTerm}%" });
-        }
+            await connection.OpenAsync();
 
-        public async Task<IEnumerable<Service>> GetByCategoryAsync(string category)
-        {
             const string sql = @"
-                SELECT 
-                    id as Id,
-                    name as Name,
-                    category as Category,
-                    description as Description,
-                    price as Price,
-                    duration as Duration,
-                    is_active as IsActive,
-                    created_at as CreatedAt
+                SELECT id, name, category, description, price, duration_minutes, is_active, created_at, updated_at
                 FROM services 
                 WHERE category = @Category AND is_active = true
                 ORDER BY name";
 
+            return await connection.QueryAsync<ServiceModel>(sql, new { Category = category });
+        }
+
+        public async Task<ServiceStatsResponse> GetStatsAsync()
+        {
             using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<Service>(sql, new { Category = category });
+            await connection.OpenAsync();
+
+            const string statsSql = @"
+                SELECT 
+                    COUNT(*) as TotalServices,
+                    COUNT(CASE WHEN is_active = true THEN 1 END) as ActiveServices,
+                    COUNT(CASE WHEN is_active = false THEN 1 END) as InactiveServices,
+                    COALESCE(AVG(price), 0) as AveragePrice,
+                    COALESCE(AVG(duration_minutes), 0) as AverageDuration
+                FROM services";
+
+            const string categorySql = @"
+                SELECT 
+                    category as Category,
+                    COUNT(*) as Count,
+                    COALESCE(AVG(price), 0) as AveragePrice
+                FROM services 
+                WHERE is_active = true
+                GROUP BY category
+                ORDER BY category";
+
+            var stats = await connection.QueryFirstAsync<ServiceStatsResponse>(statsSql);
+            var categoryStats = await connection.QueryAsync<CategoryStats>(categorySql);
+            
+            stats.CategoryBreakdown = categoryStats.ToList();
+            return stats;
+        }
+
+        public async Task<IEnumerable<string>> GetCategoriesAsync()
+        {
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string sql = @"
+                SELECT DISTINCT category 
+                FROM services 
+                WHERE is_active = true
+                ORDER BY category";
+
+            return await connection.QueryAsync<string>(sql);
         }
     }
 }
