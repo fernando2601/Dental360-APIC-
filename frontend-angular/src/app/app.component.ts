@@ -1,120 +1,111 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subject, takeUntil, filter } from 'rxjs';
+import { AuthService } from './core/services/auth.service';
+import { User } from './core/models/auth.model';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <div class="app-container">
-      <!-- Header/Navbar -->
-      <mat-toolbar color="primary" class="app-header shadow-lg">
-        <mat-toolbar-row class="px-6">
-          <span class="text-xl font-bold text-white">Clínica Dental & Harmonização</span>
-          <span class="spacer"></span>
-          <button mat-icon-button class="text-white">
-            <mat-icon>account_circle</mat-icon>
-          </button>
-        </mat-toolbar-row>
-      </mat-toolbar>
-
-      <!-- Sidebar + Content -->
-      <mat-sidenav-container class="app-sidenav-container">
-        <mat-sidenav #sidenav mode="side" opened class="app-sidenav">
-          <mat-nav-list>
-            <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
-              <mat-icon matListItemIcon>dashboard</mat-icon>
-              <span matListItemTitle>Dashboard</span>
-            </a>
-            <a mat-list-item routerLink="/appointments" routerLinkActive="active-link">
-              <mat-icon matListItemIcon>event</mat-icon>
-              <span matListItemTitle>Agendamentos</span>
-            </a>
-            <a mat-list-item routerLink="/clients" routerLinkActive="active-link">
-              <mat-icon matListItemIcon>people</mat-icon>
-              <span matListItemTitle>Clientes</span>
-            </a>
-            <a mat-list-item routerLink="/services" routerLinkActive="active-link">
-              <mat-icon matListItemIcon>medical_services</mat-icon>
-              <span matListItemTitle>Serviços</span>
-            </a>
-            <a mat-list-item routerLink="/staff" routerLinkActive="active-link">
-              <mat-icon matListItemIcon>person</mat-icon>
-              <span matListItemTitle>Profissionais</span>
-            </a>
-            <a mat-list-item routerLink="/inventory" routerLinkActive="active-link">
-              <mat-icon matListItemIcon>inventory</mat-icon>
-              <span matListItemTitle>Estoque</span>
-            </a>
-            <a mat-list-item routerLink="/financial" routerLinkActive="active-link">
-              <mat-icon matListItemIcon>attach_money</mat-icon>
-              <span matListItemTitle>Financeiro</span>
-            </a>
-            <a mat-list-item routerLink="/reports" routerLinkActive="active-link">
-              <mat-icon matListItemIcon>analytics</mat-icon>
-              <span matListItemTitle>Relatórios</span>
-            </a>
-          </mat-nav-list>
-        </mat-sidenav>
-
-        <mat-sidenav-content class="app-content">
-          <router-outlet></router-outlet>
-        </mat-sidenav-content>
-      </mat-sidenav-container>
-    </div>
-  `,
-  styles: [`
-    .app-container {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .app-header {
-      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%) !important;
-      z-index: 1000;
-    }
-
-    .spacer {
-      flex: 1 1 auto;
-    }
-
-    .app-sidenav-container {
-      flex: 1;
-    }
-
-    .app-sidenav {
-      width: 280px;
-      background-color: #f8fafc;
-      border-right: 1px solid #e2e8f0;
-    }
-
-    .app-content {
-      background-color: #f1f5f9;
-      min-height: 100%;
-    }
-
-    .active-link {
-      background-color: #e5e7eb !important;
-      color: #7c3aed !important;
-    }
-
-    .active-link mat-icon {
-      color: #7c3aed !important;
-    }
-
-    ::ng-deep .mat-mdc-list-item {
-      margin: 4px 8px;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-    }
-
-    ::ng-deep .mat-mdc-list-item:hover {
-      background-color: #e5e7eb;
-    }
-
-    ::ng-deep .mat-mdc-list-item-icon {
-      color: #6b7280;
-    }
-  `]
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
-  title = 'clinic-frontend-angular';
+export class AppComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
+  title = 'Clínica - Sistema de Gestão';
+  currentUser: User | null = null;
+  isAuthenticated = false;
+  showSidebar = false;
+  currentRoute = '';
+
+  navigationItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: 'home', roles: ['admin', 'manager', 'user'] },
+    { path: '/agenda', label: 'Agenda', icon: 'calendar', roles: ['admin', 'manager', 'user'] },
+    { path: '/patients', label: 'Pacientes', icon: 'users', roles: ['admin', 'manager', 'user'] },
+    { path: '/inventory', label: 'Estoque', icon: 'package', roles: ['admin', 'manager', 'user'] },
+    { path: '/finance', label: 'Financeiro', icon: 'dollar-sign', roles: ['admin', 'manager'] }
+  ];
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.initializeAuth();
+    this.trackRouteChanges();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private initializeAuth(): void {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+        this.isAuthenticated = !!user;
+        this.showSidebar = this.isAuthenticated && !this.isAuthRoute();
+      });
+  }
+
+  private trackRouteChanges(): void {
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event: NavigationEnd) => {
+        this.currentRoute = event.url;
+        this.showSidebar = this.isAuthenticated && !this.isAuthRoute();
+      });
+  }
+
+  private isAuthRoute(): boolean {
+    return this.currentRoute.includes('/auth/');
+  }
+
+  hasPermission(roles: string[]): boolean {
+    if (!this.currentUser) return false;
+    return roles.includes(this.currentUser.role);
+  }
+
+  isActiveRoute(path: string): boolean {
+    return this.currentRoute.startsWith(path);
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/auth/login']);
+      },
+      error: () => {
+        // Mesmo com erro, limpar dados locais e redirecionar
+        this.router.navigate(['/auth/login']);
+      }
+    });
+  }
+
+  toggleSidebar(): void {
+    this.showSidebar = !this.showSidebar;
+  }
+
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
+  }
+
+  getUserDisplayName(): string {
+    return this.currentUser?.fullName || this.currentUser?.username || 'Usuário';
+  }
+
+  getUserRole(): string {
+    const roleLabels: { [key: string]: string } = {
+      'admin': 'Administrador',
+      'manager': 'Gerente',
+      'user': 'Usuário'
+    };
+    return roleLabels[this.currentUser?.role || 'user'] || 'Usuário';
+  }
 }
