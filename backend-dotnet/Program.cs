@@ -64,6 +64,14 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 
+// Staff Module - Complete 3-layer architecture with hierarchy and performance tracking
+builder.Services.AddScoped<IStaffRepository, StaffRepository>();
+builder.Services.AddScoped<IStaffService, StaffService>();
+
+// Learning Module - Complete 3-layer architecture with progress tracking and recommendations
+builder.Services.AddScoped<ILearningRepository, LearningRepository>();
+builder.Services.AddScoped<ILearningService, LearningService>();
+
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
