@@ -7,67 +7,38 @@ namespace ClinicApi.Services
         // CRUD Básico
         Task<IEnumerable<Patient>> GetAllPatientsAsync();
         Task<Patient?> GetPatientByIdAsync(int id);
-        Task<Patient> CreatePatientAsync(CreatePatientDto patient);
-        Task<Patient?> UpdatePatientAsync(int id, CreatePatientDto patient);
+        Task<Patient> CreatePatientAsync(CreatePatientDto patientDto, int createdBy);
+        Task<Patient?> UpdatePatientAsync(int id, UpdatePatientDto patientDto);
         Task<bool> DeletePatientAsync(int id);
 
-        // Patient Profile & Management
-        Task<PatientProfile> GetPatientProfileAsync(int id);
-        Task<object> SearchPatientsAsync(string query);
-        Task<object> GetPatientsWithFiltersAsync(
-            string? name = null, string? email = null, string? phone = null, string? cpf = null,
-            string? city = null, string? healthPlan = null, string? status = null,
-            DateTime? birthStart = null, DateTime? birthEnd = null,
-            int page = 1, int limit = 25);
+        // Pesquisa e Filtros
+        Task<object> GetPatientsWithFiltersAsync(PatientFilters filters);
+        Task<IEnumerable<Patient>> SearchPatientsAsync(string searchTerm);
+        Task<Patient?> GetPatientByCPFAsync(string cpf);
+        Task<Patient?> GetPatientByEmailAsync(string email);
 
-        // Medical History Management
-        Task<object> GetPatientMedicalHistoryAsync(int patientId);
-        Task<PatientMedicalHistory> AddMedicalHistoryAsync(PatientMedicalHistory history);
-        Task<PatientMedicalHistory?> UpdateMedicalHistoryAsync(int id, PatientMedicalHistory history);
-        Task<bool> DeleteMedicalHistoryAsync(int id);
-
-        // Document Management
-        Task<object> GetPatientDocumentsAsync(int patientId);
-        Task<PatientDocument> UploadDocumentAsync(int patientId, object documentData);
-        Task<bool> DeleteDocumentAsync(int id);
-        Task<object> DownloadDocumentAsync(int id);
-
-        // Notes Management
-        Task<object> GetPatientNotesAsync(int patientId);
-        Task<PatientNote> AddPatientNoteAsync(PatientNote note);
-        Task<PatientNote?> UpdatePatientNoteAsync(int id, PatientNote note);
-        Task<bool> DeletePatientNoteAsync(int id);
-
-        // Analytics & Reports
+        // Analytics e Métricas
         Task<PatientAnalytics> GetPatientAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null);
-        Task<PatientDashboardMetrics> GetDashboardMetricsAsync();
-        Task<object> GetPatientSegmentsAsync();
-        Task<object> GetBirthdayRemindersAsync(DateTime? date = null);
+        Task<PatientMetrics> GetPatientMetricsAsync(int patientId);
+        Task<object> GetPatientsWithMetricsAsync(PatientFilters filters);
 
-        // Communication Management
-        Task<object> GetPatientCommunicationsAsync(int patientId);
-        Task<object> SendCommunicationAsync(int patientId, object communicationData);
-        Task<object> GetCommunicationTemplatesAsync();
+        // Segmentação e Distribuições
+        Task<IEnumerable<PatientSegmentation>> GetPatientSegmentationAsync();
+        Task<IEnumerable<AgeDistribution>> GetAgeDistributionAsync();
+        Task<IEnumerable<GenderDistribution>> GetGenderDistributionAsync();
+        Task<IEnumerable<LocationDistribution>> GetLocationDistributionAsync();
 
-        // Bulk Operations
-        Task<object> BulkUpdatePatientsAsync(PatientBulkAction action);
+        // Relatórios e Exports
+        Task<PatientReport> GetPatientReportAsync(int patientId, DateTime? startDate = null, DateTime? endDate = null);
         Task<object> ExportPatientsAsync(PatientExportRequest request);
-        Task<object> ImportPatientsAsync(object importData);
 
-        // Advanced Analytics
-        Task<object> GetRetentionAnalysisAsync(DateTime startDate, DateTime endDate);
-        Task<object> GetPatientValueAnalysisAsync();
-        Task<object> GetGeographicDistributionAsync();
-        Task<object> GetPatientLifecycleAnalysisAsync();
+        // Dashboard e Estatísticas
+        Task<object> GetDashboardMetricsAsync();
+        Task<object> GetPatientGrowthAsync(int months = 12);
+        Task<object> GetPatientRetentionAsync();
 
-        // Predictive Analytics
-        Task<object> GetChurnPredictionAsync();
-        Task<object> GetPatientRecommendationsAsync(int patientId);
-        Task<object> GetSegmentationInsightsAsync();
-
-        // Data Quality & Validation
-        Task<object> ValidatePatientDataAsync(int patientId);
-        Task<object> GetDuplicatePatientsAsync();
-        Task<object> CleanupPatientDataAsync();
+        // Validações
+        Task<bool> ValidatePatientDataAsync(CreatePatientDto patientDto);
+        Task<bool> ValidatePatientUpdateAsync(int id, UpdatePatientDto patientDto);
     }
 }

@@ -1,1368 +1,600 @@
 using Dapper;
-using Npgsql;
+using System.Data;
 using ClinicApi.Models;
-using System.Text;
 
 namespace ClinicApi.Repositories
 {
     public class PatientRepository : IPatientRepository
     {
-        private readonly IConfiguration _configuration;
-        private readonly string _connectionString;
+        private readonly IDbConnection _connection;
 
-        public PatientRepository(IConfiguration configuration)
+        public PatientRepository(IDbConnection connection)
         {
-            _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("DefaultConnection") 
-                ?? Environment.GetEnvironmentVariable("DATABASE_URL") 
-                ?? throw new InvalidOperationException("Connection string not found");
+            _connection = connection;
         }
 
-        public async Task<IEnumerable<Patient>> GetAllAsync()
+        public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
         {
             const string sql = @"
-                SELECT 
-                    id as Id,
-                    full_name as FullName,
-                    email as Email,
-                    phone as Phone,
-                    birthday as Birthday,
-                    cpf as Cpf,
-                    rg as Rg,
-                    gender as Gender,
-                    marital_status as MaritalStatus,
-                    profession as Profession,
-                    address as Address,
-                    city as City,
-                    state as State,
-                    zip_code as ZipCode,
-                    emergency_contact as EmergencyContact,
-                    emergency_phone as EmergencyPhone,
-                    health_plan as HealthPlan,
-                    health_plan_number as HealthPlanNumber,
-                    is_active as IsActive,
-                    created_at as CreatedAt,
-                    updated_at as UpdatedAt
-                FROM clients 
-                WHERE is_active = true
-                ORDER BY full_name";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<Patient>(sql);
-        }
-
-        public async Task<Patient?> GetByIdAsync(int id)
-        {
-            const string sql = @"
-                SELECT 
-                    id as Id,
-                    full_name as FullName,
-                    email as Email,
-                    phone as Phone,
-                    birthday as Birthday,
-                    cpf as Cpf,
-                    rg as Rg,
-                    gender as Gender,
-                    marital_status as MaritalStatus,
-                    profession as Profession,
-                    address as Address,
-                    city as City,
-                    state as State,
-                    zip_code as ZipCode,
-                    emergency_contact as EmergencyContact,
-                    emergency_phone as EmergencyPhone,
-                    health_plan as HealthPlan,
-                    health_plan_number as HealthPlanNumber,
-                    is_active as IsActive,
-                    created_at as CreatedAt,
-                    updated_at as UpdatedAt
-                FROM clients 
-                WHERE id = @Id";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleOrDefaultAsync<Patient>(sql, new { Id = id });
-        }
-
-        public async Task<Patient> CreateAsync(CreatePatientDto patientDto)
-        {
-            const string sql = @"
-                INSERT INTO clients 
-                (full_name, email, phone, birthday, cpf, rg, gender, marital_status, 
-                 profession, address, city, state, zip_code, emergency_contact, 
-                 emergency_phone, health_plan, health_plan_number, is_active, created_at, updated_at)
-                VALUES 
-                (@FullName, @Email, @Phone, @Birthday, @Cpf, @Rg, @Gender, @MaritalStatus,
-                 @Profession, @Address, @City, @State, @ZipCode, @EmergencyContact,
-                 @EmergencyPhone, @HealthPlan, @HealthPlanNumber, true, @CreatedAt, @UpdatedAt)
-                RETURNING 
-                    id as Id,
-                    full_name as FullName,
-                    email as Email,
-                    phone as Phone,
-                    birthday as Birthday,
-                    cpf as Cpf,
-                    rg as Rg,
-                    gender as Gender,
-                    marital_status as MaritalStatus,
-                    profession as Profession,
-                    address as Address,
-                    city as City,
-                    state as State,
-                    zip_code as ZipCode,
-                    emergency_contact as EmergencyContact,
-                    emergency_phone as EmergencyPhone,
-                    health_plan as HealthPlan,
-                    health_plan_number as HealthPlanNumber,
-                    is_active as IsActive,
-                    created_at as CreatedAt,
-                    updated_at as UpdatedAt";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var now = DateTime.UtcNow;
-            return await connection.QuerySingleAsync<Patient>(sql, new
-            {
-                patientDto.FullName,
-                patientDto.Email,
-                patientDto.Phone,
-                patientDto.Birthday,
-                patientDto.Cpf,
-                patientDto.Rg,
-                patientDto.Gender,
-                patientDto.MaritalStatus,
-                patientDto.Profession,
-                patientDto.Address,
-                patientDto.City,
-                patientDto.State,
-                patientDto.ZipCode,
-                patientDto.EmergencyContact,
-                patientDto.EmergencyPhone,
-                patientDto.HealthPlan,
-                patientDto.HealthPlanNumber,
-                CreatedAt = now,
-                UpdatedAt = now
-            });
-        }
-
-        public async Task<Patient?> UpdateAsync(int id, CreatePatientDto patientDto)
-        {
-            const string sql = @"
-                UPDATE clients 
-                SET 
-                    full_name = @FullName,
-                    email = @Email,
-                    phone = @Phone,
-                    birthday = @Birthday,
-                    cpf = @Cpf,
-                    rg = @Rg,
-                    gender = @Gender,
-                    marital_status = @MaritalStatus,
-                    profession = @Profession,
-                    address = @Address,
-                    city = @City,
-                    state = @State,
-                    zip_code = @ZipCode,
-                    emergency_contact = @EmergencyContact,
-                    emergency_phone = @EmergencyPhone,
-                    health_plan = @HealthPlan,
-                    health_plan_number = @HealthPlanNumber,
-                    updated_at = @UpdatedAt
-                WHERE id = @Id
-                RETURNING 
-                    id as Id,
-                    full_name as FullName,
-                    email as Email,
-                    phone as Phone,
-                    birthday as Birthday,
-                    cpf as Cpf,
-                    rg as Rg,
-                    gender as Gender,
-                    marital_status as MaritalStatus,
-                    profession as Profession,
-                    address as Address,
-                    city as City,
-                    state as State,
-                    zip_code as ZipCode,
-                    emergency_contact as EmergencyContact,
-                    emergency_phone as EmergencyPhone,
-                    health_plan as HealthPlan,
-                    health_plan_number as HealthPlanNumber,
-                    is_active as IsActive,
-                    created_at as CreatedAt,
-                    updated_at as UpdatedAt";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleOrDefaultAsync<Patient>(sql, new
-            {
-                Id = id,
-                patientDto.FullName,
-                patientDto.Email,
-                patientDto.Phone,
-                patientDto.Birthday,
-                patientDto.Cpf,
-                patientDto.Rg,
-                patientDto.Gender,
-                patientDto.MaritalStatus,
-                patientDto.Profession,
-                patientDto.Address,
-                patientDto.City,
-                patientDto.State,
-                patientDto.ZipCode,
-                patientDto.EmergencyContact,
-                patientDto.EmergencyPhone,
-                patientDto.HealthPlan,
-                patientDto.HealthPlanNumber,
-                UpdatedAt = DateTime.UtcNow
-            });
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            const string sql = @"
-                UPDATE clients 
-                SET 
-                    is_active = false,
-                    updated_at = @UpdatedAt
-                WHERE id = @Id";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id, UpdatedAt = DateTime.UtcNow });
-            return rowsAffected > 0;
-        }
-
-        public async Task<PatientProfile> GetPatientProfileAsync(int id)
-        {
-            const string patientSql = @"
-                SELECT 
-                    c.id as Id,
-                    c.full_name as FullName,
-                    c.email as Email,
-                    c.phone as Phone,
-                    c.birthday as Birthday,
-                    CASE 
-                        WHEN c.birthday IS NOT NULL THEN 
-                            EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.birthday))::int
-                        ELSE 0
-                    END as Age,
-                    CASE 
-                        WHEN c.birthday IS NOT NULL THEN
-                            CASE 
-                                WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.birthday)) < 18 THEN 'Menor'
-                                WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.birthday)) <= 30 THEN 'Jovem'
-                                WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.birthday)) <= 50 THEN 'Adulto'
-                                ELSE 'Idoso'
-                            END
-                        ELSE 'Não informado'
-                    END as AgeGroup,
-                    c.gender as Gender,
-                    c.cpf as Cpf,
-                    c.address as Address,
-                    c.city as City,
-                    c.state as State,
-                    c.health_plan as HealthPlan
-                FROM clients c 
-                WHERE c.id = @PatientId";
-
-            const string statisticsSql = @"
-                SELECT 
-                    COUNT(a.id) as TotalAppointments,
-                    COUNT(CASE WHEN a.status = 'completed' THEN 1 END) as CompletedAppointments,
-                    COUNT(CASE WHEN a.status = 'cancelled' THEN 1 END) as CancelledAppointments,
-                    COUNT(CASE WHEN a.status = 'no_show' THEN 1 END) as NoShowAppointments,
-                    MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) as LastVisit,
-                    MIN(CASE WHEN a.start_time > CURRENT_TIMESTAMP AND a.status IN ('scheduled', 'confirmed') THEN a.start_time END) as NextAppointment,
-                    COALESCE(SUM(CASE WHEN a.status = 'completed' THEN COALESCE(s.price, 150.00) END), 0) as TotalSpent,
-                    COALESCE(EXTRACT(DAY FROM (CURRENT_DATE - c.created_at::date)), 0) as DaysAsPatient
-                FROM clients c
-                LEFT JOIN appointments a ON c.id = a.client_id
-                LEFT JOIN services s ON a.service_id = s.id
-                WHERE c.id = @PatientId
-                GROUP BY c.created_at";
-
-            const string recentAppointmentsSql = @"
-                SELECT 
-                    a.id as Id,
-                    s.name as ServiceName,
-                    st.name as StaffName,
-                    a.start_time as Date,
-                    a.status as Status,
-                    CASE a.status
-                        WHEN 'scheduled' THEN 'Agendado'
-                        WHEN 'confirmed' THEN 'Confirmado'
-                        WHEN 'completed' THEN 'Concluído'
-                        WHEN 'cancelled' THEN 'Cancelado'
-                        WHEN 'no_show' THEN 'Não compareceu'
-                        ELSE 'Agendado'
-                    END as StatusLabel,
-                    COALESCE(s.price, 150.00) as Cost,
-                    a.notes as Notes,
-                    COALESCE(a.room, 'Sala 1') as Room
-                FROM appointments a
-                INNER JOIN services s ON a.service_id = s.id
-                INNER JOIN staff st ON a.staff_id = st.id
-                WHERE a.client_id = @PatientId
-                ORDER BY a.start_time DESC
-                LIMIT 10";
-
-            using var connection = new NpgsqlConnection(_connectionString);
+                SELECT Id, Name, Email, Phone, CPF, RG, DateOfBirth, Gender, 
+                       Address, City, State, ZipCode, EmergencyContact, EmergencyPhone,
+                       MedicalHistory, Allergies, Medications, Notes, Photo, Status,
+                       PreferredContactMethod, Profession, MaritalStatus, IsActive,
+                       CreatedAt, UpdatedAt, LastVisit, CreatedBy
+                FROM Patients 
+                ORDER BY Name";
             
-            var patient = await connection.QuerySingleOrDefaultAsync(patientSql, new { PatientId = id });
-            if (patient == null) throw new ArgumentException("Paciente não encontrado");
-
-            var statistics = await connection.QuerySingleOrDefaultAsync(statisticsSql, new { PatientId = id });
-            var recentAppointments = await connection.QueryAsync<PatientAppointment>(recentAppointmentsSql, new { PatientId = id });
-
-            var profile = new PatientProfile
-            {
-                Id = patient.Id,
-                FullName = patient.FullName,
-                Email = patient.Email,
-                Phone = patient.Phone,
-                Birthday = patient.Birthday,
-                Age = patient.Age,
-                AgeGroup = patient.AgeGroup,
-                Gender = patient.Gender,
-                Cpf = patient.Cpf,
-                Address = patient.Address,
-                City = patient.City,
-                State = patient.State,
-                HealthPlan = patient.HealthPlan,
-                Statistics = new PatientStatistics
-                {
-                    TotalAppointments = statistics?.TotalAppointments ?? 0,
-                    CompletedAppointments = statistics?.CompletedAppointments ?? 0,
-                    CancelledAppointments = statistics?.CancelledAppointments ?? 0,
-                    NoShowAppointments = statistics?.NoShowAppointments ?? 0,
-                    LastVisit = statistics?.LastVisit,
-                    NextAppointment = statistics?.NextAppointment,
-                    TotalSpent = statistics?.TotalSpent ?? 0,
-                    DaysAsPatient = (int)(statistics?.DaysAsPatient ?? 0),
-                    CompletionRate = statistics?.TotalAppointments > 0 ? 
-                        (decimal)(statistics.CompletedAppointments ?? 0) / statistics.TotalAppointments * 100 : 0,
-                    PatientType = CalculatePatientType(statistics?.TotalAppointments ?? 0, statistics?.LastVisit)
-                },
-                RecentAppointments = recentAppointments.ToList(),
-                FinancialSummary = await CalculateFinancialSummary(id)
-            };
-
-            return profile;
+            return await _connection.QueryAsync<Patient>(sql);
         }
 
-        public async Task<IEnumerable<PatientSearchResult>> SearchPatientsAsync(string query)
+        public async Task<Patient?> GetPatientByIdAsync(int id)
         {
             const string sql = @"
-                SELECT 
-                    c.id as Id,
-                    c.full_name as FullName,
-                    c.email as Email,
-                    c.phone as Phone,
-                    c.cpf as Cpf,
-                    CASE 
-                        WHEN c.birthday IS NOT NULL THEN 
-                            EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.birthday))::int
-                        ELSE 0
-                    END as Age,
-                    c.gender as Gender,
-                    c.city as City,
-                    c.health_plan as HealthPlan,
-                    MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) as LastVisit,
-                    MIN(CASE WHEN a.start_time > CURRENT_TIMESTAMP AND a.status IN ('scheduled', 'confirmed') THEN a.start_time END) as NextAppointment,
-                    CASE 
-                        WHEN MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) > CURRENT_DATE - INTERVAL '30 days' THEN 'Ativo'
-                        WHEN MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) IS NOT NULL THEN 'Inativo'
-                        ELSE 'Novo'
-                    END as PatientStatus,
-                    COALESCE(SUM(CASE WHEN a.status = 'completed' THEN COALESCE(s.price, 150.00) END), 0) as TotalSpent,
-                    COUNT(a.id) as TotalAppointments
-                FROM clients c
-                LEFT JOIN appointments a ON c.id = a.client_id
-                LEFT JOIN services s ON a.service_id = s.id
-                WHERE c.is_active = true 
-                    AND (
-                        c.full_name ILIKE @Query OR
-                        c.email ILIKE @Query OR
-                        c.phone ILIKE @Query OR
-                        c.cpf ILIKE @Query
-                    )
-                GROUP BY c.id, c.full_name, c.email, c.phone, c.cpf, c.birthday, c.gender, c.city, c.health_plan
-                ORDER BY c.full_name
-                LIMIT 50";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<PatientSearchResult>(sql, new { Query = $"%{query}%" });
+                SELECT Id, Name, Email, Phone, CPF, RG, DateOfBirth, Gender, 
+                       Address, City, State, ZipCode, EmergencyContact, EmergencyPhone,
+                       MedicalHistory, Allergies, Medications, Notes, Photo, Status,
+                       PreferredContactMethod, Profession, MaritalStatus, IsActive,
+                       CreatedAt, UpdatedAt, LastVisit, CreatedBy
+                FROM Patients 
+                WHERE Id = @Id";
+            
+            return await _connection.QueryFirstOrDefaultAsync<Patient>(sql, new { Id = id });
         }
 
-        public async Task<IEnumerable<PatientSearchResult>> GetPatientsWithFiltersAsync(
-            string? name = null, string? email = null, string? phone = null, string? cpf = null,
-            string? city = null, string? healthPlan = null, string? status = null,
-            DateTime? birthStart = null, DateTime? birthEnd = null,
-            int page = 1, int limit = 25)
+        public async Task<Patient> CreatePatientAsync(CreatePatientDto patientDto, int createdBy)
         {
-            var whereConditions = new List<string> { "c.is_active = true" };
+            const string sql = @"
+                INSERT INTO Patients (Name, Email, Phone, CPF, RG, DateOfBirth, Gender, 
+                                    Address, City, State, ZipCode, EmergencyContact, EmergencyPhone,
+                                    MedicalHistory, Allergies, Medications, Notes, 
+                                    PreferredContactMethod, Profession, MaritalStatus, 
+                                    Status, IsActive, CreatedAt, CreatedBy)
+                VALUES (@Name, @Email, @Phone, @CPF, @RG, @DateOfBirth, @Gender, 
+                        @Address, @City, @State, @ZipCode, @EmergencyContact, @EmergencyPhone,
+                        @MedicalHistory, @Allergies, @Medications, @Notes, 
+                        @PreferredContactMethod, @Profession, @MaritalStatus, 
+                        'active', 1, GETDATE(), @CreatedBy);
+                SELECT CAST(SCOPE_IDENTITY() as int)";
+
+            var id = await _connection.QuerySingleAsync<int>(sql, new 
+            {
+                patientDto.Name,
+                patientDto.Email,
+                patientDto.Phone,
+                patientDto.CPF,
+                patientDto.RG,
+                patientDto.DateOfBirth,
+                patientDto.Gender,
+                patientDto.Address,
+                patientDto.City,
+                patientDto.State,
+                patientDto.ZipCode,
+                patientDto.EmergencyContact,
+                patientDto.EmergencyPhone,
+                patientDto.MedicalHistory,
+                patientDto.Allergies,
+                patientDto.Medications,
+                patientDto.Notes,
+                patientDto.PreferredContactMethod,
+                patientDto.Profession,
+                patientDto.MaritalStatus,
+                CreatedBy = createdBy
+            });
+
+            return await GetPatientByIdAsync(id) ?? throw new InvalidOperationException("Failed to retrieve created patient");
+        }
+
+        public async Task<Patient?> UpdatePatientAsync(int id, UpdatePatientDto patientDto)
+        {
+            var setParts = new List<string>();
+            var parameters = new DynamicParameters();
+            parameters.Add("Id", id);
+
+            if (!string.IsNullOrEmpty(patientDto.Name))
+            {
+                setParts.Add("Name = @Name");
+                parameters.Add("Name", patientDto.Name);
+            }
+
+            if (!string.IsNullOrEmpty(patientDto.Email))
+            {
+                setParts.Add("Email = @Email");
+                parameters.Add("Email", patientDto.Email);
+            }
+
+            if (!string.IsNullOrEmpty(patientDto.Phone))
+            {
+                setParts.Add("Phone = @Phone");
+                parameters.Add("Phone", patientDto.Phone);
+            }
+
+            if (!string.IsNullOrEmpty(patientDto.CPF))
+            {
+                setParts.Add("CPF = @CPF");
+                parameters.Add("CPF", patientDto.CPF);
+            }
+
+            if (patientDto.DateOfBirth.HasValue)
+            {
+                setParts.Add("DateOfBirth = @DateOfBirth");
+                parameters.Add("DateOfBirth", patientDto.DateOfBirth);
+            }
+
+            if (!string.IsNullOrEmpty(patientDto.Status))
+            {
+                setParts.Add("Status = @Status");
+                parameters.Add("Status", patientDto.Status);
+            }
+
+            if (setParts.Count == 0)
+                return await GetPatientByIdAsync(id);
+
+            setParts.Add("UpdatedAt = GETDATE()");
+
+            var sql = $@"
+                UPDATE Patients 
+                SET {string.Join(", ", setParts)}
+                WHERE Id = @Id";
+
+            await _connection.ExecuteAsync(sql, parameters);
+            return await GetPatientByIdAsync(id);
+        }
+
+        public async Task<bool> DeletePatientAsync(int id)
+        {
+            const string sql = "UPDATE Patients SET IsActive = 0, UpdatedAt = GETDATE() WHERE Id = @Id";
+            var rowsAffected = await _connection.ExecuteAsync(sql, new { Id = id });
+            return rowsAffected > 0;
+        }
+
+        public async Task<IEnumerable<Patient>> GetPatientsWithFiltersAsync(PatientFilters filters)
+        {
+            var conditions = new List<string> { "IsActive = 1" };
             var parameters = new DynamicParameters();
 
-            var sql = new StringBuilder(@"
-                SELECT 
-                    c.id as Id,
-                    c.full_name as FullName,
-                    c.email as Email,
-                    c.phone as Phone,
-                    c.cpf as Cpf,
-                    CASE 
-                        WHEN c.birthday IS NOT NULL THEN 
-                            EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.birthday))::int
-                        ELSE 0
-                    END as Age,
-                    c.gender as Gender,
-                    c.city as City,
-                    c.health_plan as HealthPlan,
-                    MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) as LastVisit,
-                    MIN(CASE WHEN a.start_time > CURRENT_TIMESTAMP AND a.status IN ('scheduled', 'confirmed') THEN a.start_time END) as NextAppointment,
-                    CASE 
-                        WHEN MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) > CURRENT_DATE - INTERVAL '30 days' THEN 'Ativo'
-                        WHEN MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) IS NOT NULL THEN 'Inativo'
-                        ELSE 'Novo'
-                    END as PatientStatus,
-                    COALESCE(SUM(CASE WHEN a.status = 'completed' THEN COALESCE(s.price, 150.00) END), 0) as TotalSpent,
-                    COUNT(a.id) as TotalAppointments
-                FROM clients c
-                LEFT JOIN appointments a ON c.id = a.client_id
-                LEFT JOIN services s ON a.service_id = s.id");
-
-            // Aplicar filtros dinamicamente
-            if (!string.IsNullOrEmpty(name))
+            if (!string.IsNullOrEmpty(filters.Search))
             {
-                whereConditions.Add("c.full_name ILIKE @Name");
-                parameters.Add("Name", $"%{name}%");
+                conditions.Add("(Name LIKE @Search OR Email LIKE @Search OR Phone LIKE @Search OR CPF LIKE @Search)");
+                parameters.Add("Search", $"%{filters.Search}%");
             }
 
-            if (!string.IsNullOrEmpty(email))
+            if (!string.IsNullOrEmpty(filters.Status))
             {
-                whereConditions.Add("c.email ILIKE @Email");
-                parameters.Add("Email", $"%{email}%");
+                conditions.Add("Status = @Status");
+                parameters.Add("Status", filters.Status);
             }
 
-            if (!string.IsNullOrEmpty(phone))
+            if (!string.IsNullOrEmpty(filters.Gender))
             {
-                whereConditions.Add("c.phone ILIKE @Phone");
-                parameters.Add("Phone", $"%{phone}%");
+                conditions.Add("Gender = @Gender");
+                parameters.Add("Gender", filters.Gender);
             }
 
-            if (!string.IsNullOrEmpty(cpf))
+            if (!string.IsNullOrEmpty(filters.City))
             {
-                whereConditions.Add("c.cpf ILIKE @Cpf");
-                parameters.Add("Cpf", $"%{cpf}%");
+                conditions.Add("City = @City");
+                parameters.Add("City", filters.City);
             }
 
-            if (!string.IsNullOrEmpty(city))
-            {
-                whereConditions.Add("c.city ILIKE @City");
-                parameters.Add("City", $"%{city}%");
-            }
+            var orderBy = $"ORDER BY {filters.SortBy} {filters.SortOrder.ToUpper()}";
+            var offset = (filters.Page - 1) * filters.Limit;
 
-            if (!string.IsNullOrEmpty(healthPlan))
-            {
-                whereConditions.Add("c.health_plan ILIKE @HealthPlan");
-                parameters.Add("HealthPlan", $"%{healthPlan}%");
-            }
+            var sql = $@"
+                SELECT * FROM Patients
+                WHERE {string.Join(" AND ", conditions)}
+                {orderBy}
+                OFFSET @Offset ROWS
+                FETCH NEXT @Limit ROWS ONLY";
 
-            if (birthStart.HasValue)
-            {
-                whereConditions.Add("c.birthday >= @BirthStart");
-                parameters.Add("BirthStart", birthStart.Value);
-            }
+            parameters.Add("Offset", offset);
+            parameters.Add("Limit", filters.Limit);
 
-            if (birthEnd.HasValue)
-            {
-                whereConditions.Add("c.birthday <= @BirthEnd");
-                parameters.Add("BirthEnd", birthEnd.Value);
-            }
-
-            sql.Append(" WHERE " + string.Join(" AND ", whereConditions));
-            sql.Append(" GROUP BY c.id, c.full_name, c.email, c.phone, c.cpf, c.birthday, c.gender, c.city, c.health_plan");
-
-            // Filtro por status (pós-agregação)
-            if (!string.IsNullOrEmpty(status))
-            {
-                sql.Append(@" HAVING 
-                    CASE 
-                        WHEN MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) > CURRENT_DATE - INTERVAL '30 days' THEN 'Ativo'
-                        WHEN MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) IS NOT NULL THEN 'Inativo'
-                        ELSE 'Novo'
-                    END = @Status");
-                parameters.Add("Status", status);
-            }
-
-            sql.Append(" ORDER BY c.full_name");
-
-            // Paginação
-            var offset = (page - 1) * limit;
-            sql.Append($" LIMIT {limit} OFFSET {offset}");
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<PatientSearchResult>(sql.ToString(), parameters);
+            return await _connection.QueryAsync<Patient>(sql, parameters);
         }
 
-        public async Task<int> GetPatientsCountAsync(
-            string? name = null, string? email = null, string? phone = null, string? cpf = null,
-            string? city = null, string? healthPlan = null, string? status = null,
-            DateTime? birthStart = null, DateTime? birthEnd = null)
+        public async Task<int> GetPatientsCountAsync(PatientFilters filters)
         {
-            var whereConditions = new List<string> { "c.is_active = true" };
+            var conditions = new List<string> { "IsActive = 1" };
             var parameters = new DynamicParameters();
 
-            var sql = new StringBuilder(@"
-                SELECT COUNT(DISTINCT c.id)
-                FROM clients c
-                LEFT JOIN appointments a ON c.id = a.client_id
-                LEFT JOIN services s ON a.service_id = s.id");
-
-            // Aplicar os mesmos filtros
-            if (!string.IsNullOrEmpty(name))
+            if (!string.IsNullOrEmpty(filters.Search))
             {
-                whereConditions.Add("c.full_name ILIKE @Name");
-                parameters.Add("Name", $"%{name}%");
+                conditions.Add("(Name LIKE @Search OR Email LIKE @Search OR Phone LIKE @Search)");
+                parameters.Add("Search", $"%{filters.Search}%");
             }
 
-            if (!string.IsNullOrEmpty(email))
+            if (!string.IsNullOrEmpty(filters.Status))
             {
-                whereConditions.Add("c.email ILIKE @Email");
-                parameters.Add("Email", $"%{email}%");
+                conditions.Add("Status = @Status");
+                parameters.Add("Status", filters.Status);
             }
 
-            if (!string.IsNullOrEmpty(phone))
-            {
-                whereConditions.Add("c.phone ILIKE @Phone");
-                parameters.Add("Phone", $"%{phone}%");
-            }
-
-            if (!string.IsNullOrEmpty(cpf))
-            {
-                whereConditions.Add("c.cpf ILIKE @Cpf");
-                parameters.Add("Cpf", $"%{cpf}%");
-            }
-
-            if (!string.IsNullOrEmpty(city))
-            {
-                whereConditions.Add("c.city ILIKE @City");
-                parameters.Add("City", $"%{city}%");
-            }
-
-            if (!string.IsNullOrEmpty(healthPlan))
-            {
-                whereConditions.Add("c.health_plan ILIKE @HealthPlan");
-                parameters.Add("HealthPlan", $"%{healthPlan}%");
-            }
-
-            if (birthStart.HasValue)
-            {
-                whereConditions.Add("c.birthday >= @BirthStart");
-                parameters.Add("BirthStart", birthStart.Value);
-            }
-
-            if (birthEnd.HasValue)
-            {
-                whereConditions.Add("c.birthday <= @BirthEnd");
-                parameters.Add("BirthEnd", birthEnd.Value);
-            }
-
-            sql.Append(" WHERE " + string.Join(" AND ", whereConditions));
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleAsync<int>(sql.ToString(), parameters);
+            var sql = $"SELECT COUNT(*) FROM Patients WHERE {string.Join(" AND ", conditions)}";
+            return await _connection.QuerySingleAsync<int>(sql, parameters);
         }
 
-        public async Task<IEnumerable<PatientMedicalHistory>> GetMedicalHistoryAsync(int patientId)
+        public async Task<IEnumerable<Patient>> SearchPatientsAsync(string searchTerm)
         {
             const string sql = @"
-                SELECT 
-                    id as Id,
-                    patient_id as PatientId,
-                    category as Category,
-                    title as Title,
-                    description as Description,
-                    date as Date,
-                    severity as Severity,
-                    is_active as IsActive,
-                    notes as Notes,
-                    created_at as CreatedAt
-                FROM patient_medical_history 
-                WHERE patient_id = @PatientId AND is_active = true
-                ORDER BY date DESC, created_at DESC";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<PatientMedicalHistory>(sql, new { PatientId = patientId });
+                SELECT TOP 20 * FROM Patients
+                WHERE IsActive = 1 
+                AND (Name LIKE @Search OR Email LIKE @Search OR Phone LIKE @Search OR CPF LIKE @Search)
+                ORDER BY Name";
+            
+            return await _connection.QueryAsync<Patient>(sql, new { Search = $"%{searchTerm}%" });
         }
 
-        public async Task<PatientMedicalHistory> AddMedicalHistoryAsync(PatientMedicalHistory history)
+        public async Task<Patient?> GetPatientByCPFAsync(string cpf)
         {
-            const string sql = @"
-                INSERT INTO patient_medical_history 
-                (patient_id, category, title, description, date, severity, is_active, notes, created_at)
-                VALUES 
-                (@PatientId, @Category, @Title, @Description, @Date, @Severity, @IsActive, @Notes, @CreatedAt)
-                RETURNING 
-                    id as Id,
-                    patient_id as PatientId,
-                    category as Category,
-                    title as Title,
-                    description as Description,
-                    date as Date,
-                    severity as Severity,
-                    is_active as IsActive,
-                    notes as Notes,
-                    created_at as CreatedAt";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleAsync<PatientMedicalHistory>(sql, new
-            {
-                history.PatientId,
-                history.Category,
-                history.Title,
-                history.Description,
-                history.Date,
-                history.Severity,
-                history.IsActive,
-                history.Notes,
-                CreatedAt = DateTime.UtcNow
-            });
+            const string sql = "SELECT * FROM Patients WHERE CPF = @CPF AND IsActive = 1";
+            return await _connection.QueryFirstOrDefaultAsync<Patient>(sql, new { CPF = cpf });
         }
 
-        public async Task<PatientMedicalHistory?> UpdateMedicalHistoryAsync(int id, PatientMedicalHistory history)
+        public async Task<Patient?> GetPatientByEmailAsync(string email)
         {
-            const string sql = @"
-                UPDATE patient_medical_history 
-                SET 
-                    category = @Category,
-                    title = @Title,
-                    description = @Description,
-                    date = @Date,
-                    severity = @Severity,
-                    is_active = @IsActive,
-                    notes = @Notes
-                WHERE id = @Id
-                RETURNING 
-                    id as Id,
-                    patient_id as PatientId,
-                    category as Category,
-                    title as Title,
-                    description as Description,
-                    date as Date,
-                    severity as Severity,
-                    is_active as IsActive,
-                    notes as Notes,
-                    created_at as CreatedAt";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleOrDefaultAsync<PatientMedicalHistory>(sql, new
-            {
-                Id = id,
-                history.Category,
-                history.Title,
-                history.Description,
-                history.Date,
-                history.Severity,
-                history.IsActive,
-                history.Notes
-            });
+            const string sql = "SELECT * FROM Patients WHERE Email = @Email AND IsActive = 1";
+            return await _connection.QueryFirstOrDefaultAsync<Patient>(sql, new { Email = email });
         }
 
-        public async Task<bool> DeleteMedicalHistoryAsync(int id)
+        public async Task<Patient?> GetPatientByPhoneAsync(string phone)
         {
-            const string sql = "UPDATE patient_medical_history SET is_active = false WHERE id = @Id";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
-            return rowsAffected > 0;
-        }
-
-        public async Task<IEnumerable<PatientDocument>> GetPatientDocumentsAsync(int patientId)
-        {
-            const string sql = @"
-                SELECT 
-                    id as Id,
-                    patient_id as PatientId,
-                    document_type as DocumentType,
-                    file_name as FileName,
-                    file_path as FilePath,
-                    file_size as FileSize,
-                    content_type as ContentType,
-                    upload_date as UploadDate,
-                    description as Description,
-                    is_public as IsPublic
-                FROM patient_documents 
-                WHERE patient_id = @PatientId
-                ORDER BY upload_date DESC";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<PatientDocument>(sql, new { PatientId = patientId });
-        }
-
-        public async Task<PatientDocument> AddDocumentAsync(PatientDocument document)
-        {
-            const string sql = @"
-                INSERT INTO patient_documents 
-                (patient_id, document_type, file_name, file_path, file_size, content_type, upload_date, description, is_public)
-                VALUES 
-                (@PatientId, @DocumentType, @FileName, @FilePath, @FileSize, @ContentType, @UploadDate, @Description, @IsPublic)
-                RETURNING 
-                    id as Id,
-                    patient_id as PatientId,
-                    document_type as DocumentType,
-                    file_name as FileName,
-                    file_path as FilePath,
-                    file_size as FileSize,
-                    content_type as ContentType,
-                    upload_date as UploadDate,
-                    description as Description,
-                    is_public as IsPublic";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QuerySingleAsync<PatientDocument>(sql, new
-            {
-                document.PatientId,
-                document.DocumentType,
-                document.FileName,
-                document.FilePath,
-                document.FileSize,
-                document.ContentType,
-                UploadDate = DateTime.UtcNow,
-                document.Description,
-                document.IsPublic
-            });
-        }
-
-        public async Task<bool> DeleteDocumentAsync(int id)
-        {
-            const string sql = "DELETE FROM patient_documents WHERE id = @Id";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
-            return rowsAffected > 0;
-        }
-
-        public async Task<IEnumerable<PatientNote>> GetPatientNotesAsync(int patientId)
-        {
-            const string sql = @"
-                SELECT 
-                    n.id as Id,
-                    n.patient_id as PatientId,
-                    n.title as Title,
-                    n.content as Content,
-                    n.category as Category,
-                    n.priority as Priority,
-                    n.created_by as CreatedBy,
-                    s.name as CreatedByName,
-                    n.created_at as CreatedAt,
-                    n.is_private as IsPrivate
-                FROM patient_notes n
-                LEFT JOIN staff s ON n.created_by = s.id
-                WHERE n.patient_id = @PatientId
-                ORDER BY n.created_at DESC";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<PatientNote>(sql, new { PatientId = patientId });
-        }
-
-        public async Task<PatientNote> AddNoteAsync(PatientNote note)
-        {
-            const string sql = @"
-                INSERT INTO patient_notes 
-                (patient_id, title, content, category, priority, created_by, created_at, is_private)
-                VALUES 
-                (@PatientId, @Title, @Content, @Category, @Priority, @CreatedBy, @CreatedAt, @IsPrivate)
-                RETURNING 
-                    id as Id,
-                    patient_id as PatientId,
-                    title as Title,
-                    content as Content,
-                    category as Category,
-                    priority as Priority,
-                    created_by as CreatedBy,
-                    created_at as CreatedAt,
-                    is_private as IsPrivate";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var result = await connection.QuerySingleAsync(sql, new
-            {
-                note.PatientId,
-                note.Title,
-                note.Content,
-                note.Category,
-                note.Priority,
-                note.CreatedBy,
-                CreatedAt = DateTime.UtcNow,
-                note.IsPrivate
-            });
-
-            return new PatientNote
-            {
-                Id = result.Id,
-                PatientId = result.PatientId,
-                Title = result.Title,
-                Content = result.Content,
-                Category = result.Category,
-                Priority = result.Priority,
-                CreatedBy = result.CreatedBy,
-                CreatedByName = "Usuário", // Seria buscado em uma query separada
-                CreatedAt = result.CreatedAt,
-                IsPrivate = result.IsPrivate
-            };
-        }
-
-        public async Task<PatientNote?> UpdateNoteAsync(int id, PatientNote note)
-        {
-            const string sql = @"
-                UPDATE patient_notes 
-                SET 
-                    title = @Title,
-                    content = @Content,
-                    category = @Category,
-                    priority = @Priority,
-                    is_private = @IsPrivate
-                WHERE id = @Id
-                RETURNING 
-                    id as Id,
-                    patient_id as PatientId,
-                    title as Title,
-                    content as Content,
-                    category as Category,
-                    priority as Priority,
-                    created_by as CreatedBy,
-                    created_at as CreatedAt,
-                    is_private as IsPrivate";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var result = await connection.QuerySingleOrDefaultAsync(sql, new
-            {
-                Id = id,
-                note.Title,
-                note.Content,
-                note.Category,
-                note.Priority,
-                note.IsPrivate
-            });
-
-            if (result == null) return null;
-
-            return new PatientNote
-            {
-                Id = result.Id,
-                PatientId = result.PatientId,
-                Title = result.Title,
-                Content = result.Content,
-                Category = result.Category,
-                Priority = result.Priority,
-                CreatedBy = result.CreatedBy,
-                CreatedByName = "Usuário",
-                CreatedAt = result.CreatedAt,
-                IsPrivate = result.IsPrivate
-            };
-        }
-
-        public async Task<bool> DeleteNoteAsync(int id)
-        {
-            const string sql = "DELETE FROM patient_notes WHERE id = @Id";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(sql, new { Id = id });
-            return rowsAffected > 0;
+            const string sql = "SELECT * FROM Patients WHERE Phone = @Phone AND IsActive = 1";
+            return await _connection.QueryFirstOrDefaultAsync<Patient>(sql, new { Phone = phone });
         }
 
         public async Task<PatientAnalytics> GetPatientAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
-            var dates = NormalizeDateRange(startDate, endDate);
-            
-            const string analyticsSql = @"
+            var dateFilter = "";
+            var parameters = new DynamicParameters();
+
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                dateFilter = "AND CreatedAt BETWEEN @StartDate AND @EndDate";
+                parameters.Add("StartDate", startDate);
+                parameters.Add("EndDate", endDate);
+            }
+
+            const string sql = $@"
                 SELECT 
                     COUNT(*) as TotalPatients,
-                    COUNT(CASE WHEN c.created_at >= DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as NewPatientsThisMonth,
-                    COUNT(CASE WHEN last_visit.last_visit >= CURRENT_DATE - INTERVAL '90 days' THEN 1 END) as ActivePatients,
-                    COUNT(CASE WHEN last_visit.last_visit < CURRENT_DATE - INTERVAL '90 days' OR last_visit.last_visit IS NULL THEN 1 END) as InactivePatients,
-                    AVG(CASE WHEN c.birthday IS NOT NULL THEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.birthday)) END) as AverageAge
-                FROM clients c
-                LEFT JOIN (
-                    SELECT 
-                        client_id,
-                        MAX(start_time) as last_visit
-                    FROM appointments 
-                    WHERE status = 'completed'
-                    GROUP BY client_id
-                ) last_visit ON c.id = last_visit.client_id
-                WHERE c.is_active = true";
+                    COUNT(CASE WHEN Status = 'active' THEN 1 END) as ActivePatients,
+                    COUNT(CASE WHEN MONTH(CreatedAt) = MONTH(GETDATE()) AND YEAR(CreatedAt) = YEAR(GETDATE()) THEN 1 END) as NewPatientsThisMonth,
+                    COUNT(CASE WHEN MONTH(CreatedAt) = MONTH(DATEADD(month, -1, GETDATE())) AND YEAR(CreatedAt) = YEAR(DATEADD(month, -1, GETDATE())) THEN 1 END) as NewPatientsLastMonth,
+                    AVG(CAST(DATEDIFF(year, DateOfBirth, GETDATE()) as DECIMAL)) as AverageAge
+                FROM Patients 
+                WHERE IsActive = 1 {dateFilter}";
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            var analytics = await connection.QuerySingleAsync(analyticsSql);
+            return await _connection.QuerySingleAsync<PatientAnalytics>(sql, parameters);
+        }
 
-            var result = new PatientAnalytics
+        public async Task<PatientMetrics> GetPatientMetricsAsync(int patientId)
+        {
+            const string sql = @"
+                SELECT 
+                    0 as TotalAppointments,
+                    0 as CompletedAppointments,
+                    0 as CancelledAppointments,
+                    0 as NoShowAppointments,
+                    0.0 as TotalSpent,
+                    0.0 as AverageSpentPerVisit,
+                    NULL as LastVisit,
+                    NULL as NextAppointment,
+                    0 as DaysSinceLastVisit,
+                    0.0 as CompletionRate,
+                    0.0 as NoShowRate,
+                    'Regular' as PatientSegment,
+                    'Low' as RiskLevel";
+
+            return await _connection.QuerySingleAsync<PatientMetrics>(sql);
+        }
+
+        public async Task<IEnumerable<PatientWithMetrics>> GetPatientsWithMetricsAsync(PatientFilters filters)
+        {
+            var patients = await GetPatientsWithFiltersAsync(filters);
+            var result = new List<PatientWithMetrics>();
+
+            foreach (var patient in patients)
             {
-                TotalPatients = analytics.TotalPatients,
-                NewPatientsThisMonth = analytics.NewPatientsThisMonth,
-                ActivePatients = analytics.ActivePatients,
-                InactivePatients = analytics.InactivePatients,
-                AverageAge = Math.Round(analytics.AverageAge ?? 0, 1),
-                GenderDistribution = await GetGenderDistribution(),
-                AgeDistribution = await GetAgeDistribution(),
-                CityDistribution = await GetCityDistribution(),
-                HealthPlanDistribution = await GetHealthPlanDistribution(),
-                PatientTypeDistribution = await GetPatientTypeDistribution(),
-                RetentionMetrics = await GetRetentionMetrics()
-            };
+                var metrics = await GetPatientMetricsAsync(patient.Id);
+                result.Add(new PatientWithMetrics { Patient = patient, Metrics = metrics });
+            }
 
             return result;
         }
 
-        public async Task<PatientDashboardMetrics> GetDashboardMetricsAsync()
+        // Implementações simplificadas para os métodos restantes
+        public async Task<IEnumerable<PatientSegmentation>> GetPatientSegmentationAsync()
         {
-            const string sql = @"
-                SELECT 
-                    COUNT(DISTINCT c.id) as TotalPatients,
-                    COUNT(DISTINCT CASE WHEN DATE(a.start_time) = CURRENT_DATE THEN a.client_id END) as TodayAppointments,
-                    COUNT(CASE WHEN DATE(c.created_at) = CURRENT_DATE THEN 1 END) as NewPatientsToday,
-                    COUNT(CASE WHEN c.created_at >= DATE_TRUNC('week', CURRENT_DATE) THEN 1 END) as NewPatientsThisWeek,
-                    COUNT(CASE WHEN c.created_at >= DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as NewPatientsThisMonth
-                FROM clients c
-                LEFT JOIN appointments a ON c.id = a.client_id
-                WHERE c.is_active = true";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var metrics = await connection.QuerySingleAsync(sql);
-
-            return new PatientDashboardMetrics
+            return new List<PatientSegmentation>
             {
-                TotalPatients = metrics.TotalPatients,
-                TodayAppointments = metrics.TodayAppointments,
-                NewPatientsToday = metrics.NewPatientsToday,
-                NewPatientsThisWeek = metrics.NewPatientsThisWeek,
-                NewPatientsThisMonth = metrics.NewPatientsThisMonth,
-                PatientGrowthRate = await CalculateGrowthRate(),
-                AveragePatientValue = await CalculateAveragePatientValue(),
-                GrowthTrend = await GetGrowthTrend(),
-                TodayAppointments = await GetTodayAppointments(),
-                TodayBirthdays = await GetTodayBirthdays()
+                new() { Segment = "VIP", Description = "Pacientes VIP", Color = "#gold", PatientCount = 0 },
+                new() { Segment = "Regular", Description = "Pacientes Regulares", Color = "#blue", PatientCount = 0 },
+                new() { Segment = "New", Description = "Novos Pacientes", Color = "#green", PatientCount = 0 }
             };
         }
 
-        public async Task<IEnumerable<PatientSegment>> GetPatientSegmentsAsync()
+        public async Task<IEnumerable<Patient>> GetPatientsBySegmentAsync(string segment)
         {
-            // Implementação simplificada de segmentação
-            var segments = new List<PatientSegment>
-            {
-                await CreateSegment("VIP", "Pacientes com gasto > R$ 5000"),
-                await CreateSegment("Regulares", "Pacientes com 5+ consultas"),
-                await CreateSegment("Novos", "Pacientes criados nos últimos 30 dias"),
-                await CreateSegment("Inativos", "Sem consulta há 90+ dias")
-            };
-
-            return segments;
+            return await GetPatientsWithFiltersAsync(new PatientFilters { Segment = segment });
         }
 
-        public async Task<IEnumerable<PatientBirthday>> GetBirthdaysAsync(DateTime? date = null)
+        public async Task<bool> UpdatePatientSegmentAsync(int patientId, string segment)
         {
-            var targetDate = date ?? DateTime.Today;
-            
-            const string sql = @"
-                SELECT 
-                    id as Id,
-                    full_name as FullName,
-                    phone as Phone,
-                    birthday as Birthday,
-                    EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday))::int as Age,
-                    false as MessageSent
-                FROM clients 
-                WHERE EXTRACT(MONTH FROM birthday) = EXTRACT(MONTH FROM @Date)
-                    AND EXTRACT(DAY FROM birthday) = EXTRACT(DAY FROM @Date)
-                    AND is_active = true
-                ORDER BY full_name";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<PatientBirthday>(sql, new { Date = targetDate });
-        }
-
-        public async Task<IEnumerable<PatientCommunication>> GetPatientCommunicationsAsync(int patientId)
-        {
-            const string sql = @"
-                SELECT 
-                    c.id as Id,
-                    c.patient_id as PatientId,
-                    c.type as Type,
-                    c.direction as Direction,
-                    c.subject as Subject,
-                    c.content as Content,
-                    c.status as Status,
-                    c.sent_at as SentAt,
-                    c.read_at as ReadAt,
-                    c.sent_by as SentBy,
-                    s.name as SentByName
-                FROM patient_communications c
-                LEFT JOIN staff s ON c.sent_by = s.id
-                WHERE c.patient_id = @PatientId
-                ORDER BY c.sent_at DESC";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            return await connection.QueryAsync<PatientCommunication>(sql, new { PatientId = patientId });
-        }
-
-        public async Task<PatientCommunication> AddCommunicationAsync(PatientCommunication communication)
-        {
-            const string sql = @"
-                INSERT INTO patient_communications 
-                (patient_id, type, direction, subject, content, status, sent_at, sent_by)
-                VALUES 
-                (@PatientId, @Type, @Direction, @Subject, @Content, @Status, @SentAt, @SentBy)
-                RETURNING 
-                    id as Id,
-                    patient_id as PatientId,
-                    type as Type,
-                    direction as Direction,
-                    subject as Subject,
-                    content as Content,
-                    status as Status,
-                    sent_at as SentAt,
-                    read_at as ReadAt,
-                    sent_by as SentBy";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var result = await connection.QuerySingleAsync(sql, new
-            {
-                communication.PatientId,
-                communication.Type,
-                communication.Direction,
-                communication.Subject,
-                communication.Content,
-                communication.Status,
-                SentAt = DateTime.UtcNow,
-                communication.SentBy
-            });
-
-            return new PatientCommunication
-            {
-                Id = result.Id,
-                PatientId = result.PatientId,
-                Type = result.Type,
-                Direction = result.Direction,
-                Subject = result.Subject,
-                Content = result.Content,
-                Status = result.Status,
-                SentAt = result.SentAt,
-                ReadAt = result.ReadAt,
-                SentBy = result.SentBy,
-                SentByName = "Usuário"
-            };
-        }
-
-        public async Task<bool> BulkUpdatePatientsAsync(PatientBulkAction action)
-        {
-            // Implementação simplificada
+            // Implementação futura
             return true;
         }
 
-        public async Task<object> ExportPatientsAsync(PatientExportRequest request)
-        {
-            // Implementação simplificada
-            return new { success = true, message = "Exportação realizada com sucesso" };
-        }
-
-        public async Task<object> GetRetentionAnalysisAsync(DateTime startDate, DateTime endDate)
-        {
-            // Implementação simplificada
-            return new { retentionRate = 85.5m, analysis = "Análise detalhada" };
-        }
-
-        public async Task<object> GetPatientValueAnalysisAsync()
-        {
-            // Implementação simplificada
-            return new { averageValue = 1250.00m, analysis = "Análise de valor" };
-        }
-
-        public async Task<object> GetGeographicDistributionAsync()
-        {
-            return await GetCityDistribution();
-        }
-
-        // Métodos auxiliares privados
-        private async Task<PatientFinancialSummary> CalculateFinancialSummary(int patientId)
-        {
-            const string sql = @"
-                SELECT 
-                    COALESCE(SUM(CASE WHEN a.status = 'completed' THEN COALESCE(s.price, 150.00) END), 0) as TotalSpent,
-                    0 as OutstandingBalance,
-                    COALESCE(MAX(CASE WHEN a.status = 'completed' THEN COALESCE(s.price, 150.00) END), 0) as LastPayment,
-                    MAX(CASE WHEN a.status = 'completed' THEN a.start_time END) as LastPaymentDate,
-                    COUNT(CASE WHEN a.status = 'completed' THEN 1 END) as CompletedCount
-                FROM appointments a
-                LEFT JOIN services s ON a.service_id = s.id
-                WHERE a.client_id = @PatientId";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var result = await connection.QuerySingleAsync(sql, new { PatientId = patientId });
-
-            return new PatientFinancialSummary
-            {
-                TotalSpent = result.TotalSpent,
-                OutstandingBalance = result.OutstandingBalance,
-                LastPayment = result.LastPayment,
-                LastPaymentDate = result.LastPaymentDate,
-                PaymentStatus = "Em dia",
-                PendingInvoices = 0,
-                AverageSpendingPerVisit = result.CompletedCount > 0 ? result.TotalSpent / result.CompletedCount : 0
-            };
-        }
-
-        private string CalculatePatientType(int totalAppointments, DateTime? lastVisit)
-        {
-            if (totalAppointments == 0) return "Novo";
-            if (lastVisit.HasValue && lastVisit.Value > DateTime.Now.AddDays(-30)) return "Ativo";
-            if (totalAppointments >= 10) return "VIP";
-            if (lastVisit.HasValue && lastVisit.Value < DateTime.Now.AddDays(-90)) return "Inativo";
-            return "Regular";
-        }
-
-        private async Task<List<GenderDistribution>> GetGenderDistribution()
-        {
-            const string sql = @"
-                SELECT 
-                    COALESCE(gender, 'Não informado') as Gender,
-                    COUNT(*) as Count
-                FROM clients 
-                WHERE is_active = true
-                GROUP BY gender";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var results = await connection.QueryAsync(sql);
-            var total = results.Sum(r => r.Count);
-
-            return results.Select(r => new GenderDistribution
-            {
-                Gender = r.Gender,
-                Count = r.Count,
-                Percentage = total > 0 ? (decimal)r.Count / total * 100 : 0
-            }).ToList();
-        }
-
-        private async Task<List<AgeGroupDistribution>> GetAgeDistribution()
+        public async Task<IEnumerable<AgeDistribution>> GetAgeDistributionAsync()
         {
             const string sql = @"
                 SELECT 
                     CASE 
-                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday)) < 18 THEN 'Menor (0-17)'
-                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday)) <= 30 THEN 'Jovem (18-30)'
-                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday)) <= 50 THEN 'Adulto (31-50)'
-                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday)) <= 65 THEN 'Maduro (51-65)'
-                        ELSE 'Idoso (65+)'
-                    END as AgeGroup,
-                    COUNT(*) as Count
-                FROM clients 
-                WHERE is_active = true AND birthday IS NOT NULL
+                        WHEN DATEDIFF(year, DateOfBirth, GETDATE()) < 18 THEN 'Menor de 18'
+                        WHEN DATEDIFF(year, DateOfBirth, GETDATE()) BETWEEN 18 AND 30 THEN '18-30'
+                        WHEN DATEDIFF(year, DateOfBirth, GETDATE()) BETWEEN 31 AND 50 THEN '31-50'
+                        WHEN DATEDIFF(year, DateOfBirth, GETDATE()) BETWEEN 51 AND 70 THEN '51-70'
+                        ELSE 'Acima de 70'
+                    END as AgeRange,
+                    COUNT(*) as Count,
+                    CAST(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM Patients WHERE IsActive = 1) as DECIMAL(5,2)) as Percentage
+                FROM Patients
+                WHERE IsActive = 1
                 GROUP BY 
                     CASE 
-                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday)) < 18 THEN 'Menor (0-17)'
-                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday)) <= 30 THEN 'Jovem (18-30)'
-                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday)) <= 50 THEN 'Adulto (31-50)'
-                        WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthday)) <= 65 THEN 'Maduro (51-65)'
-                        ELSE 'Idoso (65+)'
+                        WHEN DATEDIFF(year, DateOfBirth, GETDATE()) < 18 THEN 'Menor de 18'
+                        WHEN DATEDIFF(year, DateOfBirth, GETDATE()) BETWEEN 18 AND 30 THEN '18-30'
+                        WHEN DATEDIFF(year, DateOfBirth, GETDATE()) BETWEEN 31 AND 50 THEN '31-50'
+                        WHEN DATEDIFF(year, DateOfBirth, GETDATE()) BETWEEN 51 AND 70 THEN '51-70'
+                        ELSE 'Acima de 70'
                     END";
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            var results = await connection.QueryAsync(sql);
-            var total = results.Sum(r => r.Count);
-
-            return results.Select(r => new AgeGroupDistribution
-            {
-                AgeGroup = r.AgeGroup,
-                Count = r.Count,
-                Percentage = total > 0 ? (decimal)r.Count / total * 100 : 0,
-                Range = r.AgeGroup
-            }).ToList();
+            return await _connection.QueryAsync<AgeDistribution>(sql);
         }
 
-        private async Task<List<CityDistribution>> GetCityDistribution()
+        public async Task<IEnumerable<GenderDistribution>> GetGenderDistributionAsync()
         {
             const string sql = @"
                 SELECT 
-                    COALESCE(city, 'Não informado') as City,
-                    COUNT(*) as Count
-                FROM clients 
-                WHERE is_active = true
-                GROUP BY city
-                ORDER BY Count DESC
-                LIMIT 10";
+                    Gender,
+                    CASE Gender 
+                        WHEN 'M' THEN 'Masculino'
+                        WHEN 'F' THEN 'Feminino'
+                        ELSE 'Outro'
+                    END as GenderLabel,
+                    COUNT(*) as Count,
+                    CAST(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM Patients WHERE IsActive = 1) as DECIMAL(5,2)) as Percentage,
+                    CASE Gender 
+                        WHEN 'M' THEN '#3B82F6'
+                        WHEN 'F' THEN '#EC4899'
+                        ELSE '#6B7280'
+                    END as Color
+                FROM Patients
+                WHERE IsActive = 1
+                GROUP BY Gender";
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            var results = await connection.QueryAsync(sql);
-            var total = results.Sum(r => r.Count);
-
-            return results.Select(r => new CityDistribution
-            {
-                City = r.City,
-                Count = r.Count,
-                Percentage = total > 0 ? (decimal)r.Count / total * 100 : 0
-            }).ToList();
+            return await _connection.QueryAsync<GenderDistribution>(sql);
         }
 
-        private async Task<List<HealthPlanDistribution>> GetHealthPlanDistribution()
+        public async Task<IEnumerable<LocationDistribution>> GetLocationDistributionAsync()
         {
             const string sql = @"
                 SELECT 
-                    COALESCE(health_plan, 'Particular') as HealthPlan,
-                    COUNT(*) as Count
-                FROM clients 
-                WHERE is_active = true
-                GROUP BY health_plan
+                    ISNULL(City, 'Não informado') as City,
+                    ISNULL(State, 'Não informado') as State,
+                    COUNT(*) as Count,
+                    CAST(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM Patients WHERE IsActive = 1) as DECIMAL(5,2)) as Percentage
+                FROM Patients
+                WHERE IsActive = 1
+                GROUP BY City, State
                 ORDER BY Count DESC";
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            var results = await connection.QueryAsync(sql);
-            var total = results.Sum(r => r.Count);
-
-            return results.Select(r => new HealthPlanDistribution
-            {
-                HealthPlan = r.HealthPlan,
-                Count = r.Count,
-                Percentage = total > 0 ? (decimal)r.Count / total * 100 : 0
-            }).ToList();
+            return await _connection.QueryAsync<LocationDistribution>(sql);
         }
 
-        private async Task<List<PatientTypeDistribution>> GetPatientTypeDistribution()
+        public async Task<IEnumerable<MonthlyRegistration>> GetMonthlyRegistrationsAsync(int months = 12)
         {
-            // Implementação simplificada
-            return new List<PatientTypeDistribution>
-            {
-                new() { PatientType = "Novo", Count = 25, Percentage = 15, Description = "Pacientes novos (0 consultas)" },
-                new() { PatientType = "Regular", Count = 80, Percentage = 50, Description = "Pacientes regulares (1-9 consultas)" },
-                new() { PatientType = "VIP", Count = 35, Percentage = 22, Description = "Pacientes VIP (10+ consultas)" },
-                new() { PatientType = "Inativo", Count = 20, Percentage = 13, Description = "Pacientes inativos (90+ dias)" }
+            const string sql = @"
+                SELECT 
+                    FORMAT(CreatedAt, 'yyyy-MM') as Month,
+                    FORMAT(CreatedAt, 'MMM yyyy', 'pt-BR') as MonthLabel,
+                    COUNT(*) as Count,
+                    0.0 as GrowthRate
+                FROM Patients
+                WHERE IsActive = 1 
+                AND CreatedAt >= DATEADD(month, -@Months, GETDATE())
+                GROUP BY FORMAT(CreatedAt, 'yyyy-MM'), FORMAT(CreatedAt, 'MMM yyyy', 'pt-BR')
+                ORDER BY Month";
+
+            return await _connection.QueryAsync<MonthlyRegistration>(sql, new { Months = months });
+        }
+
+        // Métodos simplificados para implementação futura
+        public async Task<IEnumerable<PatientCommunication>> GetPatientCommunicationsAsync(int patientId)
+        {
+            return new List<PatientCommunication>();
+        }
+
+        public async Task<PatientCommunication> CreateCommunicationAsync(PatientCommunication communication)
+        {
+            return communication;
+        }
+
+        public async Task<bool> UpdateCommunicationStatusAsync(int communicationId, string status, DateTime? deliveredAt = null, DateTime? readAt = null)
+        {
+            return true;
+        }
+
+        public async Task<IEnumerable<PatientNote>> GetPatientNotesAsync(int patientId)
+        {
+            return new List<PatientNote>();
+        }
+
+        public async Task<PatientNote> CreatePatientNoteAsync(PatientNote note)
+        {
+            return note;
+        }
+
+        public async Task<PatientNote?> UpdatePatientNoteAsync(int noteId, string title, string content, string priority)
+        {
+            return null;
+        }
+
+        public async Task<bool> DeletePatientNoteAsync(int noteId)
+        {
+            return true;
+        }
+
+        public async Task<IEnumerable<PatientDocument>> GetPatientDocumentsAsync(int patientId)
+        {
+            return new List<PatientDocument>();
+        }
+
+        public async Task<PatientDocument> CreatePatientDocumentAsync(PatientDocument document)
+        {
+            return document;
+        }
+
+        public async Task<bool> DeletePatientDocumentAsync(int documentId)
+        {
+            return true;
+        }
+
+        public async Task<bool> BulkUpdatePatientsAsync(PatientBulkAction action, int updatedBy)
+        {
+            return true;
+        }
+
+        public async Task<bool> BulkActivatePatientsAsync(int[] patientIds, int updatedBy)
+        {
+            return true;
+        }
+
+        public async Task<bool> BulkDeactivatePatientsAsync(int[] patientIds, string reason, int updatedBy)
+        {
+            return true;
+        }
+
+        public async Task<PatientReport> GetPatientReportAsync(int patientId, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            var patient = await GetPatientByIdAsync(patientId);
+            return new PatientReport 
+            { 
+                Patient = patient ?? new Patient(),
+                GeneratedAt = DateTime.Now.ToString(),
+                GeneratedBy = "Sistema"
             };
         }
 
-        private async Task<PatientRetentionMetrics> GetRetentionMetrics()
+        public async Task<IEnumerable<Patient>> GetPatientsForExportAsync(PatientExportRequest request)
         {
-            return new PatientRetentionMetrics
+            return await GetPatientsWithFiltersAsync(request.Filters ?? new PatientFilters());
+        }
+
+        public async Task<IEnumerable<PatientInsight>> GetPatientInsightsAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            return new List<PatientInsight>();
+        }
+
+        public async Task<IEnumerable<Patient>> GetInactivePatientsAsync(int daysSinceLastVisit = 90)
+        {
+            return new List<Patient>();
+        }
+
+        public async Task<IEnumerable<Patient>> GetHighValuePatientsAsync(decimal minimumValue = 1000)
+        {
+            return new List<Patient>();
+        }
+
+        public async Task<IEnumerable<Patient>> GetRiskPatientsAsync()
+        {
+            return new List<Patient>();
+        }
+
+        public async Task<object> GetDashboardMetricsAsync()
+        {
+            var analytics = await GetPatientAnalyticsAsync();
+            return new
             {
-                RetentionRate = 85.5m,
-                ChurnRate = 14.5m,
-                AverageLifetimeValue = 2450.00m,
-                AverageVisitsPerYear = 6,
-                ReactivationRate = 15.2m,
-                NewPatientAcquisition = 25
+                totalPatients = analytics.TotalPatients,
+                activePatients = analytics.ActivePatients,
+                newThisMonth = analytics.NewPatientsThisMonth,
+                averageAge = analytics.AverageAge
             };
         }
 
-        private async Task<decimal> CalculateGrowthRate()
+        public async Task<object> GetPatientGrowthAsync(int months = 12)
         {
-            const string sql = @"
-                SELECT 
-                    COUNT(CASE WHEN created_at >= DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as ThisMonth,
-                    COUNT(CASE WHEN created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month' 
-                        AND created_at < DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as LastMonth
-                FROM clients 
-                WHERE is_active = true";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var result = await connection.QuerySingleAsync(sql);
-            
-            return result.LastMonth > 0 ? 
-                ((decimal)result.ThisMonth - result.LastMonth) / result.LastMonth * 100 : 0;
+            return await GetMonthlyRegistrationsAsync(months);
         }
 
-        private async Task<decimal> CalculateAveragePatientValue()
+        public async Task<object> GetPatientRetentionAsync()
         {
-            const string sql = @"
-                SELECT 
-                    AVG(patient_value.total_spent) as AverageValue
-                FROM (
-                    SELECT 
-                        c.id,
-                        COALESCE(SUM(CASE WHEN a.status = 'completed' THEN COALESCE(s.price, 150.00) END), 0) as total_spent
-                    FROM clients c
-                    LEFT JOIN appointments a ON c.id = a.client_id
-                    LEFT JOIN services s ON a.service_id = s.id
-                    WHERE c.is_active = true
-                    GROUP BY c.id
-                ) patient_value";
-
-            using var connection = new NpgsqlConnection(_connectionString);
-            var result = await connection.QuerySingleOrDefaultAsync<decimal?>(sql);
-            return result ?? 0;
+            return new { retentionRate = 85.5 };
         }
 
-        private async Task<List<PatientTrendData>> GetGrowthTrend()
+        public async Task<IEnumerable<AppointmentSummary>> GetPatientAppointmentHistoryAsync(int patientId)
         {
-            const string sql = @"
-                SELECT 
-                    DATE(created_at) as Date,
-                    COUNT(*) as NewPatients
-                FROM clients 
-                WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
-                    AND is_active = true
-                GROUP BY DATE(created_at)
-                ORDER BY DATE(created_at)";
+            return new List<AppointmentSummary>();
+        }
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            var results = await connection.QueryAsync(sql);
+        public async Task<IEnumerable<PaymentSummary>> GetPatientPaymentHistoryAsync(int patientId)
+        {
+            return new List<PaymentSummary>();
+        }
 
-            return results.Select(r => new PatientTrendData
+        public async Task<bool> UpdateLastVisitAsync(int patientId, DateTime lastVisit)
+        {
+            const string sql = "UPDATE Patients SET LastVisit = @LastVisit, UpdatedAt = GETDATE() WHERE Id = @PatientId";
+            var rowsAffected = await _connection.ExecuteAsync(sql, new { PatientId = patientId, LastVisit = lastVisit });
+            return rowsAffected > 0;
+        }
+
+        public async Task<bool> IsCPFExistsAsync(string cpf, int? excludePatientId = null)
+        {
+            var sql = "SELECT COUNT(*) FROM Patients WHERE CPF = @CPF AND IsActive = 1";
+            var parameters = new DynamicParameters();
+            parameters.Add("CPF", cpf);
+
+            if (excludePatientId.HasValue)
             {
-                Date = r.Date,
-                NewPatients = r.NewPatients,
-                TotalPatients = 0, // Seria calculado cumulativamente
-                Period = ((DateTime)r.Date).ToString("dd/MM")
-            }).ToList();
+                sql += " AND Id != @ExcludeId";
+                parameters.Add("ExcludeId", excludePatientId);
+            }
+
+            var count = await _connection.QuerySingleAsync<int>(sql, parameters);
+            return count > 0;
         }
 
-        private async Task<List<PatientAppointment>> GetTodayAppointments()
+        public async Task<bool> IsEmailExistsAsync(string email, int? excludePatientId = null)
         {
-            const string sql = @"
-                SELECT 
-                    a.id as Id,
-                    s.name as ServiceName,
-                    st.name as StaffName,
-                    a.start_time as Date,
-                    a.status as Status,
-                    CASE a.status
-                        WHEN 'scheduled' THEN 'Agendado'
-                        WHEN 'confirmed' THEN 'Confirmado'
-                        WHEN 'completed' THEN 'Concluído'
-                        WHEN 'cancelled' THEN 'Cancelado'
-                        WHEN 'no_show' THEN 'Não compareceu'
-                        ELSE 'Agendado'
-                    END as StatusLabel,
-                    COALESCE(s.price, 150.00) as Cost,
-                    a.notes as Notes,
-                    COALESCE(a.room, 'Sala 1') as Room
-                FROM appointments a
-                INNER JOIN services s ON a.service_id = s.id
-                INNER JOIN staff st ON a.staff_id = st.id
-                WHERE DATE(a.start_time) = CURRENT_DATE
-                ORDER BY a.start_time";
+            var sql = "SELECT COUNT(*) FROM Patients WHERE Email = @Email AND IsActive = 1";
+            var parameters = new DynamicParameters();
+            parameters.Add("Email", email);
 
-            using var connection = new NpgsqlConnection(_connectionString);
-            return (await connection.QueryAsync<PatientAppointment>(sql)).ToList();
-        }
-
-        private async Task<List<PatientBirthday>> GetTodayBirthdays()
-        {
-            return (await GetBirthdaysAsync(DateTime.Today)).ToList();
-        }
-
-        private async Task<PatientSegment> CreateSegment(string name, string criteria)
-        {
-            // Implementação simplificada
-            return new PatientSegment
+            if (excludePatientId.HasValue)
             {
-                SegmentName = name,
-                Criteria = criteria,
-                PatientCount = 0,
-                AverageValue = 0,
-                Description = criteria,
-                Patients = new List<PatientSearchResult>()
-            };
+                sql += " AND Id != @ExcludeId";
+                parameters.Add("ExcludeId", excludePatientId);
+            }
+
+            var count = await _connection.QuerySingleAsync<int>(sql, parameters);
+            return count > 0;
         }
 
-        private (DateTime start, DateTime end) NormalizeDateRange(DateTime? startDate, DateTime? endDate)
+        public async Task<bool> IsPhoneExistsAsync(string phone, int? excludePatientId = null)
         {
-            var end = endDate ?? DateTime.Now.Date.AddDays(1).AddTicks(-1);
-            var start = startDate ?? end.AddDays(-30);
-            return (start, end);
+            var sql = "SELECT COUNT(*) FROM Patients WHERE Phone = @Phone AND IsActive = 1";
+            var parameters = new DynamicParameters();
+            parameters.Add("Phone", phone);
+
+            if (excludePatientId.HasValue)
+            {
+                sql += " AND Id != @ExcludeId";
+                parameters.Add("ExcludeId", excludePatientId);
+            }
+
+            var count = await _connection.QuerySingleAsync<int>(sql, parameters);
+            return count > 0;
         }
     }
 }
