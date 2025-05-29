@@ -154,25 +154,7 @@ export const insertFinancialTransactionSchema = createInsertSchema(financialTran
   paymentMethod: true,
 });
 
-// AI Chat Templates
-export const chatTemplates = pgTable("chatTemplates", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  category: text("category").notNull(),
-  content: text("content").notNull(),
-  active: boolean("active").notNull().default(true),
-  usageCount: integer("usageCount").notNull().default(0),
-  lastUsed: timestamp("lastUsed"),
-  createdAt: timestamp("createdAt").defaultNow(),
-  updatedAt: timestamp("updatedAt").defaultNow(),
-});
-
-export const insertChatTemplateSchema = createInsertSchema(chatTemplates).pick({
-  title: true,
-  category: true,
-  content: true,
-  active: true,
-});
+// Chat templates removed as requested
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -196,5 +178,4 @@ export type InsertInventory = z.infer<typeof insertInventorySchema>;
 export type FinancialTransaction = typeof financialTransactions.$inferSelect;
 export type InsertFinancialTransaction = z.infer<typeof insertFinancialTransactionSchema>;
 
-export type ChatTemplate = typeof chatTemplates.$inferSelect;
-export type InsertChatTemplate = z.infer<typeof insertChatTemplateSchema>;
+// ChatTemplate types removed

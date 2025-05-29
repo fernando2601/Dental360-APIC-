@@ -13,7 +13,7 @@ import {
   insertServiceSchema, 
   insertAppointmentSchema,
   insertInventorySchema,
-  insertChatTemplateSchema,
+
   insertFinancialTransactionSchema
 } from "@shared/schema";
 
@@ -337,147 +337,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat Template routes
-  app.get("/api/chat-templates", async (req: Request, res: Response) => {
-    try {
-      const { category } = req.query;
-      let templates;
-      if (category) {
-        templates = await storage.getChatTemplatesByCategory(category as string);
-      } else {
-        templates = await storage.getChatTemplates();
-      }
-      res.json(templates);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch chat templates" });
-    }
-  });
+  // Chat template routes removed completely
 
-  app.get("/api/chat-templates/:id", async (req: Request, res: Response) => {
-    try {
-      const template = await storage.getChatTemplate(Number(req.params.id));
-      if (!template) {
-        return res.status(404).json({ message: "Chat template not found" });
-      }
-      res.json(template);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch chat template" });
-    }
-  });
+  // All remaining chat template routes removed
 
-  app.post("/api/chat-templates", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertChatTemplateSchema.parse(req.body);
-      const template = await storage.createChatTemplate(validatedData);
-      res.status(201).json(template);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to create chat template" });
-    }
-  });
-
-  app.put("/api/chat-templates/:id", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertChatTemplateSchema.partial().parse(req.body);
-      const template = await storage.updateChatTemplate(Number(req.params.id), validatedData);
-      if (!template) {
-        return res.status(404).json({ message: "Chat template not found" });
-      }
-      res.json(template);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to update chat template" });
-    }
-  });
-
-  app.post("/api/chat-templates/:id/use", async (req: Request, res: Response) => {
-    try {
-      const template = await storage.incrementChatTemplateUsage(Number(req.params.id));
-      if (!template) {
-        return res.status(404).json({ message: "Chat template not found" });
-      }
-      res.json(template);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to increment chat template usage" });
-    }
-  });
-
-  app.delete("/api/chat-templates/:id", async (req: Request, res: Response) => {
-    try {
-      const success = await storage.deleteChatTemplate(Number(req.params.id));
-      if (!success) {
-        return res.status(404).json({ message: "Chat template not found" });
-      }
-      res.status(204).end();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete chat template" });
-    }
-  });
-
-  // Simple AI chat endpoint that matches queries to templates
-  app.post("/api/ai-chat", async (req: Request, res: Response) => {
-    try {
-      const { query } = req.body;
-      if (!query) {
-        return res.status(400).json({ message: "Query is required" });
-      }
-
-      const templates = await storage.getChatTemplates();
-      
-      // Simple keyword matching algorithm
-      let bestMatch: { template: any; score: number } | null = null;
-      
-      templates.forEach(template => {
-        if (!template.active) return;
-        
-        // Simple scoring based on keyword matches
-        const keywords = template.title.toLowerCase().split(' ')
-          .concat(template.category.toLowerCase().split(' '))
-          .concat(template.content.toLowerCase().split(' '))
-          .filter(word => word.length > 3); // Filter out short words
-        
-        const queryLower = query.toLowerCase();
-        let matchScore = 0;
-        
-        keywords.forEach(keyword => {
-          if (queryLower.includes(keyword)) {
-            matchScore += 1;
-          }
-        });
-        
-        if (!bestMatch || matchScore > bestMatch.score) {
-          bestMatch = { template, score: matchScore };
-        }
-      });
-      
-      if (bestMatch && bestMatch.score > 0) {
-        // Calculate a confidence percentage
-        const confidence = Math.min(bestMatch.score * 10, 100);
-        
-        // Increment the usage count
-        await storage.incrementChatTemplateUsage(bestMatch.template.id);
-        
-        return res.json({
-          response: bestMatch.template.content,
-          confidence,
-          template: bestMatch.template
-        });
-      }
-      
-      // No good match found
-      res.json({
-        response: "I'm sorry, I don't have specific information about that. Would you like to speak with one of our staff members for more details?",
-        confidence: 0,
-        template: null
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to process AI chat request" });
-    }
-  });
+  // AI chat endpoint removed completely
 
   // Endpoint para relatórios de agendamentos com filtros COMPLETOS
   app.get("/api/appointment-reports", authMiddleware, async (req: Request, res: Response) => {

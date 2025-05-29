@@ -67,14 +67,7 @@ export interface IStorage {
   updateFinancialTransaction(id: number, transaction: Partial<InsertFinancialTransaction>): Promise<FinancialTransaction | undefined>;
   deleteFinancialTransaction(id: number): Promise<boolean>;
   
-  // Chat Templates
-  getChatTemplates(): Promise<ChatTemplate[]>;
-  getChatTemplate(id: number): Promise<ChatTemplate | undefined>;
-  getChatTemplatesByCategory(category: string): Promise<ChatTemplate[]>;
-  createChatTemplate(template: InsertChatTemplate): Promise<ChatTemplate>;
-  updateChatTemplate(id: number, template: Partial<InsertChatTemplate>): Promise<ChatTemplate | undefined>;
-  deleteChatTemplate(id: number): Promise<boolean>;
-  incrementChatTemplateUsage(id: number): Promise<ChatTemplate | undefined>;
+  // Chat Templates removed completely
 }
 
 export class MemStorage implements IStorage {
