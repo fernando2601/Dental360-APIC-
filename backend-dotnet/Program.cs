@@ -42,7 +42,7 @@ builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IStaffRepository, StaffRepository>();
 builder.Services.AddScoped<IFinancialRepository, FinancialRepository>();
 
-// Agenda Module - Complete 3-layer architecture with advanced features
+// Agenda Module - Complete 3-layer architecture with calendar and scheduling features
 builder.Services.AddScoped<IAgendaRepository, AgendaRepository>();
 builder.Services.AddScoped<IAgendaService, AgendaService>();
 

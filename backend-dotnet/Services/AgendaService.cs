@@ -1,6 +1,5 @@
 using ClinicApi.Models;
 using ClinicApi.Repositories;
-using System.Text;
 
 namespace ClinicApi.Services
 {
@@ -15,49 +14,62 @@ namespace ClinicApi.Services
 
         public async Task<IEnumerable<Appointment>> GetAllAppointmentsAsync()
         {
-            return await _agendaRepository.GetAllAsync();
+            return await _agendaRepository.GetAllAppointmentsAsync();
         }
 
         public async Task<Appointment?> GetAppointmentByIdAsync(int id)
         {
-            return await _agendaRepository.GetByIdAsync(id);
+            return await _agendaRepository.GetAppointmentByIdAsync(id);
         }
 
-        public async Task<Appointment> CreateAppointmentAsync(CreateAppointmentDto appointmentDto)
+        public async Task<Appointment> CreateAppointmentAsync(CreateAppointmentDto appointmentDto, int createdBy)
         {
             // Validações de negócio
             await ValidateAppointmentAsync(appointmentDto);
             
             // Verificar conflitos
-            var conflicts = await _agendaRepository.CheckConflictsAsync(appointmentDto);
-            if (conflicts.Any())
+            var isAvailable = await _agendaRepository.IsTimeSlotAvailableAsync(
+                appointmentDto.StartTime, appointmentDto.EndTime, appointmentDto.StaffId, appointmentDto.Room);
+            
+            if (!isAvailable)
             {
-                throw new InvalidOperationException($"Conflitos detectados: {string.Join(", ", conflicts.Select(c => c.Description))}");
+                throw new InvalidOperationException("Horário não disponível");
             }
 
-            return await _agendaRepository.CreateAsync(appointmentDto);
+            return await _agendaRepository.CreateAppointmentAsync(appointmentDto, createdBy);
         }
 
-        public async Task<Appointment?> UpdateAppointmentAsync(int id, CreateAppointmentDto appointmentDto)
+        public async Task<Appointment?> UpdateAppointmentAsync(int id, UpdateAppointmentDto appointmentDto)
         {
-            await ValidateAppointmentAsync(appointmentDto);
-            return await _agendaRepository.UpdateAsync(id, appointmentDto);
+            await ValidateUpdateAppointmentAsync(appointmentDto);
+            
+            // Verificar conflitos se horário foi alterado
+            if (appointmentDto.StartTime.HasValue && appointmentDto.EndTime.HasValue)
+            {
+                var isAvailable = await _agendaRepository.IsTimeSlotAvailableAsync(
+                    appointmentDto.StartTime.Value, appointmentDto.EndTime.Value, 
+                    appointmentDto.StaffId, null, id);
+                
+                if (!isAvailable)
+                {
+                    throw new InvalidOperationException("Horário não disponível");
+                }
+            }
+
+            return await _agendaRepository.UpdateAppointmentAsync(id, appointmentDto);
         }
 
         public async Task<bool> DeleteAppointmentAsync(int id)
         {
-            return await _agendaRepository.DeleteAsync(id);
+            return await _agendaRepository.DeleteAppointmentAsync(id);
         }
 
-        public async Task<object> GetCalendarViewAsync(DateTime startDate, DateTime endDate, int? staffId = null, string viewType = "month")
+        public async Task<object> GetCalendarViewAsync(DateTime startDate, DateTime endDate)
         {
-            var appointments = await _agendaRepository.GetCalendarViewAsync(startDate, endDate, staffId);
+            var appointments = await _agendaRepository.GetCalendarViewAsync(startDate, endDate);
             
             return new
             {
-                viewType,
-                period = new { startDate, endDate },
-                staffId,
                 events = appointments.Select(a => new
                 {
                     id = a.Id,
@@ -69,442 +81,272 @@ namespace ClinicApi.Services
                     textColor = "#FFFFFF",
                     extendedProps = new
                     {
-                        status = a.Status,
-                        clientName = a.ClientName,
-                        staffName = a.StaffName,
+                        patientName = a.PatientName,
                         serviceName = a.ServiceName,
+                        staffName = a.StaffName,
                         room = a.Room,
+                        status = a.Status,
                         priority = a.Priority,
                         notes = a.Notes,
-                        estimatedCost = a.EstimatedCost,
-                        insuranceProvider = a.InsuranceProvider
+                        estimatedCost = a.EstimatedCost
                     }
                 }),
-                summary = new
+                period = new
                 {
-                    totalEvents = appointments.Count(),
-                    statusBreakdown = appointments.GroupBy(a => a.Status)
-                        .Select(g => new { status = g.Key, count = g.Count() })
-                        .ToList()
+                    start = startDate.ToString("yyyy-MM-dd"),
+                    end = endDate.ToString("yyyy-MM-dd")
                 }
             };
         }
 
-        public async Task<object> GetDayViewAsync(DateTime date, int? staffId = null)
+        public async Task<object> GetTodayAppointmentsAsync()
         {
-            var appointments = await _agendaRepository.GetDayViewAsync(date, staffId);
-            var availability = await _agendaRepository.GetStaffAvailabilityAsync(date, staffId);
+            var appointments = await _agendaRepository.GetTodayAppointmentsAsync();
             
             return new
             {
-                date = date.ToString("yyyy-MM-dd"),
-                appointments = appointments.OrderBy(a => a.Start),
-                staffAvailability = availability,
+                appointments = appointments.Select(a => new
+                {
+                    id = a.Id,
+                    patientName = a.PatientName,
+                    serviceName = a.ServiceName,
+                    staffName = a.StaffName,
+                    startTime = a.StartTime.ToString("HH:mm"),
+                    endTime = a.EndTime.ToString("HH:mm"),
+                    status = a.Status,
+                    room = a.Room,
+                    priority = a.Priority,
+                    estimatedCost = a.EstimatedCost
+                }).OrderBy(a => a.startTime),
                 summary = new
                 {
-                    totalAppointments = appointments.Count(),
-                    busySlots = appointments.Count(),
-                    availableSlots = availability.Sum(s => s.AvailableSlots.Count),
-                    utilizationRate = CalculateUtilizationRate(appointments, availability)
+                    total = appointments.Count(),
+                    pending = appointments.Count(a => a.Status == "pending"),
+                    confirmed = appointments.Count(a => a.Status == "confirmed"),
+                    completed = appointments.Count(a => a.Status == "completed")
                 }
             };
         }
 
-        public async Task<object> GetWeekViewAsync(DateTime weekStart, int? staffId = null)
+        public async Task<object> GetUpcomingAppointmentsAsync(int days = 7)
         {
-            var appointments = await _agendaRepository.GetWeekViewAsync(weekStart, staffId);
-            
-            // Agrupar por dia
-            var dailyAppointments = appointments
-                .GroupBy(a => a.Start.Date)
-                .Select(g => new
-                {
-                    date = g.Key.ToString("yyyy-MM-dd"),
-                    dayName = g.Key.ToString("dddd", new System.Globalization.CultureInfo("pt-BR")),
-                    appointments = g.OrderBy(a => a.Start).ToList(),
-                    count = g.Count()
-                })
-                .ToList();
-
-            return new
-            {
-                weekStart = weekStart.ToString("yyyy-MM-dd"),
-                weekEnd = weekStart.AddDays(6).ToString("yyyy-MM-dd"),
-                dailyAppointments,
-                summary = new
-                {
-                    totalAppointments = appointments.Count(),
-                    averagePerDay = Math.Round((decimal)appointments.Count() / 7, 1),
-                    busiestDay = dailyAppointments.OrderByDescending(d => d.count).FirstOrDefault()?.date,
-                    quietestDay = dailyAppointments.OrderBy(d => d.count).FirstOrDefault()?.date
-                }
-            };
-        }
-
-        public async Task<object> GetMonthViewAsync(DateTime monthStart, int? staffId = null)
-        {
-            var appointments = await _agendaRepository.GetMonthViewAsync(monthStart, staffId);
+            var appointments = await _agendaRepository.GetUpcomingAppointmentsAsync(days);
             
             return new
             {
-                month = monthStart.ToString("yyyy-MM"),
-                monthName = monthStart.ToString("MMMM yyyy", new System.Globalization.CultureInfo("pt-BR")),
-                appointments = appointments.OrderBy(a => a.Start),
-                summary = new
-                {
-                    totalAppointments = appointments.Count(),
-                    averagePerDay = Math.Round((decimal)appointments.Count() / DateTime.DaysInMonth(monthStart.Year, monthStart.Month), 1),
-                    statusBreakdown = appointments.GroupBy(a => a.Status)
-                        .Select(g => new { status = g.Key, count = g.Count() })
-                        .ToDictionary(x => x.status, x => x.count)
-                }
-            };
-        }
-
-        public async Task<ScheduleOverview> GetScheduleOverviewAsync(DateTime date)
-        {
-            return await _agendaRepository.GetScheduleOverviewAsync(date);
-        }
-
-        public async Task<object> GetStaffAvailabilityAsync(DateTime date, int? staffId = null)
-        {
-            var availability = await _agendaRepository.GetStaffAvailabilityAsync(date, staffId);
-            
-            return new
-            {
-                date = date.ToString("yyyy-MM-dd"),
-                staffAvailability = availability.Select(s => new
-                {
-                    staffId = s.StaffId,
-                    staffName = s.StaffName,
-                    isAvailable = s.IsAvailable,
-                    workingHours = new
+                appointments = appointments.GroupBy(a => a.StartTime.Date)
+                    .Select(g => new
                     {
-                        start = s.StartTime.ToString(@"hh\:mm"),
-                        end = s.EndTime.ToString(@"hh\:mm")
-                    },
-                    availableSlots = s.AvailableSlots.Count,
-                    unavailabilityReason = s.UnavailabilityReason
-                }),
-                summary = new
-                {
-                    totalStaff = availability.Count(),
-                    availableStaff = availability.Count(s => s.IsAvailable),
-                    totalAvailableSlots = availability.Sum(s => s.AvailableSlots.Count)
-                }
-            };
-        }
-
-        public async Task<object> GetAvailableSlotsAsync(DateTime date, int staffId, int serviceDuration)
-        {
-            var slots = await _agendaRepository.GetAvailableSlotsAsync(date, staffId, serviceDuration);
-            
-            return new
-            {
-                date = date.ToString("yyyy-MM-dd"),
-                staffId,
-                serviceDuration,
-                availableSlots = slots.Where(s => s.IsAvailable).Select(s => new
-                {
-                    start = s.Start.ToString("HH:mm"),
-                    end = s.End.ToString("HH:mm"),
-                    startDateTime = s.Start.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    endDateTime = s.End.ToString("yyyy-MM-ddTHH:mm:ss")
-                }),
-                occupiedSlots = slots.Where(s => !s.IsAvailable).Select(s => new
-                {
-                    start = s.Start.ToString("HH:mm"),
-                    end = s.End.ToString("HH:mm"),
-                    reason = s.Reason,
-                    existingAppointmentId = s.ExistingAppointmentId
-                }),
-                summary = new
-                {
-                    totalSlots = slots.Count(),
-                    availableCount = slots.Count(s => s.IsAvailable),
-                    occupiedCount = slots.Count(s => !s.IsAvailable),
-                    utilizationRate = slots.Any() ? (decimal)slots.Count(s => !s.IsAvailable) / slots.Count() * 100 : 0
-                }
-            };
-        }
-
-        public async Task<object> FindBestAvailableSlotAsync(int staffId, int serviceId, DateTime preferredDate, int durationMinutes)
-        {
-            var slots = await _agendaRepository.GetAvailableSlotsAsync(preferredDate, staffId, durationMinutes);
-            var availableSlots = slots.Where(s => s.IsAvailable).ToList();
-
-            if (!availableSlots.Any())
-            {
-                // Procurar nos próximos 7 dias
-                var alternativeDates = new List<object>();
-                for (int i = 1; i <= 7; i++)
-                {
-                    var nextDate = preferredDate.AddDays(i);
-                    var nextSlots = await _agendaRepository.GetAvailableSlotsAsync(nextDate, staffId, durationMinutes);
-                    var nextAvailable = nextSlots.Where(s => s.IsAvailable).Take(3);
-                    
-                    if (nextAvailable.Any())
-                    {
-                        alternativeDates.Add(new
+                        date = g.Key.ToString("yyyy-MM-dd"),
+                        dayName = g.Key.ToString("dddd", new System.Globalization.CultureInfo("pt-BR")),
+                        appointmentCount = g.Count(),
+                        appointments = g.Select(a => new
                         {
-                            date = nextDate.ToString("yyyy-MM-dd"),
-                            dayName = nextDate.ToString("dddd", new System.Globalization.CultureInfo("pt-BR")),
-                            slots = nextAvailable.Select(s => new
-                            {
-                                start = s.Start.ToString("HH:mm"),
-                                end = s.End.ToString("HH:mm"),
-                                startDateTime = s.Start.ToString("yyyy-MM-ddTHH:mm:ss")
-                            })
-                        });
-                    }
+                            id = a.Id,
+                            patientName = a.PatientName,
+                            serviceName = a.ServiceName,
+                            time = a.StartTime.ToString("HH:mm"),
+                            status = a.Status
+                        }).OrderBy(a => a.time)
+                    }).OrderBy(g => g.date),
+                summary = new
+                {
+                    totalDays = days,
+                    totalAppointments = appointments.Count(),
+                    averagePerDay = Math.Round((decimal)appointments.Count() / days, 1)
                 }
-
-                return new
-                {
-                    preferredDate = preferredDate.ToString("yyyy-MM-dd"),
-                    bestSlot = (object?)null,
-                    hasAvailability = false,
-                    message = "Não há horários disponíveis na data solicitada",
-                    alternativeDates
-                };
-            }
-
-            // Encontrar o melhor slot (preferência por manhã)
-            var bestSlot = availableSlots
-                .OrderBy(s => Math.Abs(s.Start.Hour - 9)) // Preferência por 9h
-                .ThenBy(s => s.Start)
-                .First();
-
-            return new
-            {
-                preferredDate = preferredDate.ToString("yyyy-MM-dd"),
-                bestSlot = new
-                {
-                    start = bestSlot.Start.ToString("HH:mm"),
-                    end = bestSlot.End.ToString("HH:mm"),
-                    startDateTime = bestSlot.Start.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    endDateTime = bestSlot.End.ToString("yyyy-MM-ddTHH:mm:ss")
-                },
-                hasAvailability = true,
-                alternativeSlots = availableSlots.Take(5).Select(s => new
-                {
-                    start = s.Start.ToString("HH:mm"),
-                    end = s.End.ToString("HH:mm"),
-                    startDateTime = s.Start.ToString("yyyy-MM-ddTHH:mm:ss")
-                })
             };
         }
 
-        public async Task<object> SuggestAlternativeSlotsAsync(CreateAppointmentDto appointment)
+        public async Task<bool> IsTimeSlotAvailableAsync(DateTime startTime, DateTime endTime, int? staffId = null, string? room = null, int? excludeAppointmentId = null)
         {
-            var conflicts = await _agendaRepository.CheckConflictsAsync(appointment);
+            return await _agendaRepository.IsTimeSlotAvailableAsync(startTime, endTime, staffId, room, excludeAppointmentId);
+        }
+
+        public async Task<object> CheckAvailabilityAsync(DateTime startTime, DateTime endTime, int? staffId = null)
+        {
+            var isAvailable = await _agendaRepository.IsTimeSlotAvailableAsync(startTime, endTime, staffId);
+            var conflicts = await _agendaRepository.CheckConflictsAsync(startTime, endTime, staffId, null);
             
-            if (!conflicts.Any())
-            {
-                return new
-                {
-                    hasConflicts = false,
-                    originalSlot = new
-                    {
-                        start = appointment.StartTime.ToString("yyyy-MM-ddTHH:mm:ss"),
-                        end = appointment.EndTime.ToString("yyyy-MM-ddTHH:mm:ss")
-                    },
-                    message = "Horário disponível"
-                };
-            }
-
-            var duration = (int)(appointment.EndTime - appointment.StartTime).TotalMinutes;
-            var bestSlot = await FindBestAvailableSlotAsync(appointment.StaffId, appointment.ServiceId, appointment.StartTime.Date, duration);
-
             return new
             {
-                hasConflicts = true,
+                isAvailable,
                 conflicts = conflicts.Select(c => new
                 {
                     type = c.ConflictType,
-                    description = c.Description,
-                    suggestion = c.Suggestion
+                    description = c.ConflictDescription,
+                    conflictingAppointmentId = c.ConflictingAppointmentId
                 }),
-                originalSlot = new
-                {
-                    start = appointment.StartTime.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    end = appointment.EndTime.ToString("yyyy-MM-ddTHH:mm:ss")
-                },
-                suggestedAlternatives = bestSlot
+                suggestion = isAvailable ? null : "Tente outro horário ou profissional"
             };
         }
 
-        public async Task<bool> ValidateAppointmentAsync(CreateAppointmentDto appointment)
+        public async Task<object> GetAvailableTimeSlotsAsync(DateTime date, int durationMinutes = 60, int? staffId = null)
         {
-            // Validações básicas
-            if (appointment.StartTime >= appointment.EndTime)
-                throw new ArgumentException("Horário de início deve ser anterior ao horário de término");
-
-            if (appointment.StartTime < DateTime.Now.AddMinutes(-30))
-                throw new ArgumentException("Não é possível agendar para horários passados");
-
-            if (appointment.ClientId <= 0)
-                throw new ArgumentException("Cliente é obrigatório");
-
-            if (appointment.StaffId <= 0)
-                throw new ArgumentException("Profissional é obrigatório");
-
-            if (appointment.ServiceId <= 0)
-                throw new ArgumentException("Serviço é obrigatório");
-
-            // Validar duração mínima
-            var duration = (appointment.EndTime - appointment.StartTime).TotalMinutes;
-            if (duration < 15)
-                throw new ArgumentException("Duração mínima de 15 minutos");
-
-            // Validar horário comercial
-            var hour = appointment.StartTime.Hour;
-            if (hour < 7 || hour > 19)
-                throw new ArgumentException("Agendamento fora do horário comercial (7h às 19h)");
-
-            return true;
-        }
-
-        public async Task<object> CreateRecurringAppointmentsAsync(CreateAppointmentDto baseAppointment, RecurringAppointmentPattern pattern)
-        {
-            await ValidateAppointmentAsync(baseAppointment);
-            
-            var appointments = await _agendaRepository.CreateRecurringAppointmentsAsync(baseAppointment, pattern);
+            var slots = await _agendaRepository.GetAvailabilitySlotsAsync(date, staffId);
             
             return new
             {
-                parentAppointment = appointments.First(),
-                recurringAppointments = appointments.Skip(1),
-                pattern = new
+                date = date.ToString("yyyy-MM-dd"),
+                durationMinutes,
+                staffId,
+                availableSlots = slots.Where(s => s.IsAvailable).Select(s => new
                 {
-                    type = pattern.Type,
-                    interval = pattern.Interval,
-                    endDate = pattern.EndDate.ToString("yyyy-MM-dd"),
-                    totalOccurrences = appointments.Count()
-                },
-                summary = new
-                {
-                    totalCreated = appointments.Count(),
-                    startDate = baseAppointment.StartTime.ToString("yyyy-MM-dd"),
-                    endDate = pattern.EndDate.ToString("yyyy-MM-dd")
-                }
+                    startTime = s.Start.ToString("HH:mm"),
+                    endTime = s.End.ToString("HH:mm"),
+                    staffName = s.StaffName,
+                    room = s.Room
+                }).OrderBy(s => s.startTime)
             };
         }
 
-        public async Task<object> GetRecurringSeriesAsync(int parentId)
+        public async Task<bool> ConfirmAppointmentAsync(int id, int? confirmedBy = null)
         {
-            var appointments = await _agendaRepository.GetRecurringAppointmentsAsync(parentId);
+            return await _agendaRepository.ConfirmAppointmentAsync(id, confirmedBy);
+        }
+
+        public async Task<bool> CancelAppointmentAsync(int id, string reason, int? cancelledBy = null)
+        {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                throw new ArgumentException("Motivo do cancelamento é obrigatório");
+            }
+
+            return await _agendaRepository.CancelAppointmentAsync(id, reason, cancelledBy);
+        }
+
+        public async Task<bool> CompleteAppointmentAsync(int id, decimal? actualCost = null, string? notes = null)
+        {
+            return await _agendaRepository.CompleteAppointmentAsync(id, actualCost, notes);
+        }
+
+        public async Task<bool> MarkNoShowAsync(int id, string? notes = null)
+        {
+            return await _agendaRepository.MarkNoShowAsync(id, notes);
+        }
+
+        public async Task<bool> RescheduleAppointmentAsync(RescheduleRequest request, int? rescheduledBy = null)
+        {
+            // Verificar disponibilidade do novo horário
+            var isAvailable = await _agendaRepository.IsTimeSlotAvailableAsync(
+                request.NewStartTime, request.NewEndTime, request.NewStaffId, request.NewRoom, request.AppointmentId);
+            
+            if (!isAvailable)
+            {
+                throw new InvalidOperationException("Novo horário não está disponível");
+            }
+
+            return await _agendaRepository.RescheduleAppointmentAsync(request, rescheduledBy);
+        }
+
+        public async Task<object> GetAppointmentsWithFiltersAsync(AgendaFilters filters)
+        {
+            var appointments = await _agendaRepository.GetAppointmentsWithFiltersAsync(filters);
+            var totalCount = await _agendaRepository.GetAppointmentsCountAsync(filters);
             
             return new
             {
-                parentId,
-                appointments = appointments.OrderBy(a => a.StartTime),
-                summary = new
+                appointments = appointments.Select(a => new
                 {
-                    totalAppointments = appointments.Count(),
-                    completedCount = appointments.Count(a => a.Status == "completed"),
-                    pendingCount = appointments.Count(a => a.Status == "scheduled" || a.Status == "confirmed"),
-                    cancelledCount = appointments.Count(a => a.Status == "cancelled")
-                }
-            };
-        }
-
-        public async Task<bool> UpdateRecurringSeriesAsync(int parentId, CreateAppointmentDto updates, bool updateFutureOnly = false)
-        {
-            return await _agendaRepository.UpdateRecurringSeriesAsync(parentId, updates, updateFutureOnly);
-        }
-
-        public async Task<bool> UpdateAppointmentStatusAsync(int id, string status, string? notes = null)
-        {
-            // Validar status
-            var validStatuses = new[] { "scheduled", "confirmed", "completed", "cancelled", "no_show" };
-            if (!validStatuses.Contains(status))
-                throw new ArgumentException($"Status inválido. Use: {string.Join(", ", validStatuses)}");
-
-            return await _agendaRepository.UpdateAppointmentStatusAsync(id, status, notes);
-        }
-
-        public async Task<object> GetAppointmentsByStatusAsync(string status, DateTime? date = null)
-        {
-            var appointments = await _agendaRepository.GetAppointmentsByStatusAsync(status, date);
-            
-            return new
-            {
-                status,
-                date = date?.ToString("yyyy-MM-dd"),
-                appointments = appointments.OrderBy(a => a.StartTime),
-                count = appointments.Count()
-            };
-        }
-
-        public async Task<bool> BulkUpdateStatusAsync(int[] appointmentIds, string status)
-        {
-            if (!appointmentIds.Any())
-                return false;
-
-            return await _agendaRepository.BulkUpdateStatusAsync(appointmentIds, status);
-        }
-
-        public async Task<object> GetAppointmentReportsAsync(DateTime? startDate, DateTime? endDate, string[]? statuses, 
-            int? professionalId, int? clientId, string? convenio, string? sala, int page, int limit)
-        {
-            var appointments = await _agendaRepository.GetAppointmentReportsAsync(startDate, endDate, statuses, 
-                professionalId, clientId, convenio, sala, page, limit);
-            
-            var totalCount = await _agendaRepository.GetAppointmentReportsCountAsync(startDate, endDate, statuses, 
-                professionalId, clientId, convenio, sala);
-
-            return new
-            {
-                appointments,
+                    id = a.Id,
+                    patientName = a.PatientName,
+                    serviceName = a.ServiceName,
+                    staffName = a.StaffName,
+                    startTime = a.StartTime.ToString("yyyy-MM-dd HH:mm"),
+                    endTime = a.EndTime.ToString("HH:mm"),
+                    status = a.Status,
+                    priority = a.Priority,
+                    room = a.Room,
+                    estimatedCost = a.EstimatedCost
+                }),
                 pagination = new
                 {
-                    currentPage = page,
-                    totalPages = (int)Math.Ceiling((double)totalCount / limit),
+                    currentPage = filters.Page,
+                    totalPages = (int)Math.Ceiling((double)totalCount / filters.Limit),
                     totalItems = totalCount,
-                    itemsPerPage = limit
+                    itemsPerPage = filters.Limit
                 },
                 filters = new
                 {
-                    startDate = startDate?.ToString("yyyy-MM-dd"),
-                    endDate = endDate?.ToString("yyyy-MM-dd"),
-                    statuses,
-                    professionalId,
-                    clientId,
-                    convenio,
-                    sala
+                    startDate = filters.StartDate?.ToString("yyyy-MM-dd"),
+                    endDate = filters.EndDate?.ToString("yyyy-MM-dd"),
+                    patientId = filters.PatientId,
+                    staffId = filters.StaffId,
+                    status = filters.Status,
+                    priority = filters.Priority
                 }
             };
         }
 
-        public async Task<AppointmentStatistics> GetAppointmentStatisticsAsync(DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<object> GetAppointmentsByPatientAsync(int patientId)
         {
-            return await _agendaRepository.GetAppointmentStatisticsAsync(startDate, endDate);
-        }
-
-        public async Task<object> GetDashboardMetricsAsync(DateTime? date = null)
-        {
-            var metrics = await _agendaRepository.GetDashboardMetricsAsync(date);
-            var statistics = await GetAppointmentStatisticsAsync(date, date?.AddDays(1));
+            var appointments = await _agendaRepository.GetAppointmentsByPatientAsync(patientId);
             
             return new
             {
-                metrics,
-                statistics,
-                insights = GenerateDashboardInsights(metrics, statistics),
-                generatedAt = DateTime.UtcNow
+                patientId,
+                appointments = appointments.Select(a => new
+                {
+                    id = a.Id,
+                    serviceName = a.ServiceName,
+                    staffName = a.StaffName,
+                    startTime = a.StartTime.ToString("yyyy-MM-dd HH:mm"),
+                    status = a.Status,
+                    actualCost = a.ActualCost
+                }).OrderByDescending(a => a.startTime),
+                summary = new
+                {
+                    totalAppointments = appointments.Count(),
+                    lastAppointment = appointments.OrderByDescending(a => a.StartTime).FirstOrDefault()?.StartTime.ToString("yyyy-MM-dd"),
+                    totalSpent = appointments.Where(a => a.ActualCost.HasValue).Sum(a => a.ActualCost.Value)
+                }
             };
         }
 
-        public async Task<object> GetUtilizationReportAsync(DateTime startDate, DateTime endDate)
+        public async Task<object> GetAppointmentsByStaffAsync(int staffId, DateTime? startDate = null, DateTime? endDate = null)
         {
-            return await _agendaRepository.GetUtilizationReportAsync(startDate, endDate);
+            var appointments = await _agendaRepository.GetAppointmentsByStaffAsync(staffId, startDate, endDate);
+            
+            return new
+            {
+                staffId,
+                period = new
+                {
+                    startDate = startDate?.ToString("yyyy-MM-dd"),
+                    endDate = endDate?.ToString("yyyy-MM-dd")
+                },
+                appointments = appointments.Select(a => new
+                {
+                    id = a.Id,
+                    patientName = a.PatientName,
+                    serviceName = a.ServiceName,
+                    startTime = a.StartTime.ToString("yyyy-MM-dd HH:mm"),
+                    status = a.Status,
+                    room = a.Room
+                }).OrderBy(a => a.startTime),
+                summary = new
+                {
+                    totalAppointments = appointments.Count(),
+                    completedAppointments = appointments.Count(a => a.Status == "completed"),
+                    completionRate = appointments.Any() ? 
+                        Math.Round((decimal)appointments.Count(a => a.Status == "completed") / appointments.Count() * 100, 1) : 0
+                }
+            };
         }
 
-        public async Task<object> GetPerformanceAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<AgendaStatistics> GetAgendaStatisticsAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
-            var statistics = await GetAppointmentStatisticsAsync(startDate, endDate);
-            var utilization = await GetUtilizationReportAsync(startDate ?? DateTime.Today.AddMonths(-1), endDate ?? DateTime.Today);
+            return await _agendaRepository.GetAgendaStatisticsAsync(startDate, endDate);
+        }
+
+        public async Task<object> GetDashboardMetricsAsync()
+        {
+            return await _agendaRepository.GetDashboardMetricsAsync();
+        }
+
+        public async Task<object> GetHourlyDistributionAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            var distribution = await _agendaRepository.GetHourlyDistributionAsync(startDate, endDate);
             
             return new
             {
@@ -513,349 +355,139 @@ namespace ClinicApi.Services
                     startDate = startDate?.ToString("yyyy-MM-dd"),
                     endDate = endDate?.ToString("yyyy-MM-dd")
                 },
-                statistics,
-                utilization,
-                insights = new
+                distribution = distribution.Select(h => new
                 {
-                    efficiency = CalculateEfficiencyScore(statistics),
-                    trends = AnalyzeTrends(statistics),
-                    recommendations = GenerateRecommendations(statistics)
-                }
+                    hour = h.Hour,
+                    hourLabel = $"{h.Hour:00}:00",
+                    count = h.Count,
+                    percentage = h.Percentage
+                }).OrderBy(h => h.hour)
             };
         }
 
-        public async Task<object> GetPendingRemindersAsync()
+        public async Task<object> GetWeeklyDistributionAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
-            var reminders = await _agendaRepository.GetPendingRemindersAsync();
+            var distribution = await _agendaRepository.GetWeeklyDistributionAsync(startDate, endDate);
             
             return new
             {
-                pendingReminders = reminders.OrderBy(r => r.ScheduledFor),
-                count = reminders.Count(),
-                summary = new
+                period = new
                 {
-                    smsReminders = reminders.Count(r => r.Type == "sms"),
-                    emailReminders = reminders.Count(r => r.Type == "email"),
-                    whatsappReminders = reminders.Count(r => r.Type == "whatsapp")
-                }
-            };
-        }
-
-        public async Task<bool> CreateReminderAsync(int appointmentId, string type, DateTime? scheduledFor = null)
-        {
-            var appointment = await GetAppointmentByIdAsync(appointmentId);
-            if (appointment == null)
-                return false;
-
-            // Definir horário padrão (24h antes)
-            var reminderTime = scheduledFor ?? appointment.StartTime.AddDays(-1);
-            
-            await _agendaRepository.CreateReminderAsync(appointmentId, type, reminderTime);
-            return true;
-        }
-
-        public async Task<bool> SendRemindersAsync()
-        {
-            var pendingReminders = await _agendaRepository.GetPendingRemindersAsync();
-            var sent = 0;
-
-            foreach (var reminder in pendingReminders)
-            {
-                try
-                {
-                    // Aqui seria integrado com serviços de SMS, Email, WhatsApp
-                    // Por enquanto, apenas marcamos como enviado
-                    await _agendaRepository.MarkReminderSentAsync(reminder.Id);
-                    sent++;
-                }
-                catch
-                {
-                    // Log do erro
-                    continue;
-                }
-            }
-
-            return sent > 0;
-        }
-
-        public async Task<object> GetReminderSettingsAsync()
-        {
-            return new
-            {
-                defaultTypes = new[] { "sms", "email", "whatsapp" },
-                defaultTiming = new
-                {
-                    hours24Before = true,
-                    hours2Before = true,
-                    minutes30Before = false
+                    startDate = startDate?.ToString("yyyy-MM-dd"),
+                    endDate = endDate?.ToString("yyyy-MM-dd")
                 },
-                templates = new
+                distribution = distribution.Select(d => new
                 {
-                    sms = "Lembrete: Você tem agendamento amanhã às {time} na clínica.",
-                    email = "Prezado(a) {clientName}, lembramos do seu agendamento para {date} às {time}.",
-                    whatsapp = "🦷 Olá {clientName}! Seu agendamento está marcado para {date} às {time}."
-                }
-            };
-        }
-
-        public async Task<object> GetStaffWorkingHoursAsync(int staffId)
-        {
-            var workingHours = await _agendaRepository.GetStaffWorkingHoursAsync(staffId);
-            
-            return new
-            {
-                staffId,
-                workingHours = workingHours.OrderBy(w => w.DayOfWeek).Select(w => new
-                {
-                    dayOfWeek = (int)w.DayOfWeek,
-                    dayName = w.DayOfWeek.ToString(),
-                    isWorkingDay = w.IsWorkingDay,
-                    startTime = w.StartTime.ToString(@"hh\:mm"),
-                    endTime = w.EndTime.ToString(@"hh\:mm")
+                    dayOfWeek = d.DayOfWeek.Trim(),
+                    count = d.Count,
+                    percentage = d.Percentage,
+                    revenue = d.Revenue
                 })
             };
         }
 
-        public async Task<bool> UpdateWorkingHoursAsync(int staffId, List<WorkingHours> workingHours)
+        public async Task<object> GetStatusDistributionAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
-            // Validar horários
-            foreach (var wh in workingHours)
-            {
-                if (wh.IsWorkingDay && wh.StartTime >= wh.EndTime)
-                    throw new ArgumentException($"Horário inválido para {wh.DayOfWeek}");
-            }
-
-            return await _agendaRepository.UpdateWorkingHoursAsync(staffId, workingHours);
-        }
-
-        public async Task<object> GetStaffScheduleAsync(int staffId, DateTime startDate, DateTime endDate)
-        {
-            var appointments = await _agendaRepository.GetCalendarViewAsync(startDate, endDate, staffId);
-            var workingHours = await _agendaRepository.GetStaffWorkingHoursAsync(staffId);
+            var distribution = await _agendaRepository.GetStatusDistributionAsync(startDate, endDate);
             
             return new
             {
-                staffId,
-                period = new { startDate = startDate.ToString("yyyy-MM-dd"), endDate = endDate.ToString("yyyy-MM-dd") },
-                appointments = appointments.OrderBy(a => a.Start),
-                workingHours,
-                summary = new
+                period = new
                 {
-                    totalAppointments = appointments.Count(),
-                    totalHours = appointments.Sum(a => (a.End - a.Start).TotalHours),
-                    busyDays = appointments.GroupBy(a => a.Start.Date).Count(),
-                    averagePerDay = appointments.Any() ? 
-                        Math.Round((double)appointments.Count() / ((endDate - startDate).Days + 1), 1) : 0
-                }
+                    startDate = startDate?.ToString("yyyy-MM-dd"),
+                    endDate = endDate?.ToString("yyyy-MM-dd")
+                },
+                distribution = distribution.Select(s => new
+                {
+                    status = s.Status,
+                    statusLabel = s.StatusLabel,
+                    count = s.Count,
+                    percentage = s.Percentage,
+                    color = s.Color
+                })
             };
+        }
+
+        public async Task<bool> BulkUpdateAppointmentsAsync(BulkAppointmentAction action, int? updatedBy = null)
+        {
+            return await _agendaRepository.BulkUpdateAppointmentsAsync(action, updatedBy);
+        }
+
+        public async Task<object> GetAppointmentReportAsync(DateTime startDate, DateTime endDate, string reportType)
+        {
+            return await _agendaRepository.GetAppointmentReportAsync(startDate, endDate, reportType);
+        }
+
+        public async Task<object> GetStaffProductivityReportAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _agendaRepository.GetStaffProductivityReportAsync(startDate, endDate);
+        }
+
+        public async Task<object> GetServiceUtilizationReportAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _agendaRepository.GetServiceUtilizationReportAsync(startDate, endDate);
         }
 
         public async Task<object> GetAvailableRoomsAsync(DateTime startTime, DateTime endTime)
         {
-            var availableRooms = await _agendaRepository.GetAvailableRoomsAsync(startTime, endTime);
+            var rooms = await _agendaRepository.GetAvailableRoomsAsync(startTime, endTime);
             
             return new
             {
-                requestedSlot = new
+                timeSlot = new
                 {
-                    start = startTime.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    end = endTime.ToString("yyyy-MM-ddTHH:mm:ss")
+                    startTime = startTime.ToString("yyyy-MM-dd HH:mm"),
+                    endTime = endTime.ToString("yyyy-MM-dd HH:mm")
                 },
-                availableRooms = availableRooms.OrderBy(r => r),
-                count = availableRooms.Count()
-            };
-        }
-
-        public async Task<object> GetRoomUtilizationAsync(DateTime date)
-        {
-            return await _agendaRepository.GetRoomUtilizationAsync(date);
-        }
-
-        public async Task<object> GetRoomScheduleAsync(string room, DateTime date)
-        {
-            var appointments = await _agendaRepository.GetDayViewAsync(date);
-            var roomAppointments = appointments.Where(a => a.Room == room);
-            
-            return new
-            {
-                room,
-                date = date.ToString("yyyy-MM-dd"),
-                appointments = roomAppointments.OrderBy(a => a.Start),
-                summary = new
+                availableRooms = rooms.Select(r => new
                 {
-                    totalAppointments = roomAppointments.Count(),
-                    totalHours = roomAppointments.Sum(a => (a.End - a.Start).TotalHours),
-                    utilizationRate = CalculateRoomUtilization(roomAppointments, date)
-                }
+                    name = r,
+                    isAvailable = true
+                })
             };
         }
 
-        public async Task<object> CheckConflictsAsync(CreateAppointmentDto appointment)
+        public async Task<object> GetRoomUtilizationAsync(DateTime startDate, DateTime endDate)
         {
-            var conflicts = await _agendaRepository.CheckConflictsAsync(appointment);
-            
-            return new
-            {
-                hasConflicts = conflicts.Any(),
-                conflicts = conflicts.Select(c => new
-                {
-                    type = c.ConflictType,
-                    description = c.Description,
-                    conflictTime = c.ConflictTime.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    suggestion = c.Suggestion,
-                    conflictingAppointmentId = c.ConflictingAppointmentId
-                }),
-                appointment = new
-                {
-                    start = appointment.StartTime.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    end = appointment.EndTime.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    staffId = appointment.StaffId,
-                    room = appointment.Room
-                }
-            };
+            return await _agendaRepository.GetRoomUtilizationAsync(startDate, endDate);
         }
 
-        public async Task<object> ResolveSchedulingConflictsAsync(int appointmentId)
+        public async Task<bool> SendAppointmentNotificationAsync(int appointmentId, string type)
         {
-            var appointment = await GetAppointmentByIdAsync(appointmentId);
-            if (appointment == null)
-                return new { success = false, message = "Agendamento não encontrado" };
-
-            var appointmentDto = new CreateAppointmentDto
+            return type switch
             {
-                ClientId = appointment.ClientId,
-                StaffId = appointment.StaffId,
-                ServiceId = appointment.ServiceId,
-                StartTime = appointment.StartTime,
-                EndTime = appointment.EndTime,
-                Room = appointment.Room
-            };
-
-            return await SuggestAlternativeSlotsAsync(appointmentDto);
-        }
-
-        public async Task<object> ExportScheduleAsync(DateTime startDate, DateTime endDate, string format = "pdf")
-        {
-            var appointments = await _agendaRepository.GetCalendarViewAsync(startDate, endDate);
-            
-            // Simular geração de relatório
-            var fileName = $"agenda-{startDate:yyyyMMdd}-{endDate:yyyyMMdd}.{format.ToLower()}";
-            var content = Encoding.UTF8.GetBytes("Relatório de agenda gerado");
-            var contentType = format.ToLower() switch
-            {
-                "pdf" => "application/pdf",
-                "excel" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "csv" => "text/csv",
-                _ => "application/octet-stream"
-            };
-
-            return new
-            {
-                fileName,
-                content,
-                contentType,
-                summary = new
-                {
-                    period = new { startDate = startDate.ToString("yyyy-MM-dd"), endDate = endDate.ToString("yyyy-MM-dd") },
-                    totalAppointments = appointments.Count(),
-                    format
-                }
-            };
-        }
-
-        public async Task<object> ImportAppointmentsAsync(object importData)
-        {
-            // Implementação básica de importação
-            return new
-            {
-                success = true,
-                message = "Importação realizada com sucesso",
-                imported = 0,
-                errors = new List<string>()
+                "confirmation" => await _agendaRepository.SendAppointmentConfirmationAsync(appointmentId),
+                "reminder" => await _agendaRepository.SendAppointmentReminderAsync(appointmentId, type),
+                "rescheduling" => await _agendaRepository.SendReschedulingNotificationAsync(appointmentId),
+                "cancellation" => await _agendaRepository.SendCancellationNotificationAsync(appointmentId),
+                _ => false
             };
         }
 
         // Métodos auxiliares privados
-        private decimal CalculateUtilizationRate(IEnumerable<AppointmentCalendarView> appointments, IEnumerable<StaffAvailability> availability)
+        private async Task ValidateAppointmentAsync(CreateAppointmentDto appointmentDto)
         {
-            if (!availability.Any()) return 0;
+            if (appointmentDto.PatientId <= 0)
+                throw new ArgumentException("Paciente é obrigatório");
 
-            var totalWorkingHours = availability.Sum(a => (a.EndTime - a.StartTime).TotalHours);
-            var totalAppointmentHours = appointments.Sum(a => (a.End - a.Start).TotalHours);
+            if (appointmentDto.StartTime >= appointmentDto.EndTime)
+                throw new ArgumentException("Horário de início deve ser anterior ao horário de término");
 
-            return totalWorkingHours > 0 ? (decimal)(totalAppointmentHours / totalWorkingHours * 100) : 0;
+            if (appointmentDto.StartTime < DateTime.Now.AddMinutes(-30))
+                throw new ArgumentException("Não é possível agendar consultas no passado");
+
+            // Outras validações podem ser adicionadas aqui
         }
 
-        private decimal CalculateRoomUtilization(IEnumerable<AppointmentCalendarView> roomAppointments, DateTime date)
+        private async Task ValidateUpdateAppointmentAsync(UpdateAppointmentDto appointmentDto)
         {
-            const int workingHours = 10; // 8h às 18h
-            var occupiedHours = roomAppointments.Sum(a => (a.End - a.Start).TotalHours);
-            return (decimal)(occupiedHours / workingHours * 100);
-        }
-
-        private object GenerateDashboardInsights(dynamic metrics, AppointmentStatistics statistics)
-        {
-            var insights = new List<string>();
-
-            if (statistics.CompletionRate > 90)
-                insights.Add("Excelente taxa de conclusão de agendamentos!");
-
-            if (statistics.NoShowRate > 15)
-                insights.Add("Taxa de faltas elevada. Considere melhorar os lembretes.");
-
-            if (statistics.CancellationRate > 20)
-                insights.Add("Muitos cancelamentos. Revisar política de reagendamento.");
-
-            return new
+            if (appointmentDto.StartTime.HasValue && appointmentDto.EndTime.HasValue)
             {
-                insights,
-                performance = statistics.CompletionRate > 85 ? "Excelente" : 
-                             statistics.CompletionRate > 70 ? "Bom" : "Precisa melhorar"
-            };
-        }
+                if (appointmentDto.StartTime >= appointmentDto.EndTime)
+                    throw new ArgumentException("Horário de início deve ser anterior ao horário de término");
+            }
 
-        private decimal CalculateEfficiencyScore(AppointmentStatistics statistics)
-        {
-            var completionWeight = 0.4m;
-            var utilizationWeight = 0.3m;
-            var punctualityWeight = 0.3m;
-
-            var completionScore = statistics.CompletionRate;
-            var utilizationScore = statistics.TotalAppointments > 0 ? 
-                Math.Min(100, statistics.TotalAppointments * 10) : 0; // Estimativa
-            var punctualityScore = 100 - statistics.NoShowRate; // Estimativa
-
-            return (completionScore * completionWeight) + 
-                   (utilizationScore * utilizationWeight) + 
-                   (punctualityScore * punctualityWeight);
-        }
-
-        private object AnalyzeTrends(AppointmentStatistics statistics)
-        {
-            return new
-            {
-                weeklyTrend = statistics.WeeklyTrend.Any() ? "Crescente" : "Estável",
-                busiestHours = statistics.BusiestHours.Take(3).Select(h => h.TimeRange),
-                seasonality = "Estável ao longo da semana"
-            };
-        }
-
-        private List<string> GenerateRecommendations(AppointmentStatistics statistics)
-        {
-            var recommendations = new List<string>();
-
-            if (statistics.NoShowRate > 10)
-                recommendations.Add("Implementar sistema de confirmação automática");
-
-            if (statistics.CancellationRate > 15)
-                recommendations.Add("Revisar política de cancelamento");
-
-            if (statistics.CompletionRate < 80)
-                recommendations.Add("Melhorar processo de agendamento");
-
-            recommendations.Add("Continuar monitorando métricas de performance");
-
-            return recommendations;
+            // Outras validações podem ser adicionadas aqui
         }
     }
 }
