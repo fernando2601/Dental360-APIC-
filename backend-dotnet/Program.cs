@@ -50,6 +50,10 @@ builder.Services.AddScoped<IAgendaService, AgendaService>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 
+// Authentication Module - Complete user management and security
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 // Inventory Module - Complete 3-layer architecture with smart features and optimization
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
