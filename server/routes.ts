@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { jwtAuthMiddleware, jwtAdminMiddleware, generateToken } from "./jwt";
 import { z } from "zod";
 import { DashboardService } from "./services/dashboard.service";
 // AnalyticsService removed completely
