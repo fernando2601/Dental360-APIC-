@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Plus, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
 import FinanceChart from "@/components/finance-chart";
-import AnalyticsDashboards from "@/components/analytics-dashboards";
+// Analytics removed as requested
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 // Form schema for transaction
@@ -194,7 +194,7 @@ export default function Finances() {
             <TabsTrigger value="transactions">Transações</TabsTrigger>
             <TabsTrigger value="expenses">Despesas</TabsTrigger>
             <TabsTrigger value="projections">Projeções</TabsTrigger>
-            <TabsTrigger value="analytics">Análises Avançadas</TabsTrigger>
+
           </TabsList>
         </div>
         
@@ -592,18 +592,6 @@ export default function Finances() {
           </Card>
         </TabsContent>
 
-        {/* Analytics Tab - Análises Avançadas */}
-        <TabsContent value="analytics">
-          <Card>
-            <CardHeader>
-              <CardTitle>Análises Avançadas</CardTitle>
-              <CardDescription>Métricas e insights para otimização do negócio</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AnalyticsDashboards />
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Create Transaction Dialog */}
