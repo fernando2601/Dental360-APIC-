@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { PatientsService, Patient } from '../../services/patients.service';
+import { ServicesService, Service } from '../../services/services.service';
+import { StaffService, Staff } from '../../services/staff.service';
 
 interface Appointment {
   id?: number;
@@ -37,37 +40,48 @@ interface Appointment {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">Paciente</label>
-              <input
-                type="text"
-                formControlName="patientName"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Nome do paciente"
-              />
+              <div class="flex items-center gap-2">
+                <select
+                  formControlName="patientId"
+                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Pesquise/Selecione</option>
+                  <option *ngFor="let patient of patients" [value]="patient.id">
+                    {{ patient.fullName }}
+                  </option>
+                </select>
+                <button
+                  type="button"
+                  (click)="showAddPatientModal = true"
+                  class="mt-1 flex-shrink-0 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                  title="Adicionar novo paciente"
+                >
+                  +
+                </button>
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700">Dentista</label>
+              <label class="block text-sm font-medium text-gray-700">Profissional</label>
               <select
-                formControlName="doctorName"
+                formControlName="staffId"
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Selecione um dentista</option>
-                <option value="Dr. João Silva">Dr. João Silva</option>
-                <option value="Dra. Maria Santos">Dra. Maria Santos</option>
-                <option value="Dr. Pedro Costa">Dr. Pedro Costa</option>
+                <option value="">Selecione um profissional</option>
+                <option *ngFor="let member of staff" [value]="member.id">
+                  {{ member.specialization }}
+                </option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Serviço</label>
               <select
-                formControlName="service"
+                formControlName="serviceId"
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Selecione um serviço</option>
-                <option value="Limpeza Dental">Limpeza Dental</option>
-                <option value="Restauração">Restauração</option>
-                <option value="Extração">Extração</option>
-                <option value="Canal">Canal</option>
-                <option value="Ortodontia">Ortodontia</option>
+                <option *ngFor="let service of services" [value]="service.id">
+                  {{ service.name }} ({{ service.duration }}min)
+                </option>
               </select>
             </div>
             <div>
@@ -126,6 +140,62 @@ interface Appointment {
             </button>
           </div>
         </form>
+      </div>
+
+      <!-- Modal Adicionar Paciente -->
+      <div *ngIf="showAddPatientModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Adicionar Novo Paciente</h3>
+            <form [formGroup]="patientForm" (ngSubmit)="onAddPatient()">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                  <input
+                    type="text"
+                    formControlName="fullName"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="Nome completo do paciente"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    formControlName="email"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Telefone</label>
+                  <input
+                    type="tel"
+                    formControlName="phone"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+              </div>
+              <div class="mt-6 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  (click)="showAddPatientModal = false"
+                  class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  [disabled]="!patientForm.valid || isAddingPatient"
+                  class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+                >
+                  {{ isAddingPatient ? 'Salvando...' : 'Adicionar' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
 
       <!-- Lista de Agendamentos -->
@@ -205,27 +275,45 @@ interface Appointment {
 })
 export class AgendaComponent implements OnInit {
   appointments: Appointment[] = [];
+  patients: Patient[] = [];
+  services: Service[] = [];
+  staff: Staff[] = [];
   appointmentForm: FormGroup;
+  patientForm: FormGroup;
   showNewAppointmentForm = false;
+  showAddPatientModal = false;
   isLoading = false;
+  isAddingPatient = false;
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private patientsService: PatientsService,
+    private servicesService: ServicesService,
+    private staffService: StaffService
   ) {
     this.appointmentForm = this.fb.group({
-      patientName: ['', [Validators.required]],
-      doctorName: ['', [Validators.required]],
-      service: ['', [Validators.required]],
+      patientId: ['', [Validators.required]],
+      staffId: ['', [Validators.required]],
+      serviceId: ['', [Validators.required]],
       date: ['', [Validators.required]],
       time: ['', [Validators.required]],
       status: ['agendado', [Validators.required]],
       notes: ['']
     });
+
+    this.patientForm = this.fb.group({
+      fullName: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required]]
+    });
   }
 
   ngOnInit(): void {
     this.loadAppointments();
+    this.loadPatients();
+    this.loadServices();
+    this.loadStaff();
   }
 
   private loadAppointments(): void {
@@ -239,6 +327,63 @@ export class AgendaComponent implements OnInit {
         this.appointments = [];
       }
     });
+  }
+
+  private loadPatients(): void {
+    this.patientsService.getPatients().subscribe({
+      next: (data) => {
+        this.patients = data;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar pacientes:', error);
+        this.patients = [];
+      }
+    });
+  }
+
+  private loadServices(): void {
+    this.servicesService.getServices().subscribe({
+      next: (data) => {
+        this.services = data;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar serviços:', error);
+        this.services = [];
+      }
+    });
+  }
+
+  private loadStaff(): void {
+    this.staffService.getStaffMembers().subscribe({
+      next: (data) => {
+        this.staff = data;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar equipe:', error);
+        this.staff = [];
+      }
+    });
+  }
+
+  onAddPatient(): void {
+    if (this.patientForm.valid) {
+      this.isAddingPatient = true;
+      const patientData = this.patientForm.value;
+
+      this.patientsService.createPatient(patientData).subscribe({
+        next: (newPatient) => {
+          this.patients.push(newPatient);
+          this.appointmentForm.patchValue({ patientId: newPatient.id });
+          this.patientForm.reset();
+          this.showAddPatientModal = false;
+          this.isAddingPatient = false;
+        },
+        error: (error) => {
+          console.error('Erro ao criar paciente:', error);
+          this.isAddingPatient = false;
+        }
+      });
+    }
   }
 
   onSubmit(): void {
