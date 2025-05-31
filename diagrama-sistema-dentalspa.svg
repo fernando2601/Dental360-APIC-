@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0891B2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#EA580C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DC2626;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#F8FAFC"/>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1E293B">Sistema DentalSpa - Arquitetura</text>
+  
+  <!-- Frontend Angular -->
+  <g>
+    <rect x="50" y="80" width="300" height="280" rx="10" fill="url(#blueGradient)" stroke="#4F46E5" stroke-width="2"/>
+    <text x="200" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Frontend Angular</text>
+    
+    <!-- Angular Components -->
+    <rect x="70" y="120" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="110" y="142" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Dashboard</text>
+    
+    <rect x="160" y="120" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="200" y="142" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Agenda</text>
+    
+    <rect x="250" y="120" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="290" y="142" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Pacientes</text>
+    
+    <rect x="70" y="170" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="110" y="192" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Inventário</text>
+    
+    <rect x="160" y="170" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="200" y="192" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Financeiro</text>
+    
+    <rect x="250" y="170" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="290" y="192" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Serviços</text>
+    
+    <rect x="70" y="220" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="110" y="242" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Equipe</text>
+    
+    <rect x="160" y="220" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="200" y="242" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Pacotes</text>
+    
+    <rect x="250" y="220" width="80" height="40" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="290" y="242" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1E293B">Antes/Depois</text>
+    
+    <!-- Angular Services -->
+    <text x="200" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Serviços Angular (10)</text>
+    <text x="200" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">PatientsService, AppointmentsService</text>
+    <text x="200" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">InventoryService, FinanceService, etc.</text>
+    
+    <!-- HTTP Client -->
+    <rect x="70" y="330" width="260" height="25" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="200" y="347" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1E293B">HTTP Client + JWT Interceptor</text>
+  </g>
+  
+  <!-- Express.js Backend -->
+  <g>
+    <rect x="450" y="80" width="300" height="280" rx="10" fill="url(#greenGradient)" stroke="#059669" stroke-width="2"/>
+    <text x="600" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Backend Express.js</text>
+    
+    <!-- API Routes -->
+    <text x="600" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">API Routes (15+)</text>
+    
+    <rect x="470" y="140" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="515" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/clients</text>
+    
+    <rect x="570" y="140" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="615" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/appointments</text>
+    
+    <rect x="670" y="140" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="715" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/services</text>
+    
+    <rect x="470" y="180" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="515" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/inventory</text>
+    
+    <rect x="570" y="180" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="615" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/financial</text>
+    
+    <rect x="670" y="180" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="715" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/staff</text>
+    
+    <rect x="470" y="220" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="515" y="238" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/packages</text>
+    
+    <rect x="570" y="220" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="615" y="238" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/before-after</text>
+    
+    <rect x="670" y="220" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="715" y="238" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">/api/learning</text>
+    
+    <!-- Middleware -->
+    <rect x="470" y="270" width="260" height="25" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="600" y="287" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1E293B">JWT Auth + CORS + Session Middleware</text>
+    
+    <!-- Storage Layer -->
+    <rect x="470" y="305" width="260" height="25" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="600" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1E293B">Memory Storage + Drizzle ORM</text>
+    
+    <!-- Server Info -->
+    <text x="600" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Porta: 5000 | Node.js + TypeScript</text>
+  </g>
+  
+  <!-- .NET Core Backend -->
+  <g>
+    <rect x="850" y="80" width="300" height="280" rx="10" fill="url(#orangeGradient)" stroke="#EA580C" stroke-width="2"/>
+    <text x="1000" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Backend .NET Core 8.0</text>
+    
+    <!-- Controllers -->
+    <text x="1000" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Controllers (10+)</text>
+    
+    <rect x="870" y="140" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="915" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">PatientController</text>
+    
+    <rect x="970" y="140" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="1015" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">AppointmentController</text>
+    
+    <rect x="1070" y="140" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="1115" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">ServiceController</text>
+    
+    <rect x="870" y="180" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="915" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">InventoryController</text>
+    
+    <rect x="970" y="180" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="1015" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">FinanceController</text>
+    
+    <rect x="1070" y="180" width="90" height="30" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="1115" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">PackageController</text>
+    
+    <!-- Services -->
+    <rect x="870" y="220" width="260" height="25" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="1000" y="237" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1E293B">Business Services (IPatientService, etc.)</text>
+    
+    <!-- Data Access -->
+    <rect x="870" y="255" width="260" height="25" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="1000" y="272" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1E293B">Dapper ORM + Repository Pattern</text>
+    
+    <!-- Auth -->
+    <rect x="870" y="290" width="260" height="25" rx="5" fill="white" fill-opacity="0.9"/>
+    <text x="1000" y="307" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1E293B">JWT Authentication + BCrypt</text>
+    
+    <!-- Server Info -->
+    <text x="1000" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Porta: 5001 | C# + Swagger</text>
+    <text x="1000" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">DentalSpa.sln</text>
+  </g>
+  
+  <!-- Database -->
+  <g>
+    <rect x="450" y="450" width="300" height="200" rx="10" fill="#374151" stroke="#1F2937" stroke-width="2"/>
+    <text x="600" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">PostgreSQL Database</text>
+    
+    <!-- Tables -->
+    <text x="600" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Tabelas (12+)</text>
+    
+    <rect x="470" y="510" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="505" y="526" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">users</text>
+    
+    <rect x="550" y="510" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="585" y="526" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">clients</text>
+    
+    <rect x="630" y="510" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="665" y="526" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">appointments</text>
+    
+    <rect x="470" y="545" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="505" y="561" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">services</text>
+    
+    <rect x="550" y="545" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="585" y="561" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">inventory</text>
+    
+    <rect x="630" y="545" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="665" y="561" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">staff</text>
+    
+    <rect x="470" y="580" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="505" y="596" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">packages</text>
+    
+    <rect x="550" y="580" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="585" y="596" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">before_after</text>
+    
+    <rect x="630" y="580" width="70" height="25" rx="3" fill="white" fill-opacity="0.9"/>
+    <text x="665" y="596" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1E293B">learning</text>
+    
+    <!-- DB Info -->
+    <text x="600" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Conexão: DATABASE_URL</text>
+    <text x="600" y="640" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">Drizzle Schema + Migrations</text>
+  </g>
+  
+  <!-- Arrows -->
+  <!-- Angular to Express -->
+  <line x1="350" y1="220" x2="450" y2="220" stroke="#4F46E5" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <text x="400" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4F46E5">HTTP/REST</text>
+  
+  <!-- Angular to .NET -->
+  <line x1="350" y1="180" x2="850" y2="180" stroke="#4F46E5" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+  <text x="600" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4F46E5">Futuro: REST API</text>
+  
+  <!-- Express to Database -->
+  <line x1="600" y1="360" x2="600" y2="450" stroke="#059669" stroke-width="3" marker-end="url(#arrowhead)"/>
+  <text x="610" y="405" font-family="Arial, sans-serif" font-size="10" fill="#059669">Drizzle ORM</text>
+  
+  <!-- .NET to Database -->
+  <line x1="1000" y1="360" x2="750" y2="450" stroke="#EA580C" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+  <text x="875" y="405" font-family="Arial, sans-serif" font-size="10" fill="#EA580C">Futuro: Dapper</text>
+  
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#374151"/>
+    </marker>
+  </defs>
+  
+  <!-- Statistics Box -->
+  <g>
+    <rect x="50" y="680" width="500" height="100" rx="10" fill="#F3F4F6" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="300" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1E293B">Estatísticas do Sistema</text>
+    
+    <text x="70" y="720" font-family="Arial, sans-serif" font-size="11" fill="#374151">🎯 Frontend: 10+ Componentes Angular</text>
+    <text x="70" y="735" font-family="Arial, sans-serif" font-size="11" fill="#374151">🔧 Backend Express: 15+ Rotas API</text>
+    <text x="70" y="750" font-family="Arial, sans-serif" font-size="11" fill="#374151">🏗️ Backend .NET: 10+ Controllers</text>
+    <text x="70" y="765" font-family="Arial, sans-serif" font-size="11" fill="#374151">🗄️ Database: 12+ Tabelas PostgreSQL</text>
+    
+    <text x="320" y="720" font-family="Arial, sans-serif" font-size="11" fill="#374151">🔐 Autenticação: JWT + BCrypt</text>
+    <text x="320" y="735" font-family="Arial, sans-serif" font-size="11" fill="#374151">📱 Responsivo: TailwindCSS</text>
+    <text x="320" y="750" font-family="Arial, sans-serif" font-size="11" fill="#374151">🚀 TypeScript + C#</text>
+    <text x="320" y="765" font-family="Arial, sans-serif" font-size="11" fill="#374151">⚡ Desenvolvimento Ativo</text>
+  </g>
+  
+  <!-- Development Status -->
+  <g>
+    <rect x="650" y="680" width="500" height="100" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1"/>
+    <text x="900" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1E40AF">Status do Desenvolvimento</text>
+    
+    <text x="670" y="720" font-family="Arial, sans-serif" font-size="11" fill="#1E40AF">✅ Express.js Backend - Completo e Funcionando</text>
+    <text x="670" y="735" font-family="Arial, sans-serif" font-size="11" fill="#1E40AF">✅ Angular Frontend - Completo com Serviços</text>
+    <text x="670" y="750" font-family="Arial, sans-serif" font-size="11" fill="#1E40AF">✅ PostgreSQL Database - Schema Implementado</text>
+    <text x="670" y="765" font-family="Arial, sans-serif" font-size="11" fill="#1E40AF">🔄 .NET Core Backend - Estrutura Criada</text>
+  </g>
+</svg>
