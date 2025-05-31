@@ -144,57 +144,177 @@ interface Appointment {
 
       <!-- Modal Adicionar Paciente -->
       <div *ngIf="showAddPatientModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-          <div class="mt-3">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Adicionar Novo Paciente</h3>
-            <form [formGroup]="patientForm" (ngSubmit)="onAddPatient()">
+        <div class="relative top-10 mx-auto p-6 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-medium text-gray-900">Novo paciente</h3>
+            <button 
+              (click)="showAddPatientModal = false"
+              class="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <form [formGroup]="patientForm" (ngSubmit)="onAddPatient()">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Coluna Esquerda -->
               <div class="space-y-4">
+                <!-- Foto -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Foto</label>
+                  <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                      <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500 mb-1">Selecione um arquivo JPG ou PNG do seu dispositivo</p>
+                      <button 
+                        type="button"
+                        class="bg-purple-100 text-purple-700 px-4 py-1 rounded text-sm hover:bg-purple-200"
+                      >
+                        Escolher foto
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Telefone -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Telefone</label>
+                  <div class="flex">
+                    <select class="mt-1 block w-20 border-gray-300 rounded-l-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                      <option>🇧🇷 +55</option>
+                    </select>
+                    <input
+                      type="tel"
+                      formControlName="phone"
+                      class="mt-1 block w-full border-gray-300 rounded-r-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                      placeholder="(99)9999-9999"
+                    />
+                  </div>
+                </div>
+
+                <!-- CPF -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">CPF</label>
+                  <input
+                    type="text"
+                    formControlName="cpf"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="000.000.000-00"
+                  />
+                </div>
+
+                <!-- Sexo -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
+                  <div class="flex space-x-4">
+                    <label class="flex items-center">
+                      <input
+                        type="radio"
+                        formControlName="gender"
+                        value="Feminino"
+                        class="form-radio text-purple-600"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">Feminino</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="radio"
+                        formControlName="gender"
+                        value="Masculino"
+                        class="form-radio text-purple-600"
+                      />
+                      <span class="ml-2 text-sm text-gray-700">Masculino</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Coluna Direita -->
+              <div class="space-y-4">
+                <!-- Nome -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Nome*</label>
                   <input
                     type="text"
                     formControlName="fullName"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
-                    placeholder="Nome completo do paciente"
+                    placeholder="Nome Sobrenome"
                   />
                 </div>
+
+                <!-- Email -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Email</label>
+                  <label class="block text-sm font-medium text-gray-700">E-mail</label>
                   <input
                     type="email"
                     formControlName="email"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
-                    placeholder="email@exemplo.com"
+                    placeholder="E-mail"
                   />
                 </div>
+
+                <!-- Data de Nascimento -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Telefone</label>
+                  <label class="block text-sm font-medium text-gray-700">Data de nascimento</label>
                   <input
-                    type="tel"
-                    formControlName="phone"
+                    type="date"
+                    formControlName="birthday"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
-                    placeholder="(11) 99999-9999"
                   />
                 </div>
+
+                <!-- RG -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">RG</label>
+                  <input
+                    type="text"
+                    formControlName="rg"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="Digite"
+                  />
+                </div>
+
+                <!-- Etiquetas -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Etiquetas 
+                    <span class="text-gray-400">ⓘ</span>
+                  </label>
+                  <div class="flex items-center">
+                    <select
+                      formControlName="tags"
+                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                    >
+                      <option value="">Pesquise/Selecione</option>
+                      <option value="VIP">VIP</option>
+                      <option value="Regular">Regular</option>
+                      <option value="Novo">Novo</option>
+                    </select>
+                    <button
+                      type="button"
+                      class="ml-2 text-purple-600 hover:text-purple-800 text-sm"
+                    >
+                      + Adicionar
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div class="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  (click)="showAddPatientModal = false"
-                  class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  [disabled]="!patientForm.valid || isAddingPatient"
-                  class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
-                >
-                  {{ isAddingPatient ? 'Salvando...' : 'Adicionar' }}
-                </button>
-              </div>
-            </form>
-          </div>
+            </div>
+
+            <!-- Botão Salvar -->
+            <div class="mt-8 flex justify-center">
+              <button
+                type="submit"
+                [disabled]="!patientForm.valid || isAddingPatient"
+                class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+              >
+                {{ isAddingPatient ? 'Salvando...' : 'Salvar' }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -305,7 +425,14 @@ export class AgendaComponent implements OnInit {
     this.patientForm = this.fb.group({
       fullName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required]]
+      phone: ['', [Validators.required]],
+      cpf: [''],
+      rg: [''],
+      birthday: [''],
+      gender: [''],
+      tags: [''],
+      address: [''],
+      notes: ['']
     });
   }
 
