@@ -28,6 +28,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const packagesService = new PackagesService(storage);
   const clinicInfoService = new ClinicInfoService(storage);
   const appointmentReportsService = new AppointmentReportsService(storage);
+  /**
+   * @swagger
+   * /api/clients:
+   *   get:
+   *     summary: Lista todos os clientes/pacientes
+   *     tags: [Clientes]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Lista de clientes retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Client'
+   *       401:
+   *         description: Não autenticado
+   *       500:
+   *         description: Erro interno do servidor
+   */
   // Client routes
   app.get("/api/clients", authMiddleware, async (req: Request, res: Response) => {
     try {
