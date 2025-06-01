@@ -1,0 +1,23 @@
+using System;
+
+namespace DentalSpa.Domain.Entities
+{
+    public class User
+    {
+        public int Id { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Role { get; set; } = "staff";
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string? ResetToken { get; set; }
+        public DateTime? ResetTokenExpiry { get; set; }
+        public DateTime? LastLogin { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public bool IsAdmin() => Role == "admin";
+        public bool IsStaff() => Role == "staff";
+        public bool IsValidResetToken(string token) => ResetToken == token && ResetTokenExpiry > DateTime.UtcNow;
+    }
+}
