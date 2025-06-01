@@ -72,6 +72,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * @swagger
+   * /api/clients:
+   *   post:
+   *     summary: Cria um novo cliente/paciente
+   *     tags: [Clientes]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - fullName
+   *               - email
+   *               - phone
+   *             properties:
+   *               fullName:
+   *                 type: string
+   *                 example: "João Silva"
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "joao@email.com"
+   *               phone:
+   *                 type: string
+   *                 example: "(11) 99999-9999"
+   *               address:
+   *                 type: string
+   *                 example: "Rua das Flores, 123"
+   *               birthday:
+   *                 type: string
+   *                 format: date
+   *                 example: "1990-01-15"
+   *               notes:
+   *                 type: string
+   *                 example: "Paciente com alergia a penicilina"
+   *     responses:
+   *       201:
+   *         description: Cliente criado com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Client'
+   *       400:
+   *         description: Dados inválidos
+   *       500:
+   *         description: Erro interno do servidor
+   */
   app.post("/api/clients", async (req: Request, res: Response) => {
     try {
       const validatedData = insertClientSchema.parse(req.body);
