@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using ClinicApi.Models;
-using ClinicApi.Services;
+using DentalSpa.Application.DTOs;
+using DentalSpa.Application.Services;
 
-namespace ClinicApi.Controllers
+namespace DentalSpa.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -17,55 +17,143 @@ namespace ClinicApi.Controllers
             _clientService = clientService;
         }
 
+        /// <summary>
+        /// Obtém lista de todos os clientes
+        /// </summary>
+        /// <returns>Lista de clientes</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
+        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetAllClients()
         {
-            var clients = await _clientService.GetAllClientsAsync();
-            return Ok(clients);
+            try
+            {
+                var clients = await _clientService.GetAllClientsAsync();
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Obtém cliente por ID
+        /// </summary>
+        /// <param name="id">ID do cliente</param>
+        /// <returns>Dados do cliente</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Client>> GetClient(int id)
+        public async Task<ActionResult<ClientDTO>> GetClientById(int id)
         {
-            var client = await _clientService.GetClientByIdAsync(id);
-            if (client == null)
-                return NotFound();
-
-            return Ok(client);
+            try
+            {
+                var client = await _clientService.GetClientByIdAsync(id);
+                return Ok(client);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Cria um novo cliente
+        /// </summary>
+        /// <param name="request">Dados do cliente</param>
+        /// <returns>Cliente criado</returns>
         [HttpPost]
-        public async Task<ActionResult<Client>> CreateClient(CreateClientDto clientDto)
+        public async Task<ActionResult<ClientDTO>> CreateClient([FromBody] ClientCreateRequest request)
         {
-            var client = await _clientService.CreateClientAsync(clientDto);
-            return CreatedAtAction(nameof(GetClient), new { id = client.Id }, client);
+            try
+            {
+                var client = await _clientService.CreateClientAsync(request);
+                return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Atualiza cliente existente
+        /// </summary>
+        /// <param name="id">ID do cliente</param>
+        /// <param name="request">Novos dados do cliente</param>
+        /// <returns>Cliente atualizado</returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult<Client>> UpdateClient(int id, CreateClientDto clientDto)
+        public async Task<ActionResult<ClientDTO>> UpdateClient(int id, [FromBody] ClientUpdateRequest request)
         {
-            var client = await _clientService.UpdateClientAsync(id, clientDto);
-            if (client == null)
-                return NotFound();
-
-            return Ok(client);
+            try
+            {
+                var client = await _clientService.UpdateClientAsync(id, request);
+                return Ok(client);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Remove cliente
+        /// </summary>
+        /// <param name="id">ID do cliente</param>
+        /// <returns>Confirmação de remoção</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteClient(int id)
+        public async Task<ActionResult> DeleteClient(int id)
         {
-            var result = await _clientService.DeleteClientAsync(id);
-            if (!result)
-                return NotFound();
-
-            return NoContent();
+            try
+            {
+                await _clientService.DeleteClientAsync(id);
+                return Ok(new { message = "Cliente removido com sucesso" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
+        /// <summary>
+        /// Busca clientes por termo
+        /// </summary>
+        /// <param name="searchTerm">Termo de busca</param>
+        /// <returns>Lista de clientes encontrados</returns>
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Client>>> SearchClients([FromQuery] string term)
+        public async Task<ActionResult<IEnumerable<ClientDTO>>> SearchClients([FromQuery] string searchTerm)
         {
-            var clients = await _clientService.SearchClientsAsync(term);
-            return Ok(clients);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    return BadRequest(new { message = "Termo de busca é obrigatório" });
+                }
+
+                var clients = await _clientService.SearchClientsAsync(searchTerm);
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
