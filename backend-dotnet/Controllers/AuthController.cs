@@ -1,143 +1,139 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using DentalSpa.API.Models;
-using DentalSpa.API.Services;
+using DentalSpa.Application.DTOs;
+using DentalSpa.Application.Services;
 
-namespace DentalSpa.API.Controllers
+namespace DentalSpa.Controllers
 {
     [ApiController]
-    [Route("api")]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IAuthService _authService;
 
-        public AuthController(IUserService userService)
+        public AuthController(IAuthService authService)
         {
-            _userService = userService;
+            _authService = authService;
         }
 
+        /// <summary>
+        /// Realiza login do usuário
+        /// </summary>
+        /// <param name="request">Dados de login (username e password)</param>
+        /// <returns>Token JWT e dados do usuário</returns>
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
         {
             try
             {
-                var user = await _userService.AuthenticateAsync(request.Username, request.Password);
-                if (user == null)
-                {
-                    return Unauthorized(new { message = "Credenciais inválidas" });
-                }
-
-                var token = await _userService.GenerateJwtTokenAsync(user);
-                
-                return Ok(new LoginResponse
-                {
-                    Token = token,
-                    User = new User
-                    {
-                        Id = user.Id,
-                        Username = user.Username,
-                        FullName = user.FullName,
-                        Email = user.Email,
-                        Role = user.Role
-                    }
-                });
+                var response = await _authService.LoginAsync(request);
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro ao processar login", error = ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
         }
 
+        /// <summary>
+        /// Registra um novo usuário
+        /// </summary>
+        /// <param name="request">Dados do usuário para registro</param>
+        /// <returns>Dados do usuário criado</returns>
         [HttpPost("register")]
-        public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequest request)
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult<UserDTO>> Register([FromBody] RegisterRequest request)
         {
             try
             {
-                // Verificar se usuário já existe
-                var existingUsername = await _userService.GetUserByUsernameAsync(request.Username);
-                if (existingUsername != null)
-                {
-                    return BadRequest(new { message = "Nome de usuário já está em uso" });
-                }
-
-                // Verificar se email já existe
-                var existingEmail = await _userService.QuerySingleOrDefaultAsync<User>(
-                    "SELECT * FROM users WHERE email = @Email", 
-                    new { Email = request.Email });
-                if (existingEmail != null)
-                {
-                    return BadRequest(new { message = "Email já está em uso" });
-                }
-
-                // Criar usuário
-                var user = await _userService.CreateUserAsync(new UserCreateRequest
-                {
-                    Username = request.Username,
-                    Password = request.Password,
-                    FullName = request.FullName,
-                    Role = request.Role,
-                    Email = request.Email,
-                    Phone = request.Phone
-                });
-
-                var token = await _userService.GenerateJwtTokenAsync(user);
-
-                return StatusCode(201, new LoginResponse
-                {
-                    Token = token,
-                    User = new User
-                    {
-                        Id = user.Id,
-                        Username = user.Username,
-                        FullName = user.FullName,
-                        Email = user.Email,
-                        Role = user.Role
-                    }
-                });
+                var user = await _authService.RegisterAsync(request);
+                return Ok(user);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro ao registrar usuário", error = ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
         }
 
-        [HttpPost("logout")]
-        public IActionResult Logout()
+        /// <summary>
+        /// Solicita recuperação de senha
+        /// </summary>
+        /// <param name="request">Email para recuperação</param>
+        /// <returns>Confirmação de envio</returns>
+        [HttpPost("forgot-password")]
+        public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            return Ok(new { message = "Logout realizado com sucesso" });
+            try
+            {
+                await _authService.ForgotPasswordAsync(request);
+                return Ok(new { message = "Se o email existir, um link de recuperação será enviado." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        [HttpGet("me")]
+        /// <summary>
+        /// Redefine senha usando token
+        /// </summary>
+        /// <param name="request">Token e nova senha</param>
+        /// <returns>Confirmação de redefinição</returns>
+        [HttpPost("reset-password")]
+        public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            try
+            {
+                await _authService.ResetPasswordAsync(request);
+                return Ok(new { message = "Senha redefinida com sucesso." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Obtém perfil do usuário autenticado
+        /// </summary>
+        /// <returns>Dados do usuário</returns>
+        [HttpGet("profile")]
         [Authorize]
-        public async Task<ActionResult<User>> GetCurrentUser()
+        public async Task<ActionResult<UserDTO>> GetProfile()
         {
             try
             {
-                var userIdClaim = User.FindFirst("userId")?.Value;
-                if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
-                {
-                    return Unauthorized(new { message = "Token inválido" });
-                }
-
-                var user = await _userService.GetUserByIdAsync(userId);
-                if (user == null)
-                {
-                    return NotFound(new { message = "Usuário não encontrado" });
-                }
-
-                return Ok(new User
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Role = user.Role
-                });
+                var userId = int.Parse(User.FindFirst("nameid")?.Value ?? "0");
+                var user = await _authService.GetProfileAsync(userId);
+                return Ok(user);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro ao buscar usuário", error = ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
+        }
+
+        /// <summary>
+        /// Verifica se o token JWT é válido
+        /// </summary>
+        /// <returns>Status de validação</returns>
+        [HttpGet("verify")]
+        [Authorize]
+        public ActionResult VerifyToken()
+        {
+            return Ok(new { message = "Token válido", userId = User.FindFirst("nameid")?.Value });
         }
     }
 }
