@@ -162,6 +162,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * @swagger
+   * /api/services:
+   *   get:
+   *     summary: Lista todos os serviços
+   *     tags: [Serviços]
+   *     responses:
+   *       200:
+   *         description: Lista de serviços retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Service'
+   */
   // Service routes
   app.get("/api/services", async (req: Request, res: Response) => {
     try {
@@ -184,6 +200,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * @swagger
+   * /api/services:
+   *   post:
+   *     summary: Cria um novo serviço
+   *     tags: [Serviços]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - name
+   *               - price
+   *               - duration
+   *             properties:
+   *               name:
+   *                 type: string
+   *                 example: "Limpeza Dental"
+   *               price:
+   *                 type: number
+   *                 example: 150.00
+   *               duration:
+   *                 type: integer
+   *                 example: 60
+   *               category:
+   *                 type: string
+   *                 example: "Odontológico"
+   *               description:
+   *                 type: string
+   *                 example: "Limpeza profissional dos dentes"
+   *     responses:
+   *       201:
+   *         description: Serviço criado com sucesso
+   *       400:
+   *         description: Dados inválidos
+   */
   app.post("/api/services", async (req: Request, res: Response) => {
     try {
       const validatedData = insertServiceSchema.parse(req.body);
@@ -225,6 +279,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * @swagger
+   * /api/staff:
+   *   get:
+   *     summary: Lista todos os funcionários
+   *     tags: [Staff]
+   *     responses:
+   *       200:
+   *         description: Lista de funcionários retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Staff'
+   */
   // Staff routes
   app.get("/api/staff", async (req: Request, res: Response) => {
     try {
@@ -242,6 +312,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * @swagger
+   * /api/appointments:
+   *   get:
+   *     summary: Lista todos os agendamentos
+   *     tags: [Agendamentos]
+   *     parameters:
+   *       - in: query
+   *         name: start
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Data de início do filtro
+   *       - in: query
+   *         name: end
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Data de fim do filtro
+   *     responses:
+   *       200:
+   *         description: Lista de agendamentos retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Appointment'
+   */
   // Appointment routes
   app.get("/api/appointments", async (req: Request, res: Response) => {
     try {
@@ -314,6 +413,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * @swagger
+   * /api/inventory:
+   *   get:
+   *     summary: Lista todos os itens do estoque
+   *     tags: [Estoque]
+   *     responses:
+   *       200:
+   *         description: Lista de itens do estoque retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Inventory'
+   */
   // Inventory routes
   app.get("/api/inventory", async (req: Request, res: Response) => {
     try {
@@ -377,6 +492,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * @swagger
+   * /api/financial-transactions:
+   *   get:
+   *     summary: Lista todas as transações financeiras
+   *     tags: [Financeiro]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: start
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Data de início do filtro
+   *       - in: query
+   *         name: end
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Data de fim do filtro
+   *     responses:
+   *       200:
+   *         description: Lista de transações retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/FinancialTransaction'
+   *       401:
+   *         description: Não autenticado
+   */
   // Financial Transaction routes
   app.get("/api/financial-transactions", authMiddleware, async (req: Request, res: Response) => {
     try {
@@ -498,6 +646,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===========================================
   // ENDPOINTS PARA DASHBOARD - Seguindo SOLID
   // ===========================================
+  /**
+   * @swagger
+   * /api/dashboard/metrics:
+   *   get:
+   *     summary: Obtém métricas do dashboard
+   *     tags: [Dashboard]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Métricas do dashboard retornadas com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 totalClients:
+   *                   type: integer
+   *                 totalAppointments:
+   *                   type: integer
+   *                 totalRevenue:
+   *                   type: number
+   *                 appointmentsToday:
+   *                   type: integer
+   *       401:
+   *         description: Não autenticado
+   */
   app.get("/api/dashboard/metrics", authMiddleware, async (req: Request, res: Response) => {
     try {
       const metrics = await dashboardService.getDashboardMetrics();
