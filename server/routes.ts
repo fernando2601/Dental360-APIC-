@@ -688,6 +688,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===========================================
   // ENDPOINTS PARA PACOTES - Seguindo SOLID
   // ===========================================
+  /**
+   * @swagger
+   * /api/packages:
+   *   get:
+   *     summary: Lista todos os pacotes de serviços
+   *     tags: [Pacotes]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Lista de pacotes retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Package'
+   *       401:
+   *         description: Não autenticado
+   */
   app.get("/api/packages", authMiddleware, async (req: Request, res: Response) => {
     try {
       const packages = await packagesService.getAllPackages();
@@ -760,6 +780,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===========================================
   // ENDPOINTS PARA DADOS DA CLÍNICA - Seguindo SOLID
   // ===========================================
+  /**
+   * @swagger
+   * /api/clinic-info:
+   *   get:
+   *     summary: Obtém informações da clínica
+   *     tags: [Clínica]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Informações da clínica retornadas com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ClinicInfo'
+   *       401:
+   *         description: Não autenticado
+   */
   app.get("/api/clinic-info", authMiddleware, async (req: Request, res: Response) => {
     try {
       const clinicInfo = await clinicInfoService.getClinicInfo();
@@ -804,6 +842,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===========================================
   // ENDPOINTS PARA ASSINATURAS - Seguindo SOLID
   // ===========================================
+  /**
+   * @swagger
+   * /api/subscriptions:
+   *   get:
+   *     summary: Lista todos os planos de assinatura
+   *     tags: [Assinaturas]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Lista de assinaturas retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: integer
+   *                   name:
+   *                     type: string
+   *                   price:
+   *                     type: number
+   *                   interval:
+   *                     type: string
+   *                   features:
+   *                     type: array
+   *                     items:
+   *                       type: string
+   *                   isActive:
+   *                     type: boolean
+   *                   currentPlan:
+   *                     type: boolean
+   *       401:
+   *         description: Não autenticado
+   */
   app.get("/api/subscriptions", authMiddleware, async (req: Request, res: Response) => {
     try {
       // Dados estruturados para assinaturas
@@ -837,6 +912,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===========================================
   // ENDPOINTS PARA ANTES & DEPOIS - Seguindo SOLID
   // ===========================================
+  /**
+   * @swagger
+   * /api/before-after:
+   *   get:
+   *     summary: Lista todas as fotos de antes e depois
+   *     tags: [Antes & Depois]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Lista de fotos antes e depois retornada com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: integer
+   *                   clientName:
+   *                     type: string
+   *                   procedure:
+   *                     type: string
+   *                   category:
+   *                     type: string
+   *                   beforeImage:
+   *                     type: string
+   *                   afterImage:
+   *                     type: string
+   *                   description:
+   *                     type: string
+   *                   date:
+   *                     type: string
+   *                     format: date
+   *       401:
+   *         description: Não autenticado
+   */
   app.get("/api/before-after", authMiddleware, async (req: Request, res: Response) => {
     try {
       // Dados estruturados para antes & depois
@@ -861,6 +974,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  /**
+   * @swagger
+   * /api/before-after:
+   *   post:
+   *     summary: Cria um novo caso de antes e depois
+   *     tags: [Antes & Depois]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - clientName
+   *               - procedure
+   *               - beforeImage
+   *               - afterImage
+   *             properties:
+   *               clientName:
+   *                 type: string
+   *                 example: "Maria Silva"
+   *               procedure:
+   *                 type: string
+   *                 example: "Harmonização Facial"
+   *               category:
+   *                 type: string
+   *                 example: "Harmonização"
+   *               beforeImage:
+   *                 type: string
+   *                 example: "before_image_url.jpg"
+   *               afterImage:
+   *                 type: string
+   *                 example: "after_image_url.jpg"
+   *               description:
+   *                 type: string
+   *                 example: "Resultado incrível com preenchimento labial"
+   *     responses:
+   *       201:
+   *         description: Caso criado com sucesso
+   *       401:
+   *         description: Não autenticado
+   *       403:
+   *         description: Acesso negado
+   */
   app.post("/api/before-after", authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
     try {
       const newCase = {

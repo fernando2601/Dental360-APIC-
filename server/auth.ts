@@ -148,6 +148,46 @@ export function setupAuth(app: Express) {
       .regex(/[^A-Za-z0-9]/, "Senha deve conter pelo menos um caractere especial"),
   });
 
+  /**
+   * @swagger
+   * /api/register:
+   *   post:
+   *     summary: Registra um novo usuário
+   *     tags: [Autenticação]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - username
+   *               - password
+   *               - email
+   *               - fullName
+   *             properties:
+   *               username:
+   *                 type: string
+   *                 example: "usuario123"
+   *               password:
+   *                 type: string
+   *                 example: "MinhaSenh@123"
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "usuario@email.com"
+   *               fullName:
+   *                 type: string
+   *                 example: "João da Silva"
+   *               role:
+   *                 type: string
+   *                 example: "user"
+   *     responses:
+   *       201:
+   *         description: Usuário registrado com sucesso
+   *       400:
+   *         description: Dados inválidos ou usuário já existe
+   */
   // Rota de registro
   app.post("/api/register", async (req: Request, res: Response) => {
     try {
@@ -196,6 +236,49 @@ export function setupAuth(app: Express) {
     }
   });
 
+  /**
+   * @swagger
+   * /api/login:
+   *   post:
+   *     summary: Autentica um usuário
+   *     tags: [Autenticação]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - username
+   *               - password
+   *             properties:
+   *               username:
+   *                 type: string
+   *                 example: "admin"
+   *               password:
+   *                 type: string
+   *                 example: "admin123"
+   *     responses:
+   *       200:
+   *         description: Login realizado com sucesso
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                 username:
+   *                   type: string
+   *                 fullName:
+   *                   type: string
+   *                 email:
+   *                   type: string
+   *                 role:
+   *                   type: string
+   *       401:
+   *         description: Credenciais inválidas
+   */
   // Rota de login
   app.post("/api/login", (req: Request, res: Response, next: NextFunction) => {
     try {
