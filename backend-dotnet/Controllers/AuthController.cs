@@ -1,308 +1,143 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using ClinicApi.Models;
-using ClinicApi.Services;
-using System.Security.Claims;
+using DentalSpa.API.Models;
+using DentalSpa.API.Services;
 
-namespace ClinicApi.Controllers
+namespace DentalSpa.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IUserService _userService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IUserService userService)
         {
-            _authService = authService;
+            _userService = userService;
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
+        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
         {
             try
             {
-                var response = await _authService.LoginAsync(request);
-                return Ok(response);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
+                var user = await _userService.AuthenticateAsync(request.Username, request.Password);
+                if (user == null)
+                {
+                    return Unauthorized(new { message = "Credenciais inválidas" });
+                }
+
+                var token = await _userService.GenerateJwtTokenAsync(user);
+                
+                return Ok(new LoginResponse
+                {
+                    Token = token,
+                    User = new User
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        FullName = user.FullName,
+                        Email = user.Email,
+                        Role = user.Role
+                    }
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Erro ao processar login", error = ex.Message });
             }
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(RegisterRequest request)
+        public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequest request)
         {
             try
             {
-                var user = await _authService.RegisterAsync(request);
-                return CreatedAtAction(nameof(GetProfile), new { id = user.Id }, user);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
+                // Verificar se usuário já existe
+                var existingUsername = await _userService.GetUserByUsernameAsync(request.Username);
+                if (existingUsername != null)
+                {
+                    return BadRequest(new { message = "Nome de usuário já está em uso" });
+                }
+
+                // Verificar se email já existe
+                var existingEmail = await _userService.QuerySingleOrDefaultAsync<User>(
+                    "SELECT * FROM users WHERE email = @Email", 
+                    new { Email = request.Email });
+                if (existingEmail != null)
+                {
+                    return BadRequest(new { message = "Email já está em uso" });
+                }
+
+                // Criar usuário
+                var user = await _userService.CreateUserAsync(new UserCreateRequest
+                {
+                    Username = request.Username,
+                    Password = request.Password,
+                    FullName = request.FullName,
+                    Role = request.Role,
+                    Email = request.Email,
+                    Phone = request.Phone
+                });
+
+                var token = await _userService.GenerateJwtTokenAsync(user);
+
+                return StatusCode(201, new LoginResponse
+                {
+                    Token = token,
+                    User = new User
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        FullName = user.FullName,
+                        Email = user.Email,
+                        Role = user.Role
+                    }
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro interno do servidor" });
+                return StatusCode(500, new { message = "Erro ao registrar usuário", error = ex.Message });
             }
         }
 
         [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
-            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            await _authService.LogoutAsync(token);
             return Ok(new { message = "Logout realizado com sucesso" });
-        }
-
-        [HttpPost("refresh-token")]
-        public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] string refreshToken)
-        {
-            try
-            {
-                var response = await _authService.RefreshTokenAsync(refreshToken);
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
         }
 
         [HttpGet("me")]
         [Authorize]
-        public async Task<ActionResult<UserProfile>> GetProfile()
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var profile = await _authService.GetUserProfileAsync(userId);
-            
-            if (profile == null)
-                return NotFound();
-
-            return Ok(profile);
-        }
-
-        [HttpPut("profile")]
-        [Authorize]
-        public async Task<ActionResult> UpdateProfile(UserProfile profile)
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var result = await _authService.UpdateUserProfileAsync(userId, profile);
-            
-            if (!result)
-                return BadRequest(new { message = "Não foi possível atualizar o perfil" });
-
-            return Ok(new { message = "Perfil atualizado com sucesso" });
-        }
-
-        [HttpPost("change-password")]
-        [Authorize]
-        public async Task<ActionResult> ChangePassword(ChangePasswordRequest request)
+        public async Task<ActionResult<User>> GetCurrentUser()
         {
             try
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                var result = await _authService.ChangePasswordAsync(userId, request);
-                
-                if (!result)
-                    return BadRequest(new { message = "Não foi possível alterar a senha" });
+                var userIdClaim = User.FindFirst("userId")?.Value;
+                if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized(new { message = "Token inválido" });
+                }
 
-                return Ok(new { message = "Senha alterada com sucesso" });
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { message = "Usuário não encontrado" });
+                }
+
+                return Ok(new User
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    Role = user.Role
+                });
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Erro ao buscar usuário", error = ex.Message });
             }
-        }
-
-        [HttpPost("forgot-password")]
-        public async Task<ActionResult> ForgotPassword(ForgotPasswordRequest request)
-        {
-            await _authService.ForgotPasswordAsync(request);
-            return Ok(new { message = "Se o email existir, você receberá instruções para redefinir sua senha" });
-        }
-
-        [HttpPost("reset-password")]
-        public async Task<ActionResult> ResetPassword(ResetPasswordRequest request)
-        {
-            try
-            {
-                var result = await _authService.ResetPasswordAsync(request);
-                
-                if (!result)
-                    return BadRequest(new { message = "Token inválido ou expirado" });
-
-                return Ok(new { message = "Senha redefinida com sucesso" });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("validate-reset-token")]
-        public async Task<ActionResult> ValidateResetToken([FromQuery] string token, [FromQuery] string email)
-        {
-            var isValid = await _authService.ValidateResetTokenAsync(token, email);
-            return Ok(new { isValid });
-        }
-
-        [HttpGet("dashboard")]
-        [Authorize]
-        public async Task<ActionResult<DashboardMetrics>> GetDashboard()
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var metrics = await _authService.GetDashboardMetricsAsync(userId);
-            return Ok(metrics);
-        }
-
-        [HttpGet("recent-activities")]
-        [Authorize]
-        public async Task<ActionResult> GetRecentActivities([FromQuery] int limit = 10)
-        {
-            var activities = await _authService.GetRecentActivitiesAsync(limit);
-            return Ok(activities);
-        }
-
-        [HttpGet("system-info")]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult<SystemInfo>> GetSystemInfo()
-        {
-            var systemInfo = await _authService.GetSystemInfoAsync();
-            return Ok(systemInfo);
-        }
-
-        [HttpGet("users")]
-        [Authorize(Roles = "admin,manager")]
-        public async Task<ActionResult> GetAllUsers()
-        {
-            var users = await _authService.GetAllUsersAsync();
-            return Ok(users.Select(u => new
-            {
-                u.Id,
-                u.Username,
-                u.Email,
-                u.FullName,
-                u.Role,
-                u.IsActive,
-                u.LastLogin,
-                u.CreatedAt
-            }));
-        }
-
-        [HttpGet("users/{id}")]
-        [Authorize(Roles = "admin,manager")]
-        public async Task<ActionResult> GetUser(int id)
-        {
-            var user = await _authService.GetUserByIdAsync(id);
-            if (user == null)
-                return NotFound();
-
-            return Ok(new
-            {
-                user.Id,
-                user.Username,
-                user.Email,
-                user.FullName,
-                user.Role,
-                user.IsActive,
-                user.LastLogin,
-                user.CreatedAt
-            });
-        }
-
-        [HttpPut("users/{id}")]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult> UpdateUser(int id, User user)
-        {
-            try
-            {
-                var updatedUser = await _authService.UpdateUserAsync(id, user);
-                if (updatedUser == null)
-                    return NotFound();
-
-                return Ok(new { message = "Usuário atualizado com sucesso" });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpDelete("users/{id}")]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult> DeleteUser(int id)
-        {
-            var result = await _authService.DeleteUserAsync(id);
-            if (!result)
-                return NotFound();
-
-            return Ok(new { message = "Usuário desativado com sucesso" });
-        }
-
-        [HttpGet("check-username")]
-        public async Task<ActionResult> CheckUsername([FromQuery] string username)
-        {
-            var isAvailable = await _authService.IsUsernameAvailableAsync(username);
-            return Ok(new { isAvailable });
-        }
-
-        [HttpGet("check-email")]
-        public async Task<ActionResult> CheckEmail([FromQuery] string email)
-        {
-            var isAvailable = await _authService.IsEmailAvailableAsync(email);
-            return Ok(new { isAvailable });
-        }
-
-        [HttpPost("revoke-all-sessions")]
-        [Authorize]
-        public async Task<ActionResult> RevokeAllSessions()
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            await _authService.RevokeAllSessionsAsync(userId);
-            return Ok(new { message = "Todas as sessões foram revogadas" });
-        }
-
-        [HttpGet("statistics")]
-        [Authorize]
-        public async Task<ActionResult> GetUserStatistics()
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var statistics = await _authService.GetUserStatisticsAsync(userId);
-            return Ok(statistics);
-        }
-
-        [HttpGet("activity-log")]
-        [Authorize]
-        public async Task<ActionResult> GetActivityLog(
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null)
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var log = await _authService.GetUserActivityLogAsync(userId, startDate, endDate);
-            return Ok(log);
-        }
-
-        [HttpGet("security-alerts")]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult> GetSecurityAlerts()
-        {
-            var alerts = await _authService.GetSecurityAlertsAsync();
-            return Ok(alerts);
-        }
-
-        [HttpPost("validate-token")]
-        public async Task<ActionResult> ValidateToken([FromBody] string token)
-        {
-            var isValid = await _authService.ValidateTokenAsync(token);
-            return Ok(new { isValid });
         }
     }
 }

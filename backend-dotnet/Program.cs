@@ -75,17 +75,6 @@ builder.Services.AddCors(options =>
 
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IPatientService, PatientService>();
-builder.Services.AddScoped<IAppointmentService, AppointmentService>();
-builder.Services.AddScoped<IServiceManagementService, ServiceManagementService>();
-builder.Services.AddScoped<IInventoryService, InventoryService>();
-builder.Services.AddScoped<IFinanceService, FinanceService>();
-builder.Services.AddScoped<IStaffService, StaffService>();
-builder.Services.AddScoped<IPackageService, PackageService>();
-builder.Services.AddScoped<IBeforeAfterService, BeforeAfterService>();
-builder.Services.AddScoped<ILearningService, LearningService>();
-builder.Services.AddScoped<IClinicInfoService, ClinicInfoService>();
-builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
 var app = builder.Build();
 
@@ -107,6 +96,13 @@ app.MapControllers();
 
 // Configurar para rodar na porta 5000 como estava no Express.js
 app.Urls.Add("http://localhost:5000");
+
+// Inicializar usuários padrão
+using (var scope = app.Services.CreateScope())
+{
+    var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+    await userService.SeedDefaultUsersAsync();
+}
 
 Console.WriteLine("🦷 DentalSpa API iniciada com sucesso!");
 Console.WriteLine("📚 Swagger UI disponível em: http://localhost:5000/api-docs");
