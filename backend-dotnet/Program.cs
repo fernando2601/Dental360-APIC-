@@ -88,6 +88,7 @@ builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IPatientRepository, Denta
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.ILearningAreaRepository, DentalSpa.Infrastructure.Repositories.LearningAreaRepository>();
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IClinicInfoRepository, DentalSpa.Infrastructure.Repositories.ClinicInfoRepository>();
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.ISubscriptionRepository, DentalSpa.Infrastructure.Repositories.SubscriptionRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IUserRepository, DentalSpa.Infrastructure.Repositories.UserRepository>();
 
 // ========== CAMADA APPLICATION - SERVIÇOS DE APLICAÇÃO ==========
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IAuthService, DentalSpa.Application.Services.AuthService>();
