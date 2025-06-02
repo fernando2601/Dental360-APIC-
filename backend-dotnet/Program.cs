@@ -74,22 +74,28 @@ builder.Services.AddDbContext<DentalSpaDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 // ========== CAMADA DOMAIN - INTERFACES DE REPOSITÓRIO ==========
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IClientRepository, ClientRepository>();
-builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
-builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
-builder.Services.AddScoped<IStaffRepository, StaffRepository>();
-builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
-builder.Services.AddScoped<IFinancialTransactionRepository, FinancialTransactionRepository>();
-builder.Services.AddScoped<IPackageRepository, PackageRepository>();
-builder.Services.AddScoped<IClientPackageRepository, ClientPackageRepository>();
-builder.Services.AddScoped<IBeforeAfterRepository, BeforeAfterRepository>();
-builder.Services.AddScoped<ILearningAreaRepository, LearningAreaRepository>();
-builder.Services.AddScoped<IClinicInfoRepository, ClinicInfoRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAuthRepository, DentalSpa.Infrastructure.Repositories.AuthRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IClientRepository, DentalSpa.Infrastructure.Repositories.ClientRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAppointmentRepository, DentalSpa.Infrastructure.Repositories.AppointmentRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IServiceRepository, DentalSpa.Infrastructure.Repositories.ServiceRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IStaffRepository, DentalSpa.Infrastructure.Repositories.StaffRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IInventoryRepository, DentalSpa.Infrastructure.Repositories.InventoryRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IFinancialRepository, DentalSpa.Infrastructure.Repositories.FinancialRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IPackageRepository, DentalSpa.Infrastructure.Repositories.PackageRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IBeforeAfterRepository, DentalSpa.Infrastructure.Repositories.BeforeAfterRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAgendaRepository, DentalSpa.Infrastructure.Repositories.AgendaRepository>();
 
 // ========== CAMADA APPLICATION - SERVIÇOS DE APLICAÇÃO ==========
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IAuthService, DentalSpa.Application.Services.AuthService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClientService, DentalSpa.Application.Services.ClientService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IAppointmentService, DentalSpa.Application.Services.AppointmentService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IAgendaService, DentalSpa.Application.Services.AgendaService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IServiceService, DentalSpa.Application.Services.ServiceService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IStaffService, DentalSpa.Application.Services.StaffService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IInventoryService, DentalSpa.Application.Services.InventoryService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IFinancialService, DentalSpa.Application.Services.FinancialService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IPackageService, DentalSpa.Application.Services.PackageService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IBeforeAfterService, DentalSpa.Application.Services.BeforeAfterService>();
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "DentalSpa-Default-Secret-Key-For-JWT-Token-Generation-2024";

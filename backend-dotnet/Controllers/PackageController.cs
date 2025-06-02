@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using ClinicApi.Models;
-using ClinicApi.Services;
+using DentalSpa.Domain.Entities;
+using DentalSpa.Application.Interfaces;
 
 namespace ClinicApi.Controllers
 {

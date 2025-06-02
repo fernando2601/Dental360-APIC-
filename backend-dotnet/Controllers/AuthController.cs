@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Application.DTOs;
-using DentalSpa.Application.Services;
+using DentalSpa.Application.Interfaces;
 
-namespace DentalSpa.Controllers
+namespace DentalSpa.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
