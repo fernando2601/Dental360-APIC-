@@ -1,11 +1,11 @@
-using ClinicApi.Models;
-using ClinicApi.Repositories;
+using DentalSpa.Domain.Entities;
+using DentalSpa.Domain.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace ClinicApi.Services
+namespace DentalSpa.Application.Services
 {
     public class AuthService : IAuthService
     {

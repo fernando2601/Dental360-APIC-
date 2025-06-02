@@ -6,7 +6,7 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace DentalSpa.API.Services
+namespace DentalSpa.Application.Services
 {
     public interface IUserService
     {

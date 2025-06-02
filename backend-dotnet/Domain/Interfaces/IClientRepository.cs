@@ -1,6 +1,6 @@
-using ClinicApi.Models;
+using DentalSpa.Domain.Entities;
 
-namespace ClinicApi.Repositories
+namespace DentalSpa.Domain.Interfaces
 {
     public interface IClientRepository
     {

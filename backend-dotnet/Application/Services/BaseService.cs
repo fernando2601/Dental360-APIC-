@@ -1,7 +1,7 @@
 using Npgsql;
 using Dapper;
 
-namespace DentalSpa.API.Services
+namespace DentalSpa.Application.Services
 {
     public abstract class BaseService
     {

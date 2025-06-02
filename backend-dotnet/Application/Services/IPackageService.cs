@@ -1,6 +1,6 @@
-using ClinicApi.Models;
+using DentalSpa.Domain.Entities;
 
-namespace ClinicApi.Services
+namespace DentalSpa.Application.Services
 {
     public interface IPackageService
     {

@@ -1,9 +1,9 @@
-using Dapper;
-using Npgsql;
-using ClinicApi.Models;
-using ClinicApi.Repositories;
+using Microsoft.EntityFrameworkCore;
+using DentalSpa.Domain.Entities;
+using DentalSpa.Domain.Interfaces;
+using DentalSpa.Infrastructure.Data;
 
-namespace ClinicApi.Repositories
+namespace DentalSpa.Infrastructure.Repositories
 {
     public class BeforeAfterRepository : IBeforeAfterRepository
     {

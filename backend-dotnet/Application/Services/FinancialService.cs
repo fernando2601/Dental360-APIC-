@@ -1,8 +1,8 @@
-using ClinicApi.Models;
-using ClinicApi.Repositories;
+using DentalSpa.Domain.Entities;
+using DentalSpa.Domain.Interfaces;
 using System.Text;
 
-namespace ClinicApi.Services
+namespace DentalSpa.Application.Services
 {
     public class FinancialService : IFinancialService
     {
