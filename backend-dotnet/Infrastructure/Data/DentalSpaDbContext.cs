@@ -20,7 +20,9 @@ namespace DentalSpa.Infrastructure.Data
         public DbSet<ClientPackage> ClientPackages { get; set; }
         public DbSet<BeforeAfter> BeforeAfter { get; set; }
         public DbSet<LearningArea> LearningAreas { get; set; }
-        public DbSet<ClinicInfo> ClinicInfo { get; set; }
+        public DbSet<ClinicInfo> ClinicInfos { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<ClientSubscription> ClientSubscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -84,6 +84,10 @@ builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IFinancialRepository, Den
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IPackageRepository, DentalSpa.Infrastructure.Repositories.PackageRepository>();
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IBeforeAfterRepository, DentalSpa.Infrastructure.Repositories.BeforeAfterRepository>();
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAgendaRepository, DentalSpa.Infrastructure.Repositories.AgendaRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IPatientRepository, DentalSpa.Infrastructure.Repositories.PatientRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.ILearningAreaRepository, DentalSpa.Infrastructure.Repositories.LearningAreaRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IClinicInfoRepository, DentalSpa.Infrastructure.Repositories.ClinicInfoRepository>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.ISubscriptionRepository, DentalSpa.Infrastructure.Repositories.SubscriptionRepository>();
 
 // ========== CAMADA APPLICATION - SERVIÇOS DE APLICAÇÃO ==========
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IAuthService, DentalSpa.Application.Services.AuthService>();
@@ -96,6 +100,10 @@ builder.Services.AddScoped<DentalSpa.Application.Interfaces.IInventoryService, D
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IFinancialService, DentalSpa.Application.Services.FinancialService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IPackageService, DentalSpa.Application.Services.PackageService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IBeforeAfterService, DentalSpa.Application.Services.BeforeAfterService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IPatientService, DentalSpa.Application.Services.PatientService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.ILearningService, DentalSpa.Application.Services.LearningService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClinicInfoService, DentalSpa.Application.Services.ClinicInfoService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.ISubscriptionService, DentalSpa.Application.Services.SubscriptionService>();
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "DentalSpa-Default-Secret-Key-For-JWT-Token-Generation-2024";
