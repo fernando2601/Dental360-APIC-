@@ -50,7 +50,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Patient>> UpdatePatient(int id, CreatePatientDto patientDto)
+        public async Task<ActionResult<Client>> UpdatePatient(int id, CreateClientDto patientDto)
         {
             try
             {
