@@ -104,6 +104,7 @@ builder.Services.AddScoped<DentalSpa.Application.Interfaces.IPatientService, Den
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.ILearningService, DentalSpa.Application.Services.LearningService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClinicInfoService, DentalSpa.Application.Services.ClinicInfoService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.ISubscriptionService, DentalSpa.Application.Services.SubscriptionService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IUserService, DentalSpa.Application.Services.UserService>();
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "DentalSpa-Default-Secret-Key-For-JWT-Token-Generation-2024";
