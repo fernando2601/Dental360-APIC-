@@ -14,11 +14,11 @@ namespace DentalSpa.Infrastructure.Data
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Staff> Staff { get; set; }
-        public DbSet<Inventory> Inventory { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
         public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
         public DbSet<Package> Packages { get; set; }
         public DbSet<ClientPackage> ClientPackages { get; set; }
-        public DbSet<BeforeAfter> BeforeAfter { get; set; }
+        public DbSet<BeforeAfter> BeforeAfters { get; set; }
         public DbSet<LearningArea> LearningAreas { get; set; }
         public DbSet<ClinicInfo> ClinicInfos { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
@@ -188,10 +188,43 @@ namespace DentalSpa.Infrastructure.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
-                entity.Property(e => e.Address).IsRequired().HasMaxLength(500);
-                entity.Property(e => e.Phone).IsRequired().HasMaxLength(20);
-                entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.WorkingHours).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Address).HasMaxLength(300);
+                entity.Property(e => e.Phone).HasMaxLength(20);
+                entity.Property(e => e.Email).HasMaxLength(100);
+                entity.Property(e => e.Website).HasMaxLength(100);
+                entity.Property(e => e.OpeningTime).HasMaxLength(10);
+                entity.Property(e => e.ClosingTime).HasMaxLength(10);
+                entity.Property(e => e.WorkingDays).HasMaxLength(200);
+            });
+
+            // Subscription configurations
+            modelBuilder.Entity<Subscription>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.BillingCycle).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.SupportLevel).HasMaxLength(50);
+            });
+
+            // ClientSubscription configurations
+            modelBuilder.Entity<ClientSubscription>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.PaidAmount).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.Notes).HasMaxLength(500);
+                
+                entity.HasOne(e => e.Client)
+                    .WithMany()
+                    .HasForeignKey(e => e.ClientId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasOne(e => e.Subscription)
+                    .WithMany(s => s.ClientSubscriptions)
+                    .HasForeignKey(e => e.SubscriptionId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
