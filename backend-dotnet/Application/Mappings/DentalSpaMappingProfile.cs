@@ -10,12 +10,20 @@ namespace DentalSpa.Application.Mappings
         {
             // User Mappings
             CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<User, UserSummaryDto>().ReverseMap();
             CreateMap<CreateUserDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.LastLogin, opt => opt.Ignore())
+                .ForMember(dest => dest.ResetToken, opt => opt.Ignore())
+                .ForMember(dest => dest.ResetTokenExpiry, opt => opt.Ignore());
             CreateMap<UpdateUserDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.Password, opt => opt.Ignore())
+                .ForMember(dest => dest.LastLogin, opt => opt.Ignore())
+                .ForMember(dest => dest.ResetToken, opt => opt.Ignore())
+                .ForMember(dest => dest.ResetTokenExpiry, opt => opt.Ignore());
 
             // Client Mappings
             CreateMap<Client, ClientDto>().ReverseMap();
@@ -130,9 +138,14 @@ namespace DentalSpa.Application.Mappings
 
             // ClinicInfo Mappings
             CreateMap<ClinicInfo, ClinicInfoDto>().ReverseMap();
+            CreateMap<CreateClinicInfoDto, ClinicInfo>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
             CreateMap<UpdateClinicInfoDto, ClinicInfo>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
 
             // Subscription Mappings
             CreateMap<Subscription, SubscriptionDto>().ReverseMap();
