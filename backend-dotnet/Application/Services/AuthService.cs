@@ -1,158 +1,371 @@
+using ClinicApi.Models;
+using ClinicApi.Repositories;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using BCrypt.Net;
-using DentalSpa.Application.DTOs;
-using DentalSpa.Domain.Entities;
-using DentalSpa.Domain.Interfaces;
 
-namespace DentalSpa.Application.Services
+namespace ClinicApi.Services
 {
-    public interface IAuthService
-    {
-        Task<LoginResponse> LoginAsync(LoginRequest request);
-        Task<UserDTO> RegisterAsync(RegisterRequest request);
-        Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request);
-        Task<bool> ResetPasswordAsync(ResetPasswordRequest request);
-        Task<UserDTO> GetProfileAsync(int userId);
-    }
-
     public class AuthService : IAuthService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
 
-        public AuthService(IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(IAuthRepository authRepository, IConfiguration configuration)
         {
-            _userRepository = userRepository;
+            _authRepository = authRepository;
             _configuration = configuration;
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
         {
-            var user = await _userRepository.GetByUsernameAsync(request.Username);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+            // Validar credenciais
+            var user = await _authRepository.ValidateUserCredentialsAsync(request.Username, request.Password);
+            if (user == null)
             {
                 throw new UnauthorizedAccessException("Credenciais inválidas");
             }
 
-            user.LastLogin = DateTime.UtcNow;
-            await _userRepository.UpdateAsync(user);
+            // Atualizar último login
+            await _authRepository.UpdateLastLoginAsync(user.Id);
 
+            // Gerar tokens
             var token = GenerateJwtToken(user);
-            var userDto = MapToUserDTO(user);
+            var refreshToken = GenerateRefreshToken();
+
+            // Criar sessão
+            await _authRepository.CreateSessionAsync(user.Id, token);
 
             return new LoginResponse
             {
                 Token = token,
-                User = userDto
+                User = new User
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    Role = user.Role
+                },
+                ExpiresAt = DateTime.UtcNow.AddHours(24),
+                RefreshToken = refreshToken
             };
         }
 
-        public async Task<UserDTO> RegisterAsync(RegisterRequest request)
+        public async Task<User> RegisterAsync(RegisterRequest request)
         {
-            var existingUser = await _userRepository.GetByUsernameAsync(request.Username);
-            if (existingUser != null)
+            // Validações
+            if (request.Password != request.ConfirmPassword)
             {
-                throw new InvalidOperationException("Nome de usuário já existe");
+                throw new ArgumentException("Senhas não coincidem");
             }
 
-            var existingEmail = await _userRepository.GetByEmailAsync(request.Email);
-            if (existingEmail != null)
+            if (!await _authRepository.IsUsernameAvailableAsync(request.Username))
             {
-                throw new InvalidOperationException("Email já está em uso");
+                throw new ArgumentException("Nome de usuário já existe");
             }
 
+            if (!await _authRepository.IsEmailAvailableAsync(request.Email))
+            {
+                throw new ArgumentException("Email já está em uso");
+            }
+
+            // Validar força da senha
+            if (!IsValidPassword(request.Password))
+            {
+                throw new ArgumentException("Senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula e número");
+            }
+
+            // Criar usuário
             var user = new User
             {
-                Username = request.Username,
-                Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                FullName = request.FullName,
-                Email = request.Email,
-                Phone = request.Phone,
-                Role = request.Role
+                Username = request.Username.Trim(),
+                Email = request.Email.Trim().ToLower(),
+                FullName = request.FullName.Trim(),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                Role = string.IsNullOrEmpty(request.Role) ? "user" : request.Role,
+                IsActive = true
             };
 
-            await _userRepository.AddAsync(user);
-            return MapToUserDTO(user);
+            var createdUser = await _authRepository.CreateUserAsync(user);
+            
+            // Log de auditoria
+            await _authRepository.LogUserActivityAsync(createdUser.Id, "user_registered", "Usuário registrado no sistema");
+
+            return createdUser;
+        }
+
+        public async Task<bool> LogoutAsync(string token)
+        {
+            return await _authRepository.RevokeSessionAsync(token);
+        }
+
+        public async Task<LoginResponse> RefreshTokenAsync(string refreshToken)
+        {
+            // Em uma implementação real, validaria o refresh token
+            throw new NotImplementedException("Refresh token não implementado");
+        }
+
+        public async Task<User?> GetUserByIdAsync(int id)
+        {
+            return await _authRepository.GetUserByIdAsync(id);
+        }
+
+        public async Task<User?> UpdateUserAsync(int id, User user)
+        {
+            var existingUser = await _authRepository.GetUserByIdAsync(id);
+            if (existingUser == null)
+            {
+                return null;
+            }
+
+            // Validar se email está disponível (exceto para o próprio usuário)
+            if (user.Email != existingUser.Email)
+            {
+                if (!await _authRepository.IsEmailAvailableAsync(user.Email))
+                {
+                    throw new ArgumentException("Email já está em uso");
+                }
+            }
+
+            return await _authRepository.UpdateUserAsync(id, user);
+        }
+
+        public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequest request)
+        {
+            var user = await _authRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            // Verificar senha atual
+            if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+            {
+                throw new ArgumentException("Senha atual incorreta");
+            }
+
+            // Validar nova senha
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                throw new ArgumentException("Senhas não coincidem");
+            }
+
+            if (!IsValidPassword(request.NewPassword))
+            {
+                throw new ArgumentException("Nova senha não atende aos critérios de segurança");
+            }
+
+            // Atualizar senha
+            var newPasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            var result = await _authRepository.UpdatePasswordAsync(userId, newPasswordHash);
+
+            if (result)
+            {
+                // Log de auditoria
+                await _authRepository.LogUserActivityAsync(userId, "password_changed", "Senha alterada pelo usuário");
+            }
+
+            return result;
+        }
+
+        public async Task<bool> DeleteUserAsync(int id)
+        {
+            return await _authRepository.DeleteUserAsync(id);
+        }
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await _authRepository.GetAllUsersAsync();
         }
 
         public async Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
-            var user = await _userRepository.GetByEmailAsync(request.Email);
+            var user = await _authRepository.GetUserByEmailAsync(request.Email);
             if (user == null)
             {
-                return false; // Don't reveal if email exists
+                // Por segurança, retornamos true mesmo se o email não existir
+                return true;
             }
 
-            user.ResetToken = Guid.NewGuid().ToString();
-            user.ResetTokenExpiry = DateTime.UtcNow.AddHours(1);
-            
-            await _userRepository.UpdateAsync(user);
-            
-            // TODO: Send reset email
+            // Gerar token de reset
+            var resetToken = GeneratePasswordResetToken();
+            await _authRepository.CreatePasswordResetTokenAsync(request.Email, resetToken);
+
+            // Em uma implementação real, enviaria email aqui
+            // await _emailService.SendPasswordResetEmailAsync(user.Email, resetToken);
+
             return true;
         }
 
         public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
         {
-            var user = await _userRepository.GetByResetTokenAsync(request.Token);
-            if (user == null)
+            // Validar token
+            if (!await _authRepository.ValidatePasswordResetTokenAsync(request.Email, request.Token))
             {
-                throw new InvalidOperationException("Token inválido ou expirado");
+                throw new ArgumentException("Token inválido ou expirado");
             }
 
-            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-            user.ResetToken = null;
-            user.ResetTokenExpiry = null;
+            // Validar senhas
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                throw new ArgumentException("Senhas não coincidem");
+            }
 
-            await _userRepository.UpdateAsync(user);
-            return true;
+            if (!IsValidPassword(request.NewPassword))
+            {
+                throw new ArgumentException("Senha não atende aos critérios de segurança");
+            }
+
+            // Buscar usuário
+            var user = await _authRepository.GetUserByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return false;
+            }
+
+            // Atualizar senha
+            var newPasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            var result = await _authRepository.UpdatePasswordAsync(user.Id, newPasswordHash);
+
+            if (result)
+            {
+                // Consumir token
+                await _authRepository.ConsumePasswordResetTokenAsync(request.Email, request.Token);
+                
+                // Log de auditoria
+                await _authRepository.LogUserActivityAsync(user.Id, "password_reset", "Senha redefinida via reset");
+            }
+
+            return result;
         }
 
-        public async Task<UserDTO> GetProfileAsync(int userId)
+        public async Task<bool> ValidateResetTokenAsync(string token, string email)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
-            return MapToUserDTO(user);
+            return await _authRepository.ValidatePasswordResetTokenAsync(email, token);
         }
 
+        public async Task<DashboardMetrics> GetDashboardMetricsAsync(int? userId = null)
+        {
+            return await _authRepository.GetDashboardMetricsAsync(userId);
+        }
+
+        public async Task<IEnumerable<RecentActivity>> GetRecentActivitiesAsync(int limit = 10)
+        {
+            return await _authRepository.GetRecentActivitiesAsync(limit);
+        }
+
+        public async Task<SystemInfo> GetSystemInfoAsync()
+        {
+            return await _authRepository.GetSystemInfoAsync();
+        }
+
+        public async Task<UserProfile?> GetUserProfileAsync(int userId)
+        {
+            return await _authRepository.GetUserProfileAsync(userId);
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(int userId, UserProfile profile)
+        {
+            return await _authRepository.UpdateUserProfileAsync(userId, profile);
+        }
+
+        public async Task<UserStatistics> GetUserStatisticsAsync(int userId)
+        {
+            return await _authRepository.GetUserStatisticsAsync(userId);
+        }
+
+        public async Task<bool> ValidateTokenAsync(string token)
+        {
+            return await _authRepository.ValidateSessionAsync(token);
+        }
+
+        public async Task<bool> IsUsernameAvailableAsync(string username)
+        {
+            return await _authRepository.IsUsernameAvailableAsync(username);
+        }
+
+        public async Task<bool> IsEmailAvailableAsync(string email)
+        {
+            return await _authRepository.IsEmailAvailableAsync(email);
+        }
+
+        public async Task<bool> RevokeAllSessionsAsync(int userId)
+        {
+            return await _authRepository.RevokeAllUserSessionsAsync(userId);
+        }
+
+        public async Task<IEnumerable<object>> GetActiveSessionsAsync(int userId)
+        {
+            // Implementação simplificada
+            return new List<object>();
+        }
+
+        public async Task<IEnumerable<object>> GetUserActivityLogAsync(int userId, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            return await _authRepository.GetUserActivityLogAsync(userId, startDate, endDate);
+        }
+
+        public async Task<bool> LogSecurityEventAsync(int userId, string eventType, string details)
+        {
+            return await _authRepository.LogUserActivityAsync(userId, eventType, details);
+        }
+
+        public async Task<IEnumerable<SystemAlert>> GetSecurityAlertsAsync()
+        {
+            return await _authRepository.GetSystemAlertsAsync("security");
+        }
+
+        // Métodos auxiliares privados
         private string GenerateJwtToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "DefaultSecretKey"));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var jwtKey = _configuration["Jwt:Key"] ?? "your-secret-key-here-make-it-very-long-and-secure";
+            var key = Encoding.ASCII.GetBytes(jwtKey);
 
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim("fullName", user.FullName)
             };
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddDays(7),
-                signingCredentials: creds);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(24),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _configuration["Jwt:Issuer"] ?? "ClinicApi",
+                Audience = _configuration["Jwt:Audience"] ?? "ClinicApp"
+            };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
 
-        private static UserDTO MapToUserDTO(User user)
+        private string GenerateRefreshToken()
         {
-            return new UserDTO
-            {
-                Id = user.Id,
-                Username = user.Username,
-                FullName = user.FullName,
-                Role = user.Role,
-                Email = user.Email,
-                Phone = user.Phone,
-                LastLogin = user.LastLogin,
-                CreatedAt = user.CreatedAt
-            };
+            return Guid.NewGuid().ToString();
+        }
+
+        private string GeneratePasswordResetToken()
+        {
+            return Guid.NewGuid().ToString("N")[..8].ToUpper();
+        }
+
+        private bool IsValidPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+                return false;
+
+            bool hasUpper = password.Any(char.IsUpper);
+            bool hasLower = password.Any(char.IsLower);
+            bool hasDigit = password.Any(char.IsDigit);
+
+            return hasUpper && hasLower && hasDigit;
         }
     }
 }

@@ -1,6 +1,4 @@
-using System;
-
-namespace DentalSpa.Domain.Entities
+namespace ClinicApi.Models
 {
     public class Inventory
     {
@@ -9,15 +7,26 @@ namespace DentalSpa.Domain.Entities
         public string Category { get; set; } = string.Empty;
         public string? Description { get; set; }
         public int Quantity { get; set; }
-        public int MinQuantity { get; set; } = 5;
+        public int MinQuantity { get; set; }
         public decimal UnitPrice { get; set; }
         public string? Supplier { get; set; }
-        public DateTime? ExpiryDate { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? ExpirationDate { get; set; }
+        public string? BatchNumber { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime? CreatedAt { get; set; }
+    }
 
-        public bool IsLowStock() => Quantity <= MinQuantity;
-        public bool IsExpiringSoon() => ExpiryDate.HasValue && ExpiryDate.Value <= DateTime.Now.AddDays(30);
-        public bool IsExpired() => ExpiryDate.HasValue && ExpiryDate.Value < DateTime.Now;
-        public decimal GetTotalValue() => Quantity * UnitPrice;
+    public class CreateInventoryDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public int Quantity { get; set; }
+        public int MinQuantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public string? Supplier { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        public string? BatchNumber { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }
