@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Application.DTOs;
 using DentalSpa.Application.Services;
 
-namespace DentalSpa.Controllers
+namespace DentalSpa.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

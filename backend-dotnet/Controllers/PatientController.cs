@@ -4,7 +4,7 @@ using DentalSpa.Domain.Entities;
 using DentalSpa.Application.Interfaces;
 using System.Security.Claims;
 
-namespace ClinicApi.Controllers
+namespace DentalSpa.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

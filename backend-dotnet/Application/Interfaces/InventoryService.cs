@@ -1,7 +1,7 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 
-namespace DentalSpa.Application.Services
+namespace DentalSpa.Application.Interfaces
 {
     public class InventoryService : IInventoryService
     {
