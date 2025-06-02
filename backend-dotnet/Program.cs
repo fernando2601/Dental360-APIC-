@@ -70,9 +70,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Add Entity Framework with PostgreSQL
+// Configure multiple database connections
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
+                       builder.Configuration.GetConnectionString("DefaultConnection");
+var sqlServerConnectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? 
+                               builder.Configuration.GetConnectionString("SqlServerConnection");
+
+// Add Entity Framework with PostgreSQL (Primary)
 builder.Services.AddDbContext<DentalSpaDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+// Add Entity Framework with SQL Server (Secondary)
+builder.Services.AddDbContext<SqlServerDbContext>(options =>
+    options.UseSqlServer(sqlServerConnectionString ?? "Server=localhost;Database=DentalSpa_SqlServer;Trusted_Connection=true;TrustServerCertificate=true;"));
 
 // ========== CAMADA DOMAIN - INTERFACES DE REPOSITÓRIO ==========
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAuthRepository, DentalSpa.Infrastructure.Repositories.AuthRepository>();
@@ -107,6 +117,7 @@ builder.Services.AddScoped<DentalSpa.Application.Interfaces.ILearningService, De
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClinicInfoService, DentalSpa.Application.Services.ClinicInfoService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.ISubscriptionService, DentalSpa.Application.Services.SubscriptionService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IUserService, DentalSpa.Application.Services.UserService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IDatabaseSelectorService, DentalSpa.Application.Services.DatabaseSelectorService>();
 
 // ========== AUTOMAPPER CONFIGURATION ==========
 builder.Services.AddAutoMapper(typeof(DentalSpaMappingProfile));
