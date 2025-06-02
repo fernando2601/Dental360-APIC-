@@ -2,58 +2,96 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DentalSpa.Application.DTOs
 {
-    public class ClientCreateRequest
+    public class CreateClientDto
     {
-        [Required(ErrorMessage = "Nome completo é obrigatório")]
+        [Required]
+        [StringLength(200)]
         public string FullName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Email é obrigatório")]
-        [EmailAddress(ErrorMessage = "Email inválido")]
+        
+        [Required]
+        [EmailAddress]
         public string Email { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Telefone é obrigatório")]
+        
+        [Required]
+        [StringLength(20)]
         public string Phone { get; set; } = string.Empty;
-
+        
+        [StringLength(500)]
         public string? Address { get; set; }
-        public DateTime? Birthday { get; set; }
+        
+        public DateTime? DateOfBirth { get; set; }
+        
+        [StringLength(20)]
+        public string? Gender { get; set; }
+        
+        [StringLength(20)]
+        public string? CPF { get; set; }
+        
+        [StringLength(20)]
+        public string? RG { get; set; }
+        
+        [StringLength(1000)]
         public string? Notes { get; set; }
+        
+        [StringLength(1000)]
+        public string? MedicalHistory { get; set; }
+        
+        [StringLength(500)]
+        public string? Allergies { get; set; }
+        
+        [StringLength(500)]
+        public string? Medications { get; set; }
+        
+        [StringLength(100)]
+        public string? Occupation { get; set; }
+        
+        [StringLength(200)]
+        public string? EmergencyContact { get; set; }
+        
+        [StringLength(20)]
+        public string? EmergencyPhone { get; set; }
     }
 
-    public class ClientUpdateRequest
+    public class UpdateClientDto : CreateClientDto
     {
-        [Required(ErrorMessage = "Nome completo é obrigatório")]
-        public string FullName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Email é obrigatório")]
-        [EmailAddress(ErrorMessage = "Email inválido")]
-        public string Email { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Telefone é obrigatório")]
-        public string Phone { get; set; } = string.Empty;
-
-        public string? Address { get; set; }
-        public DateTime? Birthday { get; set; }
-        public string? Notes { get; set; }
+        public int Id { get; set; }
     }
 
-    public class ClientDTO
+    public class ClientDto
     {
         public int Id { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public string? Address { get; set; }
-        public DateTime? Birthday { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? Gender { get; set; }
+        public string? CPF { get; set; }
+        public string? RG { get; set; }
         public string? Notes { get; set; }
+        public string? MedicalHistory { get; set; }
+        public string? Allergies { get; set; }
+        public string? Medications { get; set; }
+        public string? Occupation { get; set; }
+        public string? EmergencyContact { get; set; }
+        public string? EmergencyPhone { get; set; }
+        public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int Age { get; set; }
-        public bool IsMinor { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public int TotalAppointments { get; set; }
+        public DateTime? LastAppointment { get; set; }
+        public decimal TotalSpent { get; set; }
     }
 
-    public class ClientSearchRequest
+    public class ClientSummaryDto
     {
-        public string? SearchTerm { get; set; }
-        public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public int Id { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public DateTime? LastAppointment { get; set; }
+        public int TotalAppointments { get; set; }
+        public decimal TotalSpent { get; set; }
+        public bool IsActive { get; set; }
     }
 }

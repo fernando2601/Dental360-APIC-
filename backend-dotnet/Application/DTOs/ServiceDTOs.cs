@@ -2,57 +2,67 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DentalSpa.Application.DTOs
 {
-    public class ServiceCreateRequest
+    public class CreateServiceDto
     {
-        [Required(ErrorMessage = "Nome é obrigatório")]
+        [Required]
+        [StringLength(200)]
         public string Name { get; set; } = string.Empty;
-
+        
+        [StringLength(1000)]
         public string? Description { get; set; }
-
-        [Required(ErrorMessage = "Preço é obrigatório")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Preço deve ser maior que zero")]
-        public decimal Price { get; set; }
-
-        [Required(ErrorMessage = "Duração é obrigatória")]
-        [Range(1, int.MaxValue, ErrorMessage = "Duração deve ser maior que zero")]
-        public int Duration { get; set; }
-
-        [Required(ErrorMessage = "Categoria é obrigatória")]
+        
+        [Required]
+        [StringLength(100)]
         public string Category { get; set; } = string.Empty;
-    }
-
-    public class ServiceUpdateRequest
-    {
-        [Required(ErrorMessage = "Nome é obrigatório")]
-        public string Name { get; set; } = string.Empty;
-
-        public string? Description { get; set; }
-
-        [Required(ErrorMessage = "Preço é obrigatório")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Preço deve ser maior que zero")]
+        
+        [Required]
+        [Range(0.01, double.MaxValue)]
         public decimal Price { get; set; }
-
-        [Required(ErrorMessage = "Duração é obrigatória")]
-        [Range(1, int.MaxValue, ErrorMessage = "Duração deve ser maior que zero")]
-        public int Duration { get; set; }
-
-        [Required(ErrorMessage = "Categoria é obrigatória")]
-        public string Category { get; set; } = string.Empty;
-
+        
+        [Required]
+        public TimeSpan Duration { get; set; }
+        
+        [StringLength(500)]
+        public string? Requirements { get; set; }
+        
+        [StringLength(500)]
+        public string? AfterCare { get; set; }
+        
+        public bool RequiresConsultation { get; set; }
+        
         public bool IsActive { get; set; } = true;
     }
 
-    public class ServiceDTO
+    public class UpdateServiceDto : CreateServiceDto
+    {
+        public int Id { get; set; }
+    }
+
+    public class ServiceDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public decimal Price { get; set; }
-        public int Duration { get; set; }
         public string Category { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public TimeSpan Duration { get; set; }
+        public string? Requirements { get; set; }
+        public string? AfterCare { get; set; }
+        public bool RequiresConsultation { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
-        public bool IsExpensive { get; set; }
-        public bool IsLongDuration { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public int TotalAppointments { get; set; }
+        public decimal TotalRevenue { get; set; }
+    }
+
+    public class ServiceSummaryDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public TimeSpan Duration { get; set; }
+        public bool IsActive { get; set; }
     }
 }

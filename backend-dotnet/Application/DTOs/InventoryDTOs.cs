@@ -2,71 +2,84 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DentalSpa.Application.DTOs
 {
-    public class InventoryCreateRequest
+    public class CreateInventoryDto
     {
-        [Required(ErrorMessage = "Nome é obrigatório")]
+        [Required]
+        [StringLength(200)]
         public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Categoria é obrigatória")]
-        public string Category { get; set; } = string.Empty;
-
+        
+        [StringLength(1000)]
         public string? Description { get; set; }
-
-        [Required(ErrorMessage = "Quantidade é obrigatória")]
-        [Range(0, int.MaxValue, ErrorMessage = "Quantidade deve ser maior ou igual a zero")]
+        
+        [Required]
+        [StringLength(100)]
+        public string Category { get; set; } = string.Empty;
+        
+        [Required]
+        [Range(0, int.MaxValue)]
         public int Quantity { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Quantidade mínima deve ser maior ou igual a zero")]
-        public int MinQuantity { get; set; } = 5;
-
-        [Required(ErrorMessage = "Preço unitário é obrigatório")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Preço deve ser maior que zero")]
+        
+        [Required]
+        [StringLength(20)]
+        public string Unit { get; set; } = string.Empty;
+        
+        [Range(0.01, double.MaxValue)]
         public decimal UnitPrice { get; set; }
-
+        
+        [StringLength(200)]
         public string? Supplier { get; set; }
-        public DateTime? ExpiryDate { get; set; }
+        
+        [StringLength(100)]
+        public string? Location { get; set; }
+        
+        [Range(0, int.MaxValue)]
+        public int MinStock { get; set; } = 10;
+        
+        public DateTime? ExpirationDate { get; set; }
+        
+        [StringLength(50)]
+        public string Status { get; set; } = "Ativo";
     }
 
-    public class InventoryUpdateRequest
+    public class UpdateInventoryDto : CreateInventoryDto
     {
-        [Required(ErrorMessage = "Nome é obrigatório")]
-        public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Categoria é obrigatória")]
-        public string Category { get; set; } = string.Empty;
-
-        public string? Description { get; set; }
-
-        [Required(ErrorMessage = "Quantidade é obrigatória")]
-        [Range(0, int.MaxValue, ErrorMessage = "Quantidade deve ser maior ou igual a zero")]
-        public int Quantity { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Quantidade mínima deve ser maior ou igual a zero")]
-        public int MinQuantity { get; set; }
-
-        [Required(ErrorMessage = "Preço unitário é obrigatório")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Preço deve ser maior que zero")]
-        public decimal UnitPrice { get; set; }
-
-        public string? Supplier { get; set; }
-        public DateTime? ExpiryDate { get; set; }
+        public int Id { get; set; }
     }
 
-    public class InventoryDTO
+    public class InventoryDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public string Category { get; set; } = string.Empty;
         public int Quantity { get; set; }
-        public int MinQuantity { get; set; }
+        public string Unit { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
         public string? Supplier { get; set; }
-        public DateTime? ExpiryDate { get; set; }
+        public string? Location { get; set; }
+        public int MinStock { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public decimal TotalValue { get; set; }
         public bool IsLowStock { get; set; }
         public bool IsExpiringSoon { get; set; }
-        public bool IsExpired { get; set; }
-        public decimal TotalValue { get; set; }
+    }
+
+    public class StockAdjustmentDto
+    {
+        [Required]
+        public int ItemId { get; set; }
+        
+        [Required]
+        public int Quantity { get; set; }
+        
+        [Required]
+        [StringLength(500)]
+        public string Reason { get; set; } = string.Empty;
+        
+        [StringLength(200)]
+        public string? Reference { get; set; }
     }
 }

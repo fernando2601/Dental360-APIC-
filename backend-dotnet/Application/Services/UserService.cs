@@ -18,7 +18,7 @@ namespace DentalSpa.Application.Services
         Task SeedDefaultUsersAsync();
     }
 
-    public class UserService : BaseService, IUserService
+    public class UserService : IUserService
     {
         private readonly IConfiguration _configuration;
 

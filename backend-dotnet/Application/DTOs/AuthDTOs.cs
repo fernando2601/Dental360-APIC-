@@ -2,67 +2,81 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DentalSpa.Application.DTOs
 {
-    public class LoginRequest
+    public class LoginDto
     {
-        [Required(ErrorMessage = "Nome de usuário é obrigatório")]
+        [Required]
         public string Username { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Senha é obrigatória")]
+        
+        [Required]
         public string Password { get; set; } = string.Empty;
     }
 
-    public class RegisterRequest
+    public class RegisterDto
     {
-        [Required(ErrorMessage = "Nome de usuário é obrigatório")]
+        [Required]
+        [StringLength(100)]
         public string Username { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Senha é obrigatória")]
-        [MinLength(6, ErrorMessage = "Senha deve ter pelo menos 6 caracteres")]
-        public string Password { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Nome completo é obrigatório")]
+        
+        [Required]
+        [StringLength(200)]
         public string FullName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Email é obrigatório")]
-        [EmailAddress(ErrorMessage = "Email inválido")]
+        
+        [Required]
+        [EmailAddress]
         public string Email { get; set; } = string.Empty;
-
+        
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+        
+        [StringLength(20)]
         public string? Phone { get; set; }
-        public string Role { get; set; } = "staff";
+        
+        [StringLength(50)]
+        public string Role { get; set; } = "User";
     }
 
-    public class LoginResponse
+    public class ChangePasswordDto
+    {
+        [Required]
+        public string CurrentPassword { get; set; } = string.Empty;
+        
+        [Required]
+        [MinLength(6)]
+        public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordDto
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        
+        [Required]
+        [MinLength(6)]
+        public string NewPassword { get; set; } = string.Empty;
+        
+        [Required]
+        public string ResetToken { get; set; } = string.Empty;
+    }
+
+    public class AuthResponseDto
     {
         public string Token { get; set; } = string.Empty;
-        public UserDTO User { get; set; } = new UserDTO();
+        public UserDto User { get; set; } = null!;
+        public DateTime ExpiresAt { get; set; }
     }
 
-    public class UserDTO
+    public class UserDto
     {
         public int Id { get; set; }
         public string Username { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? Phone { get; set; }
-        public DateTime? LastLogin { get; set; }
+        public string Role { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
-    }
-
-    public class ForgotPasswordRequest
-    {
-        [Required(ErrorMessage = "Email é obrigatório")]
-        [EmailAddress(ErrorMessage = "Email inválido")]
-        public string Email { get; set; } = string.Empty;
-    }
-
-    public class ResetPasswordRequest
-    {
-        [Required(ErrorMessage = "Token é obrigatório")]
-        public string Token { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Nova senha é obrigatória")]
-        [MinLength(6, ErrorMessage = "Senha deve ter pelo menos 6 caracteres")]
-        public string NewPassword { get; set; } = string.Empty;
+        public DateTime LastLogin { get; set; }
     }
 }
