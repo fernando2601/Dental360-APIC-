@@ -7,6 +7,7 @@ using DentalSpa.Infrastructure.Data;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Infrastructure.Repositories;
 using DentalSpa.Application.Services;
+using DentalSpa.Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -106,6 +107,9 @@ builder.Services.AddScoped<DentalSpa.Application.Interfaces.ILearningService, De
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClinicInfoService, DentalSpa.Application.Services.ClinicInfoService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.ISubscriptionService, DentalSpa.Application.Services.SubscriptionService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IUserService, DentalSpa.Application.Services.UserService>();
+
+// ========== AUTOMAPPER CONFIGURATION ==========
+builder.Services.AddAutoMapper(typeof(DentalSpaMappingProfile));
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "DentalSpa-Default-Secret-Key-For-JWT-Token-Generation-2024";
