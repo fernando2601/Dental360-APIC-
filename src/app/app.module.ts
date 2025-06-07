@@ -16,6 +16,15 @@ import { StaffComponent } from './components/staff/staff.component';
 import { FinancialComponent } from './components/financial/financial.component';
 import { InventoryComponent } from './components/inventory/inventory.component';
 import { LoginComponent } from './components/auth/login.component';
+import { PackagesComponent } from './components/packages/packages.component';
+import { BeforeAfterComponent } from './components/before-after/before-after.component';
+import { LearningComponent } from './components/learning/learning.component';
+import { ClinicInfoComponent } from './components/clinic-info/clinic-info.component';
+import { SubscriptionsComponent } from './components/subscriptions/subscriptions.component';
+import { AnalyticsComponent } from './components/analytics/analytics.component';
+import { AgendaComponent } from './components/agenda/agenda.component';
+import { PatientsComponent } from './components/patients/patients.component';
+import { WhatsAppComponent } from './components/whatsapp/whatsapp.component';
 
 // Services
 import { ApiService } from './services/api.service';
