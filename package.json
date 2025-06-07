@@ -78,6 +78,7 @@
     "estraverse": "^4.3.0",
     "esutils": "^2.0.3",
     "events": "^3.3.0",
+    "express": "^5.1.0",
     "fast-glob": "^3.3.3",
     "faye-websocket": "^0.11.4",
     "find-cache-dir": "^4.0.0",
