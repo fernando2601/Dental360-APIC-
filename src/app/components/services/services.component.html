@@ -1,0 +1,212 @@
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2><i class="fas fa-concierge-bell me-2"></i>Gestão de Serviços</h2>
+      <p class="text-muted mb-0">Gerenciar serviços oferecidos pela clínica</p>
+    </div>
+    <button class="btn btn-primary" (click)="openAddServiceModal()">
+      <i class="fas fa-plus me-2"></i>Novo Serviço
+    </button>
+  </div>
+  
+  <!-- Stats Cards -->
+  <div class="row mb-4">
+    <div class="col-md-2 mb-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center">
+          <i class="fas fa-concierge-bell text-primary fa-2x mb-2"></i>
+          <h6>Total</h6>
+          <h4 class="text-primary">{{ services.length }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 mb-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center">
+          <i class="fas fa-tooth text-success fa-2x mb-2"></i>
+          <h6>Preventivo</h6>
+          <h4 class="text-success">{{ getServicesByCategory('Preventivo').length }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 mb-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center">
+          <i class="fas fa-cut text-warning fa-2x mb-2"></i>
+          <h6>Cirúrgico</h6>
+          <h4 class="text-warning">{{ getServicesByCategory('Cirúrgico').length }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 mb-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center">
+          <i class="fas fa-star text-info fa-2x mb-2"></i>
+          <h6>Estético</h6>
+          <h4 class="text-info">{{ getServicesByCategory('Estético').length }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 mb-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center">
+          <i class="fas fa-braille text-secondary fa-2x mb-2"></i>
+          <h6>Ortodontia</h6>
+          <h4 class="text-secondary">{{ getServicesByCategory('Ortodontia').length }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 mb-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center">
+          <i class="fas fa-money-bill-wave text-danger fa-2x mb-2"></i>
+          <h6>Receita</h6>
+          <h4 class="text-danger">{{ formatCurrency(getTotalRevenuePotential()) }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Services by Category -->
+  <div class="row">
+    <div *ngFor="let category of getUniqueCategories()" class="col-md-6 col-lg-4 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-gradient-primary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-tag me-2"></i>{{ category }}
+            <span class="badge bg-light text-dark ms-2">{{ getServicesByCategory(category).length }}</span>
+          </h6>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <div *ngFor="let service of getServicesByCategory(category)" 
+                 class="list-group-item list-group-item-action border-0">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">{{ service.name }}</h6>
+                  <p class="mb-1 text-muted small">{{ service.description }}</p>
+                  <div class="d-flex align-items-center gap-3">
+                    <small class="text-success fw-bold">
+                      <i class="fas fa-money-bill me-1"></i>{{ formatCurrency(service.price) }}
+                    </small>
+                    <small class="text-muted">
+                      <i class="fas fa-clock me-1"></i>{{ service.duration_minutes }}min
+                    </small>
+                  </div>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" (click)="editService(service)">
+                      <i class="fas fa-edit me-2"></i>Editar
+                    </a></li>
+                    <li><a class="dropdown-item" (click)="viewServiceStats(service)">
+                      <i class="fas fa-chart-bar me-2"></i>Estatísticas
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" (click)="scheduleService(service)">
+                      <i class="fas fa-calendar-plus me-2"></i>Agendar
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" (click)="deactivateService(service)" *ngIf="service.is_active">
+                      <i class="fas fa-eye-slash me-2"></i>Desativar
+                    </a></li>
+                    <li><a class="dropdown-item text-success" (click)="activateService(service)" *ngIf="!service.is_active">
+                      <i class="fas fa-eye me-2"></i>Ativar
+                    </a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Service Modal -->
+<div class="modal fade" id="serviceModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-concierge-bell me-2"></i>
+          {{ isEditing ? 'Editar Serviço' : 'Novo Serviço' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="serviceForm" (ngSubmit)="saveService()">
+          <div class="row">
+            <div class="col-md-8 mb-3">
+              <label class="form-label">Nome do Serviço *</label>
+              <input type="text" class="form-control" formControlName="name" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Categoria *</label>
+              <select class="form-select" formControlName="category" required>
+                <option value="">Selecione...</option>
+                <option value="Preventivo">Preventivo</option>
+                <option value="Restaurador">Restaurador</option>
+                <option value="Cirúrgico">Cirúrgico</option>
+                <option value="Endodontia">Endodontia</option>
+                <option value="Ortodontia">Ortodontia</option>
+                <option value="Implantologia">Implantologia</option>
+                <option value="Prótese">Prótese</option>
+                <option value="Estético">Estético</option>
+                <option value="Periodontia">Periodontia</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Preço (R$) *</label>
+              <input type="number" class="form-control" formControlName="price" step="0.01" min="0" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Duração (minutos) *</label>
+              <input type="number" class="form-control" formControlName="duration_minutes" min="15" step="15" required>
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label">Descrição</label>
+              <textarea class="form-control" formControlName="description" rows="3" placeholder="Descrição detalhada do serviço..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="saveService()" [disabled]="!serviceForm.valid || saving">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isEditing ? 'Atualizar' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.list-group-item-action:hover {
+  background-color: #f8f9fa;
+  transform: translateX(5px);
+  transition: all 0.2s ease;
+}
+
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+</style>

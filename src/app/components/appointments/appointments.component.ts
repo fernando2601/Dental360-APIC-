@@ -1,145 +1,303 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
+
+declare var bootstrap: any;
+
+interface Appointment {
+  id?: number;
+  patient_id: number;
+  service_id: number;
+  staff_id: number;
+  appointment_date: string;
+  duration_minutes?: number;
+  status: string;
+  notes?: string;
+  patient_name?: string;
+  service_name?: string;
+  staff_name?: string;
+}
+
+interface Patient {
+  id: number;
+  name: string;
+  email?: string;
+  phone?: string;
+}
+
+interface Service {
+  id: number;
+  name: string;
+  price: number;
+  duration_minutes: number;
+  category: string;
+}
+
+interface Staff {
+  id: number;
+  full_name: string;
+  specialization: string;
+  position: string;
+}
 
 @Component({
   selector: 'app-appointments',
-  template: `
-    <div class="container-fluid p-4">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-calendar-alt me-2"></i>Agendamentos</h2>
-        <button class="btn btn-primary">
-          <i class="fas fa-plus me-2"></i>Novo Agendamento
-        </button>
-      </div>
-      
-      <div class="row">
-        <div class="col-md-4 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-clock text-warning fa-2x mb-2"></i>
-              <h5>Pendentes</h5>
-              <h3 class="text-warning">{{stats.pending}}</h3>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-              <h5>Confirmados</h5>
-              <h3 class="text-success">{{stats.confirmed}}</h3>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-calendar-day text-info fa-2x mb-2"></i>
-              <h5>Hoje</h5>
-              <h3 class="text-info">{{stats.today}}</h3>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white">
-          <h5 class="mb-0">Próximos Agendamentos</h5>
-        </div>
-        <div class="card-body">
-          <div *ngIf="loading" class="text-center py-4">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Carregando...</span>
-            </div>
-          </div>
-          <div *ngIf="!loading && appointments.length === 0" class="text-center py-4 text-muted">
-            <i class="fas fa-calendar-times fa-3x mb-3"></i>
-            <p>Nenhum agendamento encontrado</p>
-          </div>
-          <div *ngIf="!loading && appointments.length > 0" class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Cliente</th>
-                  <th>Serviço</th>
-                  <th>Data/Hora</th>
-                  <th>Status</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let appointment of appointments">
-                  <td>{{appointment.clientName}}</td>
-                  <td>{{appointment.serviceName}}</td>
-                  <td>{{formatDateTime(appointment.dateTime)}}</td>
-                  <td>
-                    <span class="badge" [ngClass]="getStatusClass(appointment.status)">
-                      {{appointment.status}}
-                    </span>
-                  </td>
-                  <td>
-                    <button class="btn btn-sm btn-outline-primary me-1">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
+  templateUrl: './appointments.component.html'
 })
 export class AppointmentsComponent implements OnInit {
-  stats = { pending: 0, confirmed: 0, today: 0 };
-  appointments: any[] = [];
+  appointments: Appointment[] = [];
+  filteredAppointments: Appointment[] = [];
+  patients: Patient[] = [];
+  services: Service[] = [];
+  staffMembers: Staff[] = [];
+  
+  selectedDate = new Date().toISOString().split('T')[0];
+  statusFilter = '';
   loading = true;
+  saving = false;
+  isEditing = false;
+  
+  appointmentForm: FormGroup;
+  appointmentModal: any;
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private fb: FormBuilder
+  ) {
+    this.appointmentForm = this.fb.group({
+      patient_id: ['', Validators.required],
+      service_id: ['', Validators.required],
+      staff_id: ['', Validators.required],
+      appointment_date: ['', Validators.required],
+      notes: ['']
+    });
+  }
 
   ngOnInit() {
-    this.loadAppointments();
-    this.loadStats();
+    this.loadAllData();
   }
 
-  loadAppointments() {
-    this.apiService.get('/api/appointments').subscribe({
-      next: (data) => {
-        this.appointments = data;
-        this.loading = false;
+  loadAllData() {
+    this.loading = true;
+    Promise.all([
+      this.loadAppointments(),
+      this.loadPatients(),
+      this.loadServices(),
+      this.loadStaff()
+    ]).then(() => {
+      this.loading = false;
+      this.filterByDate();
+    }).catch(error => {
+      console.error('Error loading data:', error);
+      this.loading = false;
+    });
+  }
+
+  loadAppointments(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.apiService.get<Appointment[]>('/appointments').subscribe({
+        next: (appointments) => {
+          this.appointments = appointments;
+          resolve();
+        },
+        error: (error) => reject(error)
+      });
+    });
+  }
+
+  loadPatients(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.apiService.get<Patient[]>('/patients').subscribe({
+        next: (patients) => {
+          this.patients = patients;
+          resolve();
+        },
+        error: (error) => reject(error)
+      });
+    });
+  }
+
+  loadServices(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.apiService.get<Service[]>('/services').subscribe({
+        next: (services) => {
+          this.services = services;
+          resolve();
+        },
+        error: (error) => reject(error)
+      });
+    });
+  }
+
+  loadStaff(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.apiService.get<Staff[]>('/staff').subscribe({
+        next: (staff) => {
+          this.staffMembers = staff;
+          resolve();
+        },
+        error: (error) => reject(error)
+      });
+    });
+  }
+
+  filterByDate() {
+    const selectedDateStr = this.selectedDate;
+    this.filteredAppointments = this.appointments.filter(appointment => 
+      appointment.appointment_date.startsWith(selectedDateStr)
+    );
+    this.filterAppointments();
+  }
+
+  filterAppointments() {
+    let filtered = this.filteredAppointments;
+    
+    if (this.statusFilter) {
+      filtered = filtered.filter(appointment => 
+        appointment.status === this.statusFilter
+      );
+    }
+    
+    this.filteredAppointments = filtered.sort((a, b) => 
+      new Date(a.appointment_date).getTime() - new Date(b.appointment_date).getTime()
+    );
+  }
+
+  getAppointmentsByStatus(status: string): Appointment[] {
+    return this.appointments.filter(appointment => appointment.status === status);
+  }
+
+  getTodayAppointments(): Appointment[] {
+    const today = new Date().toISOString().split('T')[0];
+    return this.appointments.filter(appointment => 
+      appointment.appointment_date.startsWith(today)
+    );
+  }
+
+  openNewAppointmentModal() {
+    this.isEditing = false;
+    this.appointmentForm.reset();
+    this.openModal();
+  }
+
+  editAppointment(appointment: Appointment) {
+    this.isEditing = true;
+    this.appointmentForm.patchValue({
+      patient_id: appointment.patient_id,
+      service_id: appointment.service_id,
+      staff_id: appointment.staff_id,
+      appointment_date: appointment.appointment_date.substring(0, 16),
+      notes: appointment.notes
+    });
+    this.openModal();
+  }
+
+  viewAppointment(appointment: Appointment) {
+    console.log('Viewing appointment:', appointment);
+  }
+
+  confirmAppointment(appointment: Appointment) {
+    this.updateAppointmentStatus(appointment.id!, 'confirmed');
+  }
+
+  completeAppointment(appointment: Appointment) {
+    this.updateAppointmentStatus(appointment.id!, 'completed');
+  }
+
+  cancelAppointment(appointment: Appointment) {
+    this.updateAppointmentStatus(appointment.id!, 'cancelled');
+  }
+
+  updateAppointmentStatus(appointmentId: number, status: string) {
+    this.apiService.put(`/appointments/${appointmentId}`, { status }).subscribe({
+      next: () => {
+        this.loadAllData();
       },
       error: (error) => {
-        console.error('Erro ao carregar agendamentos:', error);
-        this.loading = false;
+        console.error('Error updating appointment status:', error);
       }
     });
   }
 
-  loadStats() {
-    this.apiService.get('/api/appointments/stats').subscribe({
-      next: (data) => {
-        this.stats = data;
+  saveAppointment() {
+    if (!this.appointmentForm.valid) return;
+
+    this.saving = true;
+    const appointmentData = this.appointmentForm.value;
+
+    const request = this.isEditing 
+      ? this.apiService.put<Appointment>(`/appointments/${appointmentData.id}`, appointmentData)
+      : this.apiService.post<Appointment>('/appointments', appointmentData);
+
+    request.subscribe({
+      next: () => {
+        this.saving = false;
+        this.closeModal();
+        this.loadAllData();
       },
       error: (error) => {
-        console.error('Erro ao carregar estatísticas:', error);
+        console.error('Error saving appointment:', error);
+        this.saving = false;
       }
     });
   }
 
-  formatDateTime(dateTime: string): string {
-    return new Date(dateTime).toLocaleString('pt-BR');
+  openModal() {
+    this.appointmentModal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+    this.appointmentModal.show();
   }
 
-  getStatusClass(status: string): string {
-    const statusClasses: any = {
-      'Pendente': 'bg-warning',
-      'Confirmado': 'bg-success',
-      'Cancelado': 'bg-danger',
-      'Concluído': 'bg-info'
+  closeModal() {
+    if (this.appointmentModal) {
+      this.appointmentModal.hide();
+    }
+  }
+
+  viewTodaySchedule() {
+    this.selectedDate = new Date().toISOString().split('T')[0];
+    this.filterByDate();
+  }
+
+  viewWeekSchedule() {
+    console.log('Viewing week schedule...');
+  }
+
+  exportSchedule() {
+    console.log('Exporting schedule...');
+  }
+
+  isStaffAvailable(staff: Staff): boolean {
+    const todayAppointments = this.getTodayAppointments();
+    const currentHour = new Date().getHours();
+    
+    const staffAppointments = todayAppointments.filter(appointment => 
+      appointment.staff_id === staff.id &&
+      new Date(appointment.appointment_date).getHours() === currentHour
+    );
+    
+    return staffAppointments.length === 0;
+  }
+
+  formatTime(dateString: string): string {
+    return new Date(dateString).toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  }
+
+  getStatusBadgeClass(status: string): string {
+    const statusClasses: { [key: string]: string } = {
+      'scheduled': 'bg-warning',
+      'confirmed': 'bg-success',
+      'completed': 'bg-primary',
+      'cancelled': 'bg-danger'
     };
     return statusClasses[status] || 'bg-secondary';
   }
