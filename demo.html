@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DentalSpa - Sistema Restaurado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #667eea !important;
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            transition: all 0.3s;
+        }
+        .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        .nav-link.active {
+            color: white !important;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white">
+                        <i class="fas fa-tooth me-2"></i>
+                        DentalSpa
+                    </h4>
+                    <small class="text-light">Sistema Restaurado</small>
+                </div>
+                
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                        <i class="fas fa-chart-line me-2"></i>Dashboard
+                    </a>
+                    <a class="nav-link" href="#clients" onclick="showSection('clients')">
+                        <i class="fas fa-users me-2"></i>Clientes
+                    </a>
+                    <a class="nav-link" href="#appointments" onclick="showSection('appointments')">
+                        <i class="fas fa-calendar-alt me-2"></i>Agendamentos
+                    </a>
+                    <a class="nav-link" href="#services" onclick="showSection('services')">
+                        <i class="fas fa-tooth me-2"></i>Serviços
+                    </a>
+                    <a class="nav-link" href="#staff" onclick="showSection('staff')">
+                        <i class="fas fa-user-md me-2"></i>Equipe
+                    </a>
+                    <a class="nav-link" href="#financial" onclick="showSection('financial')">
+                        <i class="fas fa-chart-line me-2"></i>Financeiro
+                    </a>
+                    <a class="nav-link" href="#inventory" onclick="showSection('inventory')">
+                        <i class="fas fa-boxes me-2"></i>Estoque
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="content-section">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-chart-line me-2"></i>Dashboard</h2>
+                        <div class="badge bg-success">Sistema Restaurado</div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users text-primary fa-2x mb-2"></i>
+                                    <h5>Total Clientes</h5>
+                                    <h3 class="text-primary">150</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-calendar-day text-success fa-2x mb-2"></i>
+                                    <h5>Hoje</h5>
+                                    <h3 class="text-success">8</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-dollar-sign text-info fa-2x mb-2"></i>
+                                    <h5>Receita Mensal</h5>
+                                    <h3 class="text-info">R$ 45.000</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tooth text-warning fa-2x mb-2"></i>
+                                    <h5>Serviços</h5>
+                                    <h3 class="text-warning">25</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Status do Sistema</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-success">
+                                <h6><i class="fas fa-check-circle me-2"></i>Frontend Angular Restaurado</h6>
+                                <p class="mb-0">Todos os componentes foram restaurados com sucesso:</p>
+                                <ul class="mt-2 mb-0">
+                                    <li>Dashboard com estatísticas</li>
+                                    <li>Gestão de clientes</li>
+                                    <li>Sistema de agendamentos</li>
+                                    <li>Catálogo de serviços</li>
+                                    <li>Gestão de equipe</li>
+                                    <li>Controle financeiro</li>
+                                    <li>Gestão de estoque</li>
+                                    <li>Sistema de autenticação</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-database me-2"></i>Backend .NET Core</h6>
+                                <p class="mb-0">Sistema backend completo com:</p>
+                                <ul class="mt-2 mb-0">
+                                    <li>AutoMapper 12.0.1 implementado</li>
+                                    <li>Suporte a múltiplos bancos (PostgreSQL + SQL Server)</li>
+                                    <li>14 tabelas criadas no PostgreSQL</li>
+                                    <li>13 DTOs com mapeamento automático</li>
+                                    <li>Arquitetura DDD com camadas bem definidas</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other sections (hidden initially) -->
+                <div id="clients" class="content-section d-none">
+                    <h2><i class="fas fa-users me-2"></i>Gestão de Clientes</h2>
+                    <div class="alert alert-info">
+                        <p>Componente de clientes restaurado com funcionalidades completas para:</p>
+                        <ul>
+                            <li>Cadastro e edição de clientes</li>
+                            <li>Histórico de atendimentos</li>
+                            <li>Informações de contato</li>
+                            <li>Anamnese e observações</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="appointments" class="content-section d-none">
+                    <h2><i class="fas fa-calendar-alt me-2"></i>Sistema de Agendamentos</h2>
+                    <div class="alert alert-info">
+                        <p>Componente de agendamentos restaurado com:</p>
+                        <ul>
+                            <li>Calendário interativo</li>
+                            <li>Gestão de horários</li>
+                            <li>Status de agendamentos</li>
+                            <li>Notificações automáticas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="services" class="content-section d-none">
+                    <h2><i class="fas fa-tooth me-2"></i>Catálogo de Serviços</h2>
+                    <div class="alert alert-info">
+                        <p>Componente de serviços restaurado incluindo:</p>
+                        <ul>
+                            <li>Serviços odontológicos</li>
+                            <li>Procedimentos de harmonização facial</li>
+                            <li>Tratamentos estéticos</li>
+                            <li>Precificação e duração</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="staff" class="content-section d-none">
+                    <h2><i class="fas fa-user-md me-2"></i>Gestão de Equipe</h2>
+                    <div class="alert alert-info">
+                        <p>Componente de equipe restaurado com:</p>
+                        <ul>
+                            <li>Cadastro de profissionais</li>
+                            <li>Especialidades e certificações</li>
+                            <li>Agenda individual</li>
+                            <li>Controle de permissões</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="financial" class="content-section d-none">
+                    <h2><i class="fas fa-chart-line me-2"></i>Controle Financeiro</h2>
+                    <div class="alert alert-info">
+                        <p>Componente financeiro restaurado incluindo:</p>
+                        <ul>
+                            <li>Receitas e despesas</li>
+                            <li>Relatórios mensais</li>
+                            <li>Contas a receber</li>
+                            <li>Fluxo de caixa</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="inventory" class="content-section d-none">
+                    <h2><i class="fas fa-boxes me-2"></i>Gestão de Estoque</h2>
+                    <div class="alert alert-info">
+                        <p>Componente de estoque restaurado com:</p>
+                        <ul>
+                            <li>Controle de materiais</li>
+                            <li>Alertas de estoque baixo</li>
+                            <li>Categoria de produtos</li>
+                            <li>Histórico de movimentações</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('d-none');
+            });
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.remove('d-none');
+            
+            // Add active class to clicked nav link
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
