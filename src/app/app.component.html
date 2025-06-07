@@ -1,0 +1,83 @@
+<div *ngIf="!isAuthenticated">
+  <router-outlet></router-outlet>
+</div>
+
+<div *ngIf="isAuthenticated" class="d-flex">
+  <!-- Sidebar -->
+  <nav class="sidebar bg-primary text-white p-3" style="width: 250px; min-height: 100vh;">
+    <div class="sidebar-header mb-4">
+      <h4><i class="fas fa-tooth"></i> DentalSpa</h4>
+    </div>
+    
+    <ul class="nav flex-column">
+      <li class="nav-item mb-2">
+        <a class="nav-link text-white" routerLink="/dashboard" routerLinkActive="active">
+          <i class="fas fa-chart-line me-2"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item mb-2">
+        <a class="nav-link text-white" routerLink="/clients" routerLinkActive="active">
+          <i class="fas fa-users me-2"></i> Clientes
+        </a>
+      </li>
+      <li class="nav-item mb-2">
+        <a class="nav-link text-white" routerLink="/appointments" routerLinkActive="active">
+          <i class="fas fa-calendar-alt me-2"></i> Agendamentos
+        </a>
+      </li>
+      <li class="nav-item mb-2">
+        <a class="nav-link text-white" routerLink="/services" routerLinkActive="active">
+          <i class="fas fa-concierge-bell me-2"></i> Serviços
+        </a>
+      </li>
+      <li class="nav-item mb-2">
+        <a class="nav-link text-white" routerLink="/staff" routerLinkActive="active">
+          <i class="fas fa-user-md me-2"></i> Funcionários
+        </a>
+      </li>
+      <li class="nav-item mb-2">
+        <a class="nav-link text-white" routerLink="/financial" routerLinkActive="active">
+          <i class="fas fa-money-bill-wave me-2"></i> Financeiro
+        </a>
+      </li>
+      <li class="nav-item mb-2">
+        <a class="nav-link text-white" routerLink="/inventory" routerLinkActive="active">
+          <i class="fas fa-boxes me-2"></i> Estoque
+        </a>
+      </li>
+    </ul>
+
+    <div class="mt-auto pt-4">
+      <button class="btn btn-outline-light w-100" (click)="logout()">
+        <i class="fas fa-sign-out-alt me-2"></i> Sair
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="flex-grow-1">
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <div class="container-fluid">
+        <div class="navbar-nav ms-auto">
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user"></i> Admin
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Perfil</a></li>
+              <li><a class="dropdown-item" href="#">Configurações</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" (click)="logout()">Sair</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container-fluid p-4">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

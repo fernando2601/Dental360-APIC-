@@ -1,0 +1,186 @@
+<div class="dashboard">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2><i class="fas fa-chart-line me-2"></i>Dashboard</h2>
+      <p class="text-muted mb-0">Visão geral do sistema</p>
+    </div>
+    <button class="btn btn-outline-primary" (click)="loadDashboardData()">
+      <i class="fas fa-sync-alt me-2"></i>Atualizar
+    </button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="card-title">Total de Clientes</h6>
+              <h3 class="mb-0">{{ stats.totalClients }}</h3>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-users fa-2x"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="card-title">Agendamentos Hoje</h6>
+              <h3 class="mb-0">{{ stats.appointmentsToday }}</h3>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-calendar-day fa-2x"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="card-title">Receita Mensal</h6>
+              <h3 class="mb-0">{{ formatCurrency(stats.monthlyRevenue) }}</h3>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-money-bill-wave fa-2x"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card text-white bg-info">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="card-title">Serviços Ativos</h6>
+              <h3 class="mb-0">{{ stats.totalServices }}</h3>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-concierge-bell fa-2x"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Upcoming Appointments -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-calendar-alt me-2"></i>Próximos Agendamentos</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="loading" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
+
+          <div *ngIf="!loading && upcomingAppointments.length === 0" class="text-center text-muted">
+            <i class="fas fa-calendar-times fa-3x mb-3 d-block"></i>
+            <p>Nenhum agendamento próximo encontrado</p>
+          </div>
+
+          <div *ngIf="!loading && upcomingAppointments.length > 0">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Data/Hora</th>
+                    <th>Cliente</th>
+                    <th>Serviço</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let appointment of upcomingAppointments">
+                    <td>{{ formatDate(appointment.scheduledDate) }}</td>
+                    <td>{{ appointment.clientName || 'N/A' }}</td>
+                    <td>{{ appointment.serviceName || 'N/A' }}</td>
+                    <td>
+                      <span class="badge" 
+                            [ngClass]="{
+                              'bg-primary': appointment.status === 'scheduled',
+                              'bg-success': appointment.status === 'confirmed',
+                              'bg-warning': appointment.status === 'pending'
+                            }">
+                        {{ appointment.status }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Database Status -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-database me-2"></i>Status dos Bancos</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="!databaseStatus" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
+
+          <div *ngIf="databaseStatus">
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <span><strong>PostgreSQL</strong></span>
+                <span [ngClass]="getDatabaseStatusClass(databaseStatus.PostgreSQL.Available)">
+                  <i [ngClass]="getDatabaseStatusIcon(databaseStatus.PostgreSQL.Available)"></i>
+                  {{ databaseStatus.PostgreSQL.Available ? 'Online' : 'Offline' }}
+                </span>
+              </div>
+              <small class="text-muted">
+                {{ databaseStatus.PostgreSQL.IsPrimary ? 'Banco Principal' : 'Banco Secundário' }}
+              </small>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <span><strong>SQL Server</strong></span>
+                <span [ngClass]="getDatabaseStatusClass(databaseStatus.SqlServer.Available)">
+                  <i [ngClass]="getDatabaseStatusIcon(databaseStatus.SqlServer.Available)"></i>
+                  {{ databaseStatus.SqlServer.Available ? 'Online' : 'Offline' }}
+                </span>
+              </div>
+              <small class="text-muted">
+                {{ databaseStatus.SqlServer.IsPrimary ? 'Banco Principal' : 'Banco Secundário' }}
+              </small>
+            </div>
+
+            <div *ngIf="databaseStatus.Recommendations.length > 0" class="mt-3">
+              <strong class="text-muted">Recomendações:</strong>
+              <ul class="small mt-2 mb-0">
+                <li *ngFor="let recommendation of databaseStatus.Recommendations">
+                  {{ recommendation }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
