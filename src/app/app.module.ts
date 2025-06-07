@@ -46,7 +46,16 @@ import { InventoryService } from './services/inventory.service';
     StaffComponent,
     FinancialComponent,
     InventoryComponent,
-    LoginComponent
+    LoginComponent,
+    PackagesComponent,
+    BeforeAfterComponent,
+    LearningComponent,
+    ClinicInfoComponent,
+    SubscriptionsComponent,
+    AnalyticsComponent,
+    AgendaComponent,
+    PatientsComponent,
+    WhatsAppComponent
   ],
   imports: [
     BrowserModule,
