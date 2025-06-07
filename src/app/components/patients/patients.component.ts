@@ -1,221 +1,207 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
+
+declare var bootstrap: any;
+
+interface Patient {
+  id?: number;
+  name: string;
+  email?: string;
+  phone?: string;
+  birth_date?: string;
+  cpf?: string;
+  address?: string;
+  emergency_contact?: string;
+  medical_history?: string;
+  allergies?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 @Component({
   selector: 'app-patients',
-  template: `
-    <div class="container-fluid p-4">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-user-injured me-2"></i>Pacientes</h2>
-        <button class="btn btn-primary">
-          <i class="fas fa-plus me-2"></i>Novo Paciente
-        </button>
-      </div>
-      
-      <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-user-injured text-primary fa-2x mb-2"></i>
-              <h6>Total Pacientes</h6>
-              <h4 class="text-primary">{{stats.totalPatients}}</h4>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-user-plus text-success fa-2x mb-2"></i>
-              <h6>Novos Este Mês</h6>
-              <h4 class="text-success">{{stats.newThisMonth}}</h4>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-calendar-check text-info fa-2x mb-2"></i>
-              <h6>Em Tratamento</h6>
-              <h4 class="text-info">{{stats.inTreatment}}</h4>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-star text-warning fa-2x mb-2"></i>
-              <h6>Satisfação Média</h6>
-              <h4 class="text-warning">{{stats.avgSatisfaction}}/5</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Lista de Pacientes</h5>
-          <div class="d-flex gap-2">
-            <div class="input-group" style="width: 300px;">
-              <span class="input-group-text">
-                <i class="fas fa-search"></i>
-              </span>
-              <input type="text" class="form-control" placeholder="Buscar paciente..." [(ngModel)]="searchTerm" (input)="filterPatients()">
-            </div>
-            <select class="form-select" style="width: auto;" [(ngModel)]="statusFilter" (change)="filterPatients()">
-              <option value="">Todos os status</option>
-              <option value="active">Ativo</option>
-              <option value="treatment">Em Tratamento</option>
-              <option value="completed">Tratamento Concluído</option>
-              <option value="inactive">Inativo</option>
-            </select>
-          </div>
-        </div>
-        <div class="card-body">
-          <div *ngIf="loading" class="text-center py-4">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Carregando...</span>
-            </div>
-          </div>
-          <div *ngIf="!loading && filteredPatients.length > 0" class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Paciente</th>
-                  <th>Idade</th>
-                  <th>Telefone</th>
-                  <th>Último Atendimento</th>
-                  <th>Próxima Consulta</th>
-                  <th>Status</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let patient of filteredPatients">
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-3">
-                        <i class="fas fa-user text-muted"></i>
-                      </div>
-                      <div>
-                        <strong>{{patient.name}}</strong>
-                        <br>
-                        <small class="text-muted">{{patient.email}}</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{{patient.age}} anos</td>
-                  <td>{{patient.phone}}</td>
-                  <td>
-                    <span *ngIf="patient.lastAppointment">{{formatDate(patient.lastAppointment)}}</span>
-                    <span *ngIf="!patient.lastAppointment" class="text-muted">Nunca</span>
-                  </td>
-                  <td>
-                    <span *ngIf="patient.nextAppointment">{{formatDate(patient.nextAppointment)}}</span>
-                    <span *ngIf="!patient.nextAppointment" class="text-muted">Não agendado</span>
-                  </td>
-                  <td>
-                    <span class="badge" [ngClass]="getStatusClass(patient.status)">
-                      {{patient.status}}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="btn-group" role="group">
-                      <button class="btn btn-sm btn-outline-primary" title="Ver Prontuário">
-                        <i class="fas fa-file-medical"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-success" title="Agendar Consulta">
-                        <i class="fas fa-calendar-plus"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-info" title="Histórico">
-                        <i class="fas fa-history"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-secondary" title="Editar">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div *ngIf="!loading && filteredPatients.length === 0" class="text-center py-4 text-muted">
-            <i class="fas fa-user-injured fa-3x mb-3"></i>
-            <p>Nenhum paciente encontrado</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
+  templateUrl: './patients.component.html'
 })
 export class PatientsComponent implements OnInit {
-  stats = { 
-    totalPatients: 0, 
-    newThisMonth: 0, 
-    inTreatment: 0, 
-    avgSatisfaction: 0 
-  };
-  patients: any[] = [];
-  filteredPatients: any[] = [];
-  loading = true;
+  patients: Patient[] = [];
+  filteredPatients: Patient[] = [];
+  appointments: any[] = [];
   searchTerm = '';
-  statusFilter = '';
+  loading = true;
+  saving = false;
+  isEditing = false;
+  
+  patientForm: FormGroup;
+  patientModal: any;
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private fb: FormBuilder
+  ) {
+    this.patientForm = this.fb.group({
+      name: ['', Validators.required],
+      email: [''],
+      phone: [''],
+      birth_date: [''],
+      cpf: [''],
+      address: [''],
+      emergency_contact: [''],
+      medical_history: [''],
+      allergies: ['']
+    });
+  }
 
   ngOnInit() {
     this.loadPatients();
-    this.loadStats();
+    this.loadAppointments();
   }
 
   loadPatients() {
-    this.apiService.get('/api/patients').subscribe({
-      next: (data: any) => {
-        this.patients = data;
-        this.filteredPatients = data;
+    this.loading = true;
+    this.apiService.get<Patient[]>('/patients').subscribe({
+      next: (patients) => {
+        this.patients = patients;
+        this.filteredPatients = patients;
         this.loading = false;
       },
       error: (error) => {
-        console.error('Erro ao carregar pacientes:', error);
+        console.error('Error loading patients:', error);
         this.loading = false;
       }
     });
   }
 
-  loadStats() {
-    this.apiService.get('/api/patients/stats').subscribe({
-      next: (data: any) => {
-        this.stats = data;
+  loadAppointments() {
+    this.apiService.get<any[]>('/appointments').subscribe({
+      next: (appointments) => {
+        this.appointments = appointments;
       },
       error: (error) => {
-        console.error('Erro ao carregar estatísticas:', error);
+        console.error('Error loading appointments:', error);
       }
     });
   }
 
   filterPatients() {
-    this.filteredPatients = this.patients.filter(patient => {
-      const matchesSearch = !this.searchTerm || 
-        patient.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        patient.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        patient.phone.includes(this.searchTerm);
-      
-      const matchesStatus = !this.statusFilter || patient.status === this.statusFilter;
-      
-      return matchesSearch && matchesStatus;
+    if (!this.searchTerm) {
+      this.filteredPatients = this.patients;
+      return;
+    }
+
+    const term = this.searchTerm.toLowerCase();
+    this.filteredPatients = this.patients.filter(patient => 
+      patient.name.toLowerCase().includes(term) ||
+      patient.email?.toLowerCase().includes(term) ||
+      patient.cpf?.includes(term) ||
+      patient.phone?.includes(term)
+    );
+  }
+
+  openAddPatientModal() {
+    this.isEditing = false;
+    this.patientForm.reset();
+    this.openModal();
+  }
+
+  editPatient(patient: Patient) {
+    this.isEditing = true;
+    this.patientForm.patchValue(patient);
+    this.openModal();
+  }
+
+  viewPatient(patient: Patient) {
+    console.log('Viewing patient:', patient);
+  }
+
+  scheduleAppointment(patient: Patient) {
+    console.log('Scheduling appointment for:', patient);
+  }
+
+  savePatient() {
+    if (!this.patientForm.valid) return;
+
+    this.saving = true;
+    const patientData = this.patientForm.value;
+
+    const request = this.isEditing 
+      ? this.apiService.put<Patient>(`/patients/${patientData.id}`, patientData)
+      : this.apiService.post<Patient>('/patients', patientData);
+
+    request.subscribe({
+      next: (patient) => {
+        this.saving = false;
+        this.closeModal();
+        this.loadPatients();
+      },
+      error: (error) => {
+        console.error('Error saving patient:', error);
+        this.saving = false;
+      }
     });
+  }
+
+  openModal() {
+    this.patientModal = new bootstrap.Modal(document.getElementById('patientModal'));
+    this.patientModal.show();
+  }
+
+  closeModal() {
+    if (this.patientModal) {
+      this.patientModal.hide();
+    }
+  }
+
+  exportPatients() {
+    console.log('Exporting patients...');
+  }
+
+  // Utility methods
+  getInitials(name: string): string {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
   }
 
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString('pt-BR');
   }
 
-  getStatusClass(status: string): string {
-    const statusClasses: any = {
-      'Ativo': 'bg-success',
-      'Em Tratamento': 'bg-info',
-      'Tratamento Concluído': 'bg-primary',
-      'Inativo': 'bg-secondary'
-    };
-    return statusClasses[status] || 'bg-secondary';
+  formatCPF(cpf: string): string {
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  }
+
+  getAge(birthDate: string): number {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age;
+  }
+
+  getNewPatientsThisMonth(): number {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    
+    return this.patients.filter(patient => {
+      if (!patient.created_at) return false;
+      const createdDate = new Date(patient.created_at);
+      return createdDate.getMonth() === currentMonth && 
+             createdDate.getFullYear() === currentYear;
+    }).length;
+  }
+
+  getPatientsWithAppointments(): number {
+    const patientIds = new Set(this.appointments.map(app => app.patient_id));
+    return patientIds.size;
+  }
+
+  getPatientsWithMedicalHistory(): number {
+    return this.patients.filter(patient => 
+      patient.medical_history && patient.medical_history.trim() !== ''
+    ).length;
   }
 }

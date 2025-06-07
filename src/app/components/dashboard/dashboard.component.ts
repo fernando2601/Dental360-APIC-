@@ -48,8 +48,13 @@ export class DashboardComponent implements OnInit {
   loadDashboardData() {
     this.loading = true;
     
-    // Load stats
-    this.loadStats();
+    // Load stats from the dedicated endpoint
+    this.apiService.get<DashboardStats>('/dashboard/stats').subscribe({
+      next: (stats) => {
+        this.stats = stats;
+      },
+      error: (error) => console.error('Error loading dashboard stats:', error)
+    });
     
     // Load database status
     this.loadDatabaseStatus();
@@ -58,55 +63,8 @@ export class DashboardComponent implements OnInit {
     this.loadUpcomingAppointments();
   }
 
-  private loadStats() {
-    // Load clients count
-    this.apiService.get<any[]>('/api/clients').subscribe({
-      next: (clients) => {
-        this.stats.totalClients = clients.length;
-      },
-      error: (error) => console.error('Error loading clients:', error)
-    });
-
-    // Load services count
-    this.apiService.get<any[]>('/api/services').subscribe({
-      next: (services) => {
-        this.stats.totalServices = services.filter(s => s.isActive).length;
-      },
-      error: (error) => console.error('Error loading services:', error)
-    });
-
-    // Load appointments today
-    const today = new Date().toISOString().split('T')[0];
-    this.apiService.get<any[]>('/api/appointments').subscribe({
-      next: (appointments) => {
-        this.stats.appointmentsToday = appointments.filter(a => 
-          a.scheduledDate.startsWith(today)
-        ).length;
-      },
-      error: (error) => console.error('Error loading appointments:', error)
-    });
-
-    // Load monthly revenue
-    this.apiService.get<any[]>('/api/financial').subscribe({
-      next: (transactions) => {
-        const currentMonth = new Date().getMonth();
-        const currentYear = new Date().getFullYear();
-        
-        this.stats.monthlyRevenue = transactions
-          .filter(t => {
-            const transactionDate = new Date(t.transactionDate);
-            return transactionDate.getMonth() === currentMonth && 
-                   transactionDate.getFullYear() === currentYear &&
-                   t.type === 'income';
-          })
-          .reduce((sum, t) => sum + t.amount, 0);
-      },
-      error: (error) => console.error('Error loading financial data:', error)
-    });
-  }
-
   private loadDatabaseStatus() {
-    this.apiService.get<DatabaseStatus>('/api/database/status').subscribe({
+    this.apiService.get<DatabaseStatus>('/database/status').subscribe({
       next: (status) => {
         this.databaseStatus = status;
       },
@@ -118,14 +76,9 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadUpcomingAppointments() {
-    this.apiService.get<any[]>('/api/appointments').subscribe({
+    this.apiService.get<any[]>('/appointments/upcoming').subscribe({
       next: (appointments) => {
-        const now = new Date();
-        this.upcomingAppointments = appointments
-          .filter(a => new Date(a.scheduledDate) > now && a.status !== 'cancelled')
-          .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime())
-          .slice(0, 5);
-        
+        this.upcomingAppointments = appointments.slice(0, 5);
         this.loading = false;
       },
       error: (error) => {

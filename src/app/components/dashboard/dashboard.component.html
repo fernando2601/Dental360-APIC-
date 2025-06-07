@@ -108,9 +108,9 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let appointment of upcomingAppointments">
-                    <td>{{ formatDate(appointment.scheduledDate) }}</td>
-                    <td>{{ appointment.clientName || 'N/A' }}</td>
-                    <td>{{ appointment.serviceName || 'N/A' }}</td>
+                    <td>{{ formatDate(appointment.appointment_date) }}</td>
+                    <td>{{ appointment.patient_name }}</td>
+                    <td>{{ appointment.service_name }}</td>
                     <td>
                       <span class="badge" 
                             [ngClass]="{
@@ -118,7 +118,7 @@
                               'bg-success': appointment.status === 'confirmed',
                               'bg-warning': appointment.status === 'pending'
                             }">
-                        {{ appointment.status }}
+                        {{ appointment.status | titlecase }}
                       </span>
                     </td>
                   </tr>
