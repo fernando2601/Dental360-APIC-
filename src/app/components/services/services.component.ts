@@ -1,147 +1,179 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
+
+declare var bootstrap: any;
+
+interface Service {
+  id?: number;
+  name: string;
+  description?: string;
+  price: number;
+  duration_minutes: number;
+  category: string;
+  is_active?: boolean;
+  created_at?: string;
+}
 
 @Component({
   selector: 'app-services',
-  template: `
-    <div class="container-fluid p-4">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-tooth me-2"></i>Serviços</h2>
-        <button class="btn btn-primary">
-          <i class="fas fa-plus me-2"></i>Novo Serviço
-        </button>
-      </div>
-      
-      <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-tooth text-primary fa-2x mb-2"></i>
-              <h6>Odontologia</h6>
-              <h4 class="text-primary">{{stats.dental}}</h4>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-user-md text-success fa-2x mb-2"></i>
-              <h6>Harmonização</h6>
-              <h4 class="text-success">{{stats.harmonization}}</h4>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-spa text-info fa-2x mb-2"></i>
-              <h6>Estética</h6>
-              <h4 class="text-info">{{stats.aesthetic}}</h4>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3 mb-3">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-              <i class="fas fa-layer-group text-warning fa-2x mb-2"></i>
-              <h6>Total</h6>
-              <h4 class="text-warning">{{stats.total}}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Catálogo de Serviços</h5>
-          <div class="d-flex gap-2">
-            <select class="form-select" style="width: auto;">
-              <option value="">Todas as categorias</option>
-              <option value="dental">Odontologia</option>
-              <option value="harmonization">Harmonização</option>
-              <option value="aesthetic">Estética</option>
-            </select>
-          </div>
-        </div>
-        <div class="card-body">
-          <div *ngIf="loading" class="text-center py-4">
-            <div class="spinner-border" role="status">
-              <span class="visually-hidden">Carregando...</span>
-            </div>
-          </div>
-          <div *ngIf="!loading && services.length === 0" class="text-center py-4 text-muted">
-            <i class="fas fa-tooth fa-3x mb-3"></i>
-            <p>Nenhum serviço cadastrado</p>
-          </div>
-          <div *ngIf="!loading && services.length > 0" class="row">
-            <div *ngFor="let service of services" class="col-md-4 mb-3">
-              <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="card-title">{{service.name}}</h6>
-                    <span class="badge" [ngClass]="getCategoryClass(service.category)">
-                      {{service.category}}
-                    </span>
-                  </div>
-                  <p class="card-text small text-muted">{{service.description}}</p>
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <strong class="text-primary">{{formatCurrency(service.price)}}</strong>
-                      <br>
-                      <small class="text-muted">{{service.duration}} min</small>
-                    </div>
-                    <div class="btn-group" role="group">
-                      <button class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
+  templateUrl: './services.component.html'
 })
 export class ServicesComponent implements OnInit {
-  stats = { dental: 0, harmonization: 0, aesthetic: 0, total: 0 };
-  services: any[] = [];
+  services: Service[] = [];
+  filteredServices: Service[] = [];
+  searchTerm = '';
+  categoryFilter = '';
   loading = true;
+  saving = false;
+  isEditing = false;
+  
+  serviceForm: FormGroup;
+  serviceModal: any;
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private fb: FormBuilder
+  ) {
+    this.serviceForm = this.fb.group({
+      name: ['', Validators.required],
+      description: [''],
+      price: ['', [Validators.required, Validators.min(0)]],
+      duration_minutes: ['', [Validators.required, Validators.min(15)]],
+      category: ['', Validators.required]
+    });
+  }
 
   ngOnInit() {
     this.loadServices();
-    this.loadStats();
   }
 
   loadServices() {
-    this.apiService.get('/api/services').subscribe({
-      next: (data) => {
-        this.services = data;
+    this.loading = true;
+    this.apiService.get<Service[]>('/services').subscribe({
+      next: (services) => {
+        this.services = services;
+        this.filteredServices = services;
         this.loading = false;
       },
       error: (error) => {
-        console.error('Erro ao carregar serviços:', error);
+        console.error('Error loading services:', error);
         this.loading = false;
       }
     });
   }
 
-  loadStats() {
-    this.apiService.get('/api/services/stats').subscribe({
-      next: (data) => {
-        this.stats = data;
+  filterServices() {
+    let filtered = this.services;
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(service => 
+        service.name.toLowerCase().includes(term) ||
+        service.description?.toLowerCase().includes(term) ||
+        service.category.toLowerCase().includes(term)
+      );
+    }
+
+    if (this.categoryFilter) {
+      filtered = filtered.filter(service => 
+        service.category.toLowerCase() === this.categoryFilter.toLowerCase()
+      );
+    }
+
+    this.filteredServices = filtered;
+  }
+
+  getUniqueCategories(): string[] {
+    const categories = [...new Set(this.services.map(service => service.category))];
+    return categories.sort();
+  }
+
+  getServicesByCategory(category: string): Service[] {
+    return this.services.filter(service => service.category === category);
+  }
+
+  getTotalRevenuePotential(): number {
+    return this.services.reduce((total, service) => total + Number(service.price), 0);
+  }
+
+  openAddServiceModal() {
+    this.isEditing = false;
+    this.serviceForm.reset();
+    this.openModal();
+  }
+
+  editService(service: Service) {
+    this.isEditing = true;
+    this.serviceForm.patchValue({
+      name: service.name,
+      description: service.description,
+      price: service.price,
+      duration_minutes: service.duration_minutes,
+      category: service.category
+    });
+    this.openModal();
+  }
+
+  viewServiceStats(service: Service) {
+    console.log('Viewing stats for service:', service);
+  }
+
+  scheduleService(service: Service) {
+    console.log('Scheduling service:', service);
+  }
+
+  deactivateService(service: Service) {
+    this.updateServiceStatus(service.id!, false);
+  }
+
+  activateService(service: Service) {
+    this.updateServiceStatus(service.id!, true);
+  }
+
+  updateServiceStatus(serviceId: number, isActive: boolean) {
+    this.apiService.put(`/services/${serviceId}`, { is_active: isActive }).subscribe({
+      next: () => {
+        this.loadServices();
       },
       error: (error) => {
-        console.error('Erro ao carregar estatísticas:', error);
+        console.error('Error updating service status:', error);
       }
     });
+  }
+
+  saveService() {
+    if (!this.serviceForm.valid) return;
+
+    this.saving = true;
+    const serviceData = this.serviceForm.value;
+
+    const request = this.isEditing 
+      ? this.apiService.put<Service>(`/services/${serviceData.id}`, serviceData)
+      : this.apiService.post<Service>('/services', serviceData);
+
+    request.subscribe({
+      next: () => {
+        this.saving = false;
+        this.closeModal();
+        this.loadServices();
+      },
+      error: (error) => {
+        console.error('Error saving service:', error);
+        this.saving = false;
+      }
+    });
+  }
+
+  openModal() {
+    this.serviceModal = new bootstrap.Modal(document.getElementById('serviceModal'));
+    this.serviceModal.show();
+  }
+
+  closeModal() {
+    if (this.serviceModal) {
+      this.serviceModal.hide();
+    }
   }
 
   formatCurrency(value: number): string {
@@ -149,14 +181,5 @@ export class ServicesComponent implements OnInit {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
-  }
-
-  getCategoryClass(category: string): string {
-    const categoryClasses: any = {
-      'Odontologia': 'bg-primary',
-      'Harmonização': 'bg-success',
-      'Estética': 'bg-info'
-    };
-    return categoryClasses[category] || 'bg-secondary';
   }
 }
