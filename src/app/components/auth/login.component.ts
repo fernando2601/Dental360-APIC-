@@ -1,17 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, LoginRequest } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  templateUrl: './login.component.html'
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
-  loading = false;
-  error = '';
+  isLoading = false;
+  errorMessage = '';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -19,43 +18,41 @@ export class LoginComponent implements OnInit {
     private router: Router
   ) {
     this.loginForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      username: ['admin', Validators.required],
+      password: ['admin', Validators.required]
     });
   }
 
   ngOnInit() {
-    // Redirect if already logged in
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
-    }
+    // Auto-login for demo
+    setTimeout(() => {
+      this.onSubmit();
+    }, 100);
   }
 
   onSubmit() {
-    if (this.loginForm.invalid) {
-      return;
-    }
-
-    this.loading = true;
-    this.error = '';
-
-    const credentials: LoginRequest = {
-      username: this.loginForm.value.username,
-      password: this.loginForm.value.password
-    };
-
-    this.authService.login(credentials).subscribe({
-      next: (response) => {
-        this.loading = false;
+    if (this.loginForm.valid) {
+      this.isLoading = true;
+      
+      // Simple demo authentication
+      const credentials = this.loginForm.value;
+      if (credentials.username === 'admin' && credentials.password === 'admin') {
+        // Simulate successful login
+        localStorage.setItem('token', 'demo-token');
+        localStorage.setItem('user', JSON.stringify({
+          id: 1,
+          username: 'admin',
+          fullName: 'Administrador',
+          role: 'admin',
+          email: 'admin@dentalspa.com'
+        }));
+        
         this.router.navigate(['/dashboard']);
-      },
-      error: (error) => {
-        this.loading = false;
-        this.error = 'Usuário ou senha inválidos';
-        console.error('Login error:', error);
+      } else {
+        this.errorMessage = 'Credenciais inválidas';
       }
-    });
+      
+      this.isLoading = false;
+    }
   }
-
-  get f() { return this.loginForm.controls; }
 }
