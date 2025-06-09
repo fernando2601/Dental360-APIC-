@@ -16,8 +16,8 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from src directory
-app.use(express.static(path.join(__dirname, 'src')));
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Database status endpoint
 app.get('/api/database/status', async (req, res) => {
