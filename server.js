@@ -15,7 +15,18 @@ const pool = new Pool({
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'src')));
+
+// Serve static files from dist directory if it exists, otherwise from src
+const distPath = path.join(__dirname, 'dist/dentalspa-frontend');
+const srcPath = path.join(__dirname, 'src');
+
+try {
+  // Try to serve from dist first (production build)
+  app.use(express.static(distPath));
+} catch (e) {
+  // Fallback to src directory
+  app.use(express.static(srcPath));
+}
 
 // Database status endpoint
 app.get('/api/database/status', async (req, res) => {
