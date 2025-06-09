@@ -16,17 +16,8 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from dist directory if it exists, otherwise from src
-const distPath = path.join(__dirname, 'dist/dentalspa-frontend');
-const srcPath = path.join(__dirname, 'src');
-
-try {
-  // Try to serve from dist first (production build)
-  app.use(express.static(distPath));
-} catch (e) {
-  // Fallback to src directory
-  app.use(express.static(srcPath));
-}
+// Serve static files from src directory
+app.use(express.static(path.join(__dirname, 'src')));
 
 // Database status endpoint
 app.get('/api/database/status', async (req, res) => {
@@ -341,9 +332,14 @@ app.get('/api/financial/daily-revenue', async (req, res) => {
   }
 });
 
+// Serve working test interface
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'src', 'test-app.html'));
+});
+
 // Handle Angular routing
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src', 'index.html'));
+  res.sendFile(path.join(__dirname, 'src', 'test-app.html'));
 });
 
 app.listen(port, '0.0.0.0', () => {
