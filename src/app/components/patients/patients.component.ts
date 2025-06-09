@@ -2,38 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 
-declare var bootstrap: any;
-
-interface Patient {
-  id?: number;
-  name: string;
-  email?: string;
-  phone?: string;
-  birth_date?: string;
-  cpf?: string;
-  address?: string;
-  emergency_contact?: string;
-  medical_history?: string;
-  allergies?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
 @Component({
   selector: 'app-patients',
   templateUrl: './patients.component.html'
 })
 export class PatientsComponent implements OnInit {
-  patients: Patient[] = [];
-  filteredPatients: Patient[] = [];
-  appointments: any[] = [];
+  patients: any[] = [];
+  filteredPatients: any[] = [];
   searchTerm = '';
   loading = true;
   saving = false;
   isEditing = false;
+  showModal = false;
   
   patientForm: FormGroup;
-  patientModal: any;
+  selectedPatient: any = null;
 
   constructor(
     private apiService: ApiService,
@@ -41,26 +24,31 @@ export class PatientsComponent implements OnInit {
   ) {
     this.patientForm = this.fb.group({
       name: ['', Validators.required],
-      email: [''],
+      email: ['', [Validators.email]],
       phone: [''],
       birth_date: [''],
       cpf: [''],
       address: [''],
+      city: [''],
+      state: [''],
+      zip_code: [''],
       emergency_contact: [''],
+      emergency_phone: [''],
       medical_history: [''],
-      allergies: ['']
+      allergies: [''],
+      medications: [''],
+      insurance: ['']
     });
   }
 
   ngOnInit() {
     this.loadPatients();
-    this.loadAppointments();
   }
 
   loadPatients() {
     this.loading = true;
-    this.apiService.get<Patient[]>('/patients').subscribe({
-      next: (patients) => {
+    this.apiService.get('/patients').subscribe({
+      next: (patients: any[]) => {
         this.patients = patients;
         this.filteredPatients = patients;
         this.loading = false;
@@ -72,50 +60,45 @@ export class PatientsComponent implements OnInit {
     });
   }
 
-  loadAppointments() {
-    this.apiService.get<any[]>('/appointments').subscribe({
-      next: (appointments) => {
-        this.appointments = appointments;
-      },
-      error: (error) => {
-        console.error('Error loading appointments:', error);
-      }
-    });
-  }
-
   filterPatients() {
     if (!this.searchTerm) {
       this.filteredPatients = this.patients;
-      return;
+    } else {
+      const term = this.searchTerm.toLowerCase();
+      this.filteredPatients = this.patients.filter(patient =>
+        patient.name.toLowerCase().includes(term) ||
+        patient.email?.toLowerCase().includes(term) ||
+        patient.phone?.includes(term) ||
+        patient.cpf?.includes(term)
+      );
     }
-
-    const term = this.searchTerm.toLowerCase();
-    this.filteredPatients = this.patients.filter(patient => 
-      patient.name.toLowerCase().includes(term) ||
-      patient.email?.toLowerCase().includes(term) ||
-      patient.cpf?.includes(term) ||
-      patient.phone?.includes(term)
-    );
   }
 
   openAddPatientModal() {
     this.isEditing = false;
+    this.selectedPatient = null;
     this.patientForm.reset();
-    this.openModal();
+    this.showModal = true;
   }
 
-  editPatient(patient: Patient) {
+  editPatient(patient: any) {
     this.isEditing = true;
+    this.selectedPatient = patient;
     this.patientForm.patchValue(patient);
-    this.openModal();
+    this.showModal = true;
   }
 
-  viewPatient(patient: Patient) {
-    console.log('Viewing patient:', patient);
-  }
-
-  scheduleAppointment(patient: Patient) {
-    console.log('Scheduling appointment for:', patient);
+  deletePatient(patient: any) {
+    if (confirm(`Tem certeza que deseja excluir o paciente ${patient.name}?`)) {
+      this.apiService.delete(`/patients/${patient.id}`).subscribe({
+        next: () => {
+          this.loadPatients();
+        },
+        error: (error) => {
+          console.error('Error deleting patient:', error);
+        }
+      });
+    }
   }
 
   savePatient() {
@@ -125,11 +108,11 @@ export class PatientsComponent implements OnInit {
     const patientData = this.patientForm.value;
 
     const request = this.isEditing 
-      ? this.apiService.put<Patient>(`/patients/${patientData.id}`, patientData)
-      : this.apiService.post<Patient>('/patients', patientData);
+      ? this.apiService.put(`/patients/${this.selectedPatient?.id}`, patientData)
+      : this.apiService.post('/patients', patientData);
 
     request.subscribe({
-      next: (patient) => {
+      next: () => {
         this.saving = false;
         this.closeModal();
         this.loadPatients();
@@ -141,35 +124,12 @@ export class PatientsComponent implements OnInit {
     });
   }
 
-  openModal() {
-    this.patientModal = new bootstrap.Modal(document.getElementById('patientModal'));
-    this.patientModal.show();
-  }
-
   closeModal() {
-    if (this.patientModal) {
-      this.patientModal.hide();
-    }
+    this.showModal = false;
   }
 
-  exportPatients() {
-    console.log('Exporting patients...');
-  }
-
-  // Utility methods
-  getInitials(name: string): string {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-  }
-
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  }
-
-  formatCPF(cpf: string): string {
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  }
-
-  getAge(birthDate: string): number {
+  calculateAge(birthDate: string): number {
+    if (!birthDate) return 0;
     const today = new Date();
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
@@ -182,26 +142,8 @@ export class PatientsComponent implements OnInit {
     return age;
   }
 
-  getNewPatientsThisMonth(): number {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    
-    return this.patients.filter(patient => {
-      if (!patient.created_at) return false;
-      const createdDate = new Date(patient.created_at);
-      return createdDate.getMonth() === currentMonth && 
-             createdDate.getFullYear() === currentYear;
-    }).length;
-  }
-
-  getPatientsWithAppointments(): number {
-    const patientIds = new Set(this.appointments.map(app => app.patient_id));
-    return patientIds.size;
-  }
-
-  getPatientsWithMedicalHistory(): number {
-    return this.patients.filter(patient => 
-      patient.medical_history && patient.medical_history.trim() !== ''
-    ).length;
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('pt-BR');
   }
 }

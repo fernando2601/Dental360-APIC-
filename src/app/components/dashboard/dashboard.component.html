@@ -1,183 +1,127 @@
-<div class="dashboard">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2><i class="fas fa-chart-line me-2"></i>Dashboard</h2>
-      <p class="text-muted mb-0">Visão geral do sistema</p>
-    </div>
-    <button class="btn btn-outline-primary" (click)="loadDashboardData()">
-      <i class="fas fa-sync-alt me-2"></i>Atualizar
-    </button>
+<div class="px-4 py-6 sm:px-0">
+  <!-- Header -->
+  <div class="border-b border-gray-200 pb-5 mb-6">
+    <h3 class="text-lg leading-6 font-medium text-gray-900">Dashboard</h3>
+    <p class="mt-2 max-w-4xl text-sm text-gray-500">
+      Visão geral da clínica e métricas principais
+    </p>
   </div>
 
   <!-- Stats Cards -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card text-white bg-primary">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="card-title">Total de Clientes</h6>
-              <h3 class="mb-0">{{ stats.totalClients }}</h3>
-            </div>
-            <div class="align-self-center">
-              <i class="fas fa-users fa-2x"></i>
-            </div>
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+    <div class="card p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            <span class="text-white text-sm">👥</span>
           </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Pacientes</dt>
+            <dd class="text-lg font-medium text-gray-900">{{ stats.totalPatients }}</dd>
+          </dl>
         </div>
       </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="card text-white bg-success">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="card-title">Agendamentos Hoje</h6>
-              <h3 class="mb-0">{{ stats.appointmentsToday }}</h3>
-            </div>
-            <div class="align-self-center">
-              <i class="fas fa-calendar-day fa-2x"></i>
-            </div>
+    <div class="card p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+            <span class="text-white text-sm">📅</span>
           </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Agendamentos Hoje</dt>
+            <dd class="text-lg font-medium text-gray-900">{{ stats.todayAppointments }}</dd>
+          </dl>
         </div>
       </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="card text-white bg-warning">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="card-title">Receita Mensal</h6>
-              <h3 class="mb-0">{{ formatCurrency(stats.monthlyRevenue) }}</h3>
-            </div>
-            <div class="align-self-center">
-              <i class="fas fa-money-bill-wave fa-2x"></i>
-            </div>
+    <div class="card p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+            <span class="text-white text-sm">🦷</span>
           </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Serviços Ativos</dt>
+            <dd class="text-lg font-medium text-gray-900">{{ stats.totalServices }}</dd>
+          </dl>
         </div>
       </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="card text-white bg-info">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h6 class="card-title">Serviços Ativos</h6>
-              <h3 class="mb-0">{{ stats.totalServices }}</h3>
-            </div>
-            <div class="align-self-center">
-              <i class="fas fa-concierge-bell fa-2x"></i>
-            </div>
+    <div class="card p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+            <span class="text-white text-sm">💰</span>
           </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Receita Mensal</dt>
+            <dd class="text-lg font-medium text-gray-900">R$ {{ stats.monthlyRevenue | number:'1.0-0' }}</dd>
+          </dl>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="row">
-    <!-- Upcoming Appointments -->
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-calendar-alt me-2"></i>Próximos Agendamentos</h5>
-        </div>
-        <div class="card-body">
-          <div *ngIf="loading" class="text-center">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Carregando...</span>
+  <!-- Recent Activity -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Appointments -->
+    <div class="card">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Próximos Agendamentos</h3>
+        <div class="space-y-3" *ngIf="recentAppointments.length > 0; else noAppointments">
+          <div *ngFor="let appointment of recentAppointments" 
+               class="flex items-center justify-between p-3 border rounded-lg">
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ appointment.patient_name }}</p>
+              <p class="text-sm text-gray-500">{{ appointment.service_name }}</p>
             </div>
-          </div>
-
-          <div *ngIf="!loading && upcomingAppointments.length === 0" class="text-center text-muted">
-            <i class="fas fa-calendar-times fa-3x mb-3 d-block"></i>
-            <p>Nenhum agendamento próximo encontrado</p>
-          </div>
-
-          <div *ngIf="!loading && upcomingAppointments.length > 0">
-            <div class="table-responsive">
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th>Data/Hora</th>
-                    <th>Cliente</th>
-                    <th>Serviço</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let appointment of upcomingAppointments">
-                    <td>{{ formatDate(appointment.appointment_date) }}</td>
-                    <td>{{ appointment.patient_name }}</td>
-                    <td>{{ appointment.service_name }}</td>
-                    <td>
-                      <span class="badge" 
-                            [ngClass]="{
-                              'bg-primary': appointment.status === 'scheduled',
-                              'bg-success': appointment.status === 'confirmed',
-                              'bg-warning': appointment.status === 'pending'
-                            }">
-                        {{ appointment.status | titlecase }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="text-right">
+              <p class="text-sm text-gray-900">{{ formatDate(appointment.appointment_date) }}</p>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [ngClass]="getStatusClass(appointment.status)">
+                {{ appointment.status }}
+              </span>
             </div>
           </div>
         </div>
+        <ng-template #noAppointments>
+          <p class="text-gray-500 text-center py-4">Nenhum agendamento encontrado</p>
+        </ng-template>
       </div>
     </div>
 
-    <!-- Database Status -->
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-database me-2"></i>Status dos Bancos</h5>
-        </div>
-        <div class="card-body">
-          <div *ngIf="!databaseStatus" class="text-center">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Carregando...</span>
-            </div>
+    <!-- Quick Stats -->
+    <div class="card">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Estatísticas Rápidas</h3>
+        <div class="space-y-4">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Taxa de Ocupação</span>
+            <span class="text-sm font-medium text-gray-900">{{ stats.occupancyRate }}%</span>
           </div>
-
-          <div *ngIf="databaseStatus">
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <span><strong>PostgreSQL</strong></span>
-                <span [ngClass]="getDatabaseStatusClass(databaseStatus.PostgreSQL.Available)">
-                  <i [ngClass]="getDatabaseStatusIcon(databaseStatus.PostgreSQL.Available)"></i>
-                  {{ databaseStatus.PostgreSQL.Available ? 'Online' : 'Offline' }}
-                </span>
-              </div>
-              <small class="text-muted">
-                {{ databaseStatus.PostgreSQL.IsPrimary ? 'Banco Principal' : 'Banco Secundário' }}
-              </small>
-            </div>
-
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <span><strong>SQL Server</strong></span>
-                <span [ngClass]="getDatabaseStatusClass(databaseStatus.SqlServer.Available)">
-                  <i [ngClass]="getDatabaseStatusIcon(databaseStatus.SqlServer.Available)"></i>
-                  {{ databaseStatus.SqlServer.Available ? 'Online' : 'Offline' }}
-                </span>
-              </div>
-              <small class="text-muted">
-                {{ databaseStatus.SqlServer.IsPrimary ? 'Banco Principal' : 'Banco Secundário' }}
-              </small>
-            </div>
-
-            <div *ngIf="databaseStatus.Recommendations.length > 0" class="mt-3">
-              <strong class="text-muted">Recomendações:</strong>
-              <ul class="small mt-2 mb-0">
-                <li *ngFor="let recommendation of databaseStatus.Recommendations">
-                  {{ recommendation }}
-                </li>
-              </ul>
-            </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Ticket Médio</span>
+            <span class="text-sm font-medium text-gray-900">R$ {{ stats.averageTicket | number:'1.0-0' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Equipe Ativa</span>
+            <span class="text-sm font-medium text-gray-900">{{ stats.activeStaff }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Satisfação</span>
+            <span class="text-sm font-medium text-gray-900">{{ stats.satisfaction }}%</span>
           </div>
         </div>
       </div>

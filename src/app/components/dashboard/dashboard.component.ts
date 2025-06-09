@@ -1,45 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 
-interface DashboardStats {
-  totalClients: number;
-  appointmentsToday: number;
-  monthlyRevenue: number;
-  totalServices: number;
-}
-
-interface DatabaseStatus {
-  PostgreSQL: {
-    Available: boolean;
-    IsPrimary: boolean;
-    ConnectionString: string;
-  };
-  SqlServer: {
-    Available: boolean;
-    IsPrimary: boolean;
-    ConnectionString: string;
-  };
-  Recommendations: string[];
-}
-
 @Component({
   selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
-  stats: DashboardStats = {
-    totalClients: 0,
-    appointmentsToday: 0,
+  stats = {
+    totalPatients: 0,
+    todayAppointments: 0,
+    totalServices: 0,
     monthlyRevenue: 0,
-    totalServices: 0
+    occupancyRate: 85,
+    averageTicket: 0,
+    activeStaff: 0,
+    satisfaction: 92
   };
 
-  databaseStatus: DatabaseStatus | null = null;
-  upcomingAppointments: any[] = [];
+  recentAppointments: any[] = [];
   loading = true;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   ngOnInit() {
     this.loadDashboardData();
@@ -48,68 +29,76 @@ export class DashboardComponent implements OnInit {
   loadDashboardData() {
     this.loading = true;
     
-    // Load stats from the dedicated endpoint
-    this.apiService.get<DashboardStats>('/dashboard/stats').subscribe({
-      next: (stats) => {
-        this.stats = stats;
+    // Load patients count
+    this.apiService.get('/patients').subscribe({
+      next: (patients: any[]) => {
+        this.stats.totalPatients = patients.length;
       },
-      error: (error) => console.error('Error loading dashboard stats:', error)
+      error: (error) => console.error('Error loading patients:', error)
     });
-    
-    // Load database status
-    this.loadDatabaseStatus();
-    
-    // Load upcoming appointments
-    this.loadUpcomingAppointments();
-  }
 
-  private loadDatabaseStatus() {
-    this.apiService.get<DatabaseStatus>('/database/status').subscribe({
-      next: (status) => {
-        this.databaseStatus = status;
+    // Load services count
+    this.apiService.get('/services').subscribe({
+      next: (services: any[]) => {
+        this.stats.totalServices = services.length;
       },
-      error: (error) => {
-        console.error('Error loading database status:', error);
-        this.databaseStatus = null;
-      }
+      error: (error) => console.error('Error loading services:', error)
     });
-  }
 
-  private loadUpcomingAppointments() {
-    this.apiService.get<any[]>('/appointments/upcoming').subscribe({
-      next: (appointments) => {
-        this.upcomingAppointments = appointments.slice(0, 5);
-        this.loading = false;
+    // Load staff count
+    this.apiService.get('/staff').subscribe({
+      next: (staff: any[]) => {
+        this.stats.activeStaff = staff.filter(s => s.is_active).length;
       },
-      error: (error) => {
-        console.error('Error loading upcoming appointments:', error);
-        this.loading = false;
-      }
+      error: (error) => console.error('Error loading staff:', error)
     });
-  }
 
-  formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+    // Load appointments with today's count
+    this.apiService.get('/appointments').subscribe({
+      next: (appointments: any[]) => {
+        const today = new Date().toISOString().split('T')[0];
+        this.stats.todayAppointments = appointments.filter(apt => 
+          apt.appointment_date.startsWith(today)
+        ).length;
+        
+        // Get recent appointments (next 5)
+        this.recentAppointments = appointments
+          .filter(apt => new Date(apt.appointment_date) >= new Date())
+          .sort((a, b) => new Date(a.appointment_date).getTime() - new Date(b.appointment_date).getTime())
+          .slice(0, 5);
+      },
+      error: (error) => console.error('Error loading appointments:', error)
+    });
+
+    // Load financial summary
+    this.apiService.get('/financial/summary').subscribe({
+      next: (summary: any) => {
+        this.stats.monthlyRevenue = summary.monthlyRevenue || 0;
+        this.stats.averageTicket = summary.averageTicket || 0;
+      },
+      error: (error) => console.error('Error loading financial summary:', error)
+    });
+
+    this.loading = false;
   }
 
   formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
   }
 
-  getDatabaseStatusClass(available: boolean): string {
-    return available ? 'text-success' : 'text-danger';
-  }
-
-  getDatabaseStatusIcon(available: boolean): string {
-    return available ? 'fas fa-check-circle' : 'fas fa-times-circle';
+  getStatusClass(status: string): string {
+    const statusClasses: { [key: string]: string } = {
+      'scheduled': 'bg-yellow-100 text-yellow-800',
+      'confirmed': 'bg-green-100 text-green-800',
+      'completed': 'bg-blue-100 text-blue-800',
+      'cancelled': 'bg-red-100 text-red-800'
+    };
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
   }
 }

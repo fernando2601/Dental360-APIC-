@@ -2,63 +2,27 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 
-declare var bootstrap: any;
-
-interface Appointment {
-  id?: number;
-  patient_id: number;
-  service_id: number;
-  staff_id: number;
-  appointment_date: string;
-  duration_minutes?: number;
-  status: string;
-  notes?: string;
-  patient_name?: string;
-  service_name?: string;
-  staff_name?: string;
-}
-
-interface Patient {
-  id: number;
-  name: string;
-  email?: string;
-  phone?: string;
-}
-
-interface Service {
-  id: number;
-  name: string;
-  price: number;
-  duration_minutes: number;
-  category: string;
-}
-
-interface Staff {
-  id: number;
-  full_name: string;
-  specialization: string;
-  position: string;
-}
-
 @Component({
   selector: 'app-appointments',
   templateUrl: './appointments.component.html'
 })
 export class AppointmentsComponent implements OnInit {
-  appointments: Appointment[] = [];
-  filteredAppointments: Appointment[] = [];
-  patients: Patient[] = [];
-  services: Service[] = [];
-  staffMembers: Staff[] = [];
+  appointments: any[] = [];
+  filteredAppointments: any[] = [];
+  patients: any[] = [];
+  services: any[] = [];
+  staffMembers: any[] = [];
   
   selectedDate = new Date().toISOString().split('T')[0];
   statusFilter = '';
+  searchTerm = '';
   loading = true;
   saving = false;
   isEditing = false;
+  showModal = false;
   
   appointmentForm: FormGroup;
-  appointmentModal: any;
+  selectedAppointment: any = null;
 
   constructor(
     private apiService: ApiService,
@@ -86,7 +50,7 @@ export class AppointmentsComponent implements OnInit {
       this.loadStaff()
     ]).then(() => {
       this.loading = false;
-      this.filterByDate();
+      this.filterAppointments();
     }).catch(error => {
       console.error('Error loading data:', error);
       this.loading = false;
@@ -95,8 +59,8 @@ export class AppointmentsComponent implements OnInit {
 
   loadAppointments(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.apiService.get<Appointment[]>('/appointments').subscribe({
-        next: (appointments) => {
+      this.apiService.get('/appointments').subscribe({
+        next: (appointments: any[]) => {
           this.appointments = appointments;
           resolve();
         },
@@ -107,8 +71,8 @@ export class AppointmentsComponent implements OnInit {
 
   loadPatients(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.apiService.get<Patient[]>('/patients').subscribe({
-        next: (patients) => {
+      this.apiService.get('/patients').subscribe({
+        next: (patients: any[]) => {
           this.patients = patients;
           resolve();
         },
@@ -119,8 +83,8 @@ export class AppointmentsComponent implements OnInit {
 
   loadServices(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.apiService.get<Service[]>('/services').subscribe({
-        next: (services) => {
+      this.apiService.get('/services').subscribe({
+        next: (services: any[]) => {
           this.services = services;
           resolve();
         },
@@ -131,8 +95,8 @@ export class AppointmentsComponent implements OnInit {
 
   loadStaff(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.apiService.get<Staff[]>('/staff').subscribe({
-        next: (staff) => {
+      this.apiService.get('/staff').subscribe({
+        next: (staff: any[]) => {
           this.staffMembers = staff;
           resolve();
         },
@@ -141,20 +105,26 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 
-  filterByDate() {
-    const selectedDateStr = this.selectedDate;
-    this.filteredAppointments = this.appointments.filter(appointment => 
-      appointment.appointment_date.startsWith(selectedDateStr)
-    );
-    this.filterAppointments();
-  }
-
   filterAppointments() {
-    let filtered = this.filteredAppointments;
+    let filtered = this.appointments;
+    
+    if (this.selectedDate) {
+      filtered = filtered.filter(appointment => 
+        appointment.appointment_date.startsWith(this.selectedDate)
+      );
+    }
     
     if (this.statusFilter) {
       filtered = filtered.filter(appointment => 
         appointment.status === this.statusFilter
+      );
+    }
+    
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(appointment =>
+        appointment.patient_name?.toLowerCase().includes(term) ||
+        appointment.service_name?.toLowerCase().includes(term)
       );
     }
     
@@ -163,25 +133,16 @@ export class AppointmentsComponent implements OnInit {
     );
   }
 
-  getAppointmentsByStatus(status: string): Appointment[] {
-    return this.appointments.filter(appointment => appointment.status === status);
-  }
-
-  getTodayAppointments(): Appointment[] {
-    const today = new Date().toISOString().split('T')[0];
-    return this.appointments.filter(appointment => 
-      appointment.appointment_date.startsWith(today)
-    );
-  }
-
-  openNewAppointmentModal() {
+  openAddAppointmentModal() {
     this.isEditing = false;
+    this.selectedAppointment = null;
     this.appointmentForm.reset();
-    this.openModal();
+    this.showModal = true;
   }
 
-  editAppointment(appointment: Appointment) {
+  editAppointment(appointment: any) {
     this.isEditing = true;
+    this.selectedAppointment = appointment;
     this.appointmentForm.patchValue({
       patient_id: appointment.patient_id,
       service_id: appointment.service_id,
@@ -189,23 +150,21 @@ export class AppointmentsComponent implements OnInit {
       appointment_date: appointment.appointment_date.substring(0, 16),
       notes: appointment.notes
     });
-    this.openModal();
+    this.showModal = true;
   }
 
-  viewAppointment(appointment: Appointment) {
-    console.log('Viewing appointment:', appointment);
+  confirmAppointment(appointment: any) {
+    this.updateAppointmentStatus(appointment.id, 'confirmed');
   }
 
-  confirmAppointment(appointment: Appointment) {
-    this.updateAppointmentStatus(appointment.id!, 'confirmed');
+  completeAppointment(appointment: any) {
+    this.updateAppointmentStatus(appointment.id, 'completed');
   }
 
-  completeAppointment(appointment: Appointment) {
-    this.updateAppointmentStatus(appointment.id!, 'completed');
-  }
-
-  cancelAppointment(appointment: Appointment) {
-    this.updateAppointmentStatus(appointment.id!, 'cancelled');
+  cancelAppointment(appointment: any) {
+    if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+      this.updateAppointmentStatus(appointment.id, 'cancelled');
+    }
   }
 
   updateAppointmentStatus(appointmentId: number, status: string) {
@@ -226,8 +185,8 @@ export class AppointmentsComponent implements OnInit {
     const appointmentData = this.appointmentForm.value;
 
     const request = this.isEditing 
-      ? this.apiService.put<Appointment>(`/appointments/${appointmentData.id}`, appointmentData)
-      : this.apiService.post<Appointment>('/appointments', appointmentData);
+      ? this.apiService.put(`/appointments/${this.selectedAppointment?.id}`, appointmentData)
+      : this.apiService.post('/appointments', appointmentData);
 
     request.subscribe({
       next: () => {
@@ -242,44 +201,15 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 
-  openModal() {
-    this.appointmentModal = new bootstrap.Modal(document.getElementById('appointmentModal'));
-    this.appointmentModal.show();
-  }
-
   closeModal() {
-    if (this.appointmentModal) {
-      this.appointmentModal.hide();
-    }
+    this.showModal = false;
   }
 
-  viewTodaySchedule() {
-    this.selectedDate = new Date().toISOString().split('T')[0];
-    this.filterByDate();
-  }
-
-  viewWeekSchedule() {
-    console.log('Viewing week schedule...');
-  }
-
-  exportSchedule() {
-    console.log('Exporting schedule...');
-  }
-
-  isStaffAvailable(staff: Staff): boolean {
-    const todayAppointments = this.getTodayAppointments();
-    const currentHour = new Date().getHours();
-    
-    const staffAppointments = todayAppointments.filter(appointment => 
-      appointment.staff_id === staff.id &&
-      new Date(appointment.appointment_date).getHours() === currentHour
-    );
-    
-    return staffAppointments.length === 0;
-  }
-
-  formatTime(dateString: string): string {
-    return new Date(dateString).toLocaleTimeString('pt-BR', {
+  formatDateTime(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -292,13 +222,23 @@ export class AppointmentsComponent implements OnInit {
     }).format(value);
   }
 
-  getStatusBadgeClass(status: string): string {
+  getStatusClass(status: string): string {
     const statusClasses: { [key: string]: string } = {
-      'scheduled': 'bg-warning',
-      'confirmed': 'bg-success',
-      'completed': 'bg-primary',
-      'cancelled': 'bg-danger'
+      'scheduled': 'bg-yellow-100 text-yellow-800',
+      'confirmed': 'bg-green-100 text-green-800',
+      'completed': 'bg-blue-100 text-blue-800',
+      'cancelled': 'bg-red-100 text-red-800'
     };
-    return statusClasses[status] || 'bg-secondary';
+    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+  }
+
+  getStatusLabel(status: string): string {
+    const statusLabels: { [key: string]: string } = {
+      'scheduled': 'Agendado',
+      'confirmed': 'Confirmado',
+      'completed': 'Concluído',
+      'cancelled': 'Cancelado'
+    };
+    return statusLabels[status] || status;
   }
 }

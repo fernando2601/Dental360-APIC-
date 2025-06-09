@@ -1,303 +1,215 @@
-<div class="container-fluid p-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2><i class="fas fa-calendar-alt me-2"></i>Gestão de Agendamentos</h2>
-      <p class="text-muted mb-0">Agendar, visualizar e gerenciar consultas</p>
+<div class="px-4 py-6 sm:px-0">
+  <!-- Header -->
+  <div class="sm:flex sm:items-center mb-6">
+    <div class="sm:flex-auto">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Agendamentos</h3>
+      <p class="mt-2 text-sm text-gray-700">Gerenciar consultas e procedimentos agendados</p>
     </div>
-    <button class="btn btn-primary" (click)="openNewAppointmentModal()">
-      <i class="fas fa-plus me-2"></i>Novo Agendamento
-    </button>
-  </div>
-  
-  <!-- Stats Cards -->
-  <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body text-center">
-          <i class="fas fa-clock text-warning fa-2x mb-2"></i>
-          <h6>Agendados</h6>
-          <h4 class="text-warning">{{ getAppointmentsByStatus('scheduled').length }}</h4>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 mb-3">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body text-center">
-          <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-          <h6>Confirmados</h6>
-          <h4 class="text-success">{{ getAppointmentsByStatus('confirmed').length }}</h4>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 mb-3">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body text-center">
-          <i class="fas fa-calendar-day text-info fa-2x mb-2"></i>
-          <h6>Hoje</h6>
-          <h4 class="text-info">{{ getTodayAppointments().length }}</h4>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 mb-3">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body text-center">
-          <i class="fas fa-check text-primary fa-2x mb-2"></i>
-          <h6>Concluídos</h6>
-          <h4 class="text-primary">{{ getAppointmentsByStatus('completed').length }}</h4>
-        </div>
-      </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <button (click)="openAddAppointmentModal()" class="btn btn-primary">
+        Novo Agendamento
+      </button>
     </div>
   </div>
 
-  <!-- Calendar and Filter Section -->
-  <div class="row mb-4">
-    <div class="col-md-8">
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Agenda do Dia</h5>
-          <div class="d-flex gap-2">
-            <input type="date" class="form-control" [(ngModel)]="selectedDate" (change)="filterByDate()" style="width: auto;">
-            <select class="form-select" [(ngModel)]="statusFilter" (change)="filterAppointments()" style="width: auto;">
-              <option value="">Todos os status</option>
-              <option value="scheduled">Agendado</option>
-              <option value="confirmed">Confirmado</option>
-              <option value="completed">Concluído</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </div>
-        </div>
-        <div class="card-body">
-          <div *ngIf="loading" class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Carregando...</span>
-            </div>
-          </div>
-          
-          <div *ngIf="!loading && filteredAppointments.length === 0" class="text-center py-4 text-muted">
-            <i class="fas fa-calendar-times fa-3x mb-3 d-block"></i>
-            <p>Nenhum agendamento encontrado para esta data</p>
-            <button class="btn btn-primary" (click)="openNewAppointmentModal()">
-              <i class="fas fa-plus me-2"></i>Agendar Consulta
-            </button>
-          </div>
-          
-          <div *ngIf="!loading && filteredAppointments.length > 0">
-            <div class="timeline">
-              <div *ngFor="let appointment of filteredAppointments" class="timeline-item">
-                <div class="timeline-time">
-                  {{ formatTime(appointment.appointment_date) }}
-                </div>
-                <div class="timeline-content">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h6 class="mb-1">{{ appointment.patient_name }}</h6>
-                      <p class="text-muted mb-1">{{ appointment.service_name }}</p>
-                      <small class="text-muted">
-                        <i class="fas fa-user-md me-1"></i>{{ appointment.staff_name }}
-                        <span class="ms-3">
-                          <i class="fas fa-clock me-1"></i>{{ appointment.duration_minutes || 60 }}min
-                        </span>
-                      </small>
-                      <div *ngIf="appointment.notes" class="mt-2">
-                        <small class="text-info">
-                          <i class="fas fa-sticky-note me-1"></i>{{ appointment.notes }}
-                        </small>
-                      </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                      <span class="badge" [ngClass]="getStatusBadgeClass(appointment.status)">
-                        {{ appointment.status | titlecase }}
-                      </span>
-                      <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                          <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" (click)="viewAppointment(appointment)">
-                            <i class="fas fa-eye me-2"></i>Ver Detalhes
-                          </a></li>
-                          <li><a class="dropdown-item" (click)="editAppointment(appointment)">
-                            <i class="fas fa-edit me-2"></i>Editar
-                          </a></li>
-                          <li><a class="dropdown-item" (click)="confirmAppointment(appointment)" *ngIf="appointment.status === 'scheduled'">
-                            <i class="fas fa-check me-2"></i>Confirmar
-                          </a></li>
-                          <li><a class="dropdown-item" (click)="completeAppointment(appointment)" *ngIf="appointment.status === 'confirmed'">
-                            <i class="fas fa-check-circle me-2"></i>Concluir
-                          </a></li>
-                          <li><hr class="dropdown-divider"></li>
-                          <li><a class="dropdown-item text-danger" (click)="cancelAppointment(appointment)">
-                            <i class="fas fa-times me-2"></i>Cancelar
-                          </a></li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <!-- Filters -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Data</label>
+      <input 
+        [(ngModel)]="selectedDate" 
+        (change)="filterAppointments()"
+        type="date" 
+        class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
     </div>
-    
-    <!-- Quick Actions Sidebar -->
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm mb-3">
-        <div class="card-header bg-white">
-          <h6 class="mb-0">Ações Rápidas</h6>
-        </div>
-        <div class="card-body">
-          <div class="d-grid gap-2">
-            <button class="btn btn-outline-primary btn-sm" (click)="openNewAppointmentModal()">
-              <i class="fas fa-plus me-2"></i>Novo Agendamento
-            </button>
-            <button class="btn btn-outline-success btn-sm" (click)="viewTodaySchedule()">
-              <i class="fas fa-calendar-day me-2"></i>Agenda de Hoje
-            </button>
-            <button class="btn btn-outline-info btn-sm" (click)="viewWeekSchedule()">
-              <i class="fas fa-calendar-week me-2"></i>Agenda da Semana
-            </button>
-            <button class="btn btn-outline-warning btn-sm" (click)="exportSchedule()">
-              <i class="fas fa-download me-2"></i>Exportar Agenda
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Staff Availability -->
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white">
-          <h6 class="mb-0">Disponibilidade da Equipe</h6>
-        </div>
-        <div class="card-body">
-          <div *ngFor="let staff of staffMembers" class="d-flex justify-content-between align-items-center mb-2">
-            <div>
-              <small class="fw-bold">{{ staff.full_name }}</small>
-              <div class="text-muted small">{{ staff.specialization }}</div>
-            </div>
-            <span class="badge bg-success" *ngIf="isStaffAvailable(staff)">Disponível</span>
-            <span class="badge bg-warning" *ngIf="!isStaffAvailable(staff)">Ocupado</span>
-          </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Status</label>
+      <select 
+        [(ngModel)]="statusFilter" 
+        (change)="filterAppointments()"
+        class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+        <option value="">Todos os status</option>
+        <option value="scheduled">Agendado</option>
+        <option value="confirmed">Confirmado</option>
+        <option value="completed">Concluído</option>
+        <option value="cancelled">Cancelado</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Buscar</label>
+      <input 
+        [(ngModel)]="searchTerm" 
+        (input)="filterAppointments()"
+        type="text" 
+        placeholder="Paciente ou serviço"
+        class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+    </div>
+  </div>
+
+  <!-- Appointments List -->
+  <div class="card overflow-hidden">
+    <div *ngIf="loading" class="p-8 text-center">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      <p class="mt-2 text-sm text-gray-500">Carregando agendamentos...</p>
+    </div>
+
+    <div *ngIf="!loading" class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Serviço</th>
+            <th>Data/Hora</th>
+            <th>Profissional</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let appointment of filteredAppointments" class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{ appointment.patient_name }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ appointment.service_name }}</div>
+              <div class="text-sm text-gray-500">{{ appointment.duration_minutes }}min</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ formatDateTime(appointment.appointment_date) }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ appointment.staff_name }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [class]="getStatusClass(appointment.status)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                {{ getStatusLabel(appointment.status) }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex space-x-2">
+                <button (click)="editAppointment(appointment)" class="text-primary-600 hover:text-primary-900">
+                  Editar
+                </button>
+                <button *ngIf="appointment.status === 'scheduled'" 
+                        (click)="confirmAppointment(appointment)" 
+                        class="text-green-600 hover:text-green-900">
+                  Confirmar
+                </button>
+                <button *ngIf="appointment.status === 'confirmed'" 
+                        (click)="completeAppointment(appointment)" 
+                        class="text-blue-600 hover:text-blue-900">
+                  Concluir
+                </button>
+                <button (click)="cancelAppointment(appointment)" 
+                        class="text-red-600 hover:text-red-900">
+                  Cancelar
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="filteredAppointments.length === 0" class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 16l-4-4m0 0l4-4m-4 4h16" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum agendamento encontrado</h3>
+        <p class="mt-1 text-sm text-gray-500">Comece criando um novo agendamento.</p>
+        <div class="mt-6">
+          <button (click)="openAddAppointmentModal()" class="btn btn-primary">
+            Novo Agendamento
+          </button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- New Appointment Modal -->
-<div class="modal fade" id="appointmentModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="fas fa-calendar-plus me-2"></i>
+<!-- Appointment Modal -->
+<div *ngIf="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b">
+        <h3 class="text-lg font-medium text-gray-900">
           {{ isEditing ? 'Editar Agendamento' : 'Novo Agendamento' }}
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </h3>
+        <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
-      <div class="modal-body">
+
+      <!-- Modal Body -->
+      <div class="mt-4">
         <form [formGroup]="appointmentForm" (ngSubmit)="saveAppointment()">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Paciente *</label>
-              <select class="form-select" formControlName="patient_id" required>
-                <option value="">Selecione o paciente</option>
-                <option *ngFor="let patient of patients" [value]="patient.id">
-                  {{ patient.name }}
-                </option>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Paciente -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Paciente *</label>
+              <select 
+                formControlName="patient_id"
+                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                <option value="">Selecione um paciente</option>
+                <option *ngFor="let patient of patients" [value]="patient.id">{{ patient.name }}</option>
               </select>
             </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Serviço *</label>
-              <select class="form-select" formControlName="service_id" required>
-                <option value="">Selecione o serviço</option>
-                <option *ngFor="let service of services" [value]="service.id">
-                  {{ service.name }} - {{ formatCurrency(service.price) }}
-                </option>
+
+            <!-- Serviço -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Serviço *</label>
+              <select 
+                formControlName="service_id"
+                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                <option value="">Selecione um serviço</option>
+                <option *ngFor="let service of services" [value]="service.id">{{ service.name }} - {{ formatCurrency(service.price) }}</option>
               </select>
             </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Profissional *</label>
-              <select class="form-select" formControlName="staff_id" required>
-                <option value="">Selecione o profissional</option>
-                <option *ngFor="let staff of staffMembers" [value]="staff.id">
-                  {{ staff.full_name }} - {{ staff.specialization }}
-                </option>
+
+            <!-- Profissional -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Profissional *</label>
+              <select 
+                formControlName="staff_id"
+                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                <option value="">Selecione um profissional</option>
+                <option *ngFor="let staff of staffMembers" [value]="staff.id">{{ staff.full_name }} - {{ staff.specialization }}</option>
               </select>
             </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Data e Hora *</label>
-              <input type="datetime-local" class="form-control" formControlName="appointment_date" required>
+
+            <!-- Data e Hora -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Data e Hora *</label>
+              <input 
+                type="datetime-local" 
+                formControlName="appointment_date"
+                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
             </div>
-            <div class="col-12 mb-3">
-              <label class="form-label">Observações</label>
-              <textarea class="form-control" formControlName="notes" rows="3" placeholder="Informações adicionais sobre o agendamento..."></textarea>
+
+            <!-- Observações -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700">Observações</label>
+              <textarea 
+                formControlName="notes"
+                rows="3"
+                class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
             </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
+            <button type="button" (click)="closeModal()" class="btn btn-secondary">
+              Cancelar
+            </button>
+            <button type="submit" [disabled]="!appointmentForm.valid || saving" class="btn btn-primary">
+              <span *ngIf="saving" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+              {{ isEditing ? 'Atualizar' : 'Agendar' }}
+            </button>
           </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" (click)="saveAppointment()" [disabled]="!appointmentForm.valid || saving">
-          <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
-          {{ isEditing ? 'Atualizar' : 'Agendar' }}
-        </button>
-      </div>
     </div>
   </div>
 </div>
-
-<style>
-.timeline {
-  position: relative;
-  padding-left: 80px;
-}
-
-.timeline-item {
-  position: relative;
-  padding-bottom: 20px;
-  border-left: 2px solid #e9ecef;
-}
-
-.timeline-item:last-child {
-  border-left: 2px solid transparent;
-}
-
-.timeline-time {
-  position: absolute;
-  left: -80px;
-  top: 0;
-  width: 70px;
-  text-align: right;
-  font-weight: bold;
-  color: #6c757d;
-  font-size: 0.875rem;
-}
-
-.timeline-content {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 15px;
-  margin-left: 20px;
-  position: relative;
-}
-
-.timeline-content::before {
-  content: '';
-  position: absolute;
-  left: -12px;
-  top: 15px;
-  width: 12px;
-  height: 12px;
-  background: #667eea;
-  border-radius: 50%;
-  border: 3px solid #fff;
-}
-
-.timeline-item:hover .timeline-content {
-  background: #e9ecef;
-  transform: translateX(5px);
-  transition: all 0.2s ease;
-}
-</style>
