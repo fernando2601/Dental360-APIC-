@@ -93,12 +93,16 @@ export class DashboardComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
-    const statusClasses: { [key: string]: string } = {
-      'scheduled': 'bg-yellow-100 text-yellow-800',
-      'confirmed': 'bg-green-100 text-green-800',
-      'completed': 'bg-blue-100 text-blue-800',
-      'cancelled': 'bg-red-100 text-red-800'
+    return 'status-badge ' + status;
+  }
+
+  getStatusLabel(status: string): string {
+    const statusLabels: { [key: string]: string } = {
+      'scheduled': 'Agendado',
+      'confirmed': 'Confirmado',
+      'completed': 'Concluído',
+      'cancelled': 'Cancelado'
     };
-    return statusClasses[status] || 'bg-gray-100 text-gray-800';
+    return statusLabels[status] || status;
   }
 }
