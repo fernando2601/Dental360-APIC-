@@ -1,38 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from './services/auth.service';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  templateUrl: './app.component.html'
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'DentalSpa';
-  isAuthenticated = false;
-
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
-
-  ngOnInit() {
-    // Temporary bypass for demo - auto authenticate
-    this.isAuthenticated = true;
-    this.router.navigate(['/dashboard']);
-    
-    this.authService.isAuthenticated$.subscribe(
-      isAuth => {
-        this.isAuthenticated = isAuth || true; // Force authenticated for demo
-        if (!isAuth && this.router.url !== '/login') {
-          // this.router.navigate(['/login']); // Commented out for demo
-        }
-      }
-    );
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
 }

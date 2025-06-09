@@ -1,273 +1,50 @@
-<div class="app-container">
-  <!-- Login Page -->
-  <div *ngIf="!isAuthenticated" class="login-container">
-    <router-outlet></router-outlet>
-  </div>
-
-  <!-- Main Application -->
-  <div *ngIf="isAuthenticated" class="main-app d-flex">
-    <!-- Sidebar -->
-    <nav class="sidebar bg-gradient-primary p-3">
-      <div class="sidebar-header text-center mb-4">
-        <h4 class="text-white mb-0">
-          <i class="fas fa-tooth me-2"></i>DentalSpa
-        </h4>
-        <small class="text-light">Sistema de Gestão</small>
-      </div>
-
-      <!-- Navigation Menu -->
-      <ul class="nav flex-column">
-        <!-- Dashboard -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light" routerLink="/dashboard" routerLinkActive="active">
-            <i class="fas fa-chart-line me-2"></i>Dashboard
-          </a>
-        </li>
-
-        <!-- Gestão de Clientes -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light d-flex justify-content-between align-items-center" 
-             data-bs-toggle="collapse" href="#clientsMenu">
-            <span><i class="fas fa-users me-2"></i>Clientes</span>
-            <i class="fas fa-chevron-down"></i>
-          </a>
-          <div class="collapse" id="clientsMenu">
-            <ul class="nav flex-column ms-3">
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/clients" routerLinkActive="active">
-                  <i class="fas fa-user-friends me-2"></i>Clientes
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/patients" routerLinkActive="active">
-                  <i class="fas fa-user-injured me-2"></i>Pacientes
-                </a>
-              </li>
-            </ul>
+<div class="min-h-screen bg-gray-50">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <h1 class="text-2xl font-bold text-primary-600">🦷 DentalSpa</h1>
           </div>
-        </li>
-
-        <!-- Agendamentos -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light d-flex justify-content-between align-items-center" 
-             data-bs-toggle="collapse" href="#appointmentsMenu">
-            <span><i class="fas fa-calendar me-2"></i>Agendamentos</span>
-            <i class="fas fa-chevron-down"></i>
-          </a>
-          <div class="collapse" id="appointmentsMenu">
-            <ul class="nav flex-column ms-3">
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/appointments" routerLinkActive="active">
-                  <i class="fas fa-calendar-alt me-2"></i>Agendamentos
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/agenda" routerLinkActive="active">
-                  <i class="fas fa-calendar-day me-2"></i>Agenda
-                </a>
-              </li>
-            </ul>
-          </div>
-        </li>
-
-        <!-- Serviços -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light d-flex justify-content-between align-items-center" 
-             data-bs-toggle="collapse" href="#servicesMenu">
-            <span><i class="fas fa-tooth me-2"></i>Serviços</span>
-            <i class="fas fa-chevron-down"></i>
-          </a>
-          <div class="collapse" id="servicesMenu">
-            <ul class="nav flex-column ms-3">
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/services" routerLinkActive="active">
-                  <i class="fas fa-cog me-2"></i>Serviços
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/packages" routerLinkActive="active">
-                  <i class="fas fa-box-open me-2"></i>Pacotes
-                </a>
-              </li>
-            </ul>
-          </div>
-        </li>
-
-        <!-- Equipe -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light" routerLink="/staff" routerLinkActive="active">
-            <i class="fas fa-user-md me-2"></i>Equipe
-          </a>
-        </li>
-
-        <!-- Financeiro -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light d-flex justify-content-between align-items-center" 
-             data-bs-toggle="collapse" href="#financialMenu">
-            <span><i class="fas fa-chart-line me-2"></i>Financeiro</span>
-            <i class="fas fa-chevron-down"></i>
-          </a>
-          <div class="collapse" id="financialMenu">
-            <ul class="nav flex-column ms-3">
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/financial" routerLinkActive="active">
-                  <i class="fas fa-dollar-sign me-2"></i>Financeiro
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/subscriptions" routerLinkActive="active">
-                  <i class="fas fa-credit-card me-2"></i>Assinaturas
-                </a>
-              </li>
-            </ul>
-          </div>
-        </li>
-
-        <!-- Estoque -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light" routerLink="/inventory" routerLinkActive="active">
-            <i class="fas fa-boxes me-2"></i>Estoque
-          </a>
-        </li>
-
-        <!-- Marketing -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light d-flex justify-content-between align-items-center" 
-             data-bs-toggle="collapse" href="#marketingMenu">
-            <span><i class="fas fa-bullhorn me-2"></i>Marketing</span>
-            <i class="fas fa-chevron-down"></i>
-          </a>
-          <div class="collapse" id="marketingMenu">
-            <ul class="nav flex-column ms-3">
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/before-after" routerLinkActive="active">
-                  <i class="fas fa-images me-2"></i>Antes/Depois
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-light small" routerLink="/whatsapp" routerLinkActive="active">
-                  <i class="fab fa-whatsapp me-2"></i>WhatsApp
-                </a>
-              </li>
-            </ul>
-          </div>
-        </li>
-
-        <!-- Área de Aprendizado -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light" routerLink="/learning" routerLinkActive="active">
-            <i class="fas fa-graduation-cap me-2"></i>Aprendizado
-          </a>
-        </li>
-
-        <!-- Analytics -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light" routerLink="/analytics" routerLinkActive="active">
-            <i class="fas fa-chart-bar me-2"></i>Analytics
-          </a>
-        </li>
-
-        <!-- Configurações -->
-        <li class="nav-item mb-1">
-          <a class="nav-link text-light" routerLink="/clinic-info" routerLinkActive="active">
-            <i class="fas fa-clinic-medical me-2"></i>Info da Clínica
-          </a>
-        </li>
-      </ul>
-
-      <!-- User Menu -->
-      <div class="mt-auto pt-3 border-top border-light">
-        <div class="d-flex align-items-center text-light mb-2">
-          <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
-            <i class="fas fa-user text-primary"></i>
-          </div>
-          <div>
-            <small>Administrador</small>
+          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <a routerLink="/dashboard" routerLinkActive="border-primary-500 text-gray-900" 
+               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Dashboard
+            </a>
+            <a routerLink="/patients" routerLinkActive="border-primary-500 text-gray-900"
+               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Pacientes
+            </a>
+            <a routerLink="/appointments" routerLinkActive="border-primary-500 text-gray-900"
+               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Agendamentos
+            </a>
+            <a routerLink="/services" routerLinkActive="border-primary-500 text-gray-900"
+               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Serviços
+            </a>
+            <a routerLink="/staff" routerLinkActive="border-primary-500 text-gray-900"
+               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Equipe
+            </a>
+            <a routerLink="/financial" routerLinkActive="border-primary-500 text-gray-900"
+               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Financeiro
+            </a>
           </div>
         </div>
-        <button class="btn btn-outline-light btn-sm w-100" (click)="logout()">
-          <i class="fas fa-sign-out-alt me-2"></i>Sair
-        </button>
+        <div class="flex items-center">
+          <button class="bg-primary-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-700">
+            Novo Agendamento
+          </button>
+        </div>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <!-- Main Content -->
-    <main class="main-content flex-grow-1">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <router-outlet></router-outlet>
+  </main>
 </div>
-
-<style>
-  .app-container {
-    min-height: 100vh;
-  }
-  
-  .login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
-  
-  .main-app {
-    min-height: 100vh;
-  }
-  
-  .sidebar {
-    width: 280px;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    overflow-y: auto;
-  }
-  
-  .main-content {
-    margin-left: 280px;
-    min-height: 100vh;
-    background-color: #f8f9fa;
-  }
-  
-  .nav-link {
-    padding: 0.75rem 1rem;
-    border-radius: 0.375rem;
-    margin-bottom: 0.25rem;
-    transition: all 0.2s ease;
-  }
-  
-  .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white !important;
-  }
-  
-  .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white !important;
-  }
-  
-  .bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  }
-  
-  .avatar-sm {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 100%;
-      position: relative;
-    }
-    .main-content {
-      margin-left: 0;
-    }
-  }
-</style>
