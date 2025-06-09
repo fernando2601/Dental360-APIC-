@@ -1,65 +1,51 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  token: string;
-  user: {
-    id: number;
-    username: string;
-    fullName: string;
-    role: string;
-    email: string;
-  };
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = environment.apiUrl;
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  private currentUserSubject: BehaviorSubject<any>;
+  public currentUser: Observable<any>;
+  private apiUrl = 'http://localhost:5000/api';
 
-  constructor(private http: HttpClient) {}
-
-  private hasToken(): boolean {
-    return !!localStorage.getItem('token');
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    this.currentUserSubject = new BehaviorSubject<any>(JSON.parse(localStorage.getItem('currentUser') || 'null'));
+    this.currentUser = this.currentUserSubject.asObservable();
   }
 
-  login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/api/auth/login`, credentials)
-      .pipe(
-        map(response => {
-          if (response.token) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
-            this.isAuthenticatedSubject.next(true);
-          }
-          return response;
-        })
-      );
+  public get currentUserValue(): any {
+    return this.currentUserSubject.value;
   }
 
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.isAuthenticatedSubject.next(false);
+  login(email: string, password: string) {
+    return this.http.post<any>(`${this.apiUrl}/auth/login`, { email, password })
+      .pipe(map(user => {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        return user;
+      }));
   }
 
-  getCurrentUser(): any {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+  logout() {
+    localStorage.removeItem('currentUser');
+    this.currentUserSubject.next(null);
+    this.router.navigate(['/login']);
   }
 
   isAuthenticated(): boolean {
-    return this.hasToken();
+    const user = this.currentUserValue;
+    return user && user.token;
+  }
+
+  getAuthToken(): string {
+    const user = this.currentUserValue;
+    return user ? user.token : '';
   }
 }
