@@ -1,13 +1,532 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <title>DentalSpa - Gestão Clínica</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DentalSpa - Sistema de Gestão</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: #0284c7;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav a {
+            color: #6b7280;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav a:hover, .nav a.active {
+            color: #111827;
+            border-bottom-color: #0284c7;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.blue { background: #dbeafe; color: #1e40af; }
+        .stat-icon.green { background: #dcfce7; color: #166534; }
+        .stat-icon.yellow { background: #fef3c7; color: #92400e; }
+        .stat-icon.purple { background: #e0e7ff; color: #5b21b6; }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #0284c7;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: #0369a1;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th,
+        .table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table th {
+            background: #f9fafb;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .badge-scheduled { background: #fef3c7; color: #92400e; }
+        .badge-confirmed { background: #dcfce7; color: #166534; }
+        .badge-completed { background: #dbeafe; color: #1e40af; }
+        .badge-cancelled { background: #fee2e2; color: #991b1b; }
+        .badge-active { background: #dcfce7; color: #166534; }
+        .badge-inactive { background: #fee2e2; color: #991b1b; }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            border: 1px solid #fecaca;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <app-root></app-root>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">DS</div>
+                <div class="logo-text">DentalSpa</div>
+            </div>
+            <nav class="nav">
+                <a href="#" class="active" onclick="showDashboard()">Dashboard</a>
+                <a href="#" onclick="showPatients()">Pacientes</a>
+                <a href="#" onclick="showAppointments()">Agendamentos</a>
+                <a href="#" onclick="showServices()">Serviços</a>
+            </nav>
+        </div>
+
+        <div id="content">
+            <div class="loading">
+                <p>Carregando dados do sistema...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let appData = {
+            patients: [],
+            appointments: [],
+            services: [],
+            staff: [],
+            stats: {}
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+        });
+
+        async function loadAllData() {
+            try {
+                showLoading();
+                
+                const [patients, appointments, services, staff, financial] = await Promise.all([
+                    fetch(`${API_BASE}/patients`).then(r => r.json()),
+                    fetch(`${API_BASE}/appointments`).then(r => r.json()),
+                    fetch(`${API_BASE}/services`).then(r => r.json()),
+                    fetch(`${API_BASE}/staff`).then(r => r.json()),
+                    fetch(`${API_BASE}/financial/summary`).then(r => r.json())
+                ]);
+
+                appData.patients = patients;
+                appData.appointments = appointments;
+                appData.services = services;
+                appData.staff = staff;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const todayAppointments = appointments.filter(apt => apt.appointment_date.startsWith(today));
+                
+                appData.stats = {
+                    totalPatients: patients.length,
+                    todayAppointments: todayAppointments.length,
+                    totalServices: services.length,
+                    activeStaff: staff.filter(s => s.is_active).length,
+                    monthlyRevenue: financial.monthlyRevenue || 0,
+                    averageTicket: financial.averageTicket || 0
+                };
+
+                showDashboard();
+            } catch (error) {
+                showError('Erro ao carregar dados: ' + error.message);
+                console.error('Erro:', error);
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('content').innerHTML = `
+                <div class="loading">
+                    <p>Carregando dados do sistema...</p>
+                </div>
+            `;
+        }
+
+        function showDashboard() {
+            updateNavigation(0);
+            document.getElementById('content').innerHTML = `
+                <div class="grid">
+                    <div class="card stat-card">
+                        <div class="stat-icon blue">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${appData.stats.totalPatients}</div>
+                            <div class="stat-label">Total de Pacientes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-icon green">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 16l-4-4m0 0l4-4m-4 4h16"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${appData.stats.todayAppointments}</div>
+                            <div class="stat-label">Consultas Hoje</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-icon yellow">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">R$ ${formatCurrency(appData.stats.monthlyRevenue)}</div>
+                            <div class="stat-label">Receita Mensal</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-icon purple">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${appData.stats.activeStaff}</div>
+                            <div class="stat-label">Equipe Ativa</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="section-header">
+                        <h3 class="section-title">Próximas Consultas</h3>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Serviço</th>
+                                <th>Data/Hora</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${getUpcomingAppointments().map(apt => `
+                                <tr>
+                                    <td>${apt.patient_name}</td>
+                                    <td>${apt.service_name}</td>
+                                    <td>${formatDateTime(apt.appointment_date)}</td>
+                                    <td><span class="badge badge-${apt.status}">${getStatusLabel(apt.status)}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    ${getUpcomingAppointments().length === 0 ? '<p style="text-align: center; padding: 2rem; color: #6b7280;">Nenhuma consulta agendada para os próximos dias</p>' : ''}
+                </div>
+            `;
+        }
+
+        function showPatients() {
+            updateNavigation(1);
+            document.getElementById('content').innerHTML = `
+                <div class="card">
+                    <div class="section-header">
+                        <h3 class="section-title">Pacientes Cadastrados (${appData.patients.length})</h3>
+                        <button class="btn" onclick="alert('Funcionalidade em desenvolvimento')">Novo Paciente</button>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                                <th>Data de Cadastro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${appData.patients.map(patient => `
+                                <tr>
+                                    <td><strong>${patient.name}</strong></td>
+                                    <td>${patient.email || '-'}</td>
+                                    <td>${patient.phone || '-'}</td>
+                                    <td>${formatDate(patient.created_at)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function showAppointments() {
+            updateNavigation(2);
+            document.getElementById('content').innerHTML = `
+                <div class="card">
+                    <div class="section-header">
+                        <h3 class="section-title">Agendamentos (${appData.appointments.length})</h3>
+                        <button class="btn" onclick="alert('Funcionalidade em desenvolvimento')">Novo Agendamento</button>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Paciente</th>
+                                <th>Serviço</th>
+                                <th>Profissional</th>
+                                <th>Data/Hora</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${appData.appointments.map(apt => `
+                                <tr>
+                                    <td><strong>${apt.patient_name}</strong></td>
+                                    <td>${apt.service_name}</td>
+                                    <td>${apt.staff_name}</td>
+                                    <td>${formatDateTime(apt.appointment_date)}</td>
+                                    <td><span class="badge badge-${apt.status}">${getStatusLabel(apt.status)}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function showServices() {
+            updateNavigation(3);
+            document.getElementById('content').innerHTML = `
+                <div class="card">
+                    <div class="section-header">
+                        <h3 class="section-title">Serviços Oferecidos (${appData.services.length})</h3>
+                        <button class="btn" onclick="alert('Funcionalidade em desenvolvimento')">Novo Serviço</button>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Preço</th>
+                                <th>Duração</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${appData.services.map(service => `
+                                <tr>
+                                    <td><strong>${service.name}</strong></td>
+                                    <td>${service.category}</td>
+                                    <td>R$ ${formatCurrency(service.price)}</td>
+                                    <td>${service.duration_minutes} min</td>
+                                    <td><span class="badge ${service.is_active ? 'badge-active' : 'badge-inactive'}">${service.is_active ? 'Ativo' : 'Inativo'}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function updateNavigation(activeIndex) {
+            document.querySelectorAll('.nav a').forEach((a, index) => {
+                a.classList.toggle('active', index === activeIndex);
+            });
+        }
+
+        function getUpcomingAppointments() {
+            const now = new Date();
+            return appData.appointments
+                .filter(apt => new Date(apt.appointment_date) >= now)
+                .sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date))
+                .slice(0, 5);
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR').format(value || 0);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            return new Date(dateString).toLocaleDateString('pt-BR');
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            return new Date(dateString).toLocaleString('pt-BR');
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'scheduled': 'Agendado',
+                'confirmed': 'Confirmado', 
+                'completed': 'Concluído',
+                'cancelled': 'Cancelado'
+            };
+            return labels[status] || status;
+        }
+
+        function showError(message) {
+            document.getElementById('content').innerHTML = `<div class="error">${message}</div>`;
+        }
+    </script>
 </body>
 </html>
