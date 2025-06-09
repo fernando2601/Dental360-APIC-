@@ -202,6 +202,323 @@
             color: #1d4ed8;
         }
 
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .card-header h3 {
+            margin: 0;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #d1d5db;
+            color: #374151;
+        }
+
+        .btn-outline:hover {
+            background: #f9fafb;
+        }
+
+        .search-bar {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .filters-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .filters-bar select,
+        .filters-bar input {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .time-slot, .day-slot {
+            background: white;
+            padding: 0.75rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .day-header {
+            background: #f9fafb;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .time-slot {
+            background: #f9fafb;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .appointment-slot {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .appointment-slot:hover {
+            background: #f3f4f6;
+        }
+
+        .appointment-block {
+            background: #3b82f6;
+            color: white;
+            padding: 0.25rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin: 0.125rem 0;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .service-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .service-price {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .service-description {
+            color: #6b7280;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .service-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .staff-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .staff-avatar {
+            width: 60px;
+            height: 60px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 auto 1rem;
+        }
+
+        .staff-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .staff-role {
+            color: #3b82f6;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .staff-specialty {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .financial-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .amount.positive {
+            color: #10b981;
+        }
+
+        .amount.negative {
+            color: #ef4444;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -304,28 +621,68 @@
                 </div>
             </div>
 
-            <!-- Other Pages (hidden by default) -->
+            <!-- Patients Page -->
             <div id="patients-page" class="page hidden">
                 <h1 class="page-title">Gestão de Pacientes</h1>
+                
                 <div class="card">
-                    <h3>Lista de Pacientes</h3>
-                    <p>Módulo de gestão completa de pacientes com histórico médico e dados pessoais.</p>
+                    <div class="card-header">
+                        <h3>Lista de Pacientes</h3>
+                        <button class="btn btn-primary" onclick="openPatientModal()">+ Novo Paciente</button>
+                    </div>
+                    
+                    <div class="search-bar">
+                        <input type="text" id="patient-search" placeholder="Buscar pacientes..." onkeyup="filterPatients()">
+                    </div>
+                    
+                    <div id="patients-list">
+                        <p>Carregando pacientes...</p>
+                    </div>
                 </div>
             </div>
 
+            <!-- Appointments Page -->
             <div id="appointments-page" class="page hidden">
                 <h1 class="page-title">Gestão de Agendamentos</h1>
+                
                 <div class="card">
-                    <h3>Agendamentos</h3>
-                    <p>Sistema completo de agendamentos com confirmação automática via WhatsApp.</p>
+                    <div class="card-header">
+                        <h3>Agendamentos</h3>
+                        <button class="btn btn-primary" onclick="openAppointmentModal()">+ Novo Agendamento</button>
+                    </div>
+                    
+                    <div class="filters-bar">
+                        <select id="status-filter" onchange="filterAppointments()">
+                            <option value="">Todos os Status</option>
+                            <option value="scheduled">Agendado</option>
+                            <option value="confirmed">Confirmado</option>
+                            <option value="completed">Concluído</option>
+                            <option value="cancelled">Cancelado</option>
+                        </select>
+                        
+                        <input type="date" id="date-filter" onchange="filterAppointments()">
+                    </div>
+                    
+                    <div id="appointments-list">
+                        <p>Carregando agendamentos...</p>
+                    </div>
                 </div>
             </div>
 
+            <!-- Agenda Page -->
             <div id="agenda-page" class="page hidden">
                 <h1 class="page-title">Agenda da Clínica</h1>
+                
                 <div class="card">
-                    <h3>Calendário de Atendimentos</h3>
-                    <p>Visualização em calendário com controle de horários e disponibilidade.</p>
+                    <div class="calendar-header">
+                        <button class="btn btn-outline" onclick="previousWeek()">← Semana Anterior</button>
+                        <h3 id="current-week">Semana Atual</h3>
+                        <button class="btn btn-outline" onclick="nextWeek()">Próxima Semana →</button>
+                    </div>
+                    
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- Calendar will be generated by JavaScript -->
+                    </div>
                 </div>
             </div>
 
