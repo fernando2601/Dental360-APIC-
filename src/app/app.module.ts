@@ -5,16 +5,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-
-// Components
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { PatientsComponent } from './components/patients/patients.component';
 import { AppointmentsComponent } from './components/appointments/appointments.component';
 import { ServicesComponent } from './components/services/services.component';
-import { StaffComponent } from './components/staff/staff.component';
-import { FinancialComponent } from './components/financial/financial.component';
-
-// Services
 import { ApiService } from './services/api.service';
 
 @NgModule({
@@ -23,9 +17,7 @@ import { ApiService } from './services/api.service';
     DashboardComponent,
     PatientsComponent,
     AppointmentsComponent,
-    ServicesComponent,
-    StaffComponent,
-    FinancialComponent
+    ServicesComponent
   ],
   imports: [
     BrowserModule,
@@ -34,9 +26,7 @@ import { ApiService } from './services/api.service';
     FormsModule,
     ReactiveFormsModule
   ],
-  providers: [
-    ApiService
-  ],
+  providers: [ApiService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
