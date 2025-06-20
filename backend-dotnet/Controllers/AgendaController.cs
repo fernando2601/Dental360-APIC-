@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Domain.Entities;
+using ClinicApi.Models;
 using DentalSpa.Application.Interfaces;
 using System.Security.Claims;
+// Add the correct using if Appointment is in another namespace, e.g.:
+// using DentalSpa.Domain.Models;
 
 namespace DentalSpa.API.Controllers
 {
@@ -29,10 +32,11 @@ namespace DentalSpa.API.Controllers
         public async Task<ActionResult<Appointment>> GetAppointment(int id)
         {
             var appointment = await _agendaService.GetAppointmentByIdAsync(id);
-            if (appointment == null)
-                return NotFound();
+            if (!appointment.HasValue)
+                  return NotFound();
 
-            return Ok(appointment);
+            return Ok(appointment.Value);
+
         }
 
         [HttpPost]
