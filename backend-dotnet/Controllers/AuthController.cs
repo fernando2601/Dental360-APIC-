@@ -135,5 +135,28 @@ namespace DentalSpa.API.Controllers
         {
             return Ok(new { message = "Token válido", userId = User.FindFirst("nameid")?.Value });
         }
+
+        /// <summary>
+        /// Gera novo JWT usando refresh token
+        /// </summary>
+        /// <param name="request">Refresh token</param>
+        /// <returns>Novo token JWT e refresh token</returns>
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            try
+            {
+                var response = await _authService.RefreshTokenAsync(request.RefreshToken);
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

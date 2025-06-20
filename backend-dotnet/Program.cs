@@ -118,6 +118,8 @@ builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClinicInfoService, 
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.ISubscriptionService, DentalSpa.Application.Services.SubscriptionService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IUserService, DentalSpa.Application.Services.UserService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IDatabaseSelectorService, DentalSpa.Application.Services.DatabaseSelectorService>();
+builder.Services.AddScoped<DentalSpa.Application.Interfaces.IOrcamentoService, DentalSpa.Application.Services.OrcamentoService>();
+builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IOrcamentoRepository, DentalSpa.Infrastructure.Repositories.OrcamentoRepository>();
 
 // ========== AUTOMAPPER CONFIGURATION ==========
 builder.Services.AddAutoMapper(typeof(DentalSpaMappingProfile));
@@ -139,6 +141,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddSingleton<DentalSpa.Application.Services.EmailService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -154,6 +158,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
+app.UseMiddleware<DentalSpa.Application.Services.ErrorHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

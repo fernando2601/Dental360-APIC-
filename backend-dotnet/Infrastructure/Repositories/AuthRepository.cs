@@ -578,9 +578,42 @@ namespace DentalSpa.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<bool> CreateSessionAsync(int userId, string sessionToken)
+        public async Task<bool> CreateSessionAsync(int userId, string refreshToken, DateTime expiresAt)
         {
-            return true;
+            const string sql = @"
+                INSERT INTO user_sessions (user_id, refresh_token, expires_at, created_at, is_revoked)
+                VALUES (@UserId, @RefreshToken, @ExpiresAt, @CreatedAt, false)
+            ";
+            using var connection = new NpgsqlConnection(_connectionString);
+            var result = await connection.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                RefreshToken = refreshToken,
+                ExpiresAt = expiresAt,
+                CreatedAt = DateTime.UtcNow
+            });
+            return result > 0;
+        }
+
+        public async Task<UserSession?> GetSessionByRefreshTokenAsync(string refreshToken)
+        {
+            const string sql = @"
+                SELECT id as Id, user_id as UserId, refresh_token as RefreshToken, expires_at as ExpiresAt, created_at as CreatedAt, is_revoked as IsRevoked
+                FROM user_sessions
+                WHERE refresh_token = @RefreshToken
+            ";
+            using var connection = new NpgsqlConnection(_connectionString);
+            return await connection.QuerySingleOrDefaultAsync<UserSession>(sql, new { RefreshToken = refreshToken });
+        }
+
+        public async Task<bool> RevokeSessionByRefreshTokenAsync(string refreshToken)
+        {
+            const string sql = @"
+                UPDATE user_sessions SET is_revoked = true WHERE refresh_token = @RefreshToken
+            ";
+            using var connection = new NpgsqlConnection(_connectionString);
+            var result = await connection.ExecuteAsync(sql, new { RefreshToken = refreshToken });
+            return result > 0;
         }
 
         public async Task<bool> ValidateSessionAsync(string sessionToken)

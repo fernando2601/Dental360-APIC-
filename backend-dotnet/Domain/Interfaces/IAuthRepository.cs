@@ -38,9 +38,9 @@ namespace DentalSpa.Domain.Interfaces
         Task<bool> ConsumePasswordResetTokenAsync(string email, string token);
 
         // Session Management
-        Task<bool> CreateSessionAsync(int userId, string sessionToken);
-        Task<bool> ValidateSessionAsync(string sessionToken);
-        Task<bool> RevokeSessionAsync(string sessionToken);
+        Task<bool> CreateSessionAsync(int userId, string refreshToken, DateTime expiresAt);
+        Task<UserSession?> GetSessionByRefreshTokenAsync(string refreshToken);
+        Task<bool> RevokeSessionByRefreshTokenAsync(string refreshToken);
         Task<bool> RevokeAllUserSessionsAsync(int userId);
 
         // Audit & Logging

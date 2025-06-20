@@ -94,4 +94,76 @@ namespace DentalSpa.Application.DTOs
         public decimal TotalSpent { get; set; }
         public bool IsActive { get; set; }
     }
+
+    public class PatientDto
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public int Idade { get; set; }
+        public string CPF { get; set; } = string.Empty;
+        public string? RG { get; set; }
+        public string EstadoNascimento { get; set; } = string.Empty;
+        public DateTime DataNascimento { get; set; }
+        public string? Sexo { get; set; }
+        public string? Telefone { get; set; }
+        public string? Email { get; set; }
+        public string? Endereco { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public string? Address { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public string? Gender { get; set; }
+        public string? Notes { get; set; }
+        public string? MedicalHistory { get; set; }
+        public string? Allergies { get; set; }
+        public string? Medications { get; set; }
+        public string? Occupation { get; set; }
+        public string? EmergencyContact { get; set; }
+        public string? EmergencyPhone { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public int TotalAppointments { get; set; }
+        public DateTime? LastAppointment { get; set; }
+        public decimal TotalSpent { get; set; }
+    }
+
+    public class CreatePatientDto
+    {
+        [Required]
+        public string Nome { get; set; } = string.Empty;
+        [Required]
+        public int Idade { get; set; }
+        [Required]
+        public string CPF { get; set; } = string.Empty;
+        public string? RG { get; set; }
+        [Required]
+        public string EstadoNascimento { get; set; } = string.Empty;
+        [Required]
+        public DateTime DataNascimento { get; set; }
+        public string? Sexo { get; set; }
+        public string? Telefone { get; set; }
+        public string? Email { get; set; }
+        public string? Endereco { get; set; }
+    }
+
+    public class UpdatePatientDto
+    {
+        [Required]
+        public int Id { get; set; }
+        [Required]
+        public string Nome { get; set; } = string.Empty;
+        [Required]
+        public int Idade { get; set; }
+        [Required]
+        public string CPF { get; set; } = string.Empty;
+        public string? RG { get; set; }
+        [Required]
+        public string EstadoNascimento { get; set; } = string.Empty;
+        [Required]
+        public DateTime DataNascimento { get; set; }
+        public string? Sexo { get; set; }
+        public string? Telefone { get; set; }
+        public string? Email { get; set; }
+        public string? Endereco { get; set; }
+    }
 }

@@ -164,4 +164,19 @@ namespace ClinicApi.Models
         public string Severity { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
     }
+
+    public class UserSession
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime ExpiresAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsRevoked { get; set; } = false;
+    }
+
+    public class RefreshTokenRequest
+    {
+        public string RefreshToken { get; set; } = string.Empty;
+    }
 }

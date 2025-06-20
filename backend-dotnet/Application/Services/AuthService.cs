@@ -11,11 +11,13 @@ namespace DentalSpa.Application.Services
     {
         private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
+        private readonly EmailService _emailService;
 
-        public AuthService(IAuthRepository authRepository, IConfiguration configuration)
+        public AuthService(IAuthRepository authRepository, IConfiguration configuration, EmailService emailService)
         {
             _authRepository = authRepository;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request)
@@ -33,9 +35,10 @@ namespace DentalSpa.Application.Services
             // Gerar tokens
             var token = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken();
+            var refreshTokenExpires = DateTime.UtcNow.AddDays(7);
 
-            // Criar sessão
-            await _authRepository.CreateSessionAsync(user.Id, token);
+            // Criar sessão (salvar refresh token)
+            await _authRepository.CreateSessionAsync(user.Id, refreshToken, refreshTokenExpires);
 
             return new LoginResponse
             {
@@ -103,8 +106,34 @@ namespace DentalSpa.Application.Services
 
         public async Task<LoginResponse> RefreshTokenAsync(string refreshToken)
         {
-            // Em uma implementação real, validaria o refresh token
-            throw new NotImplementedException("Refresh token não implementado");
+            var session = await _authRepository.GetSessionByRefreshTokenAsync(refreshToken);
+            if (session == null || session.IsRevoked || session.ExpiresAt < DateTime.UtcNow)
+            {
+                throw new UnauthorizedAccessException("Refresh token inválido ou expirado");
+            }
+
+            var user = await _authRepository.GetUserByIdAsync(session.UserId);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("Usuário não encontrado");
+            }
+
+            // Revogar o refresh token antigo
+            await _authRepository.RevokeSessionByRefreshTokenAsync(refreshToken);
+
+            // Gerar novos tokens
+            var newJwt = GenerateJwtToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+            var newRefreshTokenExpires = DateTime.UtcNow.AddDays(7);
+            await _authRepository.CreateSessionAsync(user.Id, newRefreshToken, newRefreshTokenExpires);
+
+            return new LoginResponse
+            {
+                Token = newJwt,
+                User = user,
+                ExpiresAt = DateTime.UtcNow.AddHours(24),
+                RefreshToken = newRefreshToken
+            };
         }
 
         public async Task<User?> GetUserByIdAsync(int id)
@@ -193,8 +222,12 @@ namespace DentalSpa.Application.Services
             var resetToken = GeneratePasswordResetToken();
             await _authRepository.CreatePasswordResetTokenAsync(request.Email, resetToken);
 
-            // Em uma implementação real, enviaria email aqui
-            // await _emailService.SendPasswordResetEmailAsync(user.Email, resetToken);
+            // Enviar e-mail de reset
+            var resetUrl = _configuration["App:ResetPasswordUrl"] ?? "https://seusite.com/reset-password";
+            var link = $"{resetUrl}?email={Uri.EscapeDataString(user.Email)}&token={resetToken}";
+            var subject = "Recuperação de senha - Dental360";
+            var body = $@"<p>Olá, {user.FullName}!</p><p>Recebemos uma solicitação para redefinir sua senha.</p><p>Use o código abaixo ou clique no link para redefinir:</p><h2>{resetToken}</h2><p><a href='{link}'>Redefinir senha</a></p><p>Se não foi você, ignore este e-mail.</p>";
+            await _emailService.SendEmailAsync(user.Email, subject, body);
 
             return true;
         }

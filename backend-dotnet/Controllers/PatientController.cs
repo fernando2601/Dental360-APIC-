@@ -19,30 +19,71 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Patient>>> GetAllPatients()
+        public async Task<ActionResult<IEnumerable<PatientDto>>> GetAllPatients()
         {
             var patients = await _patientService.GetAllPatientsAsync();
-            return Ok(patients);
+            var result = patients.Select(p => new PatientDto
+            {
+                Id = p.Id,
+                Nome = p.Nome,
+                Idade = p.Idade,
+                CPF = p.CPF,
+                RG = p.RG,
+                EstadoNascimento = p.EstadoNascimento,
+                DataNascimento = p.DataNascimento,
+                Sexo = p.Sexo,
+                Telefone = p.Telefone,
+                Email = p.Email,
+                Endereco = p.Endereco
+            });
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Patient>> GetPatient(int id)
+        public async Task<ActionResult<PatientDto>> GetPatient(int id)
         {
             var patient = await _patientService.GetPatientByIdAsync(id);
             if (patient == null)
                 return NotFound();
-
-            return Ok(patient);
+            var result = new PatientDto
+            {
+                Id = patient.Id,
+                Nome = patient.Nome,
+                Idade = patient.Idade,
+                CPF = patient.CPF,
+                RG = patient.RG,
+                EstadoNascimento = patient.EstadoNascimento,
+                DataNascimento = patient.DataNascimento,
+                Sexo = patient.Sexo,
+                Telefone = patient.Telefone,
+                Email = patient.Email,
+                Endereco = patient.Endereco
+            };
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Patient>> CreatePatient(CreatePatientDto patientDto)
+        public async Task<ActionResult<PatientDto>> CreatePatient([FromBody] CreatePatientDto patientDto)
         {
             try
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
                 var patient = await _patientService.CreatePatientAsync(patientDto, userId);
-                return CreatedAtAction(nameof(GetPatient), new { id = patient.Id }, patient);
+                var result = new PatientDto
+                {
+                    Id = patient.Id,
+                    Nome = patient.Nome,
+                    Idade = patient.Idade,
+                    CPF = patient.CPF,
+                    RG = patient.RG,
+                    EstadoNascimento = patient.EstadoNascimento,
+                    DataNascimento = patient.DataNascimento,
+                    Sexo = patient.Sexo,
+                    Telefone = patient.Telefone,
+                    Email = patient.Email,
+                    Endereco = patient.Endereco
+                };
+                return CreatedAtAction(nameof(GetPatient), new { id = result.Id }, result);
             }
             catch (ArgumentException ex)
             {
@@ -51,15 +92,28 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Patient>> UpdatePatient(int id, UpdatePatientDto patientDto)
+        public async Task<ActionResult<PatientDto>> UpdatePatient(int id, [FromBody] UpdatePatientDto patientDto)
         {
             try
             {
                 var patient = await _patientService.UpdatePatientAsync(id, patientDto);
                 if (patient == null)
                     return NotFound();
-
-                return Ok(patient);
+                var result = new PatientDto
+                {
+                    Id = patient.Id,
+                    Nome = patient.Nome,
+                    Idade = patient.Idade,
+                    CPF = patient.CPF,
+                    RG = patient.RG,
+                    EstadoNascimento = patient.EstadoNascimento,
+                    DataNascimento = patient.DataNascimento,
+                    Sexo = patient.Sexo,
+                    Telefone = patient.Telefone,
+                    Email = patient.Email,
+                    Endereco = patient.Endereco
+                };
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
@@ -73,7 +127,6 @@ namespace DentalSpa.API.Controllers
             var result = await _patientService.DeletePatientAsync(id);
             if (!result)
                 return NotFound();
-
             return NoContent();
         }
 
