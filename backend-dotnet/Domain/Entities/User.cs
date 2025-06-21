@@ -9,7 +9,7 @@ namespace DentalSpa.Domain.Entities
         public string Password { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
-        public string Role { get; set; } = "staff";
+        public string Role { get; set; } = "user";
         public string Email { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public string? ResetToken { get; set; }
@@ -18,6 +18,14 @@ namespace DentalSpa.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
+
+        // Campos para Reset de Senha
+        public string? PasswordResetToken { get; set; }
+        public DateTime? ResetTokenExpires { get; set; }
+
+        // Campos para Refresh Token
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
 
         public bool IsAdmin() => Role == "admin";
         public bool IsStaff() => Role == "staff";

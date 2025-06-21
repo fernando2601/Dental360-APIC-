@@ -40,27 +40,45 @@ namespace DentalSpa.API.Controllers
 
         [HttpPost("change-password")]
         [Authorize]
-        public async Task<IActionResult> ChangePassword([FromBody] object request) // Placeholder
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            // O ideal é criar um ChangePasswordRequest DTO aqui.
-            // Por enquanto, a lógica no serviço vai lidar com o 'object'.
-            // var result = await _authService.ChangePasswordAsync(userId, request...);
-            return Ok(new { message = "Password change endpoint is under construction." });
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
+            var result = await _authService.ChangePasswordAsync(userId, request);
+            if (!result)
+            {
+                return BadRequest(new { message = "Failed to change password. Check old password." });
+            }
+            return Ok(new { message = "Password changed successfully." });
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] object request) // Placeholder
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            await _authService.ForgotPasswordAsync(request);
-            return Ok(new { message = "If the email exists, a recovery link will be sent." });
+            var result = await _authService.ForgotPasswordAsync(request);
+            if (!result)
+            {
+                // Não retorne erro para não revelar se um e-mail existe ou não.
+                // Apenas retorne uma mensagem genérica.
+            }
+            return Ok(new { message = "If an account with that email exists, we have sent a password reset link." });
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] object request) // Placeholder
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
-            await _authService.ResetPasswordAsync(request);
-            return Ok(new { message = "Password reset successfully." });
+            var result = await _authService.ResetPasswordAsync(request);
+            if (!result)
+            {
+                return BadRequest(new { message = "Invalid token or email." });
+            }
+            return Ok(new { message = "Password has been reset successfully." });
         }
 
         [HttpGet("profile")]
@@ -80,9 +98,14 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<object>> RefreshToken([FromBody] object request) // Placeholder
+        [AllowAnonymous]
+        public async Task<ActionResult<object>> RefreshToken([FromBody] RefreshTokenRequest request)
         {
             var response = await _authService.RefreshTokenAsync(request);
+            if (response == null)
+            {
+                return Unauthorized("Invalid refresh token.");
+            }
             return Ok(response);
         }
     }

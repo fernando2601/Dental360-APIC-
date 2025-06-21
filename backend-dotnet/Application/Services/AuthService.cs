@@ -111,46 +111,96 @@ namespace DentalSpa.Application.Services
             return createdUser;
         }
 
-        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequest request)
         {
-            if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword))
-            {
-                throw new ArgumentException("Current and new passwords are required.");
-            }
-
             var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null || user.PasswordHash == null || !BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
+            if (user == null)
             {
-                throw new UnauthorizedAccessException("Invalid credentials or user not found.");
+                return false; // Ou lançar exceção
             }
 
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            var updatedUser = await _userRepository.UpdateAsync(user.Id, user);
+            // Verificar a senha antiga
+            if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.Password))
+            {
+                return false;
+            }
 
-            return updatedUser != null;
+            // Criptografar e salvar a nova senha
+            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            await _userRepository.UpdateAsync(user);
+
+            return true;
         }
         
-        public Task<bool> ForgotPasswordAsync(object request)
+        public async Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
-            // Placeholder implementation
-            return Task.FromResult(true);
+            var user = await _userRepository.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                // Não revele que o usuário não existe.
+                return true;
+            }
+
+            // Gerar token
+            var token = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(64));
+            user.PasswordResetToken = token;
+            user.ResetTokenExpires = DateTime.UtcNow.AddHours(1); // Token válido por 1 hora
+
+            await _userRepository.UpdateAsync(user);
+
+            // TODO: Enviar o token por e-mail para o usuário.
+            // Por enquanto, vamos pular o envio de e-mail real.
+            // _emailService.SendPasswordResetEmail(user.Email, token);
+
+            return true;
         }
 
-        public Task<bool> ResetPasswordAsync(object request)
+        public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
         {
-            // Placeholder implementation
-            return Task.FromResult(true);
+            var user = await _userRepository.FindByEmailAsync(request.Email);
+
+            if (user == null || 
+                user.PasswordResetToken != request.Token || 
+                user.ResetTokenExpires < DateTime.UtcNow)
+            {
+                return false; // Token inválido, expirado ou usuário não encontrado
+            }
+
+            // Token válido, redefinir a senha
+            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            user.PasswordResetToken = null; // Limpar o token
+            user.ResetTokenExpires = null;
+
+            await _userRepository.UpdateAsync(user);
+
+            return true;
         }
 
         public async Task<object> GetProfileAsync(int userId)
         {
-            return await _userRepository.GetByIdAsync(userId) ?? new object();
+            return await _userRepository.GetProfileByIdAsync(userId) ?? new object();
         }
 
-        public Task<object> RefreshTokenAsync(object request)
+        public async Task<object?> RefreshTokenAsync(RefreshTokenRequest request)
         {
-            // Placeholder implementation
-            return Task.FromResult<object>(new { Token = "new-refreshed-fake-token" });
+            // A lógica de validação do token (se é JWT, etc.) foi omitida por simplicidade.
+            // Aqui, estamos apenas procurando o usuário pelo refresh token.
+            var user = await _userRepository.FindByRefreshTokenAsync(request.Token);
+
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return null; // Token inválido ou expirado
+            }
+
+            // Gerar um novo token de acesso
+            var newAccessToken = GenerateJwtToken(user);
+            // Opcional: Gerar um novo refresh token e atualizar o usuário
+            // var newRefreshToken = ...
+            // user.RefreshToken = newRefreshToken;
+            // user.RefreshTokenExpiryTime = ...
+            // await _userRepository.UpdateAsync(user);
+
+            return new { token = newAccessToken };
         }
     }
 } 

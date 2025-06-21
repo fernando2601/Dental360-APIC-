@@ -1,199 +1,188 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
-using System.Data;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
-using System.Linq;
 
 namespace DentalSpa.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly IDbConnection _connection;
+        private readonly string _connectionString;
 
-        public UserRepository(IDbConnection connection)
+        public UserRepository(IConfiguration configuration)
         {
-            _connection = connection;
+            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException(nameof(configuration), "Connection string cannot be null.");
+        }
+
+        public async Task<User?> FindByEmailAsync(string email)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"Email\" = @Email", connection);
+            command.Parameters.AddWithValue("@Email", email);
+            await using var reader = await command.ExecuteReaderAsync();
+            return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
+        }
+
+        public async Task<User?> FindByUsernameAsync(string username)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"Username\" = @Username", connection);
+            command.Parameters.AddWithValue("@Username", username);
+            await using var reader = await command.ExecuteReaderAsync();
+            return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
+        }
+
+        public async Task<User?> FindByRefreshTokenAsync(string refreshToken)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"RefreshToken\" = @RefreshToken", connection);
+            command.Parameters.AddWithValue("@RefreshToken", refreshToken);
+            await using var reader = await command.ExecuteReaderAsync();
+            return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
+        }
+
+        public async Task AddAsync(User user)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(
+                "INSERT INTO public.\"Users\" (\"FullName\", \"Username\", \"Password\", \"Email\", \"Role\") VALUES (@FullName, @Username, @Password, @Email, @Role)",
+                connection);
+            command.Parameters.AddWithValue("@FullName", user.FullName);
+            command.Parameters.AddWithValue("@Username", user.Username);
+            command.Parameters.AddWithValue("@Password", user.Password);
+            command.Parameters.AddWithValue("@Email", user.Email);
+            command.Parameters.AddWithValue("@Role", user.Role);
+            await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task UpdateAsync(User user)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            var command = new NpgsqlCommand(
+                "UPDATE public.\"Users\" SET \"FullName\" = @FullName, \"Username\" = @Username, \"Password\" = @Password, \"Email\" = @Email, \"Role\" = @Role, " +
+                "\"PasswordResetToken\" = @PasswordResetToken, \"ResetTokenExpires\" = @ResetTokenExpires, " +
+                "\"RefreshToken\" = @RefreshToken, \"RefreshTokenExpiryTime\" = @RefreshTokenExpiryTime " +
+                "WHERE \"Id\" = @Id",
+                connection);
+            command.Parameters.AddWithValue("@Id", user.Id);
+            command.Parameters.AddWithValue("@FullName", user.FullName);
+            command.Parameters.AddWithValue("@Username", user.Username);
+            command.Parameters.AddWithValue("@Password", user.Password);
+            command.Parameters.AddWithValue("@Email", user.Email);
+            command.Parameters.AddWithValue("@Role", user.Role);
+            command.Parameters.AddWithValue("@PasswordResetToken", (object)user.PasswordResetToken ?? DBNull.Value);
+            command.Parameters.AddWithValue("@ResetTokenExpires", (object)user.ResetTokenExpires ?? DBNull.Value);
+            command.Parameters.AddWithValue("@RefreshToken", (object)user.RefreshToken ?? DBNull.Value);
+            command.Parameters.AddWithValue("@RefreshTokenExpiryTime", (object)user.RefreshTokenExpiryTime ?? DBNull.Value);
+            await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task<User?> GetByIdAsync(int id)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"Id\" = @Id", connection);
+            command.Parameters.AddWithValue("@Id", id);
+            await using var reader = await command.ExecuteReaderAsync();
+            return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
+        }
+
+        public async Task<User> CreateAsync(User user)
+        {
+            await AddAsync(user);
+            return user;
+        }
+
+        public async Task<User?> UpdateAsync(int id, User user)
+        {
+            user.Id = id;
+            await UpdateAsync(user);
+            return user;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand("DELETE FROM public.\"Users\" WHERE \"Id\" = @Id", connection);
+            command.Parameters.AddWithValue("@Id", id);
+            var affectedRows = await command.ExecuteNonQueryAsync();
+            return affectedRows > 0;
         }
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {
             var users = new List<User>();
-            using (var cmd = _connection.CreateCommand())
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\"", connection);
+            await using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
-                cmd.CommandText = "SELECT * FROM users WHERE is_active = true";
-                if (_connection.State == ConnectionState.Closed) _connection.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        users.Add(MapReaderToUser(reader));
-                    }
-                }
+                users.Add(MapReaderToUser(reader));
             }
-            return await Task.FromResult(users);
-        }
-
-        public async Task<User?> GetByIdAsync(int id)
-        {
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT * FROM users WHERE id = @Id AND is_active = true";
-                cmd.Parameters.Add(CreateParameter("@Id", id));
-                if (_connection.State == ConnectionState.Closed) _connection.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return MapReaderToUser(reader);
-                    }
-                }
-            }
-            return await Task.FromResult<User?>(null);
-        }
-
-        public async Task<User?> FindByEmailAsync(string email)
-        {
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT * FROM users WHERE email = @Email AND is_active = true";
-                cmd.Parameters.Add(CreateParameter("@Email", email));
-                if (_connection.State == ConnectionState.Closed) _connection.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return MapReaderToUser(reader);
-                    }
-                }
-            }
-            return await Task.FromResult<User?>(null);
-        }
-
-        public async Task<User?> FindByUsernameAsync(string username)
-        {
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT * FROM users WHERE username = @Username AND is_active = true";
-                cmd.Parameters.Add(CreateParameter("@Username", username));
-                if (_connection.State == ConnectionState.Closed) _connection.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return MapReaderToUser(reader);
-                    }
-                }
-            }
-            return await Task.FromResult<User?>(null);
-        }
-
-        public async Task<User> CreateAsync(User user)
-        {
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = @"INSERT INTO users (username, email, password_hash, role, is_active, created_at, updated_at, full_name) 
-                                   VALUES (@Username, @Email, @PasswordHash, @Role, @IsActive, @CreatedAt, @UpdatedAt, @FullName)
-                                   RETURNING id;";
-                
-                cmd.Parameters.Add(CreateParameter("@Username", user.Username));
-                cmd.Parameters.Add(CreateParameter("@Email", user.Email));
-                cmd.Parameters.Add(CreateParameter("@PasswordHash", user.PasswordHash));
-                cmd.Parameters.Add(CreateParameter("@Role", user.Role ?? "user"));
-                cmd.Parameters.Add(CreateParameter("@IsActive", true));
-                cmd.Parameters.Add(CreateParameter("@CreatedAt", DateTime.UtcNow));
-                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.UtcNow));
-                cmd.Parameters.Add(CreateParameter("@FullName", user.FullName));
-                
-                if (_connection.State == ConnectionState.Closed) _connection.Open();
-                var id = Convert.ToInt32(cmd.ExecuteScalar());
-                user.Id = id;
-                return user;
-            }
-        }
-
-        public async Task<User?> UpdateAsync(int id, User user)
-        {
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = @"UPDATE users SET 
-                                    username = @Username, 
-                                    email = @Email, 
-                                    password_hash = @PasswordHash, 
-                                    role = @Role, 
-                                    is_active = @IsActive, 
-                                    updated_at = @UpdatedAt,
-                                    full_name = @FullName
-                                   WHERE id = @Id AND is_active = true";
-                
-                cmd.Parameters.Add(CreateParameter("@Id", id));
-                cmd.Parameters.Add(CreateParameter("@Username", user.Username));
-                cmd.Parameters.Add(CreateParameter("@Email", user.Email));
-                cmd.Parameters.Add(CreateParameter("@PasswordHash", user.PasswordHash));
-                cmd.Parameters.Add(CreateParameter("@Role", user.Role));
-                cmd.Parameters.Add(CreateParameter("@IsActive", user.IsActive));
-                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.UtcNow));
-                cmd.Parameters.Add(CreateParameter("@FullName", user.FullName));
-                
-                if (_connection.State == ConnectionState.Closed) _connection.Open();
-                var rows = cmd.ExecuteNonQuery();
-                return rows > 0 ? user : null;
-            }
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "UPDATE users SET is_active = false WHERE id = @Id";
-                cmd.Parameters.Add(CreateParameter("@Id", id));
-                if (_connection.State == ConnectionState.Closed) _connection.Open();
-                var rows = cmd.ExecuteNonQuery();
-                return rows > 0;
-            }
-        }
-
-        public async Task<bool> ExistsAsync(string username, string email)
-        {
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT COUNT(*) FROM users WHERE (username = @Username OR email = @Email) AND is_active = 1";
-                cmd.Parameters.Add(CreateParameter("@Username", username));
-                cmd.Parameters.Add(CreateParameter("@Email", email));
-                if (_connection.State == ConnectionState.Closed) _connection.Open();
-                var count = Convert.ToInt32(cmd.ExecuteScalar());
-                return await Task.FromResult(count > 0);
-            }
+            return users;
         }
 
         public async Task<IEnumerable<User>> SearchAsync(string query)
         {
-            return await Task.FromResult(Enumerable.Empty<User>());
+            var users = new List<User>();
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"FullName\" ILIKE @Query OR \"Email\" ILIKE @Query OR \"Username\" ILIKE @Query", connection);
+            command.Parameters.AddWithValue("@Query", $"%{query}%");
+            await using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                users.Add(MapReaderToUser(reader));
+            }
+            return users;
         }
 
-        private IDbDataParameter CreateParameter(string name, object? value)
+        public async Task<object> GetProfileByIdAsync(int id)
         {
-            var param = _connection.CreateCommand().CreateParameter();
-            param.ParameterName = name;
-            param.Value = value ?? DBNull.Value;
-            return param;
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand("SELECT \"FullName\", \"Email\", \"Username\" FROM public.\"Users\" WHERE \"Id\" = @Id", connection);
+            command.Parameters.AddWithValue("@Id", id);
+
+            await using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return new
+                {
+                    FullName = reader.GetString(reader.GetOrdinal("FullName")),
+                    Email = reader.GetString(reader.GetOrdinal("Email")),
+                    Username = reader.GetString(reader.GetOrdinal("Username"))
+                };
+            }
+            // Retorna um objeto anônimo vazio se não encontrar, para evitar nulos
+            return new { };
         }
 
-        private User MapReaderToUser(IDataReader reader)
+        private User MapReaderToUser(NpgsqlDataReader reader)
         {
             return new User
             {
-                Id = Convert.ToInt32(reader["id"]),
-                Username = reader["username"]?.ToString(),
-                PasswordHash = reader["password_hash"]?.ToString(),
-                FullName = reader["full_name"]?.ToString(),
-                Email = reader["email"]?.ToString(),
-                Role = reader["role"]?.ToString(),
-                CreatedAt = Convert.ToDateTime(reader["created_at"]),
-                IsActive = Convert.ToBoolean(reader["is_active"])
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                FullName = reader.GetString(reader.GetOrdinal("FullName")),
+                Username = reader.GetString(reader.GetOrdinal("Username")),
+                Password = reader.GetString(reader.GetOrdinal("Password")),
+                Email = reader.GetString(reader.GetOrdinal("Email")),
+                Role = reader.GetString(reader.GetOrdinal("Role")),
+                PasswordResetToken = reader.IsDBNull(reader.GetOrdinal("PasswordResetToken")) ? null : reader.GetString(reader.GetOrdinal("PasswordResetToken")),
+                ResetTokenExpires = reader.IsDBNull(reader.GetOrdinal("ResetTokenExpires")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("ResetTokenExpires")),
+                RefreshToken = reader.IsDBNull(reader.GetOrdinal("RefreshToken")) ? null : reader.GetString(reader.GetOrdinal("RefreshToken")),
+                RefreshTokenExpiryTime = reader.IsDBNull(reader.GetOrdinal("RefreshTokenExpiryTime")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("RefreshTokenExpiryTime")),
             };
         }
     }
-} 
+}
