@@ -1,6 +1,9 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Application.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DentalSpa.Application.Services
 {
@@ -13,6 +16,15 @@ namespace DentalSpa.Application.Services
             _clientRepository = clientRepository;
         }
 
+        public async Task<Client> CreateClientAsync(Client client)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+            return await _clientRepository.CreateAsync(client);
+        }
+
         public async Task<IEnumerable<Client>> GetAllClientsAsync()
         {
             return await _clientRepository.GetAllAsync();
@@ -23,13 +35,12 @@ namespace DentalSpa.Application.Services
             return await _clientRepository.GetByIdAsync(id);
         }
 
-        public async Task<Client> CreateClientAsync(Client client)
-        {
-            return await _clientRepository.CreateAsync(client);
-        }
-
         public async Task<Client?> UpdateClientAsync(Client client)
         {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
             return await _clientRepository.UpdateAsync(client.Id, client);
         }
 
@@ -40,6 +51,10 @@ namespace DentalSpa.Application.Services
 
         public async Task<IEnumerable<Client>> SearchClientsAsync(string searchTerm)
         {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return await GetAllClientsAsync();
+            }
             return await _clientRepository.SearchAsync(searchTerm);
         }
     }

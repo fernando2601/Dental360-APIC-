@@ -1,5 +1,6 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
+using Npgsql;
 using System.Data;
 using System.Linq;
 
@@ -199,6 +200,33 @@ namespace DentalSpa.Infrastructure.Repositories
             param.ParameterName = name;
             param.Value = value ?? DBNull.Value;
             return param;
+        }
+
+        public async Task<User?> FindByEmailAsync(string email)
+        {
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE email = @Email AND is_active = 1";
+                cmd.Parameters.Add(CreateParameter("@Email", email));
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new User
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Username = reader.GetString(reader.GetOrdinal("username")),
+                            Email = reader.GetString(reader.GetOrdinal("email")),
+                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
+                            Role = reader.GetString(reader.GetOrdinal("role")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        };
+                    }
+                }
+            }
+            return await Task.FromResult<User?>(null);
         }
     }
 }
