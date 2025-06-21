@@ -152,9 +152,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Configurar para rodar na porta 5000
-app.Urls.Add("http://0.0.0.0:5000");
-
 Console.WriteLine("🦷 DentalSpa API iniciada com arquitetura DDD!");
 Console.WriteLine("🏗️  Camadas implementadas: Domain, Application, Infrastructure, Service");
 Console.WriteLine("📚 Swagger UI disponível em: http://localhost:5000/api-docs");
