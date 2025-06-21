@@ -29,27 +29,32 @@ namespace DentalSpa.API.Controllers
         public async Task<ActionResult<Appointment>> GetAppointment(int id)
         {
             var appointment = await _agendaService.GetAppointmentByIdAsync(id);
-            if (appointment == null)
+            if (appointment.HasValue == false)
                 return NotFound();
 
-            return Ok(appointment);
+            return Ok(appointment.Value);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Appointment>> CreateAppointment(CreateAppointmentDto appointmentDto)
+        public async Task<ActionResult<Appointment>> CreateAppointment([FromBody] Appointment appointment)
         {
-            var appointment = await _agendaService.CreateAppointmentAsync(appointmentDto);
-            return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, appointment);
+            var newAppointment = await _agendaService.CreateAppointmentAsync(appointment);
+            return CreatedAtAction(nameof(GetAppointment), new { id = newAppointment.Id }, newAppointment);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Appointment>> UpdateAppointment(int id, CreateAppointmentDto appointmentDto)
+        public async Task<ActionResult<Appointment>> UpdateAppointment(int id, [FromBody] Appointment appointment)
         {
-            var appointment = await _agendaService.UpdateAppointmentAsync(id, appointmentDto);
-            if (appointment == null)
+            if (id != appointment.Id)
+            {
+                return BadRequest("O ID do agendamento não corresponde.");
+            }
+
+            var updatedAppointment = await _agendaService.UpdateAppointmentAsync(id, appointment);
+            if (updatedAppointment == null)
                 return NotFound();
 
-            return Ok(appointment);
+            return Ok(updatedAppointment);
         }
 
         [HttpDelete("{id}")]
@@ -130,14 +135,14 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost("suggest-alternatives")]
-        public async Task<ActionResult> SuggestAlternatives([FromBody] CreateAppointmentDto appointment)
+        public async Task<ActionResult> SuggestAlternatives([FromBody] Appointment appointment)
         {
             var result = await _agendaService.SuggestAlternativeSlotsAsync(appointment);
             return Ok(result);
         }
 
         [HttpPost("validate")]
-        public async Task<ActionResult> ValidateAppointment([FromBody] CreateAppointmentDto appointment)
+        public async Task<ActionResult> ValidateAppointment([FromBody] Appointment appointment)
         {
             var isValid = await _agendaService.ValidateAppointmentAsync(appointment);
             return Ok(new { isValid });
@@ -149,7 +154,7 @@ namespace DentalSpa.API.Controllers
             [FromBody] object request) // Seria CreateRecurringAppointmentRequest
         {
             // Parsing seria feito aqui
-            var baseAppointment = new CreateAppointmentDto(); // Parse do request
+            var baseAppointment = new Appointment(); // Parse do request
             var pattern = new RecurringAppointmentPattern(); // Parse do request
             
             var result = await _agendaService.CreateRecurringAppointmentsAsync(baseAppointment, pattern);
@@ -166,7 +171,7 @@ namespace DentalSpa.API.Controllers
         [HttpPut("recurring/{parentId}")]
         public async Task<ActionResult> UpdateRecurringSeries(
             int parentId, 
-            [FromBody] CreateAppointmentDto updates,
+            [FromBody] Appointment updates,
             [FromQuery] bool updateFutureOnly = false)
         {
             var result = await _agendaService.UpdateRecurringSeriesAsync(parentId, updates, updateFutureOnly);
@@ -334,10 +339,10 @@ namespace DentalSpa.API.Controllers
 
         // Conflicts
         [HttpPost("check-conflicts")]
-        public async Task<ActionResult> CheckConflicts([FromBody] CreateAppointmentDto appointment)
+        public async Task<ActionResult> CheckConflicts([FromBody] Appointment appointment)
         {
-            var result = await _agendaService.CheckConflictsAsync(appointment);
-            return Ok(result);
+            var conflicts = await _agendaService.CheckConflictsAsync(appointment);
+            return Ok(conflicts);
         }
 
         [HttpPost("{id}/resolve-conflicts")]

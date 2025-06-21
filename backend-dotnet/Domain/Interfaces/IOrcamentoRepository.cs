@@ -6,12 +6,11 @@ namespace DentalSpa.Domain.Interfaces
 {
     public interface IOrcamentoRepository
     {
-        Task<Orcamento> CreateOrcamentoAsync(Orcamento orcamento);
-        Task<Orcamento?> GetOrcamentoByIdAsync(int id);
-        Task<IEnumerable<Orcamento>> GetOrcamentosByPacienteAsync(int pacienteId);
-        Task<IEnumerable<Orcamento>> GetAllOrcamentosAsync();
-        Task<Orcamento> UpdateOrcamentoAsync(Orcamento orcamento);
-        Task<bool> DeleteOrcamentoAsync(int id);
-        Task<bool> UpdateStatusAsync(int id, string status);
+        Task<IEnumerable<Orcamento>> GetAllAsync();
+        Task<Orcamento?> GetByIdAsync(int id);
+        Task<Orcamento> CreateAsync(Orcamento orcamento);
+        Task<Orcamento?> UpdateAsync(int id, Orcamento orcamento);
+        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<Orcamento>> SearchAsync(string searchTerm);
     }
 } 

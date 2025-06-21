@@ -1,4 +1,4 @@
-namespace ClinicApi.Models
+namespace DentalSpa.Domain.Entities
 {
     public class Client
     {
@@ -10,15 +10,5 @@ namespace ClinicApi.Models
         public string? Birthday { get; set; }
         public string? Notes { get; set; }
         public DateTime? CreatedAt { get; set; }
-    }
-
-    public class CreateClientDto
-    {
-        public string FullName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string? Address { get; set; }
-        public string? Birthday { get; set; }
-        public string? Notes { get; set; }
     }
 }

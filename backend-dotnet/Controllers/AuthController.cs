@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using DentalSpa.Application.DTOs;
 using DentalSpa.Application.Interfaces;
 
 namespace DentalSpa.API.Controllers
@@ -22,7 +21,7 @@ namespace DentalSpa.API.Controllers
         /// <param name="request">Dados de login (username e password)</param>
         /// <returns>Token JWT e dados do usuário</returns>
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<object>> Login([FromBody] object request)
         {
             try
             {
@@ -46,7 +45,7 @@ namespace DentalSpa.API.Controllers
         /// <returns>Dados do usuário criado</returns>
         [HttpPost("register")]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult<UserDTO>> Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult<object>> Register([FromBody] object request)
         {
             try
             {
@@ -69,7 +68,7 @@ namespace DentalSpa.API.Controllers
         /// <param name="request">Email para recuperação</param>
         /// <returns>Confirmação de envio</returns>
         [HttpPost("forgot-password")]
-        public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        public async Task<ActionResult> ForgotPassword([FromBody] object request)
         {
             try
             {
@@ -88,7 +87,7 @@ namespace DentalSpa.API.Controllers
         /// <param name="request">Token e nova senha</param>
         /// <returns>Confirmação de redefinição</returns>
         [HttpPost("reset-password")]
-        public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        public async Task<ActionResult> ResetPassword([FromBody] object request)
         {
             try
             {
@@ -111,7 +110,7 @@ namespace DentalSpa.API.Controllers
         /// <returns>Dados do usuário</returns>
         [HttpGet("profile")]
         [Authorize]
-        public async Task<ActionResult<UserDTO>> GetProfile()
+        public async Task<ActionResult<object>> GetProfile()
         {
             try
             {
@@ -142,11 +141,11 @@ namespace DentalSpa.API.Controllers
         /// <param name="request">Refresh token</param>
         /// <returns>Novo token JWT e refresh token</returns>
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<LoginResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+        public async Task<ActionResult<object>> RefreshToken([FromBody] object request)
         {
             try
             {
-                var response = await _authService.RefreshTokenAsync(request.RefreshToken);
+                var response = await _authService.RefreshTokenAsync(request);
                 return Ok(response);
             }
             catch (UnauthorizedAccessException ex)

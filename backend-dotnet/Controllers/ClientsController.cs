@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using DentalSpa.Application.DTOs;
-using DentalSpa.Application.Services;
+using DentalSpa.Domain.Entities;
+using DentalSpa.Application.Interfaces;
 
 namespace DentalSpa.API.Controllers
 {
@@ -22,7 +22,7 @@ namespace DentalSpa.API.Controllers
         /// </summary>
         /// <returns>Lista de clientes</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetAllClients()
+        public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
         {
             try
             {
@@ -41,7 +41,7 @@ namespace DentalSpa.API.Controllers
         /// <param name="id">ID do cliente</param>
         /// <returns>Dados do cliente</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<ClientDTO>> GetClientById(int id)
+        public async Task<ActionResult<Client>> GetClientById(int id)
         {
             try
             {
@@ -61,15 +61,15 @@ namespace DentalSpa.API.Controllers
         /// <summary>
         /// Cria um novo cliente
         /// </summary>
-        /// <param name="request">Dados do cliente</param>
+        /// <param name="client">Dados do cliente</param>
         /// <returns>Cliente criado</returns>
         [HttpPost]
-        public async Task<ActionResult<ClientDTO>> CreateClient([FromBody] ClientCreateRequest request)
+        public async Task<ActionResult<Client>> CreateClient([FromBody] Client client)
         {
             try
             {
-                var client = await _clientService.CreateClientAsync(request);
-                return CreatedAtAction(nameof(GetClientById), new { id = client.Id }, client);
+                var result = await _clientService.CreateClientAsync(client);
+                return CreatedAtAction(nameof(GetClientById), new { id = result.Id }, result);
             }
             catch (InvalidOperationException ex)
             {
@@ -85,15 +85,20 @@ namespace DentalSpa.API.Controllers
         /// Atualiza cliente existente
         /// </summary>
         /// <param name="id">ID do cliente</param>
-        /// <param name="request">Novos dados do cliente</param>
+        /// <param name="client">Novos dados do cliente</param>
         /// <returns>Cliente atualizado</returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult<ClientDTO>> UpdateClient(int id, [FromBody] ClientUpdateRequest request)
+        public async Task<ActionResult<Client>> UpdateClient(int id, [FromBody] Client client)
         {
             try
             {
-                var client = await _clientService.UpdateClientAsync(id, request);
-                return Ok(client);
+                if (id != client.Id)
+                {
+                    return BadRequest("O ID do cliente não corresponde.");
+                }
+
+                var result = await _clientService.UpdateClientAsync(client);
+                return Ok(result);
             }
             catch (KeyNotFoundException ex)
             {
@@ -138,7 +143,7 @@ namespace DentalSpa.API.Controllers
         /// <param name="searchTerm">Termo de busca</param>
         /// <returns>Lista de clientes encontrados</returns>
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<ClientDTO>>> SearchClients([FromQuery] string searchTerm)
+        public async Task<ActionResult<IEnumerable<Client>>> SearchClients([FromQuery] string searchTerm)
         {
             try
             {

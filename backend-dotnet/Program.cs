@@ -7,7 +7,6 @@ using DentalSpa.Infrastructure.Data;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Infrastructure.Repositories;
 using DentalSpa.Application.Services;
-using DentalSpa.Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -120,9 +119,6 @@ builder.Services.AddScoped<DentalSpa.Application.Interfaces.IUserService, Dental
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IDatabaseSelectorService, DentalSpa.Application.Services.DatabaseSelectorService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IOrcamentoService, DentalSpa.Application.Services.OrcamentoService>();
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IOrcamentoRepository, DentalSpa.Infrastructure.Repositories.OrcamentoRepository>();
-
-// ========== AUTOMAPPER CONFIGURATION ==========
-builder.Services.AddAutoMapper(typeof(DentalSpaMappingProfile));
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "DentalSpa-Default-Secret-Key-For-JWT-Token-Generation-2024";

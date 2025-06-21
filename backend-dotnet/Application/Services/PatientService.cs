@@ -1,5 +1,6 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
+using DentalSpa.Application.Interfaces;
 
 namespace DentalSpa.Application.Services
 {
@@ -12,6 +13,37 @@ namespace DentalSpa.Application.Services
             _patientRepository = patientRepository;
         }
 
+        public async Task<IEnumerable<Patient>> GetAllAsync()
+        {
+            return await _patientRepository.GetAllAsync();
+        }
+
+        public async Task<Patient?> GetByIdAsync(int id)
+        {
+            return await _patientRepository.GetByIdAsync(id);
+        }
+
+        public async Task<Patient> CreateAsync(Patient patient)
+        {
+            patient.CreatedAt = DateTime.UtcNow;
+            return await _patientRepository.CreateAsync(patient);
+        }
+
+        public async Task<Patient?> UpdateAsync(int id, Patient patient)
+        {
+            return await _patientRepository.UpdateAsync(id, patient);
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            return await _patientRepository.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<Patient>> SearchAsync(string searchTerm)
+        {
+            return await _patientRepository.SearchAsync(searchTerm);
+        }
+
         public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
         {
             return await _patientRepository.GetAllPatientsAsync();
@@ -20,70 +52,6 @@ namespace DentalSpa.Application.Services
         public async Task<Patient?> GetPatientByIdAsync(int id)
         {
             return await _patientRepository.GetPatientByIdAsync(id);
-        }
-
-        public async Task<Patient> CreatePatientAsync(CreatePatientDto patientDto, int createdBy)
-        {
-            // Validações de negócio
-            await ValidatePatientDataAsync(patientDto);
-            
-            return await _patientRepository.CreatePatientAsync(patientDto, createdBy);
-        }
-
-        public async Task<Patient?> UpdatePatientAsync(int id, UpdatePatientDto patientDto)
-        {
-            await ValidatePatientUpdateAsync(id, patientDto);
-            return await _patientRepository.UpdatePatientAsync(id, patientDto);
-        }
-
-        public async Task<bool> DeletePatientAsync(int id)
-        {
-            return await _patientRepository.DeletePatientAsync(id);
-        }
-
-        public async Task<object> GetPatientsWithFiltersAsync(PatientFilters filters)
-        {
-            var patients = await _patientRepository.GetPatientsWithFiltersAsync(filters);
-            var totalCount = await _patientRepository.GetPatientsCountAsync(filters);
-            
-            return new
-            {
-                patients = patients.Select(p => new
-                {
-                    id = p.Id,
-                    name = p.Name,
-                    email = p.Email,
-                    phone = p.FormattedPhone,
-                    cpf = p.FormattedCPF,
-                    age = p.Age,
-                    gender = p.Gender,
-                    city = p.City,
-                    status = p.Status,
-                    lastVisit = p.LastVisit?.ToString("yyyy-MM-dd"),
-                    createdAt = p.CreatedAt?.ToString("yyyy-MM-dd")
-                }),
-                pagination = new
-                {
-                    currentPage = filters.Page,
-                    totalPages = (int)Math.Ceiling((double)totalCount / filters.Limit),
-                    totalItems = totalCount,
-                    itemsPerPage = filters.Limit
-                },
-                filters = new
-                {
-                    search = filters.Search,
-                    status = filters.Status,
-                    gender = filters.Gender,
-                    city = filters.City,
-                    sortBy = filters.SortBy,
-                    sortOrder = filters.SortOrder
-                }
-            };
-        }
-
-        public async Task<IEnumerable<Patient>> SearchPatientsAsync(string searchTerm)
-        {
-            return await _patientRepository.SearchPatientsAsync(searchTerm);
         }
 
         public async Task<Patient?> GetPatientByCPFAsync(string cpf)
@@ -96,277 +64,129 @@ namespace DentalSpa.Application.Services
             return await _patientRepository.GetPatientByEmailAsync(email);
         }
 
-        public async Task<PatientAnalytics> GetPatientAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<object> GetPatientAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
             var analytics = await _patientRepository.GetPatientAnalyticsAsync(startDate, endDate);
             
-            // Calcular taxa de crescimento
-            if (analytics.NewPatientsLastMonth > 0)
-            {
-                analytics.NewPatientGrowthRate = Math.Round(
-                    ((decimal)analytics.NewPatientsThisMonth - analytics.NewPatientsLastMonth) / 
-                    analytics.NewPatientsLastMonth * 100, 2);
-            }
-
             // Buscar distribuições
-            analytics.AgeDistribution = (await _patientRepository.GetAgeDistributionAsync()).ToList();
-            analytics.GenderDistribution = (await _patientRepository.GetGenderDistributionAsync()).ToList();
-            analytics.LocationDistribution = (await _patientRepository.GetLocationDistributionAsync()).ToList();
-            analytics.MonthlyRegistrations = (await _patientRepository.GetMonthlyRegistrationsAsync()).ToList();
+            var ageDistribution = await _patientRepository.GetAgeDistributionAsync();
+            var genderDistribution = await _patientRepository.GetGenderDistributionAsync();
+            var locationDistribution = await _patientRepository.GetLocationDistributionAsync();
+            var monthlyRegistrations = await _patientRepository.GetMonthlyRegistrationsAsync();
 
-            return analytics;
+            return new
+            {
+                analytics,
+                ageDistribution,
+                genderDistribution,
+                locationDistribution,
+                monthlyRegistrations
+            };
         }
 
-        public async Task<PatientMetrics> GetPatientMetricsAsync(int patientId)
+        public async Task<object> GetPatientMetricsAsync(int patientId)
         {
             return await _patientRepository.GetPatientMetricsAsync(patientId);
         }
 
-        public async Task<object> GetPatientsWithMetricsAsync(PatientFilters filters)
-        {
-            var patientsWithMetrics = await _patientRepository.GetPatientsWithMetricsAsync(filters);
-            var totalCount = await _patientRepository.GetPatientsCountAsync(filters);
-            
-            return new
-            {
-                patients = patientsWithMetrics.Select(pm => new
-                {
-                    patient = new
-                    {
-                        id = pm.Patient.Id,
-                        name = pm.Patient.Name,
-                        email = pm.Patient.Email,
-                        phone = pm.Patient.FormattedPhone,
-                        age = pm.Patient.Age,
-                        status = pm.Patient.Status
-                    },
-                    metrics = new
-                    {
-                        totalAppointments = pm.Metrics.TotalAppointments,
-                        completedAppointments = pm.Metrics.CompletedAppointments,
-                        totalSpent = pm.Metrics.TotalSpent,
-                        lastVisit = pm.Metrics.LastVisit?.ToString("yyyy-MM-dd"),
-                        segment = pm.Metrics.PatientSegment,
-                        riskLevel = pm.Metrics.RiskLevel
-                    }
-                }),
-                pagination = new
-                {
-                    currentPage = filters.Page,
-                    totalPages = (int)Math.Ceiling((double)totalCount / filters.Limit),
-                    totalItems = totalCount
-                }
-            };
-        }
-
-        public async Task<IEnumerable<PatientSegmentation>> GetPatientSegmentationAsync()
+        public async Task<object> GetPatientSegmentationAsync()
         {
             return await _patientRepository.GetPatientSegmentationAsync();
         }
 
-        public async Task<IEnumerable<AgeDistribution>> GetAgeDistributionAsync()
+        public async Task<object> GetAgeDistributionAsync()
         {
             return await _patientRepository.GetAgeDistributionAsync();
         }
 
-        public async Task<IEnumerable<GenderDistribution>> GetGenderDistributionAsync()
+        public async Task<object> GetGenderDistributionAsync()
         {
             return await _patientRepository.GetGenderDistributionAsync();
         }
 
-        public async Task<IEnumerable<LocationDistribution>> GetLocationDistributionAsync()
+        public async Task<object> GetLocationDistributionAsync()
         {
             return await _patientRepository.GetLocationDistributionAsync();
         }
 
-        public async Task<PatientReport> GetPatientReportAsync(int patientId, DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<object> GetPatientReportAsync(int patientId, DateTime? startDate = null, DateTime? endDate = null)
         {
             var report = await _patientRepository.GetPatientReportAsync(patientId, startDate, endDate);
             
             // Buscar dados adicionais
-            report.Appointments = (await _patientRepository.GetPatientAppointmentHistoryAsync(patientId)).ToList();
-            report.Payments = (await _patientRepository.GetPatientPaymentHistoryAsync(patientId)).ToList();
-            report.Metrics = await _patientRepository.GetPatientMetricsAsync(patientId);
-            
-            return report;
-        }
-
-        public async Task<object> ExportPatientsAsync(PatientExportRequest request)
-        {
-            var patients = await _patientRepository.GetPatientsForExportAsync(request);
+            var appointments = await _patientRepository.GetPatientAppointmentHistoryAsync(patientId);
+            var payments = await _patientRepository.GetPatientPaymentHistoryAsync(patientId);
+            var metrics = await _patientRepository.GetPatientMetricsAsync(patientId);
             
             return new
             {
-                format = request.Format,
-                totalRecords = patients.Count(),
-                exportedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                data = patients.Select(p => new
-                {
-                    p.Id,
-                    p.Name,
-                    p.Email,
-                    p.Phone,
-                    p.CPF,
-                    DateOfBirth = p.DateOfBirth.ToString("yyyy-MM-dd"),
-                    Age = p.Age,
-                    p.Gender,
-                    p.City,
-                    p.State,
-                    p.Status,
-                    CreatedAt = p.CreatedAt?.ToString("yyyy-MM-dd")
-                })
+                report,
+                appointments,
+                payments,
+                metrics
             };
         }
 
         public async Task<object> GetDashboardMetricsAsync()
         {
-            var analytics = await _patientRepository.GetPatientAnalyticsAsync();
-            var dashboardMetrics = await _patientRepository.GetDashboardMetricsAsync();
-            
+            var totalPatients = await _patientRepository.GetTotalPatientsAsync();
+            var newPatientsThisMonth = await _patientRepository.GetNewPatientsThisMonthAsync();
+            var activePatients = await _patientRepository.GetActivePatientsAsync();
+            var patientGrowth = await _patientRepository.GetPatientGrowthAsync();
+
             return new
             {
-                summary = new
-                {
-                    totalPatients = analytics.TotalPatients,
-                    activePatients = analytics.ActivePatients,
-                    newThisMonth = analytics.NewPatientsThisMonth,
-                    growthRate = analytics.NewPatientGrowthRate
-                },
-                demographics = new
-                {
-                    averageAge = Math.Round(analytics.AverageAge, 1),
-                    genderDistribution = await _patientRepository.GetGenderDistributionAsync(),
-                    ageDistribution = await _patientRepository.GetAgeDistributionAsync()
-                },
-                trends = new
-                {
-                    monthlyRegistrations = await _patientRepository.GetMonthlyRegistrationsAsync(6),
-                    retentionRate = 85.5, // Valor exemplo
-                    averageLifetimeValue = analytics.AverageLifetimeValue
-                }
+                totalPatients,
+                newPatientsThisMonth,
+                activePatients,
+                patientGrowth
             };
         }
 
         public async Task<object> GetPatientGrowthAsync(int months = 12)
         {
-            var monthlyData = await _patientRepository.GetMonthlyRegistrationsAsync(months);
-            
-            return new
-            {
-                period = new
-                {
-                    months,
-                    startDate = DateTime.Now.AddMonths(-months).ToString("yyyy-MM"),
-                    endDate = DateTime.Now.ToString("yyyy-MM")
-                },
-                growth = monthlyData.Select((data, index) => new
-                {
-                    month = data.Month,
-                    monthLabel = data.MonthLabel,
-                    count = data.Count,
-                    growthRate = index > 0 ? 
-                        Math.Round(((decimal)data.Count - monthlyData.ElementAt(index - 1).Count) / 
-                        Math.Max(monthlyData.ElementAt(index - 1).Count, 1) * 100, 1) : 0
-                }),
-                summary = new
-                {
-                    totalNewPatients = monthlyData.Sum(m => m.Count),
-                    averagePerMonth = Math.Round((decimal)monthlyData.Sum(m => m.Count) / months, 1),
-                    peakMonth = monthlyData.OrderByDescending(m => m.Count).FirstOrDefault()?.MonthLabel
-                }
-            };
+            return await _patientRepository.GetPatientGrowthAsync(months);
         }
 
         public async Task<object> GetPatientRetentionAsync()
         {
-            var retention = await _patientRepository.GetPatientRetentionAsync();
-            
-            return new
-            {
-                retentionMetrics = retention,
-                insights = new
-                {
-                    activePatients = "Pacientes que visitaram nos últimos 90 dias",
-                    riskPatients = "Pacientes com mais de 120 dias sem consulta",
-                    highValuePatients = "Pacientes com gastos acima de R$ 1.000"
-                },
-                recommendations = new[]
-                {
-                    "Criar campanha de reativação para pacientes inativos",
-                    "Implementar programa de fidelidade para pacientes VIP",
-                    "Enviar lembretes automáticos de consultas de retorno"
-                }
-            };
+            return await _patientRepository.GetPatientRetentionAsync();
         }
 
-        public async Task<bool> ValidatePatientDataAsync(CreatePatientDto patientDto)
+        public async Task<bool> ValidatePatientDataAsync(Patient patient)
         {
-            var validationErrors = new List<string>();
+            if (string.IsNullOrWhiteSpace(patient.Nome))
+                return false;
 
-            // Validar nome
-            if (string.IsNullOrWhiteSpace(patientDto.Name))
-                validationErrors.Add("Nome é obrigatório");
+            if (string.IsNullOrWhiteSpace(patient.CPF))
+                return false;
 
-            // Validar email
-            if (string.IsNullOrWhiteSpace(patientDto.Email))
-                validationErrors.Add("Email é obrigatório");
-            else if (await _patientRepository.IsEmailExistsAsync(patientDto.Email))
-                validationErrors.Add("Email já está em uso");
+            if (string.IsNullOrWhiteSpace(patient.Telefone))
+                return false;
 
-            // Validar telefone
-            if (string.IsNullOrWhiteSpace(patientDto.Phone))
-                validationErrors.Add("Telefone é obrigatório");
-            else if (await _patientRepository.IsPhoneExistsAsync(patientDto.Phone))
-                validationErrors.Add("Telefone já está em uso");
-
-            // Validar CPF se fornecido
-            if (!string.IsNullOrEmpty(patientDto.CPF))
-            {
-                if (await _patientRepository.IsCPFExistsAsync(patientDto.CPF))
-                    validationErrors.Add("CPF já está em uso");
-            }
-
-            // Validar data de nascimento
-            if (patientDto.DateOfBirth > DateTime.Now)
-                validationErrors.Add("Data de nascimento não pode ser futura");
-
-            if (validationErrors.Any())
-                throw new ArgumentException(string.Join("; ", validationErrors));
+            // Verificar se CPF já existe
+            var existingPatient = await _patientRepository.GetPatientByCPFAsync(patient.CPF);
+            if (existingPatient != null)
+                return false;
 
             return true;
         }
 
-        public async Task<bool> ValidatePatientUpdateAsync(int id, UpdatePatientDto patientDto)
+        public async Task<bool> ValidatePatientUpdateAsync(Patient patient)
         {
-            var validationErrors = new List<string>();
+            if (string.IsNullOrWhiteSpace(patient.Nome))
+                return false;
 
-            // Validar email se fornecido
-            if (!string.IsNullOrEmpty(patientDto.Email))
-            {
-                if (await _patientRepository.IsEmailExistsAsync(patientDto.Email, id))
-                    validationErrors.Add("Email já está em uso por outro paciente");
-            }
+            if (string.IsNullOrWhiteSpace(patient.CPF))
+                return false;
 
-            // Validar telefone se fornecido
-            if (!string.IsNullOrEmpty(patientDto.Phone))
-            {
-                if (await _patientRepository.IsPhoneExistsAsync(patientDto.Phone, id))
-                    validationErrors.Add("Telefone já está em uso por outro paciente");
-            }
+            if (string.IsNullOrWhiteSpace(patient.Telefone))
+                return false;
 
-            // Validar CPF se fornecido
-            if (!string.IsNullOrEmpty(patientDto.CPF))
-            {
-                if (await _patientRepository.IsCPFExistsAsync(patientDto.CPF, id))
-                    validationErrors.Add("CPF já está em uso por outro paciente");
-            }
-
-            // Validar data de nascimento se fornecida
-            if (patientDto.DateOfBirth.HasValue && patientDto.DateOfBirth > DateTime.Now)
-                validationErrors.Add("Data de nascimento não pode ser futura");
-
-            if (validationErrors.Any())
-                throw new ArgumentException(string.Join("; ", validationErrors));
+            // Verificar se CPF já existe para outro paciente
+            var existingPatient = await _patientRepository.GetPatientByCPFAsync(patient.CPF);
+            if (existingPatient != null && existingPatient.Id != patient.Id)
+                return false;
 
             return true;
         }

@@ -1,5 +1,6 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
+using DentalSpa.Application.Interfaces;
 using System.Text;
 
 namespace DentalSpa.Application.Services
@@ -13,39 +14,41 @@ namespace DentalSpa.Application.Services
             _financialRepository = financialRepository;
         }
 
-        public async Task<IEnumerable<FinancialTransaction>> GetAllTransactionsAsync()
+        public async Task<IEnumerable<FinancialTransaction>> GetAllAsync()
         {
-            return await _financialRepository.GetAllTransactionsAsync();
+            return await _financialRepository.GetAllAsync();
         }
 
-        public async Task<FinancialTransaction?> GetTransactionByIdAsync(int id)
+        public async Task<FinancialTransaction?> GetByIdAsync(int id)
         {
-            return await _financialRepository.GetTransactionByIdAsync(id);
+            return await _financialRepository.GetByIdAsync(id);
         }
 
-        public async Task<FinancialTransaction> CreateTransactionAsync(CreateFinancialTransactionDto transactionDto)
+        public async Task<FinancialTransaction> CreateAsync(FinancialTransaction transaction)
         {
-            // Validações de negócio
-            ValidateTransaction(transactionDto);
-            
-            // Gerar número de referência se não fornecido
-            if (string.IsNullOrEmpty(transactionDto.ReferenceNumber))
+            ValidateTransaction(transaction);
+            if (string.IsNullOrEmpty(transaction.ReferenceNumber))
             {
-                transactionDto.ReferenceNumber = GenerateReferenceNumber(transactionDto.Type);
+                transaction.ReferenceNumber = GenerateReferenceNumber(transaction.Type);
             }
-
-            return await _financialRepository.CreateTransactionAsync(transactionDto);
+            transaction.CreatedAt = DateTime.UtcNow;
+            return await _financialRepository.CreateAsync(transaction);
         }
 
-        public async Task<FinancialTransaction?> UpdateTransactionAsync(int id, CreateFinancialTransactionDto transactionDto)
+        public async Task<FinancialTransaction?> UpdateAsync(int id, FinancialTransaction transaction)
         {
-            ValidateTransaction(transactionDto);
-            return await _financialRepository.UpdateTransactionAsync(id, transactionDto);
+            ValidateTransaction(transaction);
+            return await _financialRepository.UpdateAsync(id, transaction);
         }
 
-        public async Task<bool> DeleteTransactionAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            return await _financialRepository.DeleteTransactionAsync(id);
+            return await _financialRepository.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<FinancialTransaction>> SearchAsync(string searchTerm)
+        {
+            return await _financialRepository.SearchAsync(searchTerm);
         }
 
         public async Task<object> GetFinancialDashboardAsync(DateTime? startDate, DateTime? endDate)
@@ -169,7 +172,7 @@ namespace DentalSpa.Application.Services
         }
 
         // Métodos auxiliares privados
-        private void ValidateTransaction(CreateFinancialTransactionDto transaction)
+        private void ValidateTransaction(FinancialTransaction transaction)
         {
             if (transaction.Amount <= 0)
                 throw new ArgumentException("O valor da transação deve ser maior que zero");

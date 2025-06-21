@@ -5,3 +5,11 @@
 /home/runner/workspace/backend-dotnet/obj/Debug/net8.0/DentalSpa.API.csproj.CoreCompileInputs.cache
 /home/runner/workspace/backend-dotnet/obj/Debug/net8.0/DentalSpa.API.MvcApplicationPartsAssemblyInfo.cs
 /home/runner/workspace/backend-dotnet/obj/Debug/net8.0/DentalSpa.API.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.csproj.AssemblyReference.cache
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.AssemblyInfoInputs.cache
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.AssemblyInfo.cs
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.csproj.CoreCompileInputs.cache
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.sourcelink.json

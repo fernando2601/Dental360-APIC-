@@ -6,8 +6,8 @@ namespace DentalSpa.Domain.Interfaces
     {
         Task<IEnumerable<Client>> GetAllAsync();
         Task<Client?> GetByIdAsync(int id);
-        Task<Client> CreateAsync(CreateClientDto client);
-        Task<Client?> UpdateAsync(int id, CreateClientDto client);
+        Task<Client> CreateAsync(Client client);
+        Task<Client?> UpdateAsync(int id, Client client);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<Client>> SearchAsync(string searchTerm);
     }

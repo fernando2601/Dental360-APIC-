@@ -18,11 +18,11 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BeforeAfterResponse>>> GetAllBeforeAfter()
+        public async Task<ActionResult<IEnumerable<BeforeAfter>>> GetAll()
         {
             try
             {
-                var cases = await _beforeAfterService.GetAllBeforeAfterAsync();
+                var cases = await _beforeAfterService.GetAllAsync();
                 return Ok(cases);
             }
             catch (Exception ex)
@@ -33,19 +33,15 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<BeforeAfterModel>> GetBeforeAfterById(int id)
+        public async Task<ActionResult<BeforeAfter>> GetById(int id)
         {
             try
             {
-                var beforeAfterCase = await _beforeAfterService.GetBeforeAfterByIdAsync(id);
+                var beforeAfterCase = await _beforeAfterService.GetByIdAsync(id);
                 if (beforeAfterCase == null)
                 {
                     return NotFound(new { message = "Caso não encontrado" });
                 }
-
-                // Increment view count
-                await _beforeAfterService.IncrementViewCountAsync(id);
-
                 return Ok(beforeAfterCase);
             }
             catch (ArgumentException ex)
@@ -60,17 +56,12 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<BeforeAfterResponse>> CreateBeforeAfter([FromBody] CreateBeforeAfterRequest request)
+        public async Task<ActionResult<BeforeAfter>> Create([FromBody] BeforeAfter beforeAfter)
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var beforeAfterCase = await _beforeAfterService.CreateBeforeAfterAsync(request);
-                return CreatedAtAction(nameof(GetBeforeAfterById), new { id = beforeAfterCase.Id }, beforeAfterCase);
+                var created = await _beforeAfterService.CreateAsync(beforeAfter);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
             }
             catch (ArgumentException ex)
             {
@@ -84,22 +75,16 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<BeforeAfterResponse>> UpdateBeforeAfter(int id, [FromBody] UpdateBeforeAfterRequest request)
+        public async Task<ActionResult<BeforeAfter>> Update(int id, [FromBody] BeforeAfter beforeAfter)
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var beforeAfterCase = await _beforeAfterService.UpdateBeforeAfterAsync(id, request);
-                if (beforeAfterCase == null)
+                var updated = await _beforeAfterService.UpdateAsync(id, beforeAfter);
+                if (updated == null)
                 {
                     return NotFound(new { message = "Caso não encontrado" });
                 }
-
-                return Ok(beforeAfterCase);
+                return Ok(updated);
             }
             catch (ArgumentException ex)
             {
@@ -117,16 +102,15 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteBeforeAfter(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {
-                var success = await _beforeAfterService.DeleteBeforeAfterAsync(id);
+                var success = await _beforeAfterService.DeleteAsync(id);
                 if (!success)
                 {
                     return NotFound(new { message = "Caso não encontrado" });
                 }
-
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -144,27 +128,12 @@ namespace DentalSpa.API.Controllers
             }
         }
 
-        [HttpGet("stats")]
-        public async Task<ActionResult<BeforeAfterStatsResponse>> GetBeforeAfterStats()
-        {
-            try
-            {
-                var stats = await _beforeAfterService.GetBeforeAfterStatsAsync();
-                return Ok(stats);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving before/after statistics");
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
-        }
-
         [HttpGet("public")]
-        public async Task<ActionResult<IEnumerable<BeforeAfterResponse>>> GetPublicBeforeAfter()
+        public async Task<ActionResult<IEnumerable<BeforeAfter>>> GetPublic()
         {
             try
             {
-                var cases = await _beforeAfterService.GetPublicBeforeAfterAsync();
+                var cases = await _beforeAfterService.GetPublicAsync();
                 return Ok(cases);
             }
             catch (Exception ex)
@@ -174,12 +143,12 @@ namespace DentalSpa.API.Controllers
             }
         }
 
-        [HttpGet("treatment-type/{treatmentType}")]
-        public async Task<ActionResult<IEnumerable<BeforeAfterResponse>>> GetBeforeAfterByTreatmentType(string treatmentType)
+        [HttpGet("service/{serviceId}")]
+        public async Task<ActionResult<IEnumerable<BeforeAfter>>> GetByService(int serviceId)
         {
             try
             {
-                var cases = await _beforeAfterService.GetBeforeAfterByTreatmentTypeAsync(treatmentType);
+                var cases = await _beforeAfterService.GetByServiceAsync(serviceId);
                 return Ok(cases);
             }
             catch (ArgumentException ex)
@@ -188,89 +157,22 @@ namespace DentalSpa.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving before/after cases by treatment type: {TreatmentType}", treatmentType);
+                _logger.LogError(ex, "Error retrieving before/after cases by service: {ServiceId}", serviceId);
                 return StatusCode(500, new { message = "Erro interno do servidor" });
             }
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<BeforeAfterResponse>>> SearchBeforeAfter([FromQuery] string term)
+        public async Task<ActionResult<IEnumerable<BeforeAfter>>> Search([FromQuery] string term)
         {
             try
             {
-                var cases = await _beforeAfterService.SearchBeforeAfterAsync(term ?? string.Empty);
+                var cases = await _beforeAfterService.SearchAsync(term ?? string.Empty);
                 return Ok(cases);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error searching before/after cases with term: {SearchTerm}", term);
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
-        }
-
-        [HttpGet("treatment-types")]
-        public async Task<ActionResult<IEnumerable<string>>> GetTreatmentTypes()
-        {
-            try
-            {
-                var treatmentTypes = await _beforeAfterService.GetTreatmentTypesAsync();
-                return Ok(treatmentTypes);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving treatment types");
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
-        }
-
-        [HttpPost("{id}/rating")]
-        public async Task<ActionResult> AddRating(int id, [FromBody] CreateRatingRequest request)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var success = await _beforeAfterService.AddRatingAsync(id, request);
-                if (!success)
-                {
-                    return BadRequest(new { message = "Não foi possível adicionar a avaliação" });
-                }
-
-                return Ok(new { message = "Avaliação adicionada com sucesso" });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding rating for case: {CaseId}", id);
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
-        }
-
-        [HttpGet("{id}/ratings")]
-        public async Task<ActionResult<IEnumerable<BeforeAfterRatingModel>>> GetRatings(int id)
-        {
-            try
-            {
-                var ratings = await _beforeAfterService.GetRatingsAsync(id);
-                return Ok(ratings);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving ratings for case: {CaseId}", id);
                 return StatusCode(500, new { message = "Erro interno do servidor" });
             }
         }

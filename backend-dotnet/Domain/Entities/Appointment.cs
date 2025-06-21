@@ -1,4 +1,4 @@
-namespace ClinicApi.Models
+namespace DentalSpa.Domain.Entities
 {
     public class Appointment
     {
@@ -61,24 +61,6 @@ namespace ClinicApi.Models
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
         public string Especialidade { get; set; } = string.Empty;
-    }
-
-    public class CreateAppointmentDto
-    {
-        public int ClientId { get; set; }
-        public int StaffId { get; set; }
-        public int ServiceId { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public string? Notes { get; set; }
-        public string? Room { get; set; }
-        public decimal Price { get; set; }
-        public string? PaymentStatus { get; set; } = "pending";
-        public string? PaymentMethod { get; set; }
-        public bool IsRecurring { get; set; } = false;
-        public string? RecurrencePattern { get; set; }
-        public DateTime? RecurrenceEndDate { get; set; }
-        public int? ParentAppointmentId { get; set; }
     }
 
     // Models específicos para funcionalidades da Agenda
@@ -217,6 +199,7 @@ namespace ClinicApi.Models
         public DateTime? EndDate { get; set; }
         public int? MaxOccurrences { get; set; }
         public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; }
     }
 
     public class WaitingList

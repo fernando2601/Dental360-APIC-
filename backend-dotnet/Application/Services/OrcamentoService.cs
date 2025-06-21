@@ -1,4 +1,3 @@
-using DentalSpa.Application.DTOs;
 using DentalSpa.Application.Interfaces;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
@@ -17,54 +16,49 @@ namespace DentalSpa.Application.Services
             _repo = repo;
         }
 
-        public async Task<OrcamentoDto> CreateOrcamentoAsync(CreateOrcamentoDto dto)
+        public async Task<Orcamento> CreateOrcamentoAsync(Orcamento orcamento)
         {
-            var orcamento = new Orcamento
+            orcamento.Status = "Pendente";
+            orcamento.DataCriacao = DateTime.UtcNow;
+            
+            // Calcular valor total dos itens
+            foreach (var item in orcamento.Itens)
             {
-                PacienteId = dto.PacienteId,
-                Observacoes = dto.Observacoes,
-                Status = "Pendente",
-                DataCriacao = DateTime.UtcNow,
-                Itens = dto.Itens.Select(i => new OrcamentoItem
-                {
-                    ServicoId = i.ServicoId,
-                    Descricao = i.Descricao,
-                    Quantidade = i.Quantidade,
-                    ValorUnitario = i.ValorUnitario,
-                    ValorTotal = i.Quantidade * i.ValorUnitario
-                }).ToList()
-            };
+                item.ValorTotal = item.Quantidade * item.ValorUnitario;
+            }
             orcamento.ValorTotal = orcamento.Itens.Sum(x => x.ValorTotal);
-            var created = await _repo.CreateOrcamentoAsync(orcamento);
-            return MapToDto(created);
+            
+            return await _repo.CreateOrcamentoAsync(orcamento);
         }
 
-        public async Task<OrcamentoDto?> GetOrcamentoByIdAsync(int id)
+        public async Task<Orcamento?> GetOrcamentoByIdAsync(int id)
         {
-            var orcamento = await _repo.GetOrcamentoByIdAsync(id);
-            return orcamento == null ? null : MapToDto(orcamento);
+            return await _repo.GetOrcamentoByIdAsync(id);
         }
 
-        public async Task<IEnumerable<OrcamentoDto>> GetOrcamentosByPacienteAsync(int pacienteId)
+        public async Task<IEnumerable<Orcamento>> GetOrcamentosByPacienteAsync(int pacienteId)
         {
-            var orcamentos = await _repo.GetOrcamentosByPacienteAsync(pacienteId);
-            return orcamentos.Select(MapToDto);
+            return await _repo.GetOrcamentosByPacienteAsync(pacienteId);
         }
 
-        public async Task<IEnumerable<OrcamentoDto>> GetAllOrcamentosAsync()
+        public async Task<IEnumerable<Orcamento>> GetAllOrcamentosAsync()
         {
-            var orcamentos = await _repo.GetAllOrcamentosAsync();
-            return orcamentos.Select(MapToDto);
+            return await _repo.GetAllOrcamentosAsync();
         }
 
-        public async Task<OrcamentoDto?> UpdateOrcamentoAsync(int id, UpdateOrcamentoDto dto)
+        public async Task<Orcamento?> UpdateOrcamentoAsync(Orcamento orcamento)
         {
-            var orcamento = await _repo.GetOrcamentoByIdAsync(id);
-            if (orcamento == null) return null;
-            orcamento.Observacoes = dto.Observacoes ?? orcamento.Observacoes;
-            if (dto.Itens.Any())
+            var existing = await _repo.GetOrcamentoByIdAsync(orcamento.Id);
+            if (existing == null) return null;
+            
+            // Atualizar propriedades
+            existing.Observacoes = orcamento.Observacoes ?? existing.Observacoes;
+            existing.Status = orcamento.Status ?? existing.Status;
+            
+            // Atualizar itens se fornecidos
+            if (orcamento.Itens != null && orcamento.Itens.Any())
             {
-                orcamento.Itens = dto.Itens.Select(i => new OrcamentoItem
+                existing.Itens = orcamento.Itens.Select(i => new OrcamentoItem
                 {
                     ServicoId = i.ServicoId,
                     Descricao = i.Descricao,
@@ -72,12 +66,10 @@ namespace DentalSpa.Application.Services
                     ValorUnitario = i.ValorUnitario,
                     ValorTotal = i.Quantidade * i.ValorUnitario
                 }).ToList();
-                orcamento.ValorTotal = orcamento.Itens.Sum(x => x.ValorTotal);
+                existing.ValorTotal = existing.Itens.Sum(x => x.ValorTotal);
             }
-            if (!string.IsNullOrEmpty(dto.Status))
-                orcamento.Status = dto.Status;
-            var updated = await _repo.UpdateOrcamentoAsync(orcamento);
-            return MapToDto(updated);
+            
+            return await _repo.UpdateOrcamentoAsync(existing);
         }
 
         public async Task<bool> DeleteOrcamentoAsync(int id)
@@ -99,24 +91,5 @@ namespace DentalSpa.Application.Services
         {
             return await _repo.UpdateStatusAsync(id, "Convertido");
         }
-
-        private static OrcamentoDto MapToDto(Orcamento o) => new OrcamentoDto
-        {
-            Id = o.Id,
-            PacienteId = o.PacienteId,
-            DataCriacao = o.DataCriacao,
-            Status = o.Status,
-            ValorTotal = o.ValorTotal,
-            Observacoes = o.Observacoes,
-            Itens = o.Itens.Select(i => new OrcamentoItemDto
-            {
-                Id = i.Id,
-                ServicoId = i.ServicoId,
-                Descricao = i.Descricao,
-                Quantidade = i.Quantidade,
-                ValorUnitario = i.ValorUnitario,
-                ValorTotal = i.ValorTotal
-            }).ToList()
-        };
     }
 } 

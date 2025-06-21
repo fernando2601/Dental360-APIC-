@@ -131,14 +131,11 @@ namespace DentalSpa.Application.Services
                 clientSubscription.CreatedAt = DateTime.UtcNow;
                 clientSubscription.UpdatedAt = DateTime.UtcNow;
                 clientSubscription.Status = "Active";
-                
-                // Calculate next payment date based on billing cycle
                 var subscription = await _subscriptionRepository.GetSubscriptionByIdAsync(clientSubscription.SubscriptionId);
                 if (subscription != null)
                 {
                     clientSubscription.NextPaymentDate = CalculateNextPaymentDate(clientSubscription.StartDate, subscription.BillingCycle);
                 }
-                
                 return await _subscriptionRepository.CreateClientSubscriptionAsync(clientSubscription);
             }
             catch (Exception ex)
@@ -202,17 +199,17 @@ namespace DentalSpa.Application.Services
         }
 
         // Business logic methods
-        public async Task<bool> ActivateSubscriptionAsync(int clientSubscriptionId)
+        public async Task<bool> ActivateClientSubscriptionAsync(int clientSubscriptionId)
         {
             try
             {
-                var subscription = await _subscriptionRepository.GetClientSubscriptionByIdAsync(clientSubscriptionId);
-                if (subscription == null) return false;
+                var clientSubscription = await _subscriptionRepository.GetClientSubscriptionByIdAsync(clientSubscriptionId);
+                if (clientSubscription == null)
+                    return false;
 
-                subscription.Status = "Active";
-                subscription.UpdatedAt = DateTime.UtcNow;
-                
-                await _subscriptionRepository.UpdateClientSubscriptionAsync(subscription);
+                clientSubscription.Status = "Active";
+                clientSubscription.UpdatedAt = DateTime.UtcNow;
+                await _subscriptionRepository.UpdateClientSubscriptionAsync(clientSubscription);
                 return true;
             }
             catch (Exception ex)
@@ -222,17 +219,17 @@ namespace DentalSpa.Application.Services
             }
         }
 
-        public async Task<bool> SuspendSubscriptionAsync(int clientSubscriptionId)
+        public async Task<bool> SuspendClientSubscriptionAsync(int clientSubscriptionId)
         {
             try
             {
-                var subscription = await _subscriptionRepository.GetClientSubscriptionByIdAsync(clientSubscriptionId);
-                if (subscription == null) return false;
+                var clientSubscription = await _subscriptionRepository.GetClientSubscriptionByIdAsync(clientSubscriptionId);
+                if (clientSubscription == null)
+                    return false;
 
-                subscription.Status = "Suspended";
-                subscription.UpdatedAt = DateTime.UtcNow;
-                
-                await _subscriptionRepository.UpdateClientSubscriptionAsync(subscription);
+                clientSubscription.Status = "Suspended";
+                clientSubscription.UpdatedAt = DateTime.UtcNow;
+                await _subscriptionRepository.UpdateClientSubscriptionAsync(clientSubscription);
                 return true;
             }
             catch (Exception ex)
@@ -242,18 +239,18 @@ namespace DentalSpa.Application.Services
             }
         }
 
-        public async Task<bool> CancelSubscriptionAsync(int clientSubscriptionId)
+        public async Task<bool> CancelClientSubscriptionAsync(int clientSubscriptionId)
         {
             try
             {
-                var subscription = await _subscriptionRepository.GetClientSubscriptionByIdAsync(clientSubscriptionId);
-                if (subscription == null) return false;
+                var clientSubscription = await _subscriptionRepository.GetClientSubscriptionByIdAsync(clientSubscriptionId);
+                if (clientSubscription == null)
+                    return false;
 
-                subscription.Status = "Cancelled";
-                subscription.EndDate = DateTime.UtcNow;
-                subscription.UpdatedAt = DateTime.UtcNow;
-                
-                await _subscriptionRepository.UpdateClientSubscriptionAsync(subscription);
+                clientSubscription.Status = "Cancelled";
+                clientSubscription.UpdatedAt = DateTime.UtcNow;
+                clientSubscription.EndDate = DateTime.UtcNow;
+                await _subscriptionRepository.UpdateClientSubscriptionAsync(clientSubscription);
                 return true;
             }
             catch (Exception ex)
@@ -263,21 +260,21 @@ namespace DentalSpa.Application.Services
             }
         }
 
-        public async Task<bool> RenewSubscriptionAsync(int clientSubscriptionId)
+        public async Task<bool> RenewClientSubscriptionAsync(int clientSubscriptionId)
         {
             try
             {
                 var clientSubscription = await _subscriptionRepository.GetClientSubscriptionByIdAsync(clientSubscriptionId);
-                if (clientSubscription == null) return false;
+                if (clientSubscription == null)
+                    return false;
 
                 var subscription = await _subscriptionRepository.GetSubscriptionByIdAsync(clientSubscription.SubscriptionId);
-                if (subscription == null) return false;
+                if (subscription == null)
+                    return false;
 
-                clientSubscription.LastPaymentDate = DateTime.UtcNow;
-                clientSubscription.NextPaymentDate = CalculateNextPaymentDate(DateTime.UtcNow, subscription.BillingCycle);
                 clientSubscription.Status = "Active";
                 clientSubscription.UpdatedAt = DateTime.UtcNow;
-                
+                clientSubscription.NextPaymentDate = CalculateNextPaymentDate(DateTime.UtcNow, subscription.BillingCycle);
                 await _subscriptionRepository.UpdateClientSubscriptionAsync(clientSubscription);
                 return true;
             }
@@ -309,7 +306,7 @@ namespace DentalSpa.Application.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar assinaturas próximas do vencimento");
+                _logger.LogError(ex, "Erro ao buscar assinaturas com renovação pendente");
                 throw;
             }
         }

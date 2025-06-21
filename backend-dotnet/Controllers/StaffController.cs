@@ -18,7 +18,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<StaffResponse>>> GetAllStaff()
+        public async Task<ActionResult<IEnumerable<Staff>>> GetAllStaff()
         {
             try
             {
@@ -33,7 +33,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<StaffResponse>> GetStaffById(int id)
+        public async Task<ActionResult<Staff>> GetStaffById(int id)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<StaffResponse>> CreateStaff([FromBody] CreateStaffRequest request)
+        public async Task<ActionResult<Staff>> CreateStaff([FromBody] Staff staff)
         {
             try
             {
@@ -62,8 +62,8 @@ namespace DentalSpa.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var staff = await _staffService.CreateStaffAsync(request);
-                return CreatedAtAction(nameof(GetStaffById), new { id = staff.Id }, staff);
+                var newStaff = await _staffService.CreateStaffAsync(staff);
+                return CreatedAtAction(nameof(GetStaffById), new { id = newStaff.Id }, newStaff);
             }
             catch (ArgumentException ex)
             {
@@ -77,7 +77,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<StaffResponse>> UpdateStaff(int id, [FromBody] UpdateStaffRequest request)
+        public async Task<ActionResult<Staff>> UpdateStaff(int id, [FromBody] Staff staff)
         {
             try
             {
@@ -86,13 +86,18 @@ namespace DentalSpa.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var staff = await _staffService.UpdateStaffAsync(id, request);
-                if (staff == null)
+                if (id != staff.Id)
+                {
+                    return BadRequest("O ID do funcionário não corresponde.");
+                }
+
+                var updatedStaff = await _staffService.UpdateStaffAsync(staff);
+                if (updatedStaff == null)
                 {
                     return NotFound(new { message = "Funcionário não encontrado" });
                 }
 
-                return Ok(staff);
+                return Ok(updatedStaff);
             }
             catch (ArgumentException ex)
             {
@@ -134,7 +139,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("department/{department}")]
-        public async Task<ActionResult<IEnumerable<StaffResponse>>> GetStaffByDepartment(string department)
+        public async Task<ActionResult<IEnumerable<Staff>>> GetStaffByDepartment(string department)
         {
             try
             {
@@ -149,7 +154,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("position/{position}")]
-        public async Task<ActionResult<IEnumerable<StaffResponse>>> GetStaffByPosition(string position)
+        public async Task<ActionResult<IEnumerable<Staff>>> GetStaffByPosition(string position)
         {
             try
             {
@@ -164,7 +169,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<StaffResponse>>> SearchStaff([FromQuery] string term)
+        public async Task<ActionResult<IEnumerable<Staff>>> SearchStaff([FromQuery] string term)
         {
             try
             {
@@ -184,7 +189,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("stats")]
-        public async Task<ActionResult<StaffStatsResponse>> GetStaffStats()
+        public async Task<ActionResult<object>> GetStaffStats()
         {
             try
             {
@@ -229,7 +234,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("{managerId}/team")]
-        public async Task<ActionResult<IEnumerable<StaffResponse>>> GetTeamMembers(int managerId)
+        public async Task<ActionResult<IEnumerable<Staff>>> GetTeamMembers(int managerId)
         {
             try
             {

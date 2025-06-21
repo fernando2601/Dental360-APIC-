@@ -1,4 +1,4 @@
-namespace ClinicApi.Models
+namespace DentalSpa.Domain.Entities
 {
     public class FinancialTransaction
     {
@@ -14,20 +14,6 @@ namespace ClinicApi.Models
         public string? ReferenceNumber { get; set; }
         public string Status { get; set; } = "completed"; // "pending", "completed", "cancelled"
         public DateTime? CreatedAt { get; set; }
-    }
-
-    public class CreateFinancialTransactionDto
-    {
-        public string Type { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public decimal Amount { get; set; }
-        public string Description { get; set; } = string.Empty;
-        public DateTime TransactionDate { get; set; }
-        public string PaymentMethod { get; set; } = string.Empty;
-        public int? ClientId { get; set; }
-        public int? AppointmentId { get; set; }
-        public string? ReferenceNumber { get; set; }
-        public string Status { get; set; } = "completed";
     }
 
     public class FinancialSummary

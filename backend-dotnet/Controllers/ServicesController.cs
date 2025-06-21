@@ -18,61 +18,42 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Service>>> GetAllServices()
-        {
-            var services = await _serviceService.GetAllServicesAsync();
-            return Ok(services);
-        }
+        public async Task<ActionResult<IEnumerable<Service>>> GetAll()
+            => Ok(await _serviceService.GetAllServicesAsync());
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Service>> GetService(int id)
+        public async Task<ActionResult<Service>> GetById(int id)
         {
             var service = await _serviceService.GetServiceByIdAsync(id);
-            if (service == null)
-                return NotFound();
-
+            if (service == null) return NotFound();
             return Ok(service);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Service>> CreateService(CreateServiceDto serviceDto)
+        public async Task<ActionResult<Service>> Create([FromBody] Service service)
         {
-            var service = await _serviceService.CreateServiceAsync(serviceDto);
-            return CreatedAtAction(nameof(GetService), new { id = service.Id }, service);
+            var created = await _serviceService.CreateServiceAsync(service);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Service>> UpdateService(int id, CreateServiceDto serviceDto)
+        public async Task<ActionResult<Service>> Update(int id, [FromBody] Service service)
         {
-            var service = await _serviceService.UpdateServiceAsync(id, serviceDto);
-            if (service == null)
-                return NotFound();
-
-            return Ok(service);
+            var updated = await _serviceService.UpdateServiceAsync(id, service);
+            if (updated == null) return NotFound();
+            return Ok(updated);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteService(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var result = await _serviceService.DeleteServiceAsync(id);
-            if (!result)
-                return NotFound();
-
+            var deleted = await _serviceService.DeleteServiceAsync(id);
+            if (!deleted) return NotFound();
             return NoContent();
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Service>>> SearchServices([FromQuery] string term)
-        {
-            var services = await _serviceService.SearchServicesAsync(term);
-            return Ok(services);
-        }
-
-        [HttpGet("category/{category}")]
-        public async Task<ActionResult<IEnumerable<Service>>> GetServicesByCategory(string category)
-        {
-            var services = await _serviceService.GetServicesByCategoryAsync(category);
-            return Ok(services);
-        }
+        public async Task<ActionResult<IEnumerable<Service>>> Search([FromQuery] string term)
+            => Ok(await _serviceService.SearchServicesAsync(term));
     }
-}
+} 

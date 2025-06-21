@@ -4,25 +4,24 @@ namespace DentalSpa.Domain.Interfaces
 {
     public interface IPackageRepository
     {
-        Task<IEnumerable<PackageResponse>> GetAllPackagesAsync();
-        Task<PackageDetailedModel?> GetPackageByIdAsync(int id);
-        Task<PackageResponse> CreatePackageAsync(CreatePackageRequest request);
-        Task<PackageResponse?> UpdatePackageAsync(int id, UpdatePackageRequest request);
-        Task<bool> DeletePackageAsync(int id);
-        Task<PackageStatsResponse> GetPackageStatsAsync();
-        Task<IEnumerable<PackageResponse>> GetPackagesByCategoryAsync(string category);
-        Task<IEnumerable<PackageResponse>> SearchPackagesAsync(string searchTerm);
-        Task<IEnumerable<string>> GetPackageCategoriesAsync();
-        Task<bool> PackageExistsAsync(int id);
-        Task<bool> PackageNameExistsAsync(string name, int? excludeId = null);
-    }
+        // CRUD Básico
+        Task<IEnumerable<Package>> GetAllAsync();
+        Task<Package?> GetByIdAsync(int id);
+        Task<Package> CreateAsync(Package package);
+        Task<Package?> UpdateAsync(int id, Package package);
+        Task<bool> DeleteAsync(int id);
 
-    public interface IClinicInfoRepository
-    {
-        Task<ClinicInfoResponse?> GetClinicInfoAsync();
-        Task<ClinicInfoResponse> UpdateClinicInfoAsync(UpdateClinicInfoRequest request);
-        Task<ClinicStatsResponse> GetClinicStatsAsync();
-        Task<bool> ClinicInfoExistsAsync();
-        Task<ClinicInfoResponse> CreateDefaultClinicInfoAsync();
+        // Busca e Filtros
+        Task<IEnumerable<Package>> SearchAsync(string searchTerm);
+        Task<IEnumerable<Package>> GetByCategoryAsync(string category);
+        Task<IEnumerable<string>> GetCategoriesAsync();
+
+        // Contagem
+        Task<int> GetCountAsync();
+        Task<int> GetCountByCategoryAsync(string category);
+
+        // Verificação
+        Task<bool> ExistsAsync(int id);
+        Task<bool> NameExistsAsync(string name, int? excludeId = null);
     }
 }

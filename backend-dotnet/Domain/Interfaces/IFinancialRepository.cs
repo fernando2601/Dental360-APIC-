@@ -5,11 +5,12 @@ namespace DentalSpa.Domain.Interfaces
     public interface IFinancialRepository
     {
         // Transações básicas
-        Task<IEnumerable<FinancialTransaction>> GetAllTransactionsAsync();
-        Task<FinancialTransaction?> GetTransactionByIdAsync(int id);
-        Task<FinancialTransaction> CreateTransactionAsync(CreateFinancialTransactionDto transaction);
-        Task<FinancialTransaction?> UpdateTransactionAsync(int id, CreateFinancialTransactionDto transaction);
-        Task<bool> DeleteTransactionAsync(int id);
+        Task<IEnumerable<FinancialTransaction>> GetAllAsync();
+        Task<FinancialTransaction?> GetByIdAsync(int id);
+        Task<FinancialTransaction> CreateAsync(FinancialTransaction transaction);
+        Task<FinancialTransaction?> UpdateAsync(int id, FinancialTransaction transaction);
+        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<FinancialTransaction>> SearchAsync(string searchTerm);
 
         // Dashboard Financeiro
         Task<FinancialSummary> GetFinancialSummaryAsync(DateTime? startDate, DateTime? endDate);

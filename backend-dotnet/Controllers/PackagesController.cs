@@ -19,67 +19,45 @@ namespace DentalSpa.API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Package>>> GetAllPackages()
-        {
-            var packages = await _packageService.GetAllPackagesAsync();
-            return Ok(packages);
-        }
+            => Ok(await _packageService.GetAllPackagesAsync());
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Package>> GetPackage(int id)
         {
             var package = await _packageService.GetPackageByIdAsync(id);
-            if (package == null)
-                return NotFound();
-
+            if (package == null) return NotFound();
             return Ok(package);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Package>> CreatePackage(CreatePackageDto packageDto)
+        public async Task<ActionResult<Package>> CreatePackage([FromBody] Package package)
         {
-            var package = await _packageService.CreatePackageAsync(packageDto);
-            return CreatedAtAction(nameof(GetPackage), new { id = package.Id }, package);
+            var created = await _packageService.CreatePackageAsync(package);
+            return CreatedAtAction(nameof(GetPackage), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Package>> UpdatePackage(int id, CreatePackageDto packageDto)
+        public async Task<ActionResult<Package>> UpdatePackage(int id, [FromBody] Package package)
         {
-            var package = await _packageService.UpdatePackageAsync(id, packageDto);
-            if (package == null)
-                return NotFound();
-
-            return Ok(package);
+            var updated = await _packageService.UpdatePackageAsync(id, package);
+            if (updated == null) return NotFound();
+            return Ok(updated);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePackage(int id)
         {
             var result = await _packageService.DeletePackageAsync(id);
-            if (!result)
-                return NotFound();
-
+            if (!result) return NotFound();
             return NoContent();
         }
 
         [HttpGet("active")]
         public async Task<ActionResult<IEnumerable<Package>>> GetActivePackages()
-        {
-            var packages = await _packageService.GetActivePackagesAsync();
-            return Ok(packages);
-        }
+            => Ok(await _packageService.GetActivePackagesAsync());
 
         [HttpGet("popular")]
         public async Task<ActionResult<IEnumerable<Package>>> GetPopularPackages()
-        {
-            var packages = await _packageService.GetPopularPackagesAsync();
-            return Ok(packages);
-        }
-
-        [HttpPost("{id}/subscribe")]
-        public async Task<ActionResult> SubscribeToPackage(int id, [FromBody] SubscriptionDto subscriptionDto)
-        {
-            var result = await _packageService.SubscribeToPackageAsync(id, subscriptionDto);
-            return Ok(result);
-        }
+            => Ok(await _packageService.GetPopularPackagesAsync());
     }
-}
+} 

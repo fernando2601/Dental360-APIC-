@@ -18,7 +18,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetAllServices()
+        public async Task<ActionResult<IEnumerable<Service>>> GetAllServices()
         {
             try
             {
@@ -33,7 +33,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ServiceResponse>> GetServiceById(int id)
+        public async Task<ActionResult<Service>> GetServiceById(int id)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServiceResponse>> CreateService([FromBody] CreateServiceRequest request)
+        public async Task<ActionResult<Service>> CreateService([FromBody] Service service)
         {
             try
             {
@@ -62,8 +62,8 @@ namespace DentalSpa.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var service = await _serviceService.CreateServiceAsync(request);
-                return CreatedAtAction(nameof(GetServiceById), new { id = service.Id }, service);
+                var newService = await _serviceService.CreateServiceAsync(service);
+                return CreatedAtAction(nameof(GetServiceById), new { id = newService.Id }, newService);
             }
             catch (ArgumentException ex)
             {
@@ -77,7 +77,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ServiceResponse>> UpdateService(int id, [FromBody] UpdateServiceRequest request)
+        public async Task<ActionResult<Service>> UpdateService(int id, [FromBody] Service service)
         {
             try
             {
@@ -86,13 +86,18 @@ namespace DentalSpa.API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var service = await _serviceService.UpdateServiceAsync(id, request);
-                if (service == null)
+                if (id != service.Id)
+                {
+                    return BadRequest("O ID do serviço não corresponde.");
+                }
+
+                var updatedService = await _serviceService.UpdateServiceAsync(service);
+                if (updatedService == null)
                 {
                     return NotFound(new { message = "Serviço não encontrado" });
                 }
 
-                return Ok(service);
+                return Ok(updatedService);
             }
             catch (ArgumentException ex)
             {
@@ -126,7 +131,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("category/{category}")]
-        public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetServicesByCategory(string category)
+        public async Task<ActionResult<IEnumerable<Service>>> GetServicesByCategory(string category)
         {
             try
             {
@@ -141,7 +146,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("stats")]
-        public async Task<ActionResult<ServiceStatsResponse>> GetServiceStats()
+        public async Task<ActionResult<object>> GetServiceStats()
         {
             try
             {

@@ -48,8 +48,8 @@ namespace DentalSpa.API.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int limit = 25)
         {
-            var result = await _financialService.GetTransactionsAsync(startDate, endDate, type, category, page, limit);
-            return Ok(result);
+            var transactions = await _financialService.GetAllTransactionsAsync();
+            return Ok(transactions);
         }
 
         [HttpGet("transactions/{id}")]
@@ -58,25 +58,29 @@ namespace DentalSpa.API.Controllers
             var transaction = await _financialService.GetTransactionByIdAsync(id);
             if (transaction == null)
                 return NotFound();
-
             return Ok(transaction);
         }
 
         [HttpPost("transactions")]
-        public async Task<ActionResult<FinancialTransaction>> CreateTransaction(CreateFinancialTransactionDto transactionDto)
+        public async Task<ActionResult<FinancialTransaction>> CreateTransaction([FromBody] FinancialTransaction transaction)
         {
-            var transaction = await _financialService.CreateTransactionAsync(transactionDto);
-            return CreatedAtAction(nameof(GetTransaction), new { id = transaction.Id }, transaction);
+            var newTransaction = await _financialService.CreateTransactionAsync(transaction);
+            return CreatedAtAction(nameof(GetTransaction), new { id = newTransaction.Id }, newTransaction);
         }
 
         [HttpPut("transactions/{id}")]
-        public async Task<ActionResult<FinancialTransaction>> UpdateTransaction(int id, CreateFinancialTransactionDto transactionDto)
+        public async Task<ActionResult<FinancialTransaction>> UpdateTransaction(int id, [FromBody] FinancialTransaction transaction)
         {
-            var transaction = await _financialService.UpdateTransactionAsync(id, transactionDto);
-            if (transaction == null)
+            if (id != transaction.Id)
+            {
+                return BadRequest("O ID da transação não corresponde.");
+            }
+
+            var updatedTransaction = await _financialService.UpdateTransactionAsync(transaction);
+            if (updatedTransaction == null)
                 return NotFound();
 
-            return Ok(transaction);
+            return Ok(updatedTransaction);
         }
 
         [HttpDelete("transactions/{id}")]

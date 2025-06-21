@@ -6,8 +6,8 @@ namespace DentalSpa.Domain.Interfaces
     {
         Task<IEnumerable<Staff>> GetAllAsync();
         Task<Staff?> GetByIdAsync(int id);
-        Task<Staff> CreateAsync(CreateStaffDto staff);
-        Task<Staff?> UpdateAsync(int id, CreateStaffDto staff);
+        Task<Staff> CreateAsync(Staff staff);
+        Task<Staff?> UpdateAsync(int id, Staff staff);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<Staff>> SearchAsync(string searchTerm);
         Task<IEnumerable<Staff>> GetBySpecializationAsync(string specialization);

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using DentalSpa.Application.DTOs;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Domain.Entities;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -17,14 +17,14 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<OrcamentoDto>> Create([FromBody] CreateOrcamentoDto dto)
+        public async Task<ActionResult<Orcamento>> Create([FromBody] Orcamento orcamento)
         {
-            var orcamento = await _service.CreateOrcamentoAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = orcamento.Id }, orcamento);
+            var result = await _service.CreateOrcamentoAsync(orcamento);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrcamentoDto>> GetById(int id)
+        public async Task<ActionResult<Orcamento>> GetById(int id)
         {
             var orcamento = await _service.GetOrcamentoByIdAsync(id);
             if (orcamento == null) return NotFound();
@@ -32,25 +32,29 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("paciente/{pacienteId}")]
-        public async Task<ActionResult<IEnumerable<OrcamentoDto>>> GetByPaciente(int pacienteId)
+        public async Task<ActionResult<IEnumerable<Orcamento>>> GetByPaciente(int pacienteId)
         {
             var orcamentos = await _service.GetOrcamentosByPacienteAsync(pacienteId);
             return Ok(orcamentos);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrcamentoDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<Orcamento>>> GetAll()
         {
             var orcamentos = await _service.GetAllOrcamentosAsync();
             return Ok(orcamentos);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<OrcamentoDto>> Update(int id, [FromBody] UpdateOrcamentoDto dto)
+        public async Task<ActionResult<Orcamento>> Update(int id, [FromBody] Orcamento orcamento)
         {
-            var orcamento = await _service.UpdateOrcamentoAsync(id, dto);
-            if (orcamento == null) return NotFound();
-            return Ok(orcamento);
+            if (id != orcamento.Id)
+            {
+                return BadRequest("O ID do orçamento não corresponde.");
+            }
+            var result = await _service.UpdateOrcamentoAsync(orcamento);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]

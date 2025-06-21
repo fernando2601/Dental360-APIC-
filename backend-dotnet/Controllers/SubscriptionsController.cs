@@ -63,9 +63,8 @@ namespace DentalSpa.API.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-
-                var result = await _subscriptionService.CreateSubscriptionAsync(subscription);
-                return CreatedAtAction(nameof(GetSubscription), new { id = result.Id }, result);
+                var entity = await _subscriptionService.CreateSubscriptionAsync(subscription);
+                return CreatedAtAction(nameof(GetSubscription), new { id = entity.Id }, entity);
             }
             catch (Exception ex)
             {
@@ -83,14 +82,12 @@ namespace DentalSpa.API.Controllers
                 {
                     return BadRequest(new { message = "ID da assinatura não confere" });
                 }
-
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
-
-                var result = await _subscriptionService.UpdateSubscriptionAsync(subscription);
-                return Ok(result);
+                var entity = await _subscriptionService.UpdateSubscriptionAsync(subscription);
+                return Ok(entity);
             }
             catch (Exception ex)
             {
@@ -163,9 +160,8 @@ namespace DentalSpa.API.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-
-                var result = await _subscriptionService.CreateClientSubscriptionAsync(clientSubscription);
-                return CreatedAtAction(nameof(GetClientSubscription), new { id = result.Id }, result);
+                var entity = await _subscriptionService.CreateClientSubscriptionAsync(clientSubscription);
+                return CreatedAtAction(nameof(GetClientSubscription), new { id = entity.Id }, entity);
             }
             catch (Exception ex)
             {
@@ -183,18 +179,36 @@ namespace DentalSpa.API.Controllers
                 {
                     return BadRequest(new { message = "ID da assinatura não confere" });
                 }
-
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
-
-                var result = await _subscriptionService.UpdateClientSubscriptionAsync(clientSubscription);
-                return Ok(result);
+                var entity = await _subscriptionService.UpdateClientSubscriptionAsync(clientSubscription);
+                return Ok(entity);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao atualizar assinatura de cliente: {Id}", id);
+                return StatusCode(500, new { message = "Erro interno do servidor" });
+            }
+        }
+
+        [HttpDelete("clients/{id}")]
+        public async Task<ActionResult> DeleteClientSubscription(int id)
+        {
+            try
+            {
+                var success = await _subscriptionService.DeleteClientSubscriptionAsync(id);
+                if (!success)
+                {
+                    return NotFound(new { message = "Assinatura de cliente não encontrada" });
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao deletar assinatura de cliente: {Id}", id);
                 return StatusCode(500, new { message = "Erro interno do servidor" });
             }
         }
@@ -204,10 +218,10 @@ namespace DentalSpa.API.Controllers
         {
             try
             {
-                var success = await _subscriptionService.ActivateSubscriptionAsync(id);
+                var success = await _subscriptionService.ActivateClientSubscriptionAsync(id);
                 if (!success)
                 {
-                    return NotFound(new { message = "Assinatura não encontrada" });
+                    return NotFound(new { message = "Assinatura de cliente não encontrada" });
                 }
 
                 return Ok(new { message = "Assinatura ativada com sucesso" });
@@ -224,10 +238,10 @@ namespace DentalSpa.API.Controllers
         {
             try
             {
-                var success = await _subscriptionService.SuspendSubscriptionAsync(id);
+                var success = await _subscriptionService.SuspendClientSubscriptionAsync(id);
                 if (!success)
                 {
-                    return NotFound(new { message = "Assinatura não encontrada" });
+                    return NotFound(new { message = "Assinatura de cliente não encontrada" });
                 }
 
                 return Ok(new { message = "Assinatura suspensa com sucesso" });
@@ -244,10 +258,10 @@ namespace DentalSpa.API.Controllers
         {
             try
             {
-                var success = await _subscriptionService.CancelSubscriptionAsync(id);
+                var success = await _subscriptionService.CancelClientSubscriptionAsync(id);
                 if (!success)
                 {
-                    return NotFound(new { message = "Assinatura não encontrada" });
+                    return NotFound(new { message = "Assinatura de cliente não encontrada" });
                 }
 
                 return Ok(new { message = "Assinatura cancelada com sucesso" });
@@ -264,10 +278,10 @@ namespace DentalSpa.API.Controllers
         {
             try
             {
-                var success = await _subscriptionService.RenewSubscriptionAsync(id);
+                var success = await _subscriptionService.RenewClientSubscriptionAsync(id);
                 if (!success)
                 {
-                    return NotFound(new { message = "Assinatura não encontrada" });
+                    return NotFound(new { message = "Assinatura de cliente não encontrada" });
                 }
 
                 return Ok(new { message = "Assinatura renovada com sucesso" });
@@ -302,7 +316,7 @@ namespace DentalSpa.API.Controllers
                 var subscription = await _subscriptionService.GetActiveClientSubscriptionAsync(clientId);
                 if (subscription == null)
                 {
-                    return NotFound(new { message = "Cliente não possui assinatura ativa" });
+                    return NotFound(new { message = "Nenhuma assinatura ativa encontrada para este cliente" });
                 }
                 return Ok(subscription);
             }
@@ -318,8 +332,8 @@ namespace DentalSpa.API.Controllers
         {
             try
             {
-                var expiredSubscriptions = await _subscriptionService.GetExpiredSubscriptionsAsync();
-                return Ok(expiredSubscriptions);
+                var subscriptions = await _subscriptionService.GetExpiredSubscriptionsAsync();
+                return Ok(subscriptions);
             }
             catch (Exception ex)
             {
@@ -338,7 +352,7 @@ namespace DentalSpa.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao buscar assinaturas próximas do vencimento");
+                _logger.LogError(ex, "Erro ao buscar assinaturas com renovação pendente");
                 return StatusCode(500, new { message = "Erro interno do servidor" });
             }
         }

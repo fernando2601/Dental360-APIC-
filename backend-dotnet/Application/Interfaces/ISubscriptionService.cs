@@ -22,10 +22,10 @@ namespace DentalSpa.Application.Interfaces
         Task<ClientSubscription?> GetActiveClientSubscriptionAsync(int clientId);
         
         // Business logic methods
-        Task<bool> ActivateSubscriptionAsync(int clientSubscriptionId);
-        Task<bool> SuspendSubscriptionAsync(int clientSubscriptionId);
-        Task<bool> CancelSubscriptionAsync(int clientSubscriptionId);
-        Task<bool> RenewSubscriptionAsync(int clientSubscriptionId);
+        Task<bool> ActivateClientSubscriptionAsync(int clientSubscriptionId);
+        Task<bool> SuspendClientSubscriptionAsync(int clientSubscriptionId);
+        Task<bool> CancelClientSubscriptionAsync(int clientSubscriptionId);
+        Task<bool> RenewClientSubscriptionAsync(int clientSubscriptionId);
         Task<IEnumerable<ClientSubscription>> GetExpiredSubscriptionsAsync();
         Task<IEnumerable<ClientSubscription>> GetSubscriptionsDueForRenewalAsync(int daysAhead = 7);
     }

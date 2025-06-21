@@ -19,71 +19,29 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PatientDto>>> GetAllPatients()
+        public async Task<ActionResult<IEnumerable<Patient>>> GetAllPatients()
         {
             var patients = await _patientService.GetAllPatientsAsync();
-            var result = patients.Select(p => new PatientDto
-            {
-                Id = p.Id,
-                Nome = p.Nome,
-                Idade = p.Idade,
-                CPF = p.CPF,
-                RG = p.RG,
-                EstadoNascimento = p.EstadoNascimento,
-                DataNascimento = p.DataNascimento,
-                Sexo = p.Sexo,
-                Telefone = p.Telefone,
-                Email = p.Email,
-                Endereco = p.Endereco
-            });
-            return Ok(result);
+            return Ok(patients);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PatientDto>> GetPatient(int id)
+        public async Task<ActionResult<Patient>> GetPatient(int id)
         {
             var patient = await _patientService.GetPatientByIdAsync(id);
             if (patient == null)
                 return NotFound();
-            var result = new PatientDto
-            {
-                Id = patient.Id,
-                Nome = patient.Nome,
-                Idade = patient.Idade,
-                CPF = patient.CPF,
-                RG = patient.RG,
-                EstadoNascimento = patient.EstadoNascimento,
-                DataNascimento = patient.DataNascimento,
-                Sexo = patient.Sexo,
-                Telefone = patient.Telefone,
-                Email = patient.Email,
-                Endereco = patient.Endereco
-            };
-            return Ok(result);
+            return Ok(patient);
         }
 
         [HttpPost]
-        public async Task<ActionResult<PatientDto>> CreatePatient([FromBody] CreatePatientDto patientDto)
+        public async Task<ActionResult<Patient>> CreatePatient([FromBody] Patient patient)
         {
             try
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                var patient = await _patientService.CreatePatientAsync(patientDto, userId);
-                var result = new PatientDto
-                {
-                    Id = patient.Id,
-                    Nome = patient.Nome,
-                    Idade = patient.Idade,
-                    CPF = patient.CPF,
-                    RG = patient.RG,
-                    EstadoNascimento = patient.EstadoNascimento,
-                    DataNascimento = patient.DataNascimento,
-                    Sexo = patient.Sexo,
-                    Telefone = patient.Telefone,
-                    Email = patient.Email,
-                    Endereco = patient.Endereco
-                };
-                return CreatedAtAction(nameof(GetPatient), new { id = result.Id }, result);
+                var newPatient = await _patientService.CreatePatientAsync(patient, userId);
+                return CreatedAtAction(nameof(GetPatient), new { id = newPatient.Id }, newPatient);
             }
             catch (ArgumentException ex)
             {
@@ -92,28 +50,19 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<PatientDto>> UpdatePatient(int id, [FromBody] UpdatePatientDto patientDto)
+        public async Task<ActionResult<Patient>> UpdatePatient(int id, [FromBody] Patient patient)
         {
             try
             {
-                var patient = await _patientService.UpdatePatientAsync(id, patientDto);
-                if (patient == null)
-                    return NotFound();
-                var result = new PatientDto
+                if (id != patient.Id)
                 {
-                    Id = patient.Id,
-                    Nome = patient.Nome,
-                    Idade = patient.Idade,
-                    CPF = patient.CPF,
-                    RG = patient.RG,
-                    EstadoNascimento = patient.EstadoNascimento,
-                    DataNascimento = patient.DataNascimento,
-                    Sexo = patient.Sexo,
-                    Telefone = patient.Telefone,
-                    Email = patient.Email,
-                    Endereco = patient.Endereco
-                };
-                return Ok(result);
+                    return BadRequest("O ID do paciente não corresponde.");
+                }
+
+                var updatedPatient = await _patientService.UpdatePatientAsync(patient);
+                if (updatedPatient == null)
+                    return NotFound();
+                return Ok(updatedPatient);
             }
             catch (ArgumentException ex)
             {
@@ -128,13 +77,6 @@ namespace DentalSpa.API.Controllers
             if (!result)
                 return NotFound();
             return NoContent();
-        }
-
-        [HttpGet("filter")]
-        public async Task<ActionResult> GetPatientsWithFilters([FromQuery] PatientFilters filters)
-        {
-            var result = await _patientService.GetPatientsWithFiltersAsync(filters);
-            return Ok(result);
         }
 
         [HttpGet("search")]
@@ -183,13 +125,6 @@ namespace DentalSpa.API.Controllers
             return Ok(metrics);
         }
 
-        [HttpGet("with-metrics")]
-        public async Task<ActionResult> GetPatientsWithMetrics([FromQuery] PatientFilters filters)
-        {
-            var result = await _patientService.GetPatientsWithMetricsAsync(filters);
-            return Ok(result);
-        }
-
         [HttpGet("segmentation")]
         public async Task<ActionResult> GetPatientSegmentation()
         {
@@ -226,13 +161,6 @@ namespace DentalSpa.API.Controllers
         {
             var report = await _patientService.GetPatientReportAsync(id, startDate, endDate);
             return Ok(report);
-        }
-
-        [HttpPost("export")]
-        public async Task<ActionResult> ExportPatients([FromBody] PatientExportRequest request)
-        {
-            var exportData = await _patientService.ExportPatientsAsync(request);
-            return Ok(exportData);
         }
 
         [HttpGet("dashboard-metrics")]
