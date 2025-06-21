@@ -23,8 +23,6 @@ C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\DentalS
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\BCrypt.Net-Next.dll
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
-C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
-C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
@@ -57,3 +55,4 @@ C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\refint\
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.pdb
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\DentalSpa.API.genruntimeconfig.cache
 C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\obj\Debug\net8.0\ref\DentalSpa.API.dll
+C:\Users\nerif\Downloads\Dental360-APIC-\backend-dotnet\bin\Debug\net8.0\Swashbuckle.AspNetCore.Annotations.dll

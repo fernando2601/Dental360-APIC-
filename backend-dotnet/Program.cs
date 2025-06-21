@@ -5,157 +5,118 @@ using Microsoft.OpenApi.Models;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Infrastructure.Repositories;
 using DentalSpa.Application.Services;
+using DentalSpa.Application.Interfaces;
 using System.Data;
-using System.Data.SqlClient;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure connection string from environment variable
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
+// --- Configuration ---
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ??
                        builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Add CORS
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "a_default_super_secret_key_that_is_long_enough_for_hs256";
+
+// --- Dependency Injection ---
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy =>
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
-// Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connectionString));
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// --- Register ONLY Auth Dependencies to Isolate the issue ---
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+/* --- OTHER SERVICES AND REPOS ARE COMMENTED OUT FOR DEBUGGING ---
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<IStaffRepository, StaffRepository>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IFinancialRepository, FinancialRepository>();
+builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+builder.Services.AddScoped<IBeforeAfterRepository, BeforeAfterRepository>();
+builder.Services.AddScoped<ILearningAreaRepository, LearningAreaRepository>();
+builder.Services.AddScoped<IClinicInfoRepository, ClinicInfoRepository>();
+builder.Services.AddScoped<IAgendaRepository, AgendaRepository>();
+builder.Services.AddScoped<IOrcamentoRepository, OrcamentoRepository>();
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IFinancialService, FinancialService>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<IBeforeAfterService, BeforeAfterService>();
+builder.Services.AddScoped<ILearningService, LearningService>();
+builder.Services.AddScoped<IClinicInfoService, ClinicInfoService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IAgendaService, AgendaService>();
+builder.Services.AddScoped<IOrcamentoService, OrcamentoService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IDatabaseSelectorService, DatabaseSelectorService>();
+*/
+
+// --- Swagger / OpenAPI (SIMPLIFIED) ---
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "DentalSpa API - Arquitetura DDD", 
-        Version = "v1",
-        Description = "API completa para gestão de clínica odontológica e estética com arquitetura Domain-Driven Design (DDD). Inclui: Autenticação, Clientes, Agendamentos, Serviços, Funcionários, Estoque, Financeiro, Pacotes, Antes/Depois, Área de Aprendizado e Informações da Clínica."
-    });
-    
-    // Configure JWT authentication for Swagger
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header,
-            },
-            new List<string>()
-        }
-    });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "DentalSpa API (Auth Only)", Version = "v1" });
 });
 
-// Configure database connections using ADO.NET
-builder.Services.AddScoped<IDbConnection>(provider =>
+// --- Authentication ---
+builder.Services.AddAuthentication(options =>
 {
-    // Use PostgreSQL as primary database
-    return new NpgsqlConnection(connectionString);
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtKey)),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
 });
 
-// ========== CAMADA DOMAIN - INTERFACES DE REPOSITÓRIO ==========
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAuthRepository, DentalSpa.Infrastructure.Repositories.AuthRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IClientRepository, DentalSpa.Infrastructure.Repositories.ClientRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAppointmentRepository, DentalSpa.Infrastructure.Repositories.AppointmentRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IServiceRepository, DentalSpa.Infrastructure.Repositories.ServiceRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IStaffRepository, DentalSpa.Infrastructure.Repositories.StaffRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IInventoryRepository, DentalSpa.Infrastructure.Repositories.InventoryRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IFinancialRepository, DentalSpa.Infrastructure.Repositories.FinancialRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IPackageRepository, DentalSpa.Infrastructure.Repositories.PackageRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IBeforeAfterRepository, DentalSpa.Infrastructure.Repositories.BeforeAfterRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAgendaRepository, DentalSpa.Infrastructure.Repositories.AgendaRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IPatientRepository, DentalSpa.Infrastructure.Repositories.PatientRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.ILearningAreaRepository, DentalSpa.Infrastructure.Repositories.LearningAreaRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IClinicInfoRepository, DentalSpa.Infrastructure.Repositories.ClinicInfoRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.ISubscriptionRepository, DentalSpa.Infrastructure.Repositories.SubscriptionRepository>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IUserRepository, DentalSpa.Infrastructure.Repositories.UserRepository>();
-
-// ========== CAMADA APPLICATION - SERVIÇOS DE APLICAÇÃO ==========
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IAuthService, DentalSpa.Application.Services.AuthService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClientService, DentalSpa.Application.Services.ClientService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IAppointmentService, DentalSpa.Application.Services.AppointmentService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IAgendaService, DentalSpa.Application.Services.AgendaService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IServiceService, DentalSpa.Application.Services.ServiceService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IStaffService, DentalSpa.Application.Services.StaffService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IInventoryService, DentalSpa.Application.Services.InventoryService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IFinancialService, DentalSpa.Application.Services.FinancialService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IPackageService, DentalSpa.Application.Services.PackageService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IBeforeAfterService, DentalSpa.Application.Services.BeforeAfterService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IPatientService, DentalSpa.Application.Services.PatientService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.ILearningService, DentalSpa.Application.Services.LearningService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClinicInfoService, DentalSpa.Application.Services.ClinicInfoService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.ISubscriptionService, DentalSpa.Application.Services.SubscriptionService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IUserService, DentalSpa.Application.Services.UserService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IOrcamentoService, DentalSpa.Application.Services.OrcamentoService>();
-builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IOrcamentoRepository, DentalSpa.Infrastructure.Repositories.OrcamentoRepository>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IDatabaseSelectorService, DentalSpa.Application.Services.DatabaseSelectorService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IEmailService, DentalSpa.Application.Services.EmailService>();
-
-// Configure JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "DentalSpa-Default-Secret-Key-For-JWT-Token-Generation-2024";
-var key = Encoding.UTF8.GetBytes(jwtKey);
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
-
+// --- Build the App ---
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// --- HTTP Request Pipeline ---
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "DentalSpa API v1");
-        c.RoutePrefix = "api-docs"; // Para manter compatibilidade
-        c.DocumentTitle = "DentalSpa API - Documentação";
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "DentalSpa API V1 (Auth Only)");
+        c.RoutePrefix = "api-docs"; 
     });
 }
 
+app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors("AllowAll");
-app.UseMiddleware<DentalSpa.Application.Services.ErrorHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
-Console.WriteLine("🦷 DentalSpa API iniciada com arquitetura DDD!");
-Console.WriteLine("🏗️  Camadas implementadas: Domain, Application, Infrastructure, Service");
-Console.WriteLine("📚 Swagger UI disponível em: http://localhost:5000/api-docs");
-Console.WriteLine("🔐 Autenticação JWT configurada");
-Console.WriteLine("🗄️  ADO.NET conectado");
-
-app.Run(); 
+app.Run();

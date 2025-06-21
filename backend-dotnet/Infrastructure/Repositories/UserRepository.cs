@@ -2,6 +2,9 @@ using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using Npgsql;
 using System.Data;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 using System.Linq;
 
 namespace DentalSpa.Infrastructure.Repositories
@@ -20,22 +23,13 @@ namespace DentalSpa.Infrastructure.Repositories
             var users = new List<User>();
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE is_active = 1";
+                cmd.CommandText = "SELECT * FROM users WHERE is_active = true";
+                if (_connection.State == ConnectionState.Closed) _connection.Open();
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        users.Add(new User
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Username = reader.GetString(reader.GetOrdinal("username")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
-                            Role = reader.GetString(reader.GetOrdinal("role")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        });
+                        users.Add(MapReaderToUser(reader));
                     }
                 }
             }
@@ -46,77 +40,50 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE id = @Id AND is_active = 1";
+                cmd.CommandText = "SELECT * FROM users WHERE id = @Id AND is_active = true";
                 cmd.Parameters.Add(CreateParameter("@Id", id));
+                if (_connection.State == ConnectionState.Closed) _connection.Open();
                 using (var reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
                     {
-                        return new User
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Username = reader.GetString(reader.GetOrdinal("username")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
-                            Role = reader.GetString(reader.GetOrdinal("role")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        };
+                        return MapReaderToUser(reader);
                     }
                 }
             }
             return await Task.FromResult<User?>(null);
         }
 
-        public async Task<User?> GetByUsernameAsync(string username)
+        public async Task<User?> FindByEmailAsync(string email)
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE username = @Username AND is_active = 1";
-                cmd.Parameters.Add(CreateParameter("@Username", username));
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return new User
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Username = reader.GetString(reader.GetOrdinal("username")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
-                            Role = reader.GetString(reader.GetOrdinal("role")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        };
-                    }
-                }
-            }
-            return await Task.FromResult<User?>(null);
-        }
-
-        public async Task<User?> GetByEmailAsync(string email)
-        {
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE email = @Email AND is_active = 1";
+                cmd.CommandText = "SELECT * FROM users WHERE email = @Email AND is_active = true";
                 cmd.Parameters.Add(CreateParameter("@Email", email));
+                if (_connection.State == ConnectionState.Closed) _connection.Open();
                 using (var reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
                     {
-                        return new User
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Username = reader.GetString(reader.GetOrdinal("username")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
-                            Role = reader.GetString(reader.GetOrdinal("role")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        };
+                        return MapReaderToUser(reader);
+                    }
+                }
+            }
+            return await Task.FromResult<User?>(null);
+        }
+
+        public async Task<User?> FindByUsernameAsync(string username)
+        {
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT * FROM users WHERE username = @Username AND is_active = true";
+                cmd.Parameters.Add(CreateParameter("@Username", username));
+                if (_connection.State == ConnectionState.Closed) _connection.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return MapReaderToUser(reader);
                     }
                 }
             }
@@ -127,23 +94,23 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = @"INSERT INTO users (username, email, password_hash, role, is_active, created_at, updated_at) 
-                                   VALUES (@Username, @Email, @PasswordHash, @Role, @IsActive, @CreatedAt, @UpdatedAt);
-                                   SELECT CAST(SCOPE_IDENTITY() as int)";
+                cmd.CommandText = @"INSERT INTO users (username, email, password_hash, role, is_active, created_at, updated_at, full_name) 
+                                   VALUES (@Username, @Email, @PasswordHash, @Role, @IsActive, @CreatedAt, @UpdatedAt, @FullName)
+                                   RETURNING id;";
                 
                 cmd.Parameters.Add(CreateParameter("@Username", user.Username));
                 cmd.Parameters.Add(CreateParameter("@Email", user.Email));
                 cmd.Parameters.Add(CreateParameter("@PasswordHash", user.PasswordHash));
-                cmd.Parameters.Add(CreateParameter("@Role", user.Role));
+                cmd.Parameters.Add(CreateParameter("@Role", user.Role ?? "user"));
                 cmd.Parameters.Add(CreateParameter("@IsActive", true));
-                cmd.Parameters.Add(CreateParameter("@CreatedAt", DateTime.Now));
-                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
+                cmd.Parameters.Add(CreateParameter("@CreatedAt", DateTime.UtcNow));
+                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.UtcNow));
+                cmd.Parameters.Add(CreateParameter("@FullName", user.FullName));
                 
+                if (_connection.State == ConnectionState.Closed) _connection.Open();
                 var id = Convert.ToInt32(cmd.ExecuteScalar());
                 user.Id = id;
-                user.CreatedAt = DateTime.Now;
-                user.UpdatedAt = DateTime.Now;
-                return await Task.FromResult(user);
+                return user;
             }
         }
 
@@ -151,7 +118,15 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = @"UPDATE users SET username = @Username, email = @Email, password_hash = @PasswordHash, role = @Role, is_active = @IsActive, updated_at = @UpdatedAt WHERE id = @Id AND is_active = 1";
+                cmd.CommandText = @"UPDATE users SET 
+                                    username = @Username, 
+                                    email = @Email, 
+                                    password_hash = @PasswordHash, 
+                                    role = @Role, 
+                                    is_active = @IsActive, 
+                                    updated_at = @UpdatedAt,
+                                    full_name = @FullName
+                                   WHERE id = @Id AND is_active = true";
                 
                 cmd.Parameters.Add(CreateParameter("@Id", id));
                 cmd.Parameters.Add(CreateParameter("@Username", user.Username));
@@ -159,10 +134,12 @@ namespace DentalSpa.Infrastructure.Repositories
                 cmd.Parameters.Add(CreateParameter("@PasswordHash", user.PasswordHash));
                 cmd.Parameters.Add(CreateParameter("@Role", user.Role));
                 cmd.Parameters.Add(CreateParameter("@IsActive", user.IsActive));
-                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
+                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.UtcNow));
+                cmd.Parameters.Add(CreateParameter("@FullName", user.FullName));
                 
+                if (_connection.State == ConnectionState.Closed) _connection.Open();
                 var rows = cmd.ExecuteNonQuery();
-                return await Task.FromResult(rows > 0 ? user : null);
+                return rows > 0 ? user : null;
             }
         }
 
@@ -170,10 +147,11 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "UPDATE users SET is_active = 0 WHERE id = @Id";
+                cmd.CommandText = "UPDATE users SET is_active = false WHERE id = @Id";
                 cmd.Parameters.Add(CreateParameter("@Id", id));
+                if (_connection.State == ConnectionState.Closed) _connection.Open();
                 var rows = cmd.ExecuteNonQuery();
-                return await Task.FromResult(rows > 0);
+                return rows > 0;
             }
         }
 
@@ -184,14 +162,15 @@ namespace DentalSpa.Infrastructure.Repositories
                 cmd.CommandText = "SELECT COUNT(*) FROM users WHERE (username = @Username OR email = @Email) AND is_active = 1";
                 cmd.Parameters.Add(CreateParameter("@Username", username));
                 cmd.Parameters.Add(CreateParameter("@Email", email));
+                if (_connection.State == ConnectionState.Closed) _connection.Open();
                 var count = Convert.ToInt32(cmd.ExecuteScalar());
                 return await Task.FromResult(count > 0);
             }
         }
 
-        public async Task<IEnumerable<User>> SearchAsync(string term)
+        public async Task<IEnumerable<User>> SearchAsync(string query)
         {
-            return Enumerable.Empty<User>();
+            return await Task.FromResult(Enumerable.Empty<User>());
         }
 
         private IDbDataParameter CreateParameter(string name, object? value)
@@ -202,31 +181,19 @@ namespace DentalSpa.Infrastructure.Repositories
             return param;
         }
 
-        public async Task<User?> FindByEmailAsync(string email)
+        private User MapReaderToUser(IDataReader reader)
         {
-            using (var cmd = _connection.CreateCommand())
+            return new User
             {
-                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE email = @Email AND is_active = 1";
-                cmd.Parameters.Add(CreateParameter("@Email", email));
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return new User
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Username = reader.GetString(reader.GetOrdinal("username")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
-                            Role = reader.GetString(reader.GetOrdinal("role")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        };
-                    }
-                }
-            }
-            return await Task.FromResult<User?>(null);
+                Id = Convert.ToInt32(reader["id"]),
+                Username = reader["username"]?.ToString(),
+                PasswordHash = reader["password_hash"]?.ToString(),
+                FullName = reader["full_name"]?.ToString(),
+                Email = reader["email"]?.ToString(),
+                Role = reader["role"]?.ToString(),
+                CreatedAt = Convert.ToDateTime(reader["created_at"]),
+                IsActive = Convert.ToBoolean(reader["is_active"])
+            };
         }
     }
-}
+} 

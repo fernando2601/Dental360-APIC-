@@ -1,17 +1,15 @@
-using DentalSpa.Domain.Entities;
+using System.Threading.Tasks;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<object> LoginAsync(object request);
-        Task<object> RegisterAsync(object request);
+        Task<object?> LoginAsync(LoginRequest request);
+        Task<object> RegisterAsync(RegisterRequest request);
         Task<bool> ForgotPasswordAsync(object request);
         Task<bool> ResetPasswordAsync(object request);
-        Task<bool> ValidateTokenAsync(string token);
-        Task<object> RefreshTokenAsync(object request);
-        Task<bool> LogoutAsync(int userId);
         Task<object> GetProfileAsync(int userId);
-        Task<bool> ChangePasswordAsync(object request);
+        Task<object> RefreshTokenAsync(object request);
     }
 } 

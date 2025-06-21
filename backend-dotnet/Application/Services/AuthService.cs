@@ -7,38 +7,43 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Threading.Tasks;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IAuthRepository _authRepository;
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
 
-        public AuthService(IAuthRepository authRepository, IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(IUserRepository userRepository, IConfiguration configuration)
         {
-            _authRepository = authRepository;
             _userRepository = userRepository;
             _configuration = configuration;
         }
 
-        public async Task<object> LoginAsync(object request)
+        public async Task<object?> LoginAsync(LoginRequest request)
         {
-            var jsonElement = (JsonElement)request;
-            var email = jsonElement.GetProperty("email").GetString();
-            var password = jsonElement.GetProperty("password").GetString();
-
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.Username))
             {
-                throw new ArgumentException("Email and password are required.");
+                throw new ArgumentException("Email or Username is required.");
             }
 
-            var user = await _userRepository.FindByEmailAsync(email);
-
-            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            User? user;
+            if (!string.IsNullOrEmpty(request.Email))
             {
-                throw new UnauthorizedAccessException("Invalid credentials.");
+                user = await _userRepository.FindByEmailAsync(request.Email);
+            }
+            else
+            {
+                user = await _userRepository.FindByUsernameAsync(request.Username!);
+            }
+
+            if (user == null || user.PasswordHash == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                return null;
             }
 
             return GenerateJwtToken(user);
@@ -54,8 +59,8 @@ namespace DentalSpa.Application.Services
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Name, user.FullName)
+                    new Claim(ClaimTypes.Email, user.Email ?? ""),
+                    new Claim(ClaimTypes.Name, user.FullName ?? "")
                 }),
                 Expires = DateTime.UtcNow.AddHours(8),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -67,16 +72,16 @@ namespace DentalSpa.Application.Services
             return new { Token = tokenString, User = new { user.Id, user.Email, user.FullName } };
         }
 
-        public async Task<object> RegisterAsync(object request)
+        public async Task<object> RegisterAsync(RegisterRequest request)
         {
-            var jsonElement = (JsonElement)request;
-            var email = jsonElement.GetProperty("email").GetString();
-            var password = jsonElement.GetProperty("password").GetString();
-            var fullName = jsonElement.GetProperty("fullName").GetString();
+            var email = request.Email;
+            var password = request.Password;
+            var fullName = request.FullName;
+            var username = request.Username;
 
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(fullName))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(fullName) || string.IsNullOrEmpty(username))
             {
-                throw new ArgumentException("Email, password, and full name are required.");
+                throw new ArgumentException("Email, username, password, and full name are required.");
             }
 
             var existingUser = await _userRepository.FindByEmailAsync(email);
@@ -84,32 +89,37 @@ namespace DentalSpa.Application.Services
             {
                 throw new InvalidOperationException("Email is already in use.");
             }
+            
+            existingUser = await _userRepository.FindByUsernameAsync(username);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Username is already in use.");
+            }
 
             var newUser = new User
             {
                 Email = email,
+                Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                FullName = fullName
+                FullName = fullName,
+                Role = "user",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
             };
             
             var createdUser = await _userRepository.CreateAsync(newUser);
             return createdUser;
         }
 
-        public async Task<bool> ChangePasswordAsync(object request)
+        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
-            var jsonElement = (JsonElement)request;
-            var userId = jsonElement.GetProperty("userId").GetInt32();
-            var currentPassword = jsonElement.GetProperty("currentPassword").GetString();
-            var newPassword = jsonElement.GetProperty("newPassword").GetString();
-
             if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword))
             {
                 throw new ArgumentException("Current and new passwords are required.");
             }
 
             var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
+            if (user == null || user.PasswordHash == null || !BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
             {
                 throw new UnauthorizedAccessException("Invalid credentials or user not found.");
             }
@@ -119,78 +129,28 @@ namespace DentalSpa.Application.Services
 
             return updatedUser != null;
         }
-
-        public async Task<bool> ForgotPasswordAsync(object request) { await Task.CompletedTask; return true; }
-
-        public async Task<bool> ResetPasswordAsync(object request)
+        
+        public Task<bool> ForgotPasswordAsync(object request)
         {
-            var jsonElement = (JsonElement)request;
-            var email = jsonElement.GetProperty("email").GetString();
-            var newPassword = jsonElement.GetProperty("newPassword").GetString();
-
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(newPassword))
-            {
-                throw new ArgumentException("Email and new password are required.");
-            }
-
-            var user = await _userRepository.FindByEmailAsync(email);
-            if (user == null)
-            {
-                // Return true to not reveal if an email exists or not
-                return true; 
-            }
-
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            await _userRepository.UpdateAsync(user.Id, user);
-
-            return true;
+            // Placeholder implementation
+            return Task.FromResult(true);
         }
 
-        public async Task<bool> ValidateTokenAsync(string token)
+        public Task<bool> ResetPasswordAsync(object request)
         {
-            // Implementar validação de token
-            return true;
+            // Placeholder implementation
+            return Task.FromResult(true);
         }
 
-        public async Task<object> RefreshTokenAsync(object request) => new { Token = "new-fake-token" };
-
-        public async Task<bool> LogoutAsync(int userId)
+        public async Task<object> GetProfileAsync(int userId)
         {
-            // Implementar logout
-            return true;
+            return await _userRepository.GetByIdAsync(userId) ?? new object();
         }
 
-        public async Task<object> GetDashboardMetricsAsync(int userId)
+        public Task<object> RefreshTokenAsync(object request)
         {
-            return new { totalUsers = 100, activeUsers = 50 };
+            // Placeholder implementation
+            return Task.FromResult<object>(new { Token = "new-refreshed-fake-token" });
         }
-
-        public async Task<object> GetRecentActivityAsync(int userId)
-        {
-            return new { activities = new List<object>() };
-        }
-
-        public async Task<object> GetSystemInfoAsync()
-        {
-            return new { version = "1.0.0", status = "online" };
-        }
-
-        public async Task<object> GetUserProfileAsync(int userId)
-        {
-            var user = await _authRepository.GetByIdAsync(userId);
-            return user ?? new object();
-        }
-
-        public async Task<object> GetUserStatisticsAsync(int userId)
-        {
-            return new { loginCount = 10, lastLogin = DateTime.Now };
-        }
-
-        public async Task<object> GetSecurityAlertsAsync()
-        {
-            return new { alerts = new List<object>() };
-        }
-
-        public async Task<object> GetProfileAsync(int userId) => new { UserId = userId, Name = "Fake User" };
     }
 } 

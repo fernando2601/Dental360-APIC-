@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DentalSpa.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2494705f70651cf0de5d379d45b9e35f14935533")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4d13b5989300219c5e5e920f47ce0c02579c2179")]
 [assembly: System.Reflection.AssemblyProductAttribute("DentalSpa.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DentalSpa.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
