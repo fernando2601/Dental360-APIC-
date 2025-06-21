@@ -1,5 +1,5 @@
 DentalSpa API - .NET Core 8.0
-Sistema de gestão para clínica odontológica e de harmonização facial construído com .NET Core 8.0, ADO.NET e PostgreSQL, seguindo arquitetura Domain-Driven Design (DDD).
+Sistema de gestão para clínica odontológica e de harmonização facial construído com .NET Core 8.0, ADO.NET e PostgreSQL, seguindo arquitetura Domain-Driven Design (DDD). 
 
 Estrutura do Projeto
 backend-dotnet/
