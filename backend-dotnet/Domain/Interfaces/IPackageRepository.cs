@@ -13,8 +13,6 @@ namespace DentalSpa.Domain.Interfaces
 
         // Busca e Filtros
         Task<IEnumerable<Package>> SearchAsync(string searchTerm);
-        Task<IEnumerable<Package>> GetByCategoryAsync(string category);
-        Task<IEnumerable<string>> GetCategoriesAsync();
 
         // Contagem
         Task<int> GetCountAsync();

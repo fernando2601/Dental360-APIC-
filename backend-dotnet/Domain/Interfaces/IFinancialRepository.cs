@@ -4,34 +4,23 @@ namespace DentalSpa.Domain.Interfaces
 {
     public interface IFinancialRepository
     {
-        // Transações básicas
         Task<IEnumerable<FinancialTransaction>> GetAllAsync();
         Task<FinancialTransaction?> GetByIdAsync(int id);
         Task<FinancialTransaction> CreateAsync(FinancialTransaction transaction);
         Task<FinancialTransaction?> UpdateAsync(int id, FinancialTransaction transaction);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<FinancialTransaction>> SearchAsync(string searchTerm);
-
-        // Dashboard Financeiro
-        Task<FinancialSummary> GetFinancialSummaryAsync(DateTime? startDate, DateTime? endDate);
-        Task<object> GetFinancialDashboardAsync(DateTime? startDate, DateTime? endDate);
-
-        // Fluxo de Caixa
-        Task<object> GetCashFlowAsync(DateTime? startDate, DateTime? endDate, string period);
-        Task<object> GetCashFlowProjectionsAsync(int months);
-
-        // Análises de Despesas
-        Task<object> GetExpenseAnalysisAsync(DateTime? startDate, DateTime? endDate);
-        Task<IEnumerable<CategorySummary>> GetExpenseCategoriesAsync();
-
-        // Relatórios e Análises Avançadas
-        Task<object> GetProfitabilityAnalysisAsync(DateTime? startDate, DateTime? endDate);
-        Task<object> GetFinancialTrendsAsync(DateTime? startDate, DateTime? endDate, string period);
-        Task<object> GetAdvancedAnalysisAsync(DateTime? startDate, DateTime? endDate, string analysisType);
-
-        // Filtros e buscas
-        Task<object> GetTransactionsWithFiltersAsync(
-            DateTime? startDate, DateTime? endDate, string? type, string? category, 
-            int page, int limit);
+        
+        // Analytics methods
+        Task<object> GetFinancialDashboardAsync();
+        Task<object> GetCashFlowAsync();
+        Task<object> GetCashFlowProjectionsAsync();
+        Task<object> GetTransactionsWithFiltersAsync(string? searchTerm, DateTime? startDate, DateTime? endDate, string? category);
+        Task<object> GetExpenseAnalysisAsync();
+        Task<object> GetExpenseCategoriesAsync();
+        Task<object> GetAdvancedAnalysisAsync();
+        Task<object> GetProfitabilityAnalysisAsync();
+        Task<object> GetFinancialTrendsAsync();
+        Task<object> GetFinancialSummaryAsync();
     }
-}
+} 

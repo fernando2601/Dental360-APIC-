@@ -68,12 +68,12 @@ namespace DentalSpa.Infrastructure.Data
             modelBuilder.Entity<Staff>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.Property(e => e.FullName).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Phone).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.Position).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Specialization).IsRequired().HasMaxLength(200);
-                
-                entity.HasOne(e => e.User)
-                    .WithMany()
-                    .HasForeignKey(e => e.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(e => e.Email).IsUnique();
             });
 
             // Appointment configurations
@@ -82,21 +82,6 @@ namespace DentalSpa.Infrastructure.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Status).HasMaxLength(50);
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
-                
-                entity.HasOne(e => e.Client)
-                    .WithMany()
-                    .HasForeignKey(e => e.ClientId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                    
-                entity.HasOne(e => e.Service)
-                    .WithMany()
-                    .HasForeignKey(e => e.ServiceId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                    
-                entity.HasOne(e => e.Staff)
-                    .WithMany()
-                    .HasForeignKey(e => e.StaffId)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Inventory configurations
@@ -118,16 +103,6 @@ namespace DentalSpa.Infrastructure.Data
                 entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
                 entity.Property(e => e.Category).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.PaymentMethod).IsRequired().HasMaxLength(50);
-                
-                entity.HasOne(e => e.Client)
-                    .WithMany()
-                    .HasForeignKey(e => e.ClientId)
-                    .OnDelete(DeleteBehavior.SetNull);
-                    
-                entity.HasOne(e => e.Appointment)
-                    .WithMany()
-                    .HasForeignKey(e => e.AppointmentId)
-                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Package configurations
@@ -144,16 +119,6 @@ namespace DentalSpa.Infrastructure.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Status).HasMaxLength(50);
-                
-                entity.HasOne(e => e.Client)
-                    .WithMany()
-                    .HasForeignKey(e => e.ClientId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                    
-                entity.HasOne(e => e.Package)
-                    .WithMany()
-                    .HasForeignKey(e => e.PackageId)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // BeforeAfter configurations
@@ -162,16 +127,6 @@ namespace DentalSpa.Infrastructure.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.BeforePhotoUrl).IsRequired();
                 entity.Property(e => e.AfterPhotoUrl).IsRequired();
-                
-                entity.HasOne(e => e.Client)
-                    .WithMany()
-                    .HasForeignKey(e => e.ClientId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                    
-                entity.HasOne(e => e.Service)
-                    .WithMany()
-                    .HasForeignKey(e => e.ServiceId)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // LearningArea configurations
@@ -215,17 +170,7 @@ namespace DentalSpa.Infrastructure.Data
                 entity.Property(e => e.Status).IsRequired().HasMaxLength(20);
                 entity.Property(e => e.PaidAmount).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.Notes).HasMaxLength(500);
-                
-                entity.HasOne(e => e.Client)
-                    .WithMany()
-                    .HasForeignKey(e => e.ClientId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                    
-                entity.HasOne(e => e.Subscription)
-                    .WithMany(s => s.ClientSubscriptions)
-                    .HasForeignKey(e => e.SubscriptionId)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
-}
+} 

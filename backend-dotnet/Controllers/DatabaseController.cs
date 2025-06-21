@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using DentalSpa.Application.Interfaces;
-using DentalSpa.Infrastructure.Data;
+using System.Data;
 
 namespace DentalSpa.Controllers
 {
@@ -10,19 +9,16 @@ namespace DentalSpa.Controllers
     public class DatabaseController : ControllerBase
     {
         private readonly IDatabaseSelectorService _databaseSelector;
-        private readonly DentalSpaDbContext _postgresContext;
-        private readonly SqlServerDbContext _sqlServerContext;
+        private readonly IDbConnection _connection;
         private readonly ILogger<DatabaseController> _logger;
 
         public DatabaseController(
             IDatabaseSelectorService databaseSelector,
-            DentalSpaDbContext postgresContext,
-            SqlServerDbContext sqlServerContext,
+            IDbConnection connection,
             ILogger<DatabaseController> logger)
         {
             _databaseSelector = databaseSelector;
-            _postgresContext = postgresContext;
-            _sqlServerContext = sqlServerContext;
+            _connection = connection;
             _logger = logger;
         }
 
@@ -38,13 +34,13 @@ namespace DentalSpa.Controllers
                 {
                     Available = postgresAvailable,
                     IsPrimary = true,
-                    ConnectionString = _postgresContext.Database.GetConnectionString()?.Substring(0, 50) + "..."
+                    ConnectionString = _connection.ConnectionString?.Substring(0, Math.Min(50, _connection.ConnectionString?.Length ?? 0)) + "..."
                 },
                 SqlServer = new
                 {
                     Available = sqlServerAvailable,
                     IsPrimary = false,
-                    ConnectionString = _sqlServerContext.Database.GetConnectionString()?.Substring(0, 50) + "..."
+                    ConnectionString = "Not configured"
                 },
                 Recommendations = GetRecommendations(postgresAvailable, sqlServerAvailable)
             };
@@ -57,7 +53,24 @@ namespace DentalSpa.Controllers
         {
             try
             {
-                var clients = await _postgresContext.Clients.Take(10).ToListAsync();
+                var clients = new List<object>();
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT id, full_name, email, phone FROM clients LIMIT 10";
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            clients.Add(new
+                            {
+                                Id = reader.GetInt32("id"),
+                                FullName = reader.GetString("full_name"),
+                                Email = reader.GetString("email"),
+                                Phone = reader.GetString("phone")
+                            });
+                        }
+                    }
+                }
                 return Ok(new { Database = "PostgreSQL", Count = clients.Count, Data = clients });
             }
             catch (Exception ex)
@@ -72,8 +85,7 @@ namespace DentalSpa.Controllers
         {
             try
             {
-                var clients = await _sqlServerContext.Clients.Take(10).ToListAsync();
-                return Ok(new { Database = "SQL Server", Count = clients.Count, Data = clients });
+                return Ok(new { Database = "SQL Server", Count = 0, Data = new List<object>(), Message = "SQL Server not configured" });
             }
             catch (Exception ex)
             {
@@ -87,19 +99,9 @@ namespace DentalSpa.Controllers
         {
             try
             {
-                // Exemplo de sincronização: copiar clientes do PostgreSQL para SQL Server
-                var postgresClients = await _postgresContext.Clients.ToListAsync();
-                
-                // Limpar tabela SQL Server
-                _sqlServerContext.Clients.RemoveRange(_sqlServerContext.Clients);
-                
-                // Adicionar clientes do PostgreSQL
-                await _sqlServerContext.Clients.AddRangeAsync(postgresClients);
-                var synced = await _sqlServerContext.SaveChangesAsync();
-
                 return Ok(new { 
-                    Message = "Databases synchronized successfully", 
-                    RecordsSynced = synced,
+                    Message = "Sync not implemented - using only PostgreSQL", 
+                    RecordsSynced = 0,
                     From = "PostgreSQL",
                     To = "SQL Server"
                 });
@@ -116,15 +118,19 @@ namespace DentalSpa.Controllers
         {
             try
             {
-                var postgresCount = await _postgresContext.Clients.CountAsync();
-                var sqlServerCount = await _sqlServerContext.Clients.CountAsync();
+                int postgresCount = 0;
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT COUNT(*) FROM clients";
+                    postgresCount = Convert.ToInt32(cmd.ExecuteScalar());
+                }
 
                 var comparison = new
                 {
                     PostgreSQL = new { ClientCount = postgresCount, Status = "Primary" },
-                    SqlServer = new { ClientCount = sqlServerCount, Status = "Secondary" },
-                    InSync = postgresCount == sqlServerCount,
-                    Difference = Math.Abs(postgresCount - sqlServerCount)
+                    SqlServer = new { ClientCount = 0, Status = "Not configured" },
+                    InSync = true,
+                    Difference = 0
                 };
 
                 return Ok(comparison);
@@ -146,7 +152,7 @@ namespace DentalSpa.Controllers
             else if (postgresAvailable && !sqlServerAvailable)
             {
                 recommendations.Add("PostgreSQL está funcionando como banco principal.");
-                recommendations.Add("Configure SQL Server para redundância.");
+                recommendations.Add("Configure SQL Server para redundância se necessário.");
             }
             else if (!postgresAvailable && sqlServerAvailable)
             {
@@ -162,4 +168,4 @@ namespace DentalSpa.Controllers
             return recommendations;
         }
     }
-}
+} 

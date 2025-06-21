@@ -17,6 +17,64 @@ namespace DentalSpa.API.Controllers
             _financialService = financialService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<FinancialTransaction>>> GetAll()
+        {
+            var transactions = await _financialService.GetAllAsync();
+            return Ok(transactions);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<FinancialTransaction>> GetById(int id)
+        {
+            var transaction = await _financialService.GetByIdAsync(id);
+            if (transaction == null)
+                return NotFound();
+            return Ok(transaction);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<FinancialTransaction>> Create([FromBody] FinancialTransaction transaction)
+        {
+            var newTransaction = await _financialService.CreateAsync(transaction);
+            return CreatedAtAction(nameof(GetById), new { id = newTransaction.Id }, newTransaction);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<FinancialTransaction>> Update(int id, [FromBody] FinancialTransaction transaction)
+        {
+            if (id != transaction.Id)
+            {
+                return BadRequest("O ID da transação não corresponde.");
+            }
+
+            var updatedTransaction = await _financialService.UpdateAsync(id, transaction);
+            if (updatedTransaction == null)
+                return NotFound();
+
+            return Ok(updatedTransaction);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _financialService.DeleteAsync(id);
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<FinancialTransaction>>> Search([FromQuery] string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return BadRequest("Search term is required");
+
+            var transactions = await _financialService.SearchAsync(term);
+            return Ok(transactions);
+        }
+
         // Dashboard Financeiro
         [HttpGet("dashboard")]
         public async Task<ActionResult> GetFinancialDashboard(
@@ -36,61 +94,6 @@ namespace DentalSpa.API.Controllers
         {
             var cashFlow = await _financialService.GetCashFlowAsync(startDate, endDate, period);
             return Ok(cashFlow);
-        }
-
-        // Transações
-        [HttpGet("transactions")]
-        public async Task<ActionResult<IEnumerable<FinancialTransaction>>> GetAllTransactions(
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null,
-            [FromQuery] string? type = null,
-            [FromQuery] string? category = null,
-            [FromQuery] int page = 1,
-            [FromQuery] int limit = 25)
-        {
-            var transactions = await _financialService.GetAllTransactionsAsync();
-            return Ok(transactions);
-        }
-
-        [HttpGet("transactions/{id}")]
-        public async Task<ActionResult<FinancialTransaction>> GetTransaction(int id)
-        {
-            var transaction = await _financialService.GetTransactionByIdAsync(id);
-            if (transaction == null)
-                return NotFound();
-            return Ok(transaction);
-        }
-
-        [HttpPost("transactions")]
-        public async Task<ActionResult<FinancialTransaction>> CreateTransaction([FromBody] FinancialTransaction transaction)
-        {
-            var newTransaction = await _financialService.CreateTransactionAsync(transaction);
-            return CreatedAtAction(nameof(GetTransaction), new { id = newTransaction.Id }, newTransaction);
-        }
-
-        [HttpPut("transactions/{id}")]
-        public async Task<ActionResult<FinancialTransaction>> UpdateTransaction(int id, [FromBody] FinancialTransaction transaction)
-        {
-            if (id != transaction.Id)
-            {
-                return BadRequest("O ID da transação não corresponde.");
-            }
-
-            var updatedTransaction = await _financialService.UpdateTransactionAsync(transaction);
-            if (updatedTransaction == null)
-                return NotFound();
-
-            return Ok(updatedTransaction);
-        }
-
-        [HttpDelete("transactions/{id}")]
-        public async Task<IActionResult> DeleteTransaction(int id)
-        {
-            var result = await _financialService.DeleteTransactionAsync(id);
-            if (!result)
-                return NotFound();
-
-            return NoContent();
         }
 
         // Despesas

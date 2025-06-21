@@ -1,7 +1,6 @@
+using System.Data;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
-using System.Data;
-using System.Data.SqlClient;
 
 namespace DentalSpa.Infrastructure.Repositories
 {
@@ -16,101 +15,307 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<IEnumerable<Package>> GetAllAsync()
         {
-            const string sql = "SELECT * FROM packages WHERE is_active = 1";
-            return await Task.FromResult(_connection.Query<Package>(sql));
+            var packages = new List<Package>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, name, description, price, original_price, sessions_included, validity_days, is_active, created_at FROM packages WHERE is_active = 1";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        packages.Add(new Package
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.GetString(reader.GetOrdinal("name")),
+                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("price")),
+                            OriginalPrice = reader.GetDecimal(reader.GetOrdinal("original_price")),
+                            SessionsIncluded = reader.GetInt32(reader.GetOrdinal("sessions_included")),
+                            ValidityDays = reader.GetInt32(reader.GetOrdinal("validity_days")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(packages);
         }
 
         public async Task<Package?> GetByIdAsync(int id)
         {
-            const string sql = "SELECT * FROM packages WHERE id = @Id AND is_active = 1";
-            return await Task.FromResult(_connection.QueryFirstOrDefault<Package>(sql, new { Id = id }));
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, name, description, price, original_price, sessions_included, validity_days, is_active, created_at FROM packages WHERE id = @Id AND is_active = 1";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Package
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.GetString(reader.GetOrdinal("name")),
+                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("price")),
+                            OriginalPrice = reader.GetDecimal(reader.GetOrdinal("original_price")),
+                            SessionsIncluded = reader.GetInt32(reader.GetOrdinal("sessions_included")),
+                            ValidityDays = reader.GetInt32(reader.GetOrdinal("validity_days")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
+                        };
+                    }
+                }
+            }
+            return await Task.FromResult<Package?>(null);
         }
 
         public async Task<Package> CreateAsync(Package package)
         {
-            const string sql = @"
-                INSERT INTO packages (name, description, original_price, final_price, discount_percentage, is_active, created_at, updated_at)
-                VALUES (@Name, @Description, @OriginalPrice, @FinalPrice, @DiscountPercentage, 1, @CreatedAt, @UpdatedAt);
-                SELECT CAST(SCOPE_IDENTITY() as int)";
-            
-            package.CreatedAt = DateTime.UtcNow;
-            package.UpdatedAt = DateTime.UtcNow;
-            
-            var id = await Task.FromResult(_connection.QuerySingle<int>(sql, package));
-            package.Id = id;
-            return package;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "INSERT INTO packages (name, description, price, original_price, sessions_included, validity_days, is_active, created_at) VALUES (@Name, @Description, @Price, @OriginalPrice, @SessionsIncluded, @ValidityDays, @IsActive, @CreatedAt); SELECT LASTVAL();";
+                
+                var nameParam = cmd.CreateParameter();
+                nameParam.ParameterName = "@Name";
+                nameParam.Value = package.Name;
+                cmd.Parameters.Add(nameParam);
+
+                var descParam = cmd.CreateParameter();
+                descParam.ParameterName = "@Description";
+                descParam.Value = package.Description ?? (object)DBNull.Value;
+                cmd.Parameters.Add(descParam);
+
+                var priceParam = cmd.CreateParameter();
+                priceParam.ParameterName = "@Price";
+                priceParam.Value = package.Price;
+                cmd.Parameters.Add(priceParam);
+
+                var origPriceParam = cmd.CreateParameter();
+                origPriceParam.ParameterName = "@OriginalPrice";
+                origPriceParam.Value = package.OriginalPrice;
+                cmd.Parameters.Add(origPriceParam);
+
+                var sessionsParam = cmd.CreateParameter();
+                sessionsParam.ParameterName = "@SessionsIncluded";
+                sessionsParam.Value = package.SessionsIncluded;
+                cmd.Parameters.Add(sessionsParam);
+
+                var validityParam = cmd.CreateParameter();
+                validityParam.ParameterName = "@ValidityDays";
+                validityParam.Value = package.ValidityDays;
+                cmd.Parameters.Add(validityParam);
+
+                var activeParam = cmd.CreateParameter();
+                activeParam.ParameterName = "@IsActive";
+                activeParam.Value = package.IsActive;
+                cmd.Parameters.Add(activeParam);
+
+                var createdParam = cmd.CreateParameter();
+                createdParam.ParameterName = "@CreatedAt";
+                createdParam.Value = package.CreatedAt;
+                cmd.Parameters.Add(createdParam);
+
+                var id = Convert.ToInt32(cmd.ExecuteScalar());
+                package.Id = id;
+                return await Task.FromResult(package);
+            }
         }
 
         public async Task<Package?> UpdateAsync(int id, Package package)
         {
-            const string sql = @"
-                UPDATE packages 
-                SET name = @Name, description = @Description, 
-                    original_price = @OriginalPrice, final_price = @FinalPrice, 
-                    discount_percentage = @DiscountPercentage, updated_at = @UpdatedAt
-                WHERE id = @Id AND is_active = 1";
-            
-            package.Id = id;
-            package.UpdatedAt = DateTime.UtcNow;
-            
-            var rowsAffected = await Task.FromResult(_connection.Execute(sql, package));
-            return rowsAffected > 0 ? package : null;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "UPDATE packages SET name = @Name, description = @Description, price = @Price, original_price = @OriginalPrice, sessions_included = @SessionsIncluded, validity_days = @ValidityDays, is_active = @IsActive WHERE id = @Id";
+                
+                var idParam = cmd.CreateParameter();
+                idParam.ParameterName = "@Id";
+                idParam.Value = id;
+                cmd.Parameters.Add(idParam);
+
+                var nameParam = cmd.CreateParameter();
+                nameParam.ParameterName = "@Name";
+                nameParam.Value = package.Name;
+                cmd.Parameters.Add(nameParam);
+
+                var descParam = cmd.CreateParameter();
+                descParam.ParameterName = "@Description";
+                descParam.Value = package.Description ?? (object)DBNull.Value;
+                cmd.Parameters.Add(descParam);
+
+                var priceParam = cmd.CreateParameter();
+                priceParam.ParameterName = "@Price";
+                priceParam.Value = package.Price;
+                cmd.Parameters.Add(priceParam);
+
+                var origPriceParam = cmd.CreateParameter();
+                origPriceParam.ParameterName = "@OriginalPrice";
+                origPriceParam.Value = package.OriginalPrice;
+                cmd.Parameters.Add(origPriceParam);
+
+                var sessionsParam = cmd.CreateParameter();
+                sessionsParam.ParameterName = "@SessionsIncluded";
+                sessionsParam.Value = package.SessionsIncluded;
+                cmd.Parameters.Add(sessionsParam);
+
+                var validityParam = cmd.CreateParameter();
+                validityParam.ParameterName = "@ValidityDays";
+                validityParam.Value = package.ValidityDays;
+                cmd.Parameters.Add(validityParam);
+
+                var activeParam = cmd.CreateParameter();
+                activeParam.ParameterName = "@IsActive";
+                activeParam.Value = package.IsActive;
+                cmd.Parameters.Add(activeParam);
+
+                var rows = cmd.ExecuteNonQuery();
+                return await Task.FromResult(rows > 0 ? package : null);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            const string sql = "UPDATE packages SET is_active = 0 WHERE id = @Id";
-            var rowsAffected = await Task.FromResult(_connection.Execute(sql, new { Id = id }));
-            return rowsAffected > 0;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "UPDATE packages SET is_active = 0 WHERE id = @Id";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                var rows = cmd.ExecuteNonQuery();
+                return await Task.FromResult(rows > 0);
+            }
         }
 
         public async Task<IEnumerable<Package>> SearchAsync(string searchTerm)
         {
-            const string sql = "SELECT * FROM packages WHERE is_active = 1 AND name LIKE @SearchTerm";
-            return await Task.FromResult(_connection.Query<Package>(sql, new { SearchTerm = $"%{searchTerm}%" }));
+            var packages = new List<Package>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, name, description, price, original_price, sessions_included, validity_days, is_active, created_at FROM packages WHERE is_active = 1 AND (name ILIKE @SearchTerm OR description ILIKE @SearchTerm)";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@SearchTerm";
+                param.Value = $"%{searchTerm}%";
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        packages.Add(new Package
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.GetString(reader.GetOrdinal("name")),
+                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("price")),
+                            OriginalPrice = reader.GetDecimal(reader.GetOrdinal("original_price")),
+                            SessionsIncluded = reader.GetInt32(reader.GetOrdinal("sessions_included")),
+                            ValidityDays = reader.GetInt32(reader.GetOrdinal("validity_days")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(packages);
         }
 
-        public async Task<IEnumerable<Package>> GetByCategoryAsync(string category)
+        public async Task<IEnumerable<Package>> GetActiveAsync()
         {
-            const string sql = "SELECT * FROM packages WHERE category = @Category AND is_active = 1";
-            return await Task.FromResult(_connection.Query<Package>(sql, new { Category = category }));
-        }
-
-        public async Task<IEnumerable<string>> GetCategoriesAsync()
-        {
-            const string sql = "SELECT DISTINCT category FROM packages WHERE category IS NOT NULL AND category != ''";
-            return await Task.FromResult(_connection.Query<string>(sql));
+            var packages = new List<Package>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, name, description, price, original_price, sessions_included, validity_days, is_active, created_at FROM packages WHERE is_active = 1";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        packages.Add(new Package
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.GetString(reader.GetOrdinal("name")),
+                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
+                            Price = reader.GetDecimal(reader.GetOrdinal("price")),
+                            OriginalPrice = reader.GetDecimal(reader.GetOrdinal("original_price")),
+                            SessionsIncluded = reader.GetInt32(reader.GetOrdinal("sessions_included")),
+                            ValidityDays = reader.GetInt32(reader.GetOrdinal("validity_days")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(packages);
         }
 
         public async Task<int> GetCountAsync()
         {
-            const string sql = "SELECT COUNT(*) FROM packages WHERE is_active = 1";
-            return await Task.FromResult(_connection.QueryFirst<int>(sql));
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM packages WHERE is_active = 1";
+                var count = Convert.ToInt32(cmd.ExecuteScalar());
+                return await Task.FromResult(count);
+            }
         }
 
         public async Task<int> GetCountByCategoryAsync(string category)
         {
-            const string sql = "SELECT COUNT(*) FROM packages WHERE category = @Category AND is_active = 1";
-            return await Task.FromResult(_connection.QueryFirst<int>(sql, new { Category = category }));
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM packages WHERE category = @Category AND is_active = 1";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Category";
+                param.Value = category;
+                cmd.Parameters.Add(param);
+                var count = Convert.ToInt32(cmd.ExecuteScalar());
+                return await Task.FromResult(count);
+            }
         }
 
         public async Task<bool> ExistsAsync(int id)
         {
-            const string sql = "SELECT 1 FROM packages WHERE id = @Id AND is_active = 1";
-            var result = await Task.FromResult(_connection.QueryFirstOrDefault<int>(sql, new { Id = id }));
-            return result == 1;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT 1 FROM packages WHERE id = @Id AND is_active = 1";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    return await Task.FromResult(reader.Read());
+                }
+            }
         }
 
         public async Task<bool> NameExistsAsync(string name, int? excludeId = null)
         {
-            const string sql = "SELECT 1 FROM packages WHERE name = @Name AND is_active = 1";
-            if (excludeId.HasValue)
+            using (var cmd = _connection.CreateCommand())
             {
-                sql += " AND id != @ExcludeId";
+                if (excludeId.HasValue)
+                {
+                    cmd.CommandText = "SELECT 1 FROM packages WHERE name = @Name AND id != @ExcludeId AND is_active = 1";
+                    var excludeParam = cmd.CreateParameter();
+                    excludeParam.ParameterName = "@ExcludeId";
+                    excludeParam.Value = excludeId.Value;
+                    cmd.Parameters.Add(excludeParam);
+                }
+                else
+                {
+                    cmd.CommandText = "SELECT 1 FROM packages WHERE name = @Name AND is_active = 1";
+                }
+
+                var nameParam = cmd.CreateParameter();
+                nameParam.ParameterName = "@Name";
+                nameParam.Value = name;
+                cmd.Parameters.Add(nameParam);
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    return await Task.FromResult(reader.Read());
+                }
             }
-            
-            var result = await Task.FromResult(_connection.QueryFirstOrDefault<int>(sql, new { Name = name, ExcludeId = excludeId }));
-            return result == 1;
         }
     }
-}
+} 

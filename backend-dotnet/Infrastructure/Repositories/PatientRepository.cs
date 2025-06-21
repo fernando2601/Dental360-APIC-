@@ -1,7 +1,6 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace DentalSpa.Infrastructure.Repositories
 {
@@ -16,208 +15,342 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<IEnumerable<Patient>> GetAllAsync()
         {
-            const string sql = "SELECT * FROM patients WHERE is_active = 1";
-            return await Task.FromResult(_connection.Query<Patient>(sql));
+            var patients = new List<Patient>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, name, email, phone, cpf, birth_date, gender, address, city, state, zip_code, created_at, updated_at FROM patients WHERE is_active = 1";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        patients.Add(new Patient
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader.GetString(reader.GetOrdinal("name")),
+                            Email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString(reader.GetOrdinal("email")),
+                            Phone = reader.IsDBNull(reader.GetOrdinal("phone")) ? null : reader.GetString(reader.GetOrdinal("phone")),
+                            CPF = reader.IsDBNull(reader.GetOrdinal("cpf")) ? null : reader.GetString(reader.GetOrdinal("cpf")),
+                            BirthDate = reader.IsDBNull(reader.GetOrdinal("birth_date")) ? null : reader.GetDateTime(reader.GetOrdinal("birth_date")),
+                            Gender = reader.IsDBNull(reader.GetOrdinal("gender")) ? null : reader.GetString(reader.GetOrdinal("gender")),
+                            Address = reader.IsDBNull(reader.GetOrdinal("address")) ? null : reader.GetString(reader.GetOrdinal("address")),
+                            City = reader.IsDBNull(reader.GetOrdinal("city")) ? null : reader.GetString(reader.GetOrdinal("city")),
+                            State = reader.IsDBNull(reader.GetOrdinal("state")) ? null : reader.GetString(reader.GetOrdinal("state")),
+                            ZipCode = reader.IsDBNull(reader.GetOrdinal("zip_code")) ? null : reader.GetString(reader.GetOrdinal("zip_code")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(patients);
         }
 
         public async Task<Patient?> GetByIdAsync(int id)
         {
-            const string sql = "SELECT * FROM patients WHERE id = @Id AND is_active = 1";
-            return await Task.FromResult(_connection.QueryFirstOrDefault<Patient>(sql, new { Id = id }));
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, name, email, phone, cpf, birth_date, gender, address, city, state, zip_code, created_at, updated_at FROM patients WHERE id = @Id AND is_active = 1";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Patient
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader.GetString(reader.GetOrdinal("name")),
+                            Email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString(reader.GetOrdinal("email")),
+                            Phone = reader.IsDBNull(reader.GetOrdinal("phone")) ? null : reader.GetString(reader.GetOrdinal("phone")),
+                            CPF = reader.IsDBNull(reader.GetOrdinal("cpf")) ? null : reader.GetString(reader.GetOrdinal("cpf")),
+                            BirthDate = reader.IsDBNull(reader.GetOrdinal("birth_date")) ? null : reader.GetDateTime(reader.GetOrdinal("birth_date")),
+                            Gender = reader.IsDBNull(reader.GetOrdinal("gender")) ? null : reader.GetString(reader.GetOrdinal("gender")),
+                            Address = reader.IsDBNull(reader.GetOrdinal("address")) ? null : reader.GetString(reader.GetOrdinal("address")),
+                            City = reader.IsDBNull(reader.GetOrdinal("city")) ? null : reader.GetString(reader.GetOrdinal("city")),
+                            State = reader.IsDBNull(reader.GetOrdinal("state")) ? null : reader.GetString(reader.GetOrdinal("state")),
+                            ZipCode = reader.IsDBNull(reader.GetOrdinal("zip_code")) ? null : reader.GetString(reader.GetOrdinal("zip_code")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        };
+                    }
+                }
+            }
+            return await Task.FromResult<Patient?>(null);
         }
 
         public async Task<Patient> CreateAsync(Patient patient)
         {
-            const string sql = @"
-                INSERT INTO patients (name, email, phone, birth_date, address, is_active, created_at, updated_at)
-                VALUES (@Name, @Email, @Phone, @BirthDate, @Address, 1, @CreatedAt, @UpdatedAt);
-                SELECT CAST(SCOPE_IDENTITY() as int)";
-            
-            patient.CreatedAt = DateTime.UtcNow;
-            patient.UpdatedAt = DateTime.UtcNow;
-            
-            var id = await Task.FromResult(_connection.QuerySingle<int>(sql, patient));
-            patient.Id = id;
-            return patient;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = @"INSERT INTO patients (name, email, phone, cpf, birth_date, gender, address, city, state, zip_code, created_at, updated_at, is_active) 
+                                   VALUES (@Name, @Email, @Phone, @CPF, @BirthDate, @Gender, @Address, @City, @State, @ZipCode, @CreatedAt, @UpdatedAt, 1); 
+                                   SELECT CAST(SCOPE_IDENTITY() as int)";
+                
+                cmd.Parameters.Add(CreateParameter("@Name", patient.Name));
+                cmd.Parameters.Add(CreateParameter("@Email", patient.Email));
+                cmd.Parameters.Add(CreateParameter("@Phone", patient.Phone));
+                cmd.Parameters.Add(CreateParameter("@CPF", patient.CPF));
+                cmd.Parameters.Add(CreateParameter("@BirthDate", patient.BirthDate));
+                cmd.Parameters.Add(CreateParameter("@Gender", patient.Gender));
+                cmd.Parameters.Add(CreateParameter("@Address", patient.Address));
+                cmd.Parameters.Add(CreateParameter("@City", patient.City));
+                cmd.Parameters.Add(CreateParameter("@State", patient.State));
+                cmd.Parameters.Add(CreateParameter("@ZipCode", patient.ZipCode));
+                cmd.Parameters.Add(CreateParameter("@CreatedAt", DateTime.Now));
+                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
+                
+                var id = Convert.ToInt32(cmd.ExecuteScalar());
+                patient.Id = id;
+                return await Task.FromResult(patient);
+            }
         }
 
         public async Task<Patient?> UpdateAsync(int id, Patient patient)
         {
-            const string sql = @"
-                UPDATE patients 
-                SET name = @Name, email = @Email, phone = @Phone, 
-                    birth_date = @BirthDate, address = @Address, updated_at = @UpdatedAt
-                WHERE id = @Id AND is_active = 1";
-            
-            patient.Id = id;
-            patient.UpdatedAt = DateTime.UtcNow;
-            
-            var rowsAffected = await Task.FromResult(_connection.Execute(sql, patient));
-            return rowsAffected > 0 ? patient : null;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = @"UPDATE patients SET name = @Name, email = @Email, phone = @Phone, cpf = @CPF, 
+                                   birth_date = @BirthDate, gender = @Gender, address = @Address, city = @City, 
+                                   state = @State, zip_code = @ZipCode, updated_at = @UpdatedAt 
+                                   WHERE id = @Id AND is_active = 1";
+                
+                cmd.Parameters.Add(CreateParameter("@Id", id));
+                cmd.Parameters.Add(CreateParameter("@Name", patient.Name));
+                cmd.Parameters.Add(CreateParameter("@Email", patient.Email));
+                cmd.Parameters.Add(CreateParameter("@Phone", patient.Phone));
+                cmd.Parameters.Add(CreateParameter("@CPF", patient.CPF));
+                cmd.Parameters.Add(CreateParameter("@BirthDate", patient.BirthDate));
+                cmd.Parameters.Add(CreateParameter("@Gender", patient.Gender));
+                cmd.Parameters.Add(CreateParameter("@Address", patient.Address));
+                cmd.Parameters.Add(CreateParameter("@City", patient.City));
+                cmd.Parameters.Add(CreateParameter("@State", patient.State));
+                cmd.Parameters.Add(CreateParameter("@ZipCode", patient.ZipCode));
+                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
+                
+                var rows = cmd.ExecuteNonQuery();
+                return await Task.FromResult(rows > 0 ? patient : null);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            const string sql = "UPDATE patients SET is_active = 0 WHERE id = @Id";
-            var rowsAffected = await Task.FromResult(_connection.Execute(sql, new { Id = id }));
-            return rowsAffected > 0;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "UPDATE patients SET is_active = 0 WHERE id = @Id";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                var rows = cmd.ExecuteNonQuery();
+                return await Task.FromResult(rows > 0);
+            }
         }
 
         public async Task<IEnumerable<Patient>> SearchAsync(string searchTerm)
         {
-            const string sql = "SELECT * FROM patients WHERE is_active = 1 AND name LIKE @SearchTerm";
-            return await Task.FromResult(_connection.Query<Patient>(sql, new { SearchTerm = $"%{searchTerm}%" }));
-        }
-
-        public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
-        {
-            const string sql = @"
-                SELECT Id, Name, Email, Phone, CPF, DateOfBirth, Gender, Address, 
-                       City, State, ZipCode, EmergencyContact, EmergencyPhone, 
-                       MedicalHistory, Allergies, InsuranceProvider, InsuranceNumber,
-                       IsActive, CreatedAt, UpdatedAt, LastVisit
-                FROM Patients 
-                WHERE IsActive = 1 
-                ORDER BY Name";
-
-            return await _connection.QueryAsync<Patient>(sql);
-        }
-
-        public async Task<Patient?> GetPatientByIdAsync(int id)
-        {
-            const string sql = @"
-                SELECT Id, Name, Email, Phone, CPF, DateOfBirth, Gender, Address, 
-                       City, State, ZipCode, EmergencyContact, EmergencyPhone, 
-                       MedicalHistory, Allergies, InsuranceProvider, InsuranceNumber,
-                       IsActive, CreatedAt, UpdatedAt, LastVisit
-                FROM Patients 
-                WHERE Id = @Id AND IsActive = 1";
-
-            return await _connection.QuerySingleOrDefaultAsync<Patient>(sql, new { Id = id });
+            var patients = new List<Patient>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, name, email, phone, cpf, birth_date, gender, address, city, state, zip_code, created_at, updated_at FROM patients WHERE is_active = 1 AND (name LIKE @SearchTerm OR email LIKE @SearchTerm OR cpf LIKE @SearchTerm)";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@SearchTerm";
+                param.Value = $"%{searchTerm}%";
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        patients.Add(new Patient
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader.GetString(reader.GetOrdinal("name")),
+                            Email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString(reader.GetOrdinal("email")),
+                            Phone = reader.IsDBNull(reader.GetOrdinal("phone")) ? null : reader.GetString(reader.GetOrdinal("phone")),
+                            CPF = reader.IsDBNull(reader.GetOrdinal("cpf")) ? null : reader.GetString(reader.GetOrdinal("cpf")),
+                            BirthDate = reader.IsDBNull(reader.GetOrdinal("birth_date")) ? null : reader.GetDateTime(reader.GetOrdinal("birth_date")),
+                            Gender = reader.IsDBNull(reader.GetOrdinal("gender")) ? null : reader.GetString(reader.GetOrdinal("gender")),
+                            Address = reader.IsDBNull(reader.GetOrdinal("address")) ? null : reader.GetString(reader.GetOrdinal("address")),
+                            City = reader.IsDBNull(reader.GetOrdinal("city")) ? null : reader.GetString(reader.GetOrdinal("city")),
+                            State = reader.IsDBNull(reader.GetOrdinal("state")) ? null : reader.GetString(reader.GetOrdinal("state")),
+                            ZipCode = reader.IsDBNull(reader.GetOrdinal("zip_code")) ? null : reader.GetString(reader.GetOrdinal("zip_code")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(patients);
         }
 
         public async Task<Patient?> GetPatientByCPFAsync(string cpf)
         {
-            const string sql = @"
-                SELECT Id, Name, Email, Phone, CPF, DateOfBirth, Gender, Address, 
-                       City, State, ZipCode, EmergencyContact, EmergencyPhone, 
-                       MedicalHistory, Allergies, InsuranceProvider, InsuranceNumber,
-                       IsActive, CreatedAt, UpdatedAt, LastVisit
-                FROM Patients 
-                WHERE CPF = @CPF AND IsActive = 1";
-
-            return await _connection.QuerySingleOrDefaultAsync<Patient>(sql, new { CPF = cpf });
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, name, email, phone, cpf, birth_date, gender, address, city, state, zip_code, created_at, updated_at FROM patients WHERE cpf = @CPF AND is_active = 1";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@CPF";
+                param.Value = cpf;
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Patient
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader.GetString(reader.GetOrdinal("name")),
+                            Email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString(reader.GetOrdinal("email")),
+                            Phone = reader.IsDBNull(reader.GetOrdinal("phone")) ? null : reader.GetString(reader.GetOrdinal("phone")),
+                            CPF = reader.IsDBNull(reader.GetOrdinal("cpf")) ? null : reader.GetString(reader.GetOrdinal("cpf")),
+                            BirthDate = reader.IsDBNull(reader.GetOrdinal("birth_date")) ? null : reader.GetDateTime(reader.GetOrdinal("birth_date")),
+                            Gender = reader.IsDBNull(reader.GetOrdinal("gender")) ? null : reader.GetString(reader.GetOrdinal("gender")),
+                            Address = reader.IsDBNull(reader.GetOrdinal("address")) ? null : reader.GetString(reader.GetOrdinal("address")),
+                            City = reader.IsDBNull(reader.GetOrdinal("city")) ? null : reader.GetString(reader.GetOrdinal("city")),
+                            State = reader.IsDBNull(reader.GetOrdinal("state")) ? null : reader.GetString(reader.GetOrdinal("state")),
+                            ZipCode = reader.IsDBNull(reader.GetOrdinal("zip_code")) ? null : reader.GetString(reader.GetOrdinal("zip_code")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        };
+                    }
+                }
+            }
+            return await Task.FromResult<Patient?>(null);
         }
 
         public async Task<Patient?> GetPatientByEmailAsync(string email)
         {
-            const string sql = @"
-                SELECT Id, Name, Email, Phone, CPF, DateOfBirth, Gender, Address, 
-                       City, State, ZipCode, EmergencyContact, EmergencyPhone, 
-                       MedicalHistory, Allergies, InsuranceProvider, InsuranceNumber,
-                       IsActive, CreatedAt, UpdatedAt, LastVisit
-                FROM Patients 
-                WHERE Email = @Email AND IsActive = 1";
-
-            return await _connection.QuerySingleOrDefaultAsync<Patient>(sql, new { Email = email });
-        }
-
-        public async Task<Patient?> GetPatientByPhoneAsync(string phone)
-        {
-            const string sql = @"
-                SELECT Id, Name, Email, Phone, CPF, DateOfBirth, Gender, Address, 
-                       City, State, ZipCode, EmergencyContact, EmergencyPhone, 
-                       MedicalHistory, Allergies, InsuranceProvider, InsuranceNumber,
-                       IsActive, CreatedAt, UpdatedAt, LastVisit
-                FROM Patients 
-                WHERE Phone = @Phone AND IsActive = 1";
-
-            return await _connection.QuerySingleOrDefaultAsync<Patient>(sql, new { Phone = phone });
-        }
-
-        public async Task<bool> UpdateLastVisitAsync(int patientId, DateTime lastVisit)
-        {
-            const string sql = "UPDATE Patients SET LastVisit = @LastVisit, UpdatedAt = GETDATE() WHERE Id = @PatientId";
-            var rowsAffected = await _connection.ExecuteAsync(sql, new { PatientId = patientId, LastVisit = lastVisit });
-            return rowsAffected > 0;
-        }
-
-        public async Task<bool> IsCPFExistsAsync(string cpf, int? excludePatientId = null)
-        {
-            var sql = "SELECT COUNT(*) FROM Patients WHERE CPF = @CPF AND IsActive = 1";
-            var parameters = new DynamicParameters();
-            parameters.Add("CPF", cpf);
-
-            if (excludePatientId.HasValue)
+            using (var cmd = _connection.CreateCommand())
             {
-                sql += " AND Id != @ExcludeId";
-                parameters.Add("ExcludeId", excludePatientId);
+                cmd.CommandText = "SELECT id, name, email, phone, cpf, birth_date, gender, address, city, state, zip_code, created_at, updated_at FROM patients WHERE email = @Email AND is_active = 1";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Email";
+                param.Value = email;
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Patient
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader.GetString(reader.GetOrdinal("name")),
+                            Email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString(reader.GetOrdinal("email")),
+                            Phone = reader.IsDBNull(reader.GetOrdinal("phone")) ? null : reader.GetString(reader.GetOrdinal("phone")),
+                            CPF = reader.IsDBNull(reader.GetOrdinal("cpf")) ? null : reader.GetString(reader.GetOrdinal("cpf")),
+                            BirthDate = reader.IsDBNull(reader.GetOrdinal("birth_date")) ? null : reader.GetDateTime(reader.GetOrdinal("birth_date")),
+                            Gender = reader.IsDBNull(reader.GetOrdinal("gender")) ? null : reader.GetString(reader.GetOrdinal("gender")),
+                            Address = reader.IsDBNull(reader.GetOrdinal("address")) ? null : reader.GetString(reader.GetOrdinal("address")),
+                            City = reader.IsDBNull(reader.GetOrdinal("city")) ? null : reader.GetString(reader.GetOrdinal("city")),
+                            State = reader.IsDBNull(reader.GetOrdinal("state")) ? null : reader.GetString(reader.GetOrdinal("state")),
+                            ZipCode = reader.IsDBNull(reader.GetOrdinal("zip_code")) ? null : reader.GetString(reader.GetOrdinal("zip_code")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        };
+                    }
+                }
             }
-
-            var count = await _connection.QuerySingleAsync<int>(sql, parameters);
-            return count > 0;
+            return await Task.FromResult<Patient?>(null);
         }
 
-        public async Task<bool> IsEmailExistsAsync(string email, int? excludePatientId = null)
+        // Analytics methods - returning mock data for now
+        public async Task<object> GetPatientAnalyticsAsync()
         {
-            var sql = "SELECT COUNT(*) FROM Patients WHERE Email = @Email AND IsActive = 1";
-            var parameters = new DynamicParameters();
-            parameters.Add("Email", email);
+            return await Task.FromResult(new { total = 0, active = 0, newThisMonth = 0 });
+        }
 
-            if (excludePatientId.HasValue)
+        public async Task<object> GetAgeDistributionAsync()
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<object> GetGenderDistributionAsync()
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<object> GetLocationDistributionAsync()
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<object> GetMonthlyRegistrationsAsync()
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<object> GetPatientMetricsAsync()
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<object> GetPatientSegmentationAsync()
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<object> GetPatientReportAsync()
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<object> GetPatientAppointmentHistoryAsync(int patientId)
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<object> GetPatientPaymentHistoryAsync(int patientId)
+        {
+            return await Task.FromResult(new { });
+        }
+
+        public async Task<int> GetTotalPatientsAsync()
+        {
+            using (var cmd = _connection.CreateCommand())
             {
-                sql += " AND Id != @ExcludeId";
-                parameters.Add("ExcludeId", excludePatientId);
+                cmd.CommandText = "SELECT COUNT(*) FROM patients WHERE is_active = 1";
+                var count = Convert.ToInt32(cmd.ExecuteScalar());
+                return await Task.FromResult(count);
             }
-
-            var count = await _connection.QuerySingleAsync<int>(sql, parameters);
-            return count > 0;
         }
 
-        public async Task<bool> IsPhoneExistsAsync(string phone, int? excludePatientId = null)
+        public async Task<int> GetNewPatientsThisMonthAsync()
         {
-            var sql = "SELECT COUNT(*) FROM Patients WHERE Phone = @Phone AND IsActive = 1";
-            var parameters = new DynamicParameters();
-            parameters.Add("Phone", phone);
-
-            if (excludePatientId.HasValue)
+            using (var cmd = _connection.CreateCommand())
             {
-                sql += " AND Id != @ExcludeId";
-                parameters.Add("ExcludeId", excludePatientId);
+                cmd.CommandText = "SELECT COUNT(*) FROM patients WHERE is_active = 1 AND MONTH(created_at) = MONTH(GETDATE()) AND YEAR(created_at) = YEAR(GETDATE())";
+                var count = Convert.ToInt32(cmd.ExecuteScalar());
+                return await Task.FromResult(count);
             }
-
-            var count = await _connection.QuerySingleAsync<int>(sql, parameters);
-            return count > 0;
         }
 
-        // Simplified methods that return basic data structures
-        public async Task<object> GetDashboardMetricsAsync()
+        public async Task<int> GetActivePatientsAsync()
         {
-            const string sql = @"
-                SELECT 
-                    COUNT(*) as TotalPatients,
-                    COUNT(CASE WHEN LastVisit >= DATEADD(month, -6, GETDATE()) THEN 1 END) as ActivePatients,
-                    COUNT(CASE WHEN CreatedAt >= DATEADD(month, -1, GETDATE()) THEN 1 END) as NewThisMonth,
-                    AVG(DATEDIFF(YEAR, DateOfBirth, GETDATE())) as AverageAge
-                FROM Patients 
-                WHERE IsActive = 1";
-
-            return await _connection.QuerySingleAsync<object>(sql);
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM patients WHERE is_active = 1";
+                var count = Convert.ToInt32(cmd.ExecuteScalar());
+                return await Task.FromResult(count);
+            }
         }
 
-        public async Task<IEnumerable<Patient>> GetInactivePatientsAsync(int daysSinceLastVisit = 90)
+        public async Task<object> GetPatientGrowthAsync()
         {
-            const string sql = @"
-                SELECT Id, Name, Email, Phone, CPF, DateOfBirth, Gender, Address, 
-                       City, State, ZipCode, EmergencyContact, EmergencyPhone, 
-                       MedicalHistory, Allergies, InsuranceProvider, InsuranceNumber,
-                       IsActive, CreatedAt, UpdatedAt, LastVisit
-                FROM Patients 
-                WHERE IsActive = 1 
-                AND (LastVisit IS NULL OR LastVisit < DATEADD(day, -@Days, GETDATE()))
-                ORDER BY LastVisit";
+            return await Task.FromResult(new { });
+        }
 
-            return await _connection.QueryAsync<Patient>(sql, new { Days = daysSinceLastVisit });
+        public async Task<object> GetPatientRetentionAsync()
+        {
+            return await Task.FromResult(new { });
+        }
+
+        private IDbDataParameter CreateParameter(string name, object? value)
+        {
+            var param = _connection.CreateCommand().CreateParameter();
+            param.ParameterName = name;
+            param.Value = value ?? DBNull.Value;
+            return param;
         }
     }
 } 

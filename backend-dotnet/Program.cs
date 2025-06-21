@@ -1,12 +1,13 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
-using DentalSpa.Infrastructure.Data;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Infrastructure.Repositories;
 using DentalSpa.Application.Services;
+using System.Data;
+using System.Data.SqlClient;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,19 +70,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure multiple database connections
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
-                       builder.Configuration.GetConnectionString("DefaultConnection");
-var sqlServerConnectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING") ?? 
-                               builder.Configuration.GetConnectionString("SqlServerConnection");
-
-// Add Entity Framework with PostgreSQL (Primary)
-builder.Services.AddDbContext<DentalSpaDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
-// Add Entity Framework with SQL Server (Secondary)
-builder.Services.AddDbContext<SqlServerDbContext>(options =>
-    options.UseSqlServer(sqlServerConnectionString ?? "Server=localhost;Database=DentalSpa_SqlServer;Trusted_Connection=true;TrustServerCertificate=true;"));
+// Configure database connections using ADO.NET
+builder.Services.AddScoped<IDbConnection>(provider =>
+{
+    // Use PostgreSQL as primary database
+    return new NpgsqlConnection(connectionString);
+});
 
 // ========== CAMADA DOMAIN - INTERFACES DE REPOSITÓRIO ==========
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IAuthRepository, DentalSpa.Infrastructure.Repositories.AuthRepository>();
@@ -116,7 +110,6 @@ builder.Services.AddScoped<DentalSpa.Application.Interfaces.ILearningService, De
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IClinicInfoService, DentalSpa.Application.Services.ClinicInfoService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.ISubscriptionService, DentalSpa.Application.Services.SubscriptionService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IUserService, DentalSpa.Application.Services.UserService>();
-builder.Services.AddScoped<DentalSpa.Application.Interfaces.IDatabaseSelectorService, DentalSpa.Application.Services.DatabaseSelectorService>();
 builder.Services.AddScoped<DentalSpa.Application.Interfaces.IOrcamentoService, DentalSpa.Application.Services.OrcamentoService>();
 builder.Services.AddScoped<DentalSpa.Domain.Interfaces.IOrcamentoRepository, DentalSpa.Infrastructure.Repositories.OrcamentoRepository>();
 
@@ -162,40 +155,10 @@ app.MapControllers();
 // Configurar para rodar na porta 5000
 app.Urls.Add("http://0.0.0.0:5000");
 
-// Ensure database is created and initialize default data
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<DentalSpaDbContext>();
-    
-    // Create database if it doesn't exist
-    await context.Database.EnsureCreatedAsync();
-    
-    // Seed default admin user if no users exist
-    if (!await context.Users.AnyAsync())
-    {
-        var adminUser = new DentalSpa.Domain.Entities.User
-        {
-            Username = "admin",
-            Password = BCrypt.Net.BCrypt.HashPassword("admin123"),
-            FullName = "Administrador",
-            Email = "admin@dentalspa.com",
-            Role = "admin",
-            CreatedAt = DateTime.UtcNow
-        };
-        
-        context.Users.Add(adminUser);
-        await context.SaveChangesAsync();
-        
-        Console.WriteLine("👤 Usuário administrador padrão criado:");
-        Console.WriteLine("   Username: admin");
-        Console.WriteLine("   Password: admin123");
-    }
-}
-
 Console.WriteLine("🦷 DentalSpa API iniciada com arquitetura DDD!");
 Console.WriteLine("🏗️  Camadas implementadas: Domain, Application, Infrastructure, Service");
 Console.WriteLine("📚 Swagger UI disponível em: http://localhost:5000/api-docs");
 Console.WriteLine("🔐 Autenticação JWT configurada");
-Console.WriteLine("🗄️  PostgreSQL conectado");
+Console.WriteLine("🗄️  ADO.NET conectado");
 
-app.Run();
+app.Run(); 

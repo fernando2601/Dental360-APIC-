@@ -26,11 +26,13 @@ namespace DentalSpa.Application.Services
         public async Task<Patient> CreateAsync(Patient patient)
         {
             patient.CreatedAt = DateTime.UtcNow;
+            patient.UpdatedAt = DateTime.UtcNow;
             return await _patientRepository.CreateAsync(patient);
         }
 
         public async Task<Patient?> UpdateAsync(int id, Patient patient)
         {
+            patient.UpdatedAt = DateTime.UtcNow;
             return await _patientRepository.UpdateAsync(id, patient);
         }
 

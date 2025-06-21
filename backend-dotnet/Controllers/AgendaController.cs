@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Application.Interfaces;
 using DentalSpa.Domain.Entities;
-using System.Security.Claims;
 
 namespace DentalSpa.API.Controllers
 {
@@ -19,16 +18,16 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAllAppointments()
+        public async Task<ActionResult<IEnumerable<Appointment>>> GetAll()
         {
-            var appointments = await _agendaService.GetAllAppointmentsAsync();
+            var appointments = await _agendaService.GetAllAsync();
             return Ok(appointments);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Appointment>> GetAppointment(int id)
+        public async Task<ActionResult<Appointment>> GetById(int id)
         {
-            var appointment = await _agendaService.GetAppointmentByIdAsync(id);
+            var appointment = await _agendaService.GetByIdAsync(id);
             if (appointment == null)
                 return NotFound();
 
@@ -36,12 +35,12 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Appointment>> CreateAppointment([FromBody] Appointment appointment)
+        public async Task<ActionResult<Appointment>> Create([FromBody] Appointment appointment)
         {
             try
             {
-                var newAppointment = await _agendaService.CreateAppointmentAsync(appointment);
-                return CreatedAtAction(nameof(GetAppointment), new { id = newAppointment.Id }, newAppointment);
+                var newAppointment = await _agendaService.CreateAsync(appointment);
+                return CreatedAtAction(nameof(GetById), new { id = newAppointment.Id }, newAppointment);
             }
             catch (InvalidOperationException ex)
             {
@@ -54,11 +53,11 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Appointment>> UpdateAppointment(int id, [FromBody] Appointment appointment)
+        public async Task<ActionResult<Appointment>> Update(int id, [FromBody] Appointment appointment)
         {
             try
             {
-                var updatedAppointment = await _agendaService.UpdateAppointmentAsync(id, appointment);
+                var updatedAppointment = await _agendaService.UpdateAsync(id, appointment);
                 if (updatedAppointment == null)
                     return NotFound();
                 
@@ -75,9 +74,9 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAppointment(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var result = await _agendaService.DeleteAppointmentAsync(id);
+            var result = await _agendaService.DeleteAsync(id);
             if (!result)
                 return NotFound();
 
@@ -85,9 +84,9 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> SearchAppointments([FromQuery] string searchTerm)
+        public async Task<ActionResult<IEnumerable<Appointment>>> Search([FromQuery] string searchTerm)
         {
-            var appointments = await _agendaService.SearchAppointmentsAsync(searchTerm);
+            var appointments = await _agendaService.SearchAsync(searchTerm);
             return Ok(appointments);
         }
     }

@@ -1,22 +1,18 @@
-using Microsoft.EntityFrameworkCore;
 using DentalSpa.Application.Interfaces;
-using DentalSpa.Infrastructure.Data;
+using System.Data;
 
 namespace DentalSpa.Application.Services
 {
     public class DatabaseSelectorService : IDatabaseSelectorService
     {
-        private readonly DentalSpaDbContext _postgresContext;
-        private readonly SqlServerDbContext _sqlServerContext;
+        private readonly IDbConnection _connection;
         private readonly ILogger<DatabaseSelectorService> _logger;
 
         public DatabaseSelectorService(
-            DentalSpaDbContext postgresContext,
-            SqlServerDbContext sqlServerContext,
+            IDbConnection connection,
             ILogger<DatabaseSelectorService> logger)
         {
-            _postgresContext = postgresContext;
-            _sqlServerContext = sqlServerContext;
+            _connection = connection;
             _logger = logger;
         }
 
@@ -34,7 +30,9 @@ namespace DentalSpa.Application.Services
         {
             try
             {
-                return _postgresContext.Database.CanConnect();
+                _connection.Open();
+                _connection.Close();
+                return true;
             }
             catch (Exception ex)
             {
@@ -47,7 +45,7 @@ namespace DentalSpa.Application.Services
         {
             try
             {
-                return _sqlServerContext.Database.CanConnect();
+                return false; // SQL Server not configured
             }
             catch (Exception ex)
             {
@@ -64,21 +62,23 @@ namespace DentalSpa.Application.Services
                 {
                     case "postgresql":
                     case "postgres":
-                        return await _postgresContext.Database.CanConnectAsync();
+                        _connection.Open();
+                        _connection.Close();
+                        return await Task.FromResult(true);
                     
                     case "sqlserver":
                     case "sql":
-                        return await _sqlServerContext.Database.CanConnectAsync();
+                        return await Task.FromResult(false); // SQL Server not configured
                     
                     default:
-                        return false;
+                        return await Task.FromResult(false);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Database connection test failed for {connectionType}: {ex.Message}");
-                return false;
+                return await Task.FromResult(false);
             }
         }
     }
-}
+} 

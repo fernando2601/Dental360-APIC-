@@ -1,6 +1,4 @@
 using DentalSpa.Domain.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace DentalSpa.Domain.Interfaces
 {
@@ -12,5 +10,9 @@ namespace DentalSpa.Domain.Interfaces
         Task<Orcamento?> UpdateAsync(int id, Orcamento orcamento);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<Orcamento>> SearchAsync(string searchTerm);
+        
+        // Additional methods
+        Task<IEnumerable<Orcamento>> GetOrcamentosByPacienteAsync(int pacienteId);
+        Task<bool> UpdateStatusAsync(int id, string status);
     }
 } 

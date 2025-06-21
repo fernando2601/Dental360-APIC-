@@ -19,29 +19,28 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Patient>>> GetAllPatients()
+        public async Task<ActionResult<IEnumerable<Patient>>> GetAll()
         {
-            var patients = await _patientService.GetAllPatientsAsync();
+            var patients = await _patientService.GetAllAsync();
             return Ok(patients);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Patient>> GetPatient(int id)
+        public async Task<ActionResult<Patient>> GetById(int id)
         {
-            var patient = await _patientService.GetPatientByIdAsync(id);
+            var patient = await _patientService.GetByIdAsync(id);
             if (patient == null)
                 return NotFound();
             return Ok(patient);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Patient>> CreatePatient([FromBody] Patient patient)
+        public async Task<ActionResult<Patient>> Create([FromBody] Patient patient)
         {
             try
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                var newPatient = await _patientService.CreatePatientAsync(patient, userId);
-                return CreatedAtAction(nameof(GetPatient), new { id = newPatient.Id }, newPatient);
+                var newPatient = await _patientService.CreateAsync(patient);
+                return CreatedAtAction(nameof(GetById), new { id = newPatient.Id }, newPatient);
             }
             catch (ArgumentException ex)
             {
@@ -50,7 +49,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Patient>> UpdatePatient(int id, [FromBody] Patient patient)
+        public async Task<ActionResult<Patient>> Update(int id, [FromBody] Patient patient)
         {
             try
             {
@@ -59,7 +58,7 @@ namespace DentalSpa.API.Controllers
                     return BadRequest("O ID do paciente não corresponde.");
                 }
 
-                var updatedPatient = await _patientService.UpdatePatientAsync(patient);
+                var updatedPatient = await _patientService.UpdateAsync(id, patient);
                 if (updatedPatient == null)
                     return NotFound();
                 return Ok(updatedPatient);
@@ -71,21 +70,21 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePatient(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var result = await _patientService.DeletePatientAsync(id);
+            var result = await _patientService.DeleteAsync(id);
             if (!result)
                 return NotFound();
             return NoContent();
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Patient>>> SearchPatients([FromQuery] string term)
+        public async Task<ActionResult<IEnumerable<Patient>>> Search([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
                 return BadRequest("Search term is required");
 
-            var patients = await _patientService.SearchPatientsAsync(term);
+            var patients = await _patientService.SearchAsync(term);
             return Ok(patients);
         }
 

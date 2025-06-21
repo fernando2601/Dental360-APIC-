@@ -10,6 +10,5 @@ namespace DentalSpa.Domain.Interfaces
         Task<Service?> UpdateAsync(int id, Service service);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<Service>> SearchAsync(string searchTerm);
-        Task<IEnumerable<Service>> GetByCategoryAsync(string category);
     }
 }

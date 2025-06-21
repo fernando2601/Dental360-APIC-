@@ -1,7 +1,6 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace DentalSpa.Infrastructure.Repositories
 {
@@ -16,63 +15,132 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<IEnumerable<Service>> GetAllAsync()
         {
-            const string sql = "SELECT * FROM services WHERE is_active = 1";
-            return await Task.FromResult(_connection.Query<Service>(sql));
+            var services = new List<Service>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id FROM services WHERE is_active = 1";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        services.Add(new Service
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(services);
         }
 
         public async Task<Service?> GetByIdAsync(int id)
         {
-            const string sql = "SELECT * FROM services WHERE id = @Id AND is_active = 1";
-            return await Task.FromResult(_connection.QueryFirstOrDefault<Service>(sql, new { Id = id }));
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id FROM services WHERE id = @Id AND is_active = 1";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Service
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id"))
+                        };
+                    }
+                }
+            }
+            return await Task.FromResult<Service?>(null);
         }
 
         public async Task<Service> CreateAsync(Service service)
         {
-            const string sql = @"
-                INSERT INTO services (name, description, price, duration, is_active, created_at, updated_at)
-                VALUES (@Name, @Description, @Price, @Duration, 1, @CreatedAt, @UpdatedAt);
-                SELECT CAST(SCOPE_IDENTITY() as int)";
-            
-            service.CreatedAt = DateTime.UtcNow;
-            service.UpdatedAt = DateTime.UtcNow;
-            
-            var id = await Task.FromResult(_connection.QuerySingle<int>(sql, service));
-            service.Id = id;
-            return service;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "INSERT INTO services (is_active) VALUES (1); SELECT CAST(SCOPE_IDENTITY() as int)";
+                var id = Convert.ToInt32(cmd.ExecuteScalar());
+                service.Id = id;
+                return await Task.FromResult(service);
+            }
         }
 
         public async Task<Service?> UpdateAsync(int id, Service service)
         {
-            const string sql = @"
-                UPDATE services 
-                SET name = @Name, description = @Description, 
-                    price = @Price, duration = @Duration, updated_at = @UpdatedAt
-                WHERE id = @Id AND is_active = 1";
-            
-            service.Id = id;
-            service.UpdatedAt = DateTime.UtcNow;
-            
-            var rowsAffected = await Task.FromResult(_connection.Execute(sql, service));
-            return rowsAffected > 0 ? service : null;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "UPDATE services SET is_active = 1 WHERE id = @Id";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                var rows = cmd.ExecuteNonQuery();
+                return await Task.FromResult(rows > 0 ? service : null);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            const string sql = "UPDATE services SET is_active = 0 WHERE id = @Id";
-            var rowsAffected = await Task.FromResult(_connection.Execute(sql, new { Id = id }));
-            return rowsAffected > 0;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "UPDATE services SET is_active = 0 WHERE id = @Id";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Id";
+                param.Value = id;
+                cmd.Parameters.Add(param);
+                var rows = cmd.ExecuteNonQuery();
+                return await Task.FromResult(rows > 0);
+            }
         }
 
         public async Task<IEnumerable<Service>> SearchAsync(string searchTerm)
         {
-            const string sql = "SELECT * FROM services WHERE is_active = 1 AND name LIKE @SearchTerm";
-            return await Task.FromResult(_connection.Query<Service>(sql, new { SearchTerm = $"%{searchTerm}%" }));
+            var services = new List<Service>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id FROM services WHERE is_active = 1 AND name ILIKE @SearchTerm";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@SearchTerm";
+                param.Value = $"%{searchTerm}%";
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        services.Add(new Service
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(services);
         }
 
         public async Task<IEnumerable<Service>> GetByCategoryAsync(string category)
         {
-            const string sql = "SELECT * FROM services WHERE category = @Category AND is_active = 1";
-            return await Task.FromResult(_connection.Query<Service>(sql, new { Category = category }));
+            var services = new List<Service>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id FROM services WHERE category = @Category AND is_active = 1";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@Category";
+                param.Value = category;
+                cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        services.Add(new Service
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(services);
         }
     }
-}
+} 
