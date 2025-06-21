@@ -43,6 +43,10 @@ namespace DentalSpa.Domain.Entities
         
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         
+        public int DurationDays { get; set; } = 30;
+        
+        public string Features { get; set; } = string.Empty;
+        
         // Navigation properties
         public virtual ICollection<ClientSubscription> ClientSubscriptions { get; set; } = new List<ClientSubscription>();
     }

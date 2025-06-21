@@ -4,23 +4,7 @@ using DentalSpa.Application.Interfaces;
 
 namespace DentalSpa.Application.Services
 {
-    public interface IUserService
-    {
-        Task<User?> AuthenticateAsync(string username, string password);
-        Task<User> CreateUserAsync(object request);
-        Task<User?> GetUserByIdAsync(int id);
-        Task<User?> GetUserByUsernameAsync(string username);
-        Task<string> GenerateJwtTokenAsync(User user);
-        Task SeedDefaultUsersAsync();
-        Task<IEnumerable<User>> GetAllAsync();
-        Task<User?> GetByIdAsync(int id);
-        Task<User> CreateAsync(User user);
-        Task<User?> UpdateAsync(int id, User user);
-        Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<User>> SearchAsync(string searchTerm);
-    }
-
-    public class UserService : IUserService
+    public class UserService : DentalSpa.Application.Interfaces.IUserService
     {
         private readonly IUserRepository _userRepository;
 
@@ -35,10 +19,9 @@ namespace DentalSpa.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<User> CreateUserAsync(object request)
+        public async Task<User> CreateUserAsync(User user)
         {
-            // Implementation of CreateUserAsync method
-            throw new NotImplementedException();
+            return await _userRepository.CreateAsync(user);
         }
 
         public async Task<User?> GetUserByIdAsync(int id)
@@ -64,7 +47,7 @@ namespace DentalSpa.Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync()
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             return await _userRepository.GetAllAsync();
         }
@@ -74,17 +57,12 @@ namespace DentalSpa.Application.Services
             return await _userRepository.GetByIdAsync(id);
         }
 
-        public async Task<User> CreateAsync(User user)
+        public async Task<User> UpdateUserAsync(User user)
         {
-            return await _userRepository.CreateAsync(user);
+            return await _userRepository.UpdateAsync(user.Id, user);
         }
 
-        public async Task<User?> UpdateAsync(int id, User user)
-        {
-            return await _userRepository.UpdateAsync(id, user);
-        }
-
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteUserAsync(int id)
         {
             return await _userRepository.DeleteAsync(id);
         }
@@ -92,6 +70,30 @@ namespace DentalSpa.Application.Services
         public async Task<IEnumerable<User>> SearchAsync(string searchTerm)
         {
             return await _userRepository.SearchAsync(searchTerm);
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            // Implementação mínima - retorna null por enquanto
+            return null;
+        }
+
+        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        {
+            // Implementação mínima - retorna true por enquanto
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(int userId, string newPassword)
+        {
+            // Implementação mínima - retorna true por enquanto
+            return true;
+        }
+
+        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
+        {
+            // Implementação mínima - retorna lista vazia por enquanto
+            return Enumerable.Empty<User>();
         }
     }
 }

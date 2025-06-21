@@ -18,7 +18,7 @@ namespace DentalSpa.Domain.Entities
         [Phone]
         public string Phone { get; set; } = string.Empty;
         
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
         public string Gender { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string? MedicalHistory { get; set; }
@@ -37,5 +37,9 @@ namespace DentalSpa.Domain.Entities
         public string? Sexo { get; set; }
         public string? Telefone { get; set; }
         public string? Endereco { get; set; }
+        public string City { get; set; } = string.Empty;
+        public string State { get; set; } = string.Empty;
+        public string ZipCode { get; set; } = string.Empty;
+        public string Segment { get; set; } = string.Empty;
     }
 }

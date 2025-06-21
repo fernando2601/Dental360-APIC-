@@ -32,13 +32,14 @@ namespace DentalSpa.Application.Services
             return await _serviceRepository.CreateAsync(service);
         }
 
-        public async Task<Service?> UpdateServiceAsync(Service service)
+        public async Task<Service?> UpdateServiceAsync(int id, Service service)
         {
-            if (service.Id <= 0)
+            if (id <= 0)
                 return null;
 
+            service.Id = id; // Ensure the service has the correct ID
             ValidateService(service);
-            return await _serviceRepository.UpdateAsync(service.Id, service);
+            return await _serviceRepository.UpdateAsync(id, service);
         }
 
         public async Task<bool> DeleteServiceAsync(int id)

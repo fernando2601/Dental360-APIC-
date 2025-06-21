@@ -4,15 +4,23 @@ namespace DentalSpa.Domain.Interfaces
 {
     public interface ISubscriptionRepository
     {
-        // Subscription CRUD
+        // Métodos básicos de Subscription
+        Task<IEnumerable<Subscription>> GetAllAsync();
+        Task<Subscription?> GetByIdAsync(int id);
+        Task<Subscription> CreateAsync(Subscription subscription);
+        Task<Subscription?> UpdateAsync(int id, Subscription subscription);
+        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<Subscription>> GetActiveSubscriptionsAsync();
+        Task<IEnumerable<Subscription>> SearchAsync(string searchTerm);
+        
+        // Métodos específicos de Subscription (usados pelo serviço)
         Task<IEnumerable<Subscription>> GetAllSubscriptionsAsync();
         Task<Subscription?> GetSubscriptionByIdAsync(int id);
         Task<Subscription> CreateSubscriptionAsync(Subscription subscription);
         Task<Subscription> UpdateSubscriptionAsync(Subscription subscription);
         Task<bool> DeleteSubscriptionAsync(int id);
-        Task<IEnumerable<Subscription>> GetActiveSubscriptionsAsync();
         
-        // Client Subscription CRUD
+        // Métodos de ClientSubscription
         Task<IEnumerable<ClientSubscription>> GetAllClientSubscriptionsAsync();
         Task<ClientSubscription?> GetClientSubscriptionByIdAsync(int id);
         Task<ClientSubscription> CreateClientSubscriptionAsync(ClientSubscription clientSubscription);

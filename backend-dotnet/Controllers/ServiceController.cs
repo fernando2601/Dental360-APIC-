@@ -91,7 +91,7 @@ namespace DentalSpa.API.Controllers
                     return BadRequest("O ID do serviço não corresponde.");
                 }
 
-                var updatedService = await _serviceService.UpdateServiceAsync(service);
+                var updatedService = await _serviceService.UpdateServiceAsync(id, service);
                 if (updatedService == null)
                 {
                     return NotFound(new { message = "Serviço não encontrado" });

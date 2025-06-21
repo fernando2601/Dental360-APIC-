@@ -2,10 +2,11 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using DentalSpa.Application.Interfaces;
 
 namespace DentalSpa.Application.Services
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
         public EmailService(IConfiguration configuration)

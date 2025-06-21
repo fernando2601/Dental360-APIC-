@@ -1,85 +1,204 @@
-using Microsoft.EntityFrameworkCore;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
-using DentalSpa.Infrastructure.Data;
+using System.Data;
+using System.Linq;
 
 namespace DentalSpa.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly DentalSpaDbContext _context;
+        private readonly IDbConnection _connection;
 
-        public UserRepository(DentalSpaDbContext context)
+        public UserRepository(IDbConnection connection)
         {
-            _context = context;
+            _connection = connection;
         }
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _context.Users.ToListAsync();
+            var users = new List<User>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE is_active = 1";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        users.Add(new User
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Username = reader.GetString(reader.GetOrdinal("username")),
+                            Email = reader.GetString(reader.GetOrdinal("email")),
+                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
+                            Role = reader.GetString(reader.GetOrdinal("role")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(users);
         }
 
         public async Task<User?> GetByIdAsync(int id)
         {
-            return await _context.Users.FindAsync(id);
-        }
-
-        public async Task<User> CreateAsync(User user)
-        {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task<User> UpdateAsync(User user)
-        {
-            _context.Entry(user).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return false;
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE id = @Id AND is_active = 1";
+                cmd.Parameters.Add(CreateParameter("@Id", id));
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new User
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Username = reader.GetString(reader.GetOrdinal("username")),
+                            Email = reader.GetString(reader.GetOrdinal("email")),
+                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
+                            Role = reader.GetString(reader.GetOrdinal("role")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        };
+                    }
+                }
+            }
+            return await Task.FromResult<User?>(null);
         }
 
         public async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == username);
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE username = @Username AND is_active = 1";
+                cmd.Parameters.Add(CreateParameter("@Username", username));
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new User
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Username = reader.GetString(reader.GetOrdinal("username")),
+                            Email = reader.GetString(reader.GetOrdinal("email")),
+                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
+                            Role = reader.GetString(reader.GetOrdinal("role")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        };
+                    }
+                }
+            }
+            return await Task.FromResult<User?>(null);
         }
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email);
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, username, email, password_hash, role, is_active, created_at, updated_at FROM users WHERE email = @Email AND is_active = 1";
+                cmd.Parameters.Add(CreateParameter("@Email", email));
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new User
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Username = reader.GetString(reader.GetOrdinal("username")),
+                            Email = reader.GetString(reader.GetOrdinal("email")),
+                            PasswordHash = reader.GetString(reader.GetOrdinal("password_hash")),
+                            Role = reader.GetString(reader.GetOrdinal("role")),
+                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        };
+                    }
+                }
+            }
+            return await Task.FromResult<User?>(null);
         }
 
-        public async Task<bool> ExistsAsync(int id)
+        public async Task<User> CreateAsync(User user)
         {
-            return await _context.Users.AnyAsync(u => u.Id == id);
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = @"INSERT INTO users (username, email, password_hash, role, is_active, created_at, updated_at) 
+                                   VALUES (@Username, @Email, @PasswordHash, @Role, @IsActive, @CreatedAt, @UpdatedAt);
+                                   SELECT CAST(SCOPE_IDENTITY() as int)";
+                
+                cmd.Parameters.Add(CreateParameter("@Username", user.Username));
+                cmd.Parameters.Add(CreateParameter("@Email", user.Email));
+                cmd.Parameters.Add(CreateParameter("@PasswordHash", user.PasswordHash));
+                cmd.Parameters.Add(CreateParameter("@Role", user.Role));
+                cmd.Parameters.Add(CreateParameter("@IsActive", true));
+                cmd.Parameters.Add(CreateParameter("@CreatedAt", DateTime.Now));
+                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
+                
+                var id = Convert.ToInt32(cmd.ExecuteScalar());
+                user.Id = id;
+                user.CreatedAt = DateTime.Now;
+                user.UpdatedAt = DateTime.Now;
+                return await Task.FromResult(user);
+            }
         }
 
-        public async Task<IEnumerable<User>> GetByRoleAsync(string role)
+        public async Task<User?> UpdateAsync(int id, User user)
         {
-            return await _context.Users
-                .Where(u => u.Role == role)
-                .ToListAsync();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = @"UPDATE users SET username = @Username, email = @Email, password_hash = @PasswordHash, role = @Role, is_active = @IsActive, updated_at = @UpdatedAt WHERE id = @Id AND is_active = 1";
+                
+                cmd.Parameters.Add(CreateParameter("@Id", id));
+                cmd.Parameters.Add(CreateParameter("@Username", user.Username));
+                cmd.Parameters.Add(CreateParameter("@Email", user.Email));
+                cmd.Parameters.Add(CreateParameter("@PasswordHash", user.PasswordHash));
+                cmd.Parameters.Add(CreateParameter("@Role", user.Role));
+                cmd.Parameters.Add(CreateParameter("@IsActive", user.IsActive));
+                cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
+                
+                var rows = cmd.ExecuteNonQuery();
+                return await Task.FromResult(rows > 0 ? user : null);
+            }
         }
 
-        public async Task<bool> UpdateLastLoginAsync(int userId)
+        public async Task<bool> DeleteAsync(int id)
         {
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null) return false;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "UPDATE users SET is_active = 0 WHERE id = @Id";
+                cmd.Parameters.Add(CreateParameter("@Id", id));
+                var rows = cmd.ExecuteNonQuery();
+                return await Task.FromResult(rows > 0);
+            }
+        }
 
-            user.LastLogin = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-            return true;
+        public async Task<bool> ExistsAsync(string username, string email)
+        {
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM users WHERE (username = @Username OR email = @Email) AND is_active = 1";
+                cmd.Parameters.Add(CreateParameter("@Username", username));
+                cmd.Parameters.Add(CreateParameter("@Email", email));
+                var count = Convert.ToInt32(cmd.ExecuteScalar());
+                return await Task.FromResult(count > 0);
+            }
+        }
+
+        public async Task<IEnumerable<User>> SearchAsync(string term)
+        {
+            return Enumerable.Empty<User>();
+        }
+
+        private IDbDataParameter CreateParameter(string name, object? value)
+        {
+            var param = _connection.CreateCommand().CreateParameter();
+            param.ParameterName = name;
+            param.Value = value ?? DBNull.Value;
+            return param;
         }
     }
 }

@@ -66,93 +66,199 @@ namespace DentalSpa.Application.Services
             return await _patientRepository.GetPatientByEmailAsync(email);
         }
 
-        public async Task<object> GetPatientAnalyticsAsync(DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<object> GetPatientAnalyticsAsync(DateTime? startDate, DateTime? endDate)
         {
-            var analytics = await _patientRepository.GetPatientAnalyticsAsync(startDate, endDate);
+            var patients = await _patientRepository.GetAllAsync();
+            var start = startDate ?? DateTime.Now.AddMonths(-1);
+            var end = endDate ?? DateTime.Now;
             
-            // Buscar distribuições
-            var ageDistribution = await _patientRepository.GetAgeDistributionAsync();
-            var genderDistribution = await _patientRepository.GetGenderDistributionAsync();
-            var locationDistribution = await _patientRepository.GetLocationDistributionAsync();
-            var monthlyRegistrations = await _patientRepository.GetMonthlyRegistrationsAsync();
+            var filteredPatients = patients.Where(p => p.CreatedAt >= start && p.CreatedAt <= end);
+            var totalPatients = filteredPatients.Count();
+            var activePatients = filteredPatients.Count(p => p.IsActive);
+            var newPatientsThisMonth = filteredPatients.Count(p => p.CreatedAt.Month == DateTime.Now.Month && p.CreatedAt.Year == DateTime.Now.Year);
 
             return new
             {
-                analytics,
-                ageDistribution,
-                genderDistribution,
-                locationDistribution,
-                monthlyRegistrations
+                TotalPatients = totalPatients,
+                ActivePatients = activePatients,
+                NewPatientsThisMonth = newPatientsThisMonth,
+                InactivePatients = totalPatients - activePatients,
+                Period = new { Start = start, End = end }
             };
         }
 
-        public async Task<object> GetPatientMetricsAsync(int patientId)
+        public async Task<object> GetPatientMetricsAsync(int id)
         {
-            return await _patientRepository.GetPatientMetricsAsync(patientId);
+            var patient = await _patientRepository.GetByIdAsync(id);
+            if (patient == null)
+                return new { Error = "Patient not found" };
+
+            var patients = await _patientRepository.GetAllAsync();
+            var totalPatients = patients.Count();
+            var activePatients = patients.Count(p => p.IsActive);
+            var averageAge = patients.Where(p => p.BirthDate.HasValue).Average(p => DateTime.Now.Year - p.BirthDate.Value.Year);
+
+            return new
+            {
+                Patient = new
+                {
+                    Id = patient.Id,
+                    Name = patient.Name,
+                    Age = patient.BirthDate.HasValue ? DateTime.Now.Year - patient.BirthDate.Value.Year : 0,
+                    IsActive = patient.IsActive,
+                    CreatedAt = patient.CreatedAt
+                },
+                Metrics = new
+                {
+                    TotalPatients = totalPatients,
+                    ActivePatients = activePatients,
+                    AverageAge = Math.Round(averageAge, 1),
+                    RetentionRate = totalPatients > 0 ? (double)activePatients / totalPatients * 100 : 0
+                }
+            };
         }
 
         public async Task<object> GetPatientSegmentationAsync()
         {
-            return await _patientRepository.GetPatientSegmentationAsync();
+            var patients = await _patientRepository.GetAllAsync();
+            var segments = patients.GroupBy(p => p.Segment ?? "Não Definido")
+                                 .Select(g => new { Segment = g.Key, Count = g.Count() })
+                                 .OrderByDescending(x => x.Count);
+
+            return segments;
         }
 
         public async Task<object> GetAgeDistributionAsync()
         {
-            return await _patientRepository.GetAgeDistributionAsync();
+            var patients = await _patientRepository.GetAllAsync();
+            var ageGroups = patients.Where(p => p.BirthDate.HasValue)
+                                  .GroupBy(p => GetAgeGroup(DateTime.Now.Year - p.BirthDate.Value.Year))
+                                  .Select(g => new { AgeGroup = g.Key, Count = g.Count() })
+                                  .OrderBy(x => x.AgeGroup);
+
+            return ageGroups;
         }
 
         public async Task<object> GetGenderDistributionAsync()
         {
-            return await _patientRepository.GetGenderDistributionAsync();
+            var patients = await _patientRepository.GetAllAsync();
+            var genderDistribution = patients.GroupBy(p => p.Gender ?? "Não Informado")
+                                           .Select(g => new { Gender = g.Key, Count = g.Count() })
+                                           .OrderByDescending(x => x.Count);
+
+            return genderDistribution;
         }
 
         public async Task<object> GetLocationDistributionAsync()
         {
-            return await _patientRepository.GetLocationDistributionAsync();
+            var patients = await _patientRepository.GetAllAsync();
+            var locationDistribution = patients.GroupBy(p => p.City ?? "Não Informado")
+                                             .Select(g => new { City = g.Key, Count = g.Count() })
+                                             .OrderByDescending(x => x.Count)
+                                             .Take(10);
+
+            return locationDistribution;
         }
 
-        public async Task<object> GetPatientReportAsync(int patientId, DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<object> GetPatientReportAsync(int id, DateTime? startDate, DateTime? endDate)
         {
-            var report = await _patientRepository.GetPatientReportAsync(patientId, startDate, endDate);
+            var patient = await _patientRepository.GetByIdAsync(id);
+            if (patient == null)
+                return new { Error = "Patient not found" };
+
+            var patients = await _patientRepository.GetAllAsync();
+            var start = startDate ?? DateTime.Now.AddMonths(-1);
+            var end = endDate ?? DateTime.Now;
             
-            // Buscar dados adicionais
-            var appointments = await _patientRepository.GetPatientAppointmentHistoryAsync(patientId);
-            var payments = await _patientRepository.GetPatientPaymentHistoryAsync(patientId);
-            var metrics = await _patientRepository.GetPatientMetricsAsync(patientId);
-            
-            return new
+            var report = new
             {
-                report,
-                appointments,
-                payments,
-                metrics
+                Patient = new
+                {
+                    Id = patient.Id,
+                    Name = patient.Name,
+                    Email = patient.Email,
+                    Phone = patient.Phone,
+                    Age = patient.BirthDate.HasValue ? DateTime.Now.Year - patient.BirthDate.Value.Year : 0,
+                    City = patient.City,
+                    State = patient.State,
+                    IsActive = patient.IsActive,
+                    CreatedAt = patient.CreatedAt
+                },
+                Period = new { Start = start, End = end },
+                Statistics = new
+                {
+                    TotalPatients = patients.Count(),
+                    ActivePatients = patients.Count(p => p.IsActive),
+                    NewPatientsThisMonth = patients.Count(p => p.CreatedAt.Month == DateTime.Now.Month && p.CreatedAt.Year == DateTime.Now.Year),
+                    NewPatientsThisYear = patients.Count(p => p.CreatedAt.Year == DateTime.Now.Year),
+                    AverageAge = patients.Where(p => p.BirthDate.HasValue).Average(p => DateTime.Now.Year - p.BirthDate.Value.Year),
+                    TopCities = patients.GroupBy(p => p.City ?? "Não Informado")
+                                      .Select(g => new { City = g.Key, Count = g.Count() })
+                                      .OrderByDescending(x => x.Count)
+                                      .Take(5)
+                }
             };
+
+            return report;
         }
 
         public async Task<object> GetDashboardMetricsAsync()
         {
-            var totalPatients = await _patientRepository.GetTotalPatientsAsync();
-            var newPatientsThisMonth = await _patientRepository.GetNewPatientsThisMonthAsync();
-            var activePatients = await _patientRepository.GetActivePatientsAsync();
-            var patientGrowth = await _patientRepository.GetPatientGrowthAsync();
-
-            return new
+            var patients = await _patientRepository.GetAllAsync();
+            var metrics = new
             {
-                totalPatients,
-                newPatientsThisMonth,
-                activePatients,
-                patientGrowth
+                TotalPatients = patients.Count(),
+                ActivePatients = patients.Count(p => p.IsActive),
+                NewPatientsToday = patients.Count(p => p.CreatedAt.Date == DateTime.Now.Date),
+                NewPatientsThisWeek = patients.Count(p => p.CreatedAt >= DateTime.Now.AddDays(-7)),
+                NewPatientsThisMonth = patients.Count(p => p.CreatedAt.Month == DateTime.Now.Month && p.CreatedAt.Year == DateTime.Now.Year)
             };
+
+            return metrics;
         }
 
-        public async Task<object> GetPatientGrowthAsync(int months = 12)
+        public async Task<object> GetPatientGrowthAsync(int months)
         {
-            return await _patientRepository.GetPatientGrowthAsync(months);
+            var patients = await _patientRepository.GetAllAsync();
+            var monthlyGrowth = patients.GroupBy(p => new { p.CreatedAt.Year, p.CreatedAt.Month })
+                                      .Select(g => new { 
+                                          Month = $"{g.Key.Year}-{g.Key.Month:D2}", 
+                                          Count = g.Count() 
+                                      })
+                                      .OrderByDescending(x => x.Month)
+                                      .Take(months)
+                                      .Reverse();
+
+            return monthlyGrowth;
         }
 
         public async Task<object> GetPatientRetentionAsync()
         {
-            return await _patientRepository.GetPatientRetentionAsync();
+            var patients = await _patientRepository.GetAllAsync();
+            var totalPatients = patients.Count();
+            var activePatients = patients.Count(p => p.IsActive);
+            var retentionRate = totalPatients > 0 ? (double)activePatients / totalPatients * 100 : 0;
+
+            return new
+            {
+                TotalPatients = totalPatients,
+                ActivePatients = activePatients,
+                RetentionRate = Math.Round(retentionRate, 2)
+            };
+        }
+
+        private string GetAgeGroup(int age)
+        {
+            return age switch
+            {
+                < 18 => "0-17",
+                < 30 => "18-29",
+                < 40 => "30-39",
+                < 50 => "40-49",
+                < 60 => "50-59",
+                < 70 => "60-69",
+                _ => "70+"
+            };
         }
 
         public async Task<bool> ValidatePatientDataAsync(Patient patient)

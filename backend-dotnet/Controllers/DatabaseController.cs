@@ -63,10 +63,10 @@ namespace DentalSpa.Controllers
                         {
                             clients.Add(new
                             {
-                                Id = reader.GetInt32("id"),
-                                FullName = reader.GetString("full_name"),
-                                Email = reader.GetString("email"),
-                                Phone = reader.GetString("phone")
+                                Id = Convert.ToInt32(reader["id"].ToString()),
+                                FullName = Convert.ToString(reader["full_name"]?.ToString()),
+                                Email = Convert.ToString(reader["email"]?.ToString()),
+                                Phone = Convert.ToString(reader["phone"]?.ToString())
                             });
                         }
                     }

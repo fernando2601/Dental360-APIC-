@@ -53,302 +53,323 @@ namespace DentalSpa.Application.Services
 
         public async Task<object> GetFinancialDashboardAsync(DateTime? startDate, DateTime? endDate)
         {
-            // Aplicar período padrão se não especificado
-            var dates = NormalizeDateRange(startDate, endDate);
+            var transactions = await _financialRepository.GetAllAsync();
+            var (start, end) = NormalizeDateRange(startDate, endDate);
             
-            var dashboard = await _financialRepository.GetFinancialDashboardAsync(dates.start, dates.end);
-            
-            // Adicionar métricas calculadas
-            return EnrichDashboardData(dashboard, dates.start, dates.end);
+            var filteredTransactions = transactions.Where(t => t.Date >= start && t.Date <= end);
+            var totalRevenue = filteredTransactions.Where(t => t.Type == "income").Sum(t => t.Amount);
+            var totalExpenses = filteredTransactions.Where(t => t.Type == "expense").Sum(t => t.Amount);
+            var profit = totalRevenue - totalExpenses;
+
+            return new
+            {
+                TotalRevenue = totalRevenue,
+                TotalExpenses = totalExpenses,
+                Profit = profit,
+                Period = new { Start = start, End = end },
+                TransactionCount = filteredTransactions.Count()
+            };
         }
 
         public async Task<object> GetCashFlowAsync(DateTime? startDate, DateTime? endDate, string period)
         {
-            var dates = NormalizeDateRange(startDate, endDate);
-            return await _financialRepository.GetCashFlowAsync(dates.start, dates.end, period);
-        }
+            var transactions = await _financialRepository.GetAllAsync();
+            var (start, end) = NormalizeDateRange(startDate, endDate);
+            
+            var filteredTransactions = transactions.Where(t => t.Date >= start && t.Date <= end);
+            
+            var cashFlow = period.ToLower() switch
+            {
+                "monthly" => filteredTransactions.GroupBy(t => new { t.Date.Year, t.Date.Month })
+                    .Select(g => new
+                    {
+                        Period = $"{g.Key.Year}-{g.Key.Month:D2}",
+                        Revenue = g.Where(t => t.Type == "income").Sum(t => t.Amount),
+                        Expenses = g.Where(t => t.Type == "expense").Sum(t => t.Amount),
+                        NetFlow = g.Where(t => t.Type == "income").Sum(t => t.Amount) - g.Where(t => t.Type == "expense").Sum(t => t.Amount)
+                    }).OrderBy(x => x.Period),
+                "weekly" => filteredTransactions.GroupBy(t => new { Year = t.Date.Year, Week = GetWeekOfYear(t.Date) })
+                    .Select(g => new
+                    {
+                        Period = $"Week {g.Key.Week}, {g.Key.Year}",
+                        Revenue = g.Where(t => t.Type == "income").Sum(t => t.Amount),
+                        Expenses = g.Where(t => t.Type == "expense").Sum(t => t.Amount),
+                        NetFlow = g.Where(t => t.Type == "income").Sum(t => t.Amount) - g.Where(t => t.Type == "expense").Sum(t => t.Amount)
+                    }).OrderBy(x => x.Period),
+                _ => filteredTransactions.GroupBy(t => t.Date.Date)
+                    .Select(g => new
+                    {
+                        Period = g.Key.ToString("yyyy-MM-dd"),
+                        Revenue = g.Where(t => t.Type == "income").Sum(t => t.Amount),
+                        Expenses = g.Where(t => t.Type == "expense").Sum(t => t.Amount),
+                        NetFlow = g.Where(t => t.Type == "income").Sum(t => t.Amount) - g.Where(t => t.Type == "expense").Sum(t => t.Amount)
+                    }).OrderBy(x => x.Period)
+            };
 
-        public async Task<object> GetCashFlowProjectionsAsync(int months)
-        {
-            // Validar parâmetros
-            if (months <= 0 || months > 24)
-                months = 6; // Padrão de 6 meses
-
-            return await _financialRepository.GetCashFlowProjectionsAsync(months);
-        }
-
-        public async Task<object> GetTransactionsAsync(DateTime? startDate, DateTime? endDate, string? type, string? category, int page, int limit)
-        {
-            // Validar paginação
-            if (page <= 0) page = 1;
-            if (limit <= 0 || limit > 100) limit = 25;
-
-            var dates = NormalizeDateRange(startDate, endDate);
-            return await _financialRepository.GetTransactionsWithFiltersAsync(
-                dates.start, dates.end, type, category, page, limit);
+            return cashFlow;
         }
 
         public async Task<object> GetExpensesAsync(DateTime? startDate, DateTime? endDate, string? category)
         {
-            var dates = NormalizeDateRange(startDate, endDate);
-            return await _financialRepository.GetExpenseAnalysisAsync(dates.start, dates.end);
+            var transactions = await _financialRepository.GetAllAsync();
+            var (start, end) = NormalizeDateRange(startDate, endDate);
+            
+            var filteredTransactions = transactions.Where(t => t.Date >= start && t.Date <= end && t.Type == "expense");
+            
+            if (!string.IsNullOrEmpty(category))
+            {
+                filteredTransactions = filteredTransactions.Where(t => t.Category == category);
+            }
+
+            return filteredTransactions.ToList();
         }
 
-        public async Task<IEnumerable<CategorySummary>> GetExpenseCategoriesAsync()
+        public async Task<object> GetExpenseCategoriesAsync()
         {
-            return await _financialRepository.GetExpenseCategoriesAsync();
+            var transactions = await _financialRepository.GetAllAsync();
+            var expenseCategories = transactions.Where(t => t.Type == "expense")
+                .GroupBy(t => t.Category)
+                .Select(g => new { Category = g.Key, Total = g.Sum(t => t.Amount), Count = g.Count() })
+                .OrderByDescending(x => x.Total);
+
+            return expenseCategories;
         }
 
         public async Task<object> GetExpenseAnalysisAsync(DateTime? startDate, DateTime? endDate)
         {
-            var dates = NormalizeDateRange(startDate, endDate);
-            var analysis = await _financialRepository.GetExpenseAnalysisAsync(dates.start, dates.end);
+            var transactions = await _financialRepository.GetAllAsync();
+            var (start, end) = NormalizeDateRange(startDate, endDate);
             
-            // Adicionar insights automáticos
-            return AddExpenseInsights(analysis, dates.start, dates.end);
+            var expenses = transactions.Where(t => t.Date >= start && t.Date <= end && t.Type == "expense");
+            
+            var analysis = new
+            {
+                TotalExpenses = expenses.Sum(t => t.Amount),
+                AverageExpense = expenses.Any() ? expenses.Average(t => t.Amount) : 0,
+                ExpenseByCategory = expenses.GroupBy(t => t.Category)
+                    .Select(g => new { Category = g.Key, Total = g.Sum(t => t.Amount), Count = g.Count() })
+                    .OrderByDescending(x => x.Total),
+                MonthlyExpenses = expenses.GroupBy(t => new { t.Date.Year, t.Date.Month })
+                    .Select(g => new { Month = $"{g.Key.Year}-{g.Key.Month:D2}", Total = g.Sum(t => t.Amount) })
+                    .OrderBy(x => x.Month)
+            };
+
+            return analysis;
         }
 
         public async Task<object> GetFinancialProjectionsAsync(int months, string type)
         {
-            // Validar e normalizar parâmetros
-            if (months <= 0 || months > 24) months = 6;
-            
-            switch (type.ToLower())
+            var transactions = await _financialRepository.GetAllAsync();
+            var recentMonths = transactions.GroupBy(t => new { t.Date.Year, t.Date.Month })
+                .OrderByDescending(g => g.Key.Year)
+                .ThenByDescending(g => g.Key.Month)
+                .Take(6);
+
+            var avgMonthlyRevenue = recentMonths.Average(g => g.Where(t => t.Type == "income").Sum(t => t.Amount));
+            var avgMonthlyExpenses = recentMonths.Average(g => g.Where(t => t.Type == "expense").Sum(t => t.Amount));
+
+            var projections = Enumerable.Range(1, months).Select(i => new
             {
-                case "conservative":
-                    return await GetConservativeProjections(months);
-                case "optimistic":
-                    return await GetOptimisticProjections(months);
-                case "linear":
-                default:
-                    return await _financialRepository.GetCashFlowProjectionsAsync(months);
-            }
+                Month = DateTime.Now.AddMonths(i).ToString("yyyy-MM"),
+                ProjectedRevenue = avgMonthlyRevenue,
+                ProjectedExpenses = avgMonthlyExpenses,
+                ProjectedNetFlow = avgMonthlyRevenue - avgMonthlyExpenses
+            });
+
+            return projections;
         }
 
         public async Task<object> CreateProjectionAsync(object projectionData)
         {
-            // Implementar lógica de criação de projeções customizadas
-            // Por enquanto, retorna uma projeção padrão
-            return await GetFinancialProjectionsAsync(6, "linear");
+            // Implementação básica - retorna os dados recebidos
+            return new { Success = true, Data = projectionData, CreatedAt = DateTime.UtcNow };
         }
 
         public async Task<object> GetAdvancedAnalysisAsync(DateTime? startDate, DateTime? endDate, string analysisType)
         {
-            var dates = NormalizeDateRange(startDate, endDate);
-            var analysis = await _financialRepository.GetAdvancedAnalysisAsync(dates.start, dates.end, analysisType);
+            var transactions = await _financialRepository.GetAllAsync();
+            var (start, end) = NormalizeDateRange(startDate, endDate);
             
-            // Adicionar insights baseados em IA/ML
-            return AddAdvancedInsights(analysis, analysisType);
+            var filteredTransactions = transactions.Where(t => t.Date >= start && t.Date <= end);
+            var revenue = filteredTransactions.Where(t => t.Type == "income");
+            var expenses = filteredTransactions.Where(t => t.Type == "expense");
+
+            var analysis = new
+            {
+                RevenueGrowth = CalculateGrowthRate(revenue),
+                ExpenseGrowth = CalculateGrowthRate(expenses),
+                ProfitMargin = revenue.Any() ? ((revenue.Sum(t => t.Amount) - expenses.Sum(t => t.Amount)) / revenue.Sum(t => t.Amount)) * 100 : 0,
+                TopRevenueCategories = revenue.GroupBy(t => t.Category)
+                    .Select(g => new { Category = g.Key, Total = g.Sum(t => t.Amount) })
+                    .OrderByDescending(x => x.Total)
+                    .Take(5),
+                TopExpenseCategories = expenses.GroupBy(t => t.Category)
+                    .Select(g => new { Category = g.Key, Total = g.Sum(t => t.Amount) })
+                    .OrderByDescending(x => x.Total)
+                    .Take(5),
+                AnalysisType = analysisType
+            };
+
+            return analysis;
         }
 
         public async Task<object> GetProfitabilityAnalysisAsync(DateTime? startDate, DateTime? endDate)
         {
-            var dates = NormalizeDateRange(startDate, endDate);
-            return await _financialRepository.GetProfitabilityAnalysisAsync(dates.start, dates.end);
+            var transactions = await _financialRepository.GetAllAsync();
+            var (start, end) = NormalizeDateRange(startDate, endDate);
+            
+            var filteredTransactions = transactions.Where(t => t.Date >= start && t.Date <= end);
+            var revenue = filteredTransactions.Where(t => t.Type == "income");
+            var expenses = filteredTransactions.Where(t => t.Type == "expense");
+
+            var totalRevenue = revenue.Sum(t => t.Amount);
+            var totalExpenses = expenses.Sum(t => t.Amount);
+            var netProfit = totalRevenue - totalExpenses;
+
+            return new
+            {
+                TotalRevenue = totalRevenue,
+                TotalExpenses = totalExpenses,
+                NetProfit = netProfit,
+                ProfitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0,
+                RevenueByCategory = revenue.GroupBy(t => t.Category)
+                    .Select(g => new { Category = g.Key, Amount = g.Sum(t => t.Amount), Percentage = (g.Sum(t => t.Amount) / totalRevenue) * 100 }),
+                ExpenseByCategory = expenses.GroupBy(t => t.Category)
+                    .Select(g => new { Category = g.Key, Amount = g.Sum(t => t.Amount), Percentage = totalExpenses > 0 ? (g.Sum(t => t.Amount) / totalExpenses) * 100 : 0 })
+            };
         }
 
         public async Task<object> GetFinancialTrendsAsync(DateTime? startDate, DateTime? endDate, string period)
         {
-            var dates = NormalizeDateRange(startDate, endDate);
-            return await _financialRepository.GetFinancialTrendsAsync(dates.start, dates.end, period);
-        }
-
-        public async Task<FinancialSummary> GetFinancialSummaryAsync(DateTime? startDate, DateTime? endDate)
-        {
-            var dates = NormalizeDateRange(startDate, endDate);
-            return await _financialRepository.GetFinancialSummaryAsync(dates.start, dates.end);
-        }
-
-        public async Task<object> GenerateFinancialReportAsync(string format, DateTime? startDate, DateTime? endDate, string reportType)
-        {
-            var dates = NormalizeDateRange(startDate, endDate);
+            var transactions = await _financialRepository.GetAllAsync();
+            var (start, end) = NormalizeDateRange(startDate, endDate);
             
-            // Coletar dados para o relatório
-            var summary = await _financialRepository.GetFinancialSummaryAsync(dates.start, dates.end);
-            var analysis = await _financialRepository.GetAdvancedAnalysisAsync(dates.start, dates.end, reportType);
+            var filteredTransactions = transactions.Where(t => t.Date >= start && t.Date <= end);
             
-            // Gerar relatório no formato solicitado
-            return await GenerateReport(format, summary, analysis, dates.start, dates.end, reportType);
+            var trends = period.ToLower() switch
+            {
+                "monthly" => filteredTransactions.GroupBy(t => new { t.Date.Year, t.Date.Month })
+                    .Select(g => new
+                    {
+                        Period = $"{g.Key.Year}-{g.Key.Month:D2}",
+                        Revenue = g.Where(t => t.Type == "income").Sum(t => t.Amount),
+                        Expenses = g.Where(t => t.Type == "expense").Sum(t => t.Amount),
+                        NetFlow = g.Where(t => t.Type == "income").Sum(t => t.Amount) - g.Where(t => t.Type == "expense").Sum(t => t.Amount),
+                        Trend = CalculateTrend(g)
+                    }).OrderBy(x => x.Period),
+                _ => filteredTransactions.GroupBy(t => t.Date.Date)
+                    .Select(g => new
+                    {
+                        Period = g.Key.ToString("yyyy-MM-dd"),
+                        Revenue = g.Where(t => t.Type == "income").Sum(t => t.Amount),
+                        Expenses = g.Where(t => t.Type == "expense").Sum(t => t.Amount),
+                        NetFlow = g.Where(t => t.Type == "income").Sum(t => t.Amount) - g.Where(t => t.Type == "expense").Sum(t => t.Amount),
+                        Trend = CalculateTrend(g)
+                    }).OrderBy(x => x.Period)
+            };
+
+            return trends;
         }
 
-        // Métodos auxiliares privados
+        public async Task<object> GetFinancialSummaryAsync(DateTime? startDate, DateTime? endDate)
+        {
+            var transactions = await _financialRepository.GetAllAsync();
+            var (start, end) = NormalizeDateRange(startDate, endDate);
+            
+            var filteredTransactions = transactions.Where(t => t.Date >= start && t.Date <= end);
+            var revenue = filteredTransactions.Where(t => t.Type == "income");
+            var expenses = filteredTransactions.Where(t => t.Type == "expense");
+
+            return new FinancialSummary
+            {
+                TotalIncome = revenue.Sum(t => t.Amount),
+                TotalExpenses = expenses.Sum(t => t.Amount),
+                NetProfit = revenue.Sum(t => t.Amount) - expenses.Sum(t => t.Amount),
+                TotalTransactions = filteredTransactions.Count(),
+                IncomeByCategory = revenue.GroupBy(t => t.Category)
+                    .Select(g => new CategorySummary { Category = g.Key, Amount = g.Sum(t => t.Amount), Count = g.Count() }).ToList(),
+                ExpensesByCategory = expenses.GroupBy(t => t.Category)
+                    .Select(g => new CategorySummary { Category = g.Key, Amount = g.Sum(t => t.Amount), Count = g.Count() }).ToList()
+            };
+        }
+
+        public async Task<dynamic> GenerateFinancialReportAsync(string format, DateTime? startDate, DateTime? endDate, string reportType)
+        {
+            var summary = await GetFinancialSummaryAsync(startDate, endDate);
+            
+            // Implementação básica - retorna um objeto com dados do relatório
+            return new
+            {
+                Content = Encoding.UTF8.GetBytes("Relatório financeiro gerado"),
+                ContentType = format.ToLower() == "pdf" ? "application/pdf" : "application/json",
+                FileName = $"financial_report_{DateTime.Now:yyyyMMdd}.{format}",
+                Summary = summary
+            };
+        }
+
+        private double CalculateGrowthRate(IEnumerable<FinancialTransaction> transactions)
+        {
+            if (!transactions.Any()) return 0;
+            
+            var monthlyData = transactions.GroupBy(t => new { t.Date.Year, t.Date.Month })
+                .OrderBy(g => g.Key.Year)
+                .ThenBy(g => g.Key.Month)
+                .Select(g => (double)g.Sum(t => t.Amount))
+                .ToList();
+
+            if (monthlyData.Count < 2) return 0;
+
+            var current = monthlyData.Last();
+            var previous = monthlyData[monthlyData.Count - 2];
+
+            return previous > 0 ? ((current - previous) / previous) * 100 : 0;
+        }
+
+        private string CalculateTrend(IEnumerable<FinancialTransaction> transactions)
+        {
+            if (!transactions.Any()) return "stable";
+            
+            var amounts = transactions.Select(t => t.Amount).ToList();
+            if (amounts.Count < 2) return "stable";
+
+            var trend = amounts.Last() - amounts.First();
+            return trend > 0 ? "increasing" : trend < 0 ? "decreasing" : "stable";
+        }
+
         private void ValidateTransaction(FinancialTransaction transaction)
         {
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
+
+            if (string.IsNullOrEmpty(transaction.Type))
+                throw new ArgumentException("Transaction type is required");
+
             if (transaction.Amount <= 0)
-                throw new ArgumentException("O valor da transação deve ser maior que zero");
+                throw new ArgumentException("Transaction amount must be greater than zero");
 
-            if (string.IsNullOrWhiteSpace(transaction.Description))
-                throw new ArgumentException("A descrição é obrigatória");
-
-            if (string.IsNullOrWhiteSpace(transaction.Type) || 
-                (transaction.Type != "income" && transaction.Type != "expense"))
-                throw new ArgumentException("O tipo deve ser 'income' ou 'expense'");
-
-            if (transaction.TransactionDate > DateTime.Now.AddDays(1))
-                throw new ArgumentException("A data da transação não pode ser futura");
+            if (string.IsNullOrEmpty(transaction.Description))
+                throw new ArgumentException("Transaction description is required");
         }
 
         private string GenerateReferenceNumber(string type)
         {
-            var prefix = type == "income" ? "REC" : "PAG";
+            var prefix = type.ToUpper().Substring(0, Math.Min(3, type.Length));
             var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
             var random = new Random().Next(1000, 9999);
-            return $"{prefix}-{timestamp}-{random}";
+            return $"{prefix}{timestamp}{random}";
         }
 
         private (DateTime start, DateTime end) NormalizeDateRange(DateTime? startDate, DateTime? endDate)
         {
-            var end = endDate ?? DateTime.Now.Date.AddDays(1).AddTicks(-1);
-            var start = startDate ?? end.AddDays(-30); // Padrão de 30 dias
-
+            var start = startDate ?? DateTime.Now.AddMonths(-1);
+            var end = endDate ?? DateTime.Now;
             return (start, end);
         }
 
-        private object EnrichDashboardData(dynamic dashboard, DateTime startDate, DateTime endDate)
+        private int GetWeekOfYear(DateTime date)
         {
-            // Calcular métricas adicionais para o dashboard
-            var periodDays = (endDate - startDate).Days;
-            
-            return new
-            {
-                dashboard,
-                period = new
-                {
-                    startDate,
-                    endDate,
-                    days = periodDays
-                },
-                insights = new
-                {
-                    dailyAverageIncome = periodDays > 0 ? dashboard.summary.TotalIncome / periodDays : 0,
-                    dailyAverageExpenses = periodDays > 0 ? dashboard.summary.TotalExpenses / periodDays : 0,
-                    profitMargin = dashboard.summary.TotalIncome > 0 
-                        ? (dashboard.summary.NetProfit / dashboard.summary.TotalIncome) * 100 
-                        : 0,
-                    burnRate = periodDays > 0 ? dashboard.summary.TotalExpenses / periodDays : 0
-                }
-            };
-        }
-
-        private object AddExpenseInsights(dynamic analysis, DateTime startDate, DateTime endDate)
-        {
-            return new
-            {
-                analysis,
-                insights = new
-                {
-                    message = "Análise de despesas gerada com base nos dados do período selecionado",
-                    recommendations = GenerateExpenseRecommendations(analysis),
-                    period = new { startDate, endDate }
-                }
-            };
-        }
-
-        private object AddAdvancedInsights(dynamic analysis, string analysisType)
-        {
-            return new
-            {
-                analysis,
-                insights = new
-                {
-                    analysisType,
-                    generatedAt = DateTime.UtcNow,
-                    recommendations = GenerateAdvancedRecommendations(analysis, analysisType)
-                }
-            };
-        }
-
-        private async Task<object> GetConservativeProjections(int months)
-        {
-            var baseProjections = await _financialRepository.GetCashFlowProjectionsAsync(months);
-            
-            // Aplicar fatores conservadores (reduzir receitas, aumentar despesas)
-            return ModifyProjections(baseProjections, 0.9m, 1.1m); // -10% receita, +10% despesa
-        }
-
-        private async Task<object> GetOptimisticProjections(int months)
-        {
-            var baseProjections = await _financialRepository.GetCashFlowProjectionsAsync(months);
-            
-            // Aplicar fatores otimistas (aumentar receitas, reduzir despesas)
-            return ModifyProjections(baseProjections, 1.15m, 0.95m); // +15% receita, -5% despesa
-        }
-
-        private object ModifyProjections(dynamic baseProjections, decimal incomeFactor, decimal expenseFactor)
-        {
-            // Implementar modificação das projeções com fatores específicos
-            return new
-            {
-                baseProjections,
-                modified = true,
-                factors = new { incomeFactor, expenseFactor }
-            };
-        }
-
-        private List<string> GenerateExpenseRecommendations(dynamic analysis)
-        {
-            var recommendations = new List<string>();
-            
-            recommendations.Add("Monitore regularmente as categorias de maior gasto");
-            recommendations.Add("Considere negociar contratos de fornecedores");
-            recommendations.Add("Avalie a possibilidade de reduzir custos operacionais");
-            
-            return recommendations;
-        }
-
-        private List<string> GenerateAdvancedRecommendations(dynamic analysis, string analysisType)
-        {
-            var recommendations = new List<string>();
-            
-            switch (analysisType.ToLower())
-            {
-                case "profitability":
-                    recommendations.Add("Foque nos serviços com maior margem de lucro");
-                    recommendations.Add("Avalie o aumento de preços em serviços de baixa margem");
-                    break;
-                case "trends":
-                    recommendations.Add("Monitore tendências de crescimento mensais");
-                    recommendations.Add("Ajuste estratégias baseado nos padrões identificados");
-                    break;
-                default:
-                    recommendations.Add("Continue monitorando métricas financeiras regularmente");
-                    break;
-            }
-            
-            return recommendations;
-        }
-
-        private async Task<object> GenerateReport(string format, FinancialSummary summary, dynamic analysis, 
-            DateTime startDate, DateTime endDate, string reportType)
-        {
-            var reportData = new
-            {
-                format,
-                reportType,
-                period = new { startDate, endDate },
-                summary,
-                analysis,
-                generatedAt = DateTime.UtcNow
-            };
-
-            // Simular geração de arquivo
-            var fileName = $"relatorio-financeiro-{DateTime.Now:yyyyMMdd}.{format.ToLower()}";
-            var content = Encoding.UTF8.GetBytes("Relatório financeiro gerado");
-            var contentType = format.ToLower() switch
-            {
-                "pdf" => "application/pdf",
-                "excel" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "csv" => "text/csv",
-                _ => "application/octet-stream"
-            };
-
-            return new
-            {
-                FileName = fileName,
-                Content = content,
-                ContentType = contentType,
-                Data = reportData
-            };
+            var calendar = System.Globalization.CultureInfo.InvariantCulture.Calendar;
+            return calendar.GetWeekOfYear(date, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
         }
     }
 }

@@ -54,15 +54,16 @@ namespace DentalSpa.Application.Services
             }
         }
 
-        public async Task<Package?> UpdatePackageAsync(Package package)
+        public async Task<Package?> UpdatePackageAsync(int id, Package package)
         {
             try
             {
-                return await _packageRepository.UpdateAsync(package.Id, package);
+                package.Id = id; // Ensure the package has the correct ID
+                return await _packageRepository.UpdateAsync(id, package);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating package with ID: {PackageId}", package.Id);
+                _logger.LogError(ex, "Error updating package with ID: {PackageId}", id);
                 throw;
             }
         }

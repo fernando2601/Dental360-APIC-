@@ -55,6 +55,11 @@ namespace DentalSpa.Application.Services
             return await _orcamentoRepository.GetOrcamentosByPacienteAsync(pacienteId);
         }
 
+        public async Task<bool> UpdateStatusAsync(int id, string status)
+        {
+            return await _orcamentoRepository.UpdateStatusAsync(id, status);
+        }
+
         public async Task<bool> AprovarOrcamentoAsync(int id)
         {
             return await _orcamentoRepository.UpdateStatusAsync(id, "Aprovado");
@@ -67,7 +72,32 @@ namespace DentalSpa.Application.Services
 
         public async Task<bool> ConverterOrcamentoEmTratamentoAsync(int id)
         {
-            return await _orcamentoRepository.UpdateStatusAsync(id, "Convertido");
+            return await _orcamentoRepository.UpdateStatusAsync(id, "Convertido em Tratamento");
+        }
+
+        public async Task<Orcamento?> CreateOrcamentoAsync(Orcamento orcamento)
+        {
+            return await _orcamentoRepository.CreateAsync(orcamento);
+        }
+
+        public async Task<Orcamento?> GetOrcamentoByIdAsync(int id)
+        {
+            return await _orcamentoRepository.GetByIdAsync(id);
+        }
+
+        public async Task<IEnumerable<Orcamento>> GetAllOrcamentosAsync()
+        {
+            return await _orcamentoRepository.GetAllAsync();
+        }
+
+        public async Task<Orcamento?> UpdateOrcamentoAsync(int id, Orcamento orcamento)
+        {
+            return await _orcamentoRepository.UpdateAsync(id, orcamento);
+        }
+
+        public async Task<bool> DeleteOrcamentoAsync(int id)
+        {
+            return await _orcamentoRepository.DeleteAsync(id);
         }
     }
 } 

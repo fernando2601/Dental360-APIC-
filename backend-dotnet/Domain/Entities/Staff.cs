@@ -19,5 +19,6 @@ namespace DentalSpa.Domain.Entities
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int? ManagerId { get; set; }
+        public string Name { get => FullName; set => FullName = value; }
     }
 }

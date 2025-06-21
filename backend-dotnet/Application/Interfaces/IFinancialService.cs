@@ -10,18 +10,19 @@ namespace DentalSpa.Application.Interfaces
         Task<FinancialTransaction?> UpdateAsync(int id, FinancialTransaction transaction);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<FinancialTransaction>> SearchAsync(string searchTerm);
-        
-        // Analytics methods
-        Task<object> GetFinancialDashboardAsync();
-        Task<object> GetCashFlowAsync();
-        Task<object> GetCashFlowProjectionsAsync();
-        Task<object> GetTransactionsWithFiltersAsync(string? searchTerm, DateTime? startDate, DateTime? endDate, string? category);
-        Task<object> GetExpenseAnalysisAsync();
+
+        // Métodos de dashboard e análises
+        Task<object> GetFinancialDashboardAsync(DateTime? startDate, DateTime? endDate);
+        Task<object> GetCashFlowAsync(DateTime? startDate, DateTime? endDate, string period);
+        Task<object> GetExpensesAsync(DateTime? startDate, DateTime? endDate, string? category);
         Task<object> GetExpenseCategoriesAsync();
-        Task<object> GetAdvancedAnalysisAsync();
-        Task<object> GetProfitabilityAnalysisAsync();
-        Task<object> GetFinancialTrendsAsync();
-        Task<object> GetFinancialSummaryAsync();
-        Task<object> ExportFinancialReportAsync();
+        Task<object> GetExpenseAnalysisAsync(DateTime? startDate, DateTime? endDate);
+        Task<object> GetFinancialProjectionsAsync(int months, string type);
+        Task<object> CreateProjectionAsync(object projectionData);
+        Task<object> GetAdvancedAnalysisAsync(DateTime? startDate, DateTime? endDate, string analysisType);
+        Task<object> GetProfitabilityAnalysisAsync(DateTime? startDate, DateTime? endDate);
+        Task<object> GetFinancialTrendsAsync(DateTime? startDate, DateTime? endDate, string period);
+        Task<object> GetFinancialSummaryAsync(DateTime? startDate, DateTime? endDate);
+        Task<dynamic> GenerateFinancialReportAsync(string format, DateTime? startDate, DateTime? endDate, string reportType);
     }
 } 

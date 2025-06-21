@@ -33,6 +33,10 @@ namespace DentalSpa.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        
+        public string DifficultyLevel { get; set; } = string.Empty;
+        
+        public int DurationMinutes { get; set; } = 0;
 
         public bool HasMedia() => !string.IsNullOrEmpty(ImageUrl) || !string.IsNullOrEmpty(VideoUrl);
         public bool IsPopular() => ViewCount > 100;

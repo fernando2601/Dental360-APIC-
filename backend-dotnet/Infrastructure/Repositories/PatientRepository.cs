@@ -345,6 +345,17 @@ namespace DentalSpa.Infrastructure.Repositories
             return await Task.FromResult(new { });
         }
 
+        // Métodos específicos (usados pelo serviço)
+        public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
+        {
+            return await GetAllAsync();
+        }
+
+        public async Task<Patient?> GetPatientByIdAsync(int id)
+        {
+            return await GetByIdAsync(id);
+        }
+
         private IDbDataParameter CreateParameter(string name, object? value)
         {
             var param = _connection.CreateCommand().CreateParameter();

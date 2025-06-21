@@ -52,7 +52,7 @@ namespace DentalSpa.API.Controllers
             {
                 return BadRequest("O ID do orçamento não corresponde.");
             }
-            var result = await _service.UpdateOrcamentoAsync(orcamento);
+            var result = await _service.UpdateOrcamentoAsync(id, orcamento);
             if (result == null) return NotFound();
             return Ok(result);
         }

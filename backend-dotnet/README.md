@@ -1,14 +1,22 @@
 # DentalSpa API - .NET Core 8.0
 
-Sistema de gestão para clínica odontológica e de harmonização facial construído com .NET Core 8.0, Dapper ORM e PostgreSQL.
+Sistema de gestão para clínica odontológica e de harmonização facial construído com .NET Core 8.0, ADO.NET e PostgreSQL, seguindo arquitetura Domain-Driven Design (DDD).
 
 ## Estrutura do Projeto
 
 ```
 backend-dotnet/
 ├── Controllers/          # Controllers da API
-├── Models/              # Modelos de dados
-├── Services/            # Lógica de negócio
+├── Application/          # Camada de aplicação (serviços e interfaces)
+│   ├── Interfaces/       # Interfaces dos serviços
+│   ├── Services/         # Implementação dos serviços
+│   └── Mappings/         # Mapeamentos de objetos
+├── Domain/              # Camada de domínio
+│   ├── Entities/         # Entidades do domínio
+│   └── Interfaces/       # Interfaces dos repositórios
+├── Infrastructure/       # Camada de infraestrutura
+│   ├── Data/            # Scripts SQL e configurações
+│   └── Repositories/     # Implementação dos repositórios
 ├── Properties/          # Configurações do projeto
 ├── DentalSpa.API.csproj # Arquivo de projeto
 ├── Program.cs           # Ponto de entrada da aplicação
@@ -56,9 +64,8 @@ Configure a string de conexão PostgreSQL no arquivo `appsettings.json`:
 ## Endpoints da API
 
 A API estará disponível em:
-- HTTP: http://localhost:5001
-- HTTPS: https://localhost:7001
-- Swagger UI: http://localhost:5001/swagger
+- HTTP: http://localhost:5000
+- Swagger UI: http://localhost:5000/api-docs
 
 ## Módulos Implementados
 
@@ -74,12 +81,24 @@ A API estará disponível em:
 - ✅ Área de Aprendizado
 - ✅ Informações da Clínica
 - ✅ Assinaturas
+- ✅ Orçamentos
+- ✅ Usuários
+
+## Arquitetura
+
+O projeto segue a arquitetura Domain-Driven Design (DDD) com as seguintes camadas:
+
+- **Domain**: Contém as entidades de negócio e interfaces dos repositórios
+- **Application**: Contém a lógica de aplicação, serviços e interfaces
+- **Infrastructure**: Contém a implementação dos repositórios usando ADO.NET
+- **Controllers**: Contém os endpoints da API REST
 
 ## Tecnologias Utilizadas
 
 - .NET Core 8.0
-- Dapper ORM
+- ADO.NET (Npgsql para PostgreSQL)
 - PostgreSQL
 - JWT Authentication
 - Swagger/OpenAPI
 - BCrypt para hash de senhas
+- Arquitetura DDD

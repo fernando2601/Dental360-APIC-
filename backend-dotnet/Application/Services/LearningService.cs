@@ -15,6 +15,33 @@ namespace DentalSpa.Application.Services
             _logger = logger;
         }
 
+        // Métodos genéricos (usados pelo controller)
+        public async Task<IEnumerable<LearningArea>> GetAllAsync()
+        {
+            return await GetAllLearningAreasAsync();
+        }
+
+        public async Task<LearningArea?> GetByIdAsync(int id)
+        {
+            return await GetLearningAreaByIdAsync(id);
+        }
+
+        public async Task<LearningArea> CreateAsync(LearningArea learningArea)
+        {
+            return await CreateLearningAreaAsync(learningArea);
+        }
+
+        public async Task<LearningArea?> UpdateAsync(int id, LearningArea learningArea)
+        {
+            return await _learningRepository.UpdateAsync(id, learningArea);
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            return await DeleteLearningAreaAsync(id);
+        }
+
+        // Métodos específicos
         public async Task<IEnumerable<LearningArea>> GetAllLearningAreasAsync()
         {
             try
@@ -52,20 +79,6 @@ namespace DentalSpa.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao criar área de aprendizado");
-                throw;
-            }
-        }
-
-        public async Task<LearningArea> UpdateLearningAreaAsync(LearningArea learningArea)
-        {
-            try
-            {
-                learningArea.UpdatedAt = DateTime.UtcNow;
-                return await _learningRepository.UpdateAsync(learningArea);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar área de aprendizado: {Id}", learningArea.Id);
                 throw;
             }
         }
@@ -118,6 +131,20 @@ namespace DentalSpa.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao pesquisar áreas de aprendizado por título: {SearchTerm}", searchTerm);
+                throw;
+            }
+        }
+
+        public async Task<LearningArea> UpdateLearningAreaAsync(LearningArea learningArea)
+        {
+            try
+            {
+                learningArea.UpdatedAt = DateTime.UtcNow;
+                return await _learningRepository.UpdateAsync(learningArea.Id, learningArea);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar área de aprendizado: {Id}", learningArea.Id);
                 throw;
             }
         }

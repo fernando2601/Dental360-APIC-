@@ -4,13 +4,14 @@ namespace DentalSpa.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<object> LoginAsync(string email, string password);
-        Task<object> RegisterAsync(User user, string password);
+        Task<object> LoginAsync(object request);
+        Task<object> RegisterAsync(object request);
         Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
-        Task<bool> ForgotPasswordAsync(string email);
-        Task<bool> ResetPasswordAsync(string token, string newPassword);
+        Task<bool> ForgotPasswordAsync(object request);
+        Task<bool> ResetPasswordAsync(object request);
         Task<bool> ValidateTokenAsync(string token);
-        Task<object> RefreshTokenAsync(string refreshToken);
+        Task<object> RefreshTokenAsync(object request);
         Task<bool> LogoutAsync(int userId);
+        Task<object> GetProfileAsync(int userId);
     }
 } 

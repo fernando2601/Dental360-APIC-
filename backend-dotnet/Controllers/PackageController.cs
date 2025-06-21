@@ -39,7 +39,7 @@ namespace DentalSpa.API.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<Package>> Update(int id, [FromBody] Package package)
         {
-            var updated = await _packageService.UpdatePackageAsync(package);
+            var updated = await _packageService.UpdatePackageAsync(id, package);
             if (updated == null) return NotFound();
             return Ok(updated);
         }
