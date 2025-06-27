@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DentalSpa.Domain.Entities
 {
-    public class Package
+    public class Product
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -20,11 +20,11 @@ namespace DentalSpa.Domain.Entities
         public decimal GetPricePerSession() => Price / SessionsIncluded;
     }
 
-    public class ClientPackage
+    public class ClientProduct
     {
         public int Id { get; set; }
         public int ClientId { get; set; }
-        public int PackageId { get; set; }
+        public int ProductId { get; set; }
         public DateTime PurchaseDate { get; set; } = DateTime.Now;
         public DateTime ExpiryDate { get; set; }
         public int SessionsUsed { get; set; } = 0;
@@ -32,11 +32,11 @@ namespace DentalSpa.Domain.Entities
 
         // Navigation properties
         public Client? Client { get; set; }
-        public Package? Package { get; set; }
+        public Product? Product { get; set; }
 
-        public int GetRemainingSessions() => (Package?.SessionsIncluded ?? 0) - SessionsUsed;
+        public int GetRemainingSessions() => (Product?.SessionsIncluded ?? 0) - SessionsUsed;
         public bool IsExpired() => DateTime.Now > ExpiryDate;
-        public bool IsCompleted() => SessionsUsed >= (Package?.SessionsIncluded ?? 0);
+        public bool IsCompleted() => SessionsUsed >= (Product?.SessionsIncluded ?? 0);
         public bool CanUse() => Status == "active" && !IsExpired() && !IsCompleted();
     }
 }

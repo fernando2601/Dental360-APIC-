@@ -4,120 +4,118 @@ using DentalSpa.Application.Interfaces;
 
 namespace DentalSpa.Application.Services
 {
-    public class PackageService : IPackageService
+    public class ProductService : IProductService
     {
-        private readonly IPackageRepository _packageRepository;
-        private readonly ILogger<PackageService> _logger;
+        private readonly IProductRepository _productRepository;
+        private readonly ILogger<ProductService> _logger;
 
-        public PackageService(IPackageRepository packageRepository, ILogger<PackageService> logger)
+        public ProductService(IProductRepository productRepository, ILogger<ProductService> logger)
         {
-            _packageRepository = packageRepository;
+            _productRepository = productRepository;
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Package>> GetAllPackagesAsync()
+        public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
             try
             {
-                return await _packageRepository.GetAllAsync();
+                return await _productRepository.GetAllAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving all packages");
+                _logger.LogError(ex, "Error retrieving all products");
                 throw;
             }
         }
 
-        public async Task<Package?> GetPackageByIdAsync(int id)
+        public async Task<Product?> GetProductByIdAsync(int id)
         {
             try
             {
-                return await _packageRepository.GetByIdAsync(id);
+                return await _productRepository.GetByIdAsync(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving package with ID: {PackageId}", id);
+                _logger.LogError(ex, "Error retrieving product with ID: {ProductId}", id);
                 throw;
             }
         }
 
-        public async Task<Package> CreatePackageAsync(Package package)
+        public async Task<Product> CreateProductAsync(Product product)
         {
             try
             {
-                return await _packageRepository.CreateAsync(package);
+                return await _productRepository.CreateAsync(product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating package");
+                _logger.LogError(ex, "Error creating product");
                 throw;
             }
         }
 
-        public async Task<Package?> UpdatePackageAsync(int id, Package package)
+        public async Task<Product?> UpdateProductAsync(int id, Product product)
         {
             try
             {
-                package.Id = id; // Ensure the package has the correct ID
-                return await _packageRepository.UpdateAsync(id, package);
+                product.Id = id; // Ensure the product has the correct ID
+                return await _productRepository.UpdateAsync(id, product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating package with ID: {PackageId}", id);
+                _logger.LogError(ex, "Error updating product with ID: {ProductId}", id);
                 throw;
             }
         }
 
-        public async Task<bool> DeletePackageAsync(int id)
+        public async Task<bool> DeleteProductAsync(int id)
         {
             try
             {
-                return await _packageRepository.DeleteAsync(id);
+                return await _productRepository.DeleteAsync(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting package with ID: {PackageId}", id);
+                _logger.LogError(ex, "Error deleting product with ID: {ProductId}", id);
                 throw;
             }
         }
 
-        public async Task<IEnumerable<Package>> SearchPackagesAsync(string searchTerm)
+        public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
         {
             try
             {
-                return await _packageRepository.SearchAsync(searchTerm);
+                return await _productRepository.SearchAsync(searchTerm);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error searching packages with term: {SearchTerm}", searchTerm);
+                _logger.LogError(ex, "Error searching products with term: {SearchTerm}", searchTerm);
                 throw;
             }
         }
 
-        public async Task<IEnumerable<Package>> GetActivePackagesAsync()
+        public async Task<IEnumerable<Product>> GetActiveProductsAsync()
         {
             try
             {
-                // Implementação básica - retorna todos os pacotes
-                return await _packageRepository.GetAllAsync();
+                return await _productRepository.GetAllAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving active packages");
+                _logger.LogError(ex, "Error retrieving active products");
                 throw;
             }
         }
 
-        public async Task<IEnumerable<Package>> GetPopularPackagesAsync()
+        public async Task<IEnumerable<Product>> GetPopularProductsAsync()
         {
             try
             {
-                // Implementação básica - retorna todos os pacotes
-                return await _packageRepository.GetAllAsync();
+                return await _productRepository.GetAllAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving popular packages");
+                _logger.LogError(ex, "Error retrieving popular products");
                 throw;
             }
         }

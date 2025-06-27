@@ -2,17 +2,17 @@ using DentalSpa.Domain.Entities;
 
 namespace DentalSpa.Domain.Interfaces
 {
-    public interface IPackageRepository
+    public interface IProductRepository
     {
         // CRUD Básico
-        Task<IEnumerable<Package>> GetAllAsync();
-        Task<Package?> GetByIdAsync(int id);
-        Task<Package> CreateAsync(Package package);
-        Task<Package?> UpdateAsync(int id, Package package);
+        Task<IEnumerable<Product>> GetAllAsync();
+        Task<Product?> GetByIdAsync(int id);
+        Task<Product> CreateAsync(Product product);
+        Task<Product?> UpdateAsync(int id, Product product);
         Task<bool> DeleteAsync(int id);
 
         // Busca e Filtros
-        Task<IEnumerable<Package>> SearchAsync(string searchTerm);
+        Task<IEnumerable<Product>> SearchAsync(string searchTerm);
 
         // Contagem
         Task<int> GetCountAsync();

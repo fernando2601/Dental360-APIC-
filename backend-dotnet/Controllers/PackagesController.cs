@@ -8,56 +8,56 @@ namespace DentalSpa.API.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class PackagesController : ControllerBase
+    public class ProductsController : ControllerBase
     {
-        private readonly IPackageService _packageService;
+        private readonly IProductService _productService;
 
-        public PackagesController(IPackageService packageService)
+        public ProductsController(IProductService productService)
         {
-            _packageService = packageService;
+            _productService = productService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Package>>> GetAllPackages()
-            => Ok(await _packageService.GetAllPackagesAsync());
+        public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
+            => Ok(await _productService.GetAllProductsAsync());
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Package>> GetPackage(int id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var package = await _packageService.GetPackageByIdAsync(id);
-            if (package == null) return NotFound();
-            return Ok(package);
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null) return NotFound();
+            return Ok(product);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Package>> CreatePackage([FromBody] Package package)
+        public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
         {
-            var created = await _packageService.CreatePackageAsync(package);
-            return CreatedAtAction(nameof(GetPackage), new { id = created.Id }, created);
+            var created = await _productService.CreateProductAsync(product);
+            return CreatedAtAction(nameof(GetProduct), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Package>> UpdatePackage(int id, [FromBody] Package package)
+        public async Task<ActionResult<Product>> UpdateProduct(int id, [FromBody] Product product)
         {
-            var updated = await _packageService.UpdatePackageAsync(id, package);
+            var updated = await _productService.UpdateProductAsync(id, product);
             if (updated == null) return NotFound();
             return Ok(updated);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePackage(int id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            var result = await _packageService.DeletePackageAsync(id);
+            var result = await _productService.DeleteProductAsync(id);
             if (!result) return NotFound();
             return NoContent();
         }
 
         [HttpGet("active")]
-        public async Task<ActionResult<IEnumerable<Package>>> GetActivePackages()
-            => Ok(await _packageService.GetActivePackagesAsync());
+        public async Task<ActionResult<IEnumerable<Product>>> GetActiveProducts()
+            => Ok(await _productService.GetActiveProductsAsync());
 
         [HttpGet("popular")]
-        public async Task<ActionResult<IEnumerable<Package>>> GetPopularPackages()
-            => Ok(await _packageService.GetPopularPackagesAsync());
+        public async Task<ActionResult<IEnumerable<Product>>> GetPopularProducts()
+            => Ok(await _productService.GetPopularProductsAsync());
     }
 } 
