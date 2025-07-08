@@ -79,12 +79,6 @@ namespace DentalSpa.Application.Services
             return await _serviceRepository.GetAllAsync();
         }
 
-        public async Task<IEnumerable<ServiceResponse>> SearchAsync(string searchTerm)
-        {
-            var services = await _serviceRepository.SearchAsync(searchTerm);
-            return services.Select((Service s) => MapToResponse(s));
-        }
-
         public async Task<object> GetServiceStatsAsync()
         {
             // Implementação básica

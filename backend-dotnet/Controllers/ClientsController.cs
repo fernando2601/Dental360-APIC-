@@ -96,29 +96,5 @@ namespace DentalSpa.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
-        /// <summary>
-        /// Busca clientes por termo
-        /// </summary>
-        /// <param name="searchTerm">Termo de busca</param>
-        /// <returns>Lista de clientes encontrados</returns>
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Client>>> SearchClients([FromQuery] string searchTerm)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(searchTerm))
-                {
-                    return BadRequest(new { message = "Termo de busca é obrigatório" });
-                }
-
-                var clients = await _clientService.SearchClientsAsync(searchTerm);
-                return Ok(clients);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
     }
 }

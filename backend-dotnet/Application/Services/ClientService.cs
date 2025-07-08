@@ -48,12 +48,6 @@ namespace DentalSpa.Application.Services
 
         public async Task DeleteClientAsync(int id) => await _clientRepository.DeleteAsync(id);
 
-        public async Task<IEnumerable<ClientResponse>> SearchClientsAsync(string searchTerm)
-        {
-            var clients = await _clientRepository.SearchAsync(searchTerm);
-            return clients.Select(MapToResponse);
-        }
-
         public async Task<ClientResponse> CreateAsync(ClientCreateRequest request)
         {
             var client = new Client
@@ -102,12 +96,6 @@ namespace DentalSpa.Application.Services
         public async Task<bool> DeleteAsync(int id)
         {
             return await _clientRepository.DeleteAsync(id);
-        }
-
-        public async Task<IEnumerable<ClientResponse>> SearchAsync(string searchTerm)
-        {
-            var clients = await _clientRepository.SearchAsync(searchTerm);
-            return clients.Select(MapToResponse);
         }
 
         private ClientResponse MapToResponse(Client client)

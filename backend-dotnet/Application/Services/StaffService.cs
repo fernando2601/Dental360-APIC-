@@ -93,18 +93,6 @@ namespace DentalSpa.Application.Services
             }
         }
 
-        public async Task<IEnumerable<StaffResponse>> SearchStaffAsync(string searchTerm)
-        {
-            var staff = await _staffRepository.SearchStaffAsync(searchTerm);
-            return staff.Select((Staff s) => MapToResponse(s));
-        }
-
-        public async Task<IEnumerable<Staff>> GetStaffBySpecializationAsync(string specialization)
-        {
-            // Implementação básica - retorna todos os funcionários
-            return await _staffRepository.GetAllAsync();
-        }
-
         public async Task<IEnumerable<StaffResponse>> GetStaffByDepartmentAsync(string department)
         {
             var staff = await _staffRepository.GetStaffByDepartmentAsync(department);

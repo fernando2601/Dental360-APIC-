@@ -10,8 +10,6 @@ namespace DentalSpa.Application.Interfaces
         Task<StaffResponse> CreateAsync(StaffCreateRequest request);
         Task<StaffResponse?> UpdateAsync(int id, StaffCreateRequest request);
         Task<bool> DeleteStaffAsync(int id);
-        Task<IEnumerable<StaffResponse>> SearchStaffAsync(string searchTerm);
-        Task<IEnumerable<Staff>> GetStaffBySpecializationAsync(string specialization);
         Task<IEnumerable<StaffResponse>> GetStaffByDepartmentAsync(string department);
         Task<IEnumerable<StaffResponse>> GetStaffByPositionAsync(string position);
         Task<object> GetStaffStatsAsync();

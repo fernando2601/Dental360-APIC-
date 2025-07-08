@@ -127,26 +127,6 @@ namespace DentalSpa.API.Controllers
             }
         }
 
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Staff>>> SearchStaff([FromQuery] string term)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(term))
-                {
-                    return BadRequest(new { message = "Termo de busca é obrigatório" });
-                }
-
-                var staff = await _staffService.SearchStaffAsync(term);
-                return Ok(staff);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar funcionários com termo {SearchTerm}", term);
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
-        }
-
         [HttpGet("stats")]
         public async Task<ActionResult<object>> GetStaffStats()
         {

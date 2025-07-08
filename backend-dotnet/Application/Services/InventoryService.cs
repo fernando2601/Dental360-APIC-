@@ -93,12 +93,6 @@ namespace DentalSpa.Application.Services
 
         public async Task<bool> DeleteInventoryAsync(int id) => await _inventoryRepository.DeleteAsync(id);
 
-        public async Task<IEnumerable<InventoryResponse>> SearchByNameAsync(string name)
-        {
-            var items = await _inventoryRepository.SearchByNameAsync(name);
-            return items.Select(MapToResponse);
-        }
-
         public async Task<IEnumerable<Inventory>> GetByStatusAsync(string status)
         {
             // Implementação fictícia, pois não há método correspondente no repositório
@@ -132,12 +126,6 @@ namespace DentalSpa.Application.Services
         public async Task<bool> DeleteAsync(int id)
         {
             return await _inventoryRepository.DeleteAsync(id);
-        }
-
-        public async Task<IEnumerable<InventoryResponse>> SearchAsync(string searchTerm)
-        {
-            var items = await _inventoryRepository.SearchAsync(searchTerm);
-            return items.Select(MapToResponse);
         }
 
         private InventoryResponse MapToResponse(Inventory inventory)

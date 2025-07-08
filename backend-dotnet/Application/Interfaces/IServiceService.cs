@@ -10,7 +10,6 @@ namespace DentalSpa.Application.Interfaces
         Task<ServiceResponse> CreateAsync(ServiceCreateRequest request);
         Task<ServiceResponse?> UpdateAsync(int id, ServiceCreateRequest request);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<ServiceResponse>> SearchAsync(string searchTerm);
         Task<IEnumerable<Service>> GetServicesByCategoryAsync(string category);
         Task<object> GetServiceStatsAsync();
         Task<IEnumerable<string>> GetCategoriesAsync();

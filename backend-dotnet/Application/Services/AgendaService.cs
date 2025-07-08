@@ -44,11 +44,6 @@ namespace DentalSpa.Application.Services
             return await _agendaRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<Appointment>> SearchAsync(string searchTerm)
-        {
-            return await _agendaRepository.SearchAsync(searchTerm);
-        }
-
         public async Task<IEnumerable<Appointment>> GetAppointmentsByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             // Implementação básica - retorna todos os agendamentos

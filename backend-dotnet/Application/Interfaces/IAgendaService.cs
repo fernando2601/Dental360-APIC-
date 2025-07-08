@@ -9,8 +9,6 @@ namespace DentalSpa.Application.Interfaces
         Task<Appointment> CreateAsync(Appointment appointment);
         Task<Appointment?> UpdateAsync(int id, Appointment appointment);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<Appointment>> SearchAsync(string searchTerm);
-        
         Task<IEnumerable<Appointment>> GetAppointmentsByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<IEnumerable<Appointment>> GetAppointmentsByPatientAsync(int patientId);
         Task<IEnumerable<Appointment>> GetAppointmentsByStaffAsync(int staffId);

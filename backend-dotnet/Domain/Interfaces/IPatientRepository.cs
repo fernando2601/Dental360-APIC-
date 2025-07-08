@@ -9,7 +9,6 @@ namespace DentalSpa.Domain.Interfaces
         Task<Patient> CreateAsync(Patient patient);
         Task<Patient?> UpdateAsync(int id, Patient patient);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<Patient>> SearchAsync(string searchTerm);
         
         // Métodos específicos (usados pelo serviço)
         Task<IEnumerable<Patient>> GetAllPatientsAsync();

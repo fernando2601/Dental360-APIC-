@@ -10,7 +10,6 @@ namespace DentalSpa.Application.Interfaces
         Task<PatientResponse> CreateAsync(PatientCreateRequest request);
         Task<PatientResponse?> UpdateAsync(int id, PatientCreateRequest request);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<PatientResponse>> SearchAsync(string searchTerm);
         
         // Analytics methods
         Task<object> GetPatientAnalyticsAsync(DateTime? startDate, DateTime? endDate);

@@ -145,42 +145,6 @@ namespace DentalSpa.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<Staff>> SearchAsync(string searchTerm)
-        {
-            var list = new List<Staff>();
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT id, full_name, email, phone, position, specialization, department, salary, hire_date, is_active, bio, profile_image_url, years_of_experience, license, manager_id, created_at FROM staff WHERE (full_name ILIKE @Search OR email ILIKE @Search OR phone ILIKE @Search) AND is_active = 1";
-                var param = cmd.CreateParameter(); param.ParameterName = "@Search"; param.Value = $"%{searchTerm}%"; cmd.Parameters.Add(param);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        list.Add(new Staff
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            FullName = reader.GetString(reader.GetOrdinal("full_name")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            Phone = reader.GetString(reader.GetOrdinal("phone")),
-                            Position = reader.GetString(reader.GetOrdinal("position")),
-                            Specialization = reader.GetString(reader.GetOrdinal("specialization")),
-                            Department = reader.GetString(reader.GetOrdinal("department")),
-                            Salary = reader.GetDecimal(reader.GetOrdinal("salary")),
-                            HireDate = reader.GetDateTime(reader.GetOrdinal("hire_date")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            Bio = reader.IsDBNull(reader.GetOrdinal("bio")) ? null : reader.GetString(reader.GetOrdinal("bio")),
-                            ProfileImageUrl = reader.IsDBNull(reader.GetOrdinal("profile_image_url")) ? null : reader.GetString(reader.GetOrdinal("profile_image_url")),
-                            YearsOfExperience = reader.GetInt32(reader.GetOrdinal("years_of_experience")),
-                            License = reader.IsDBNull(reader.GetOrdinal("license")) ? null : reader.GetString(reader.GetOrdinal("license")),
-                            ManagerId = reader.IsDBNull(reader.GetOrdinal("manager_id")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("manager_id")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
-                        });
-                    }
-                }
-            }
-            return await Task.FromResult(list);
-        }
-
         public async Task<IEnumerable<Staff>> GetBySpecializationAsync(string specialization)
         {
             var list = new List<Staff>();
@@ -350,6 +314,5 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<IEnumerable<Staff>> GetAllStaffAsync() => await GetAllAsync();
         public async Task<Staff?> GetStaffByIdAsync(int id) => await GetByIdAsync(id);
-        public async Task<IEnumerable<Staff>> SearchStaffAsync(string searchTerm) => await SearchAsync(searchTerm);
     }
 } 

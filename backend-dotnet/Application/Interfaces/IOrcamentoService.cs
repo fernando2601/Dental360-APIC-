@@ -12,7 +12,6 @@ namespace DentalSpa.Application.Interfaces
         Task<Orcamento> CreateAsync(Orcamento orcamento);
         Task<Orcamento?> UpdateAsync(int id, Orcamento orcamento);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<OrcamentoResponse>> SearchAsync(string searchTerm);
         Task<IEnumerable<Orcamento>> GetOrcamentosByPacienteAsync(int pacienteId);
         Task<bool> UpdateStatusAsync(int id, string status);
         Task<bool> AprovarOrcamentoAsync(int id);

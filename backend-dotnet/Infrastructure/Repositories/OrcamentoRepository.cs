@@ -114,35 +114,6 @@ namespace DentalSpa.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<Orcamento>> SearchAsync(string searchTerm)
-        {
-            var orcamentos = new List<Orcamento>();
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT id, paciente_id, valor_total, status, created_at, updated_at FROM orcamentos WHERE is_active = 1 AND status LIKE @SearchTerm";
-                var param = cmd.CreateParameter();
-                param.ParameterName = "@SearchTerm";
-                param.Value = $"%{searchTerm}%";
-                cmd.Parameters.Add(param);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        orcamentos.Add(new Orcamento
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            PacienteId = reader.GetInt32(reader.GetOrdinal("paciente_id")),
-                            ValorTotal = reader.GetDecimal(reader.GetOrdinal("valor_total")),
-                            Status = reader.GetString(reader.GetOrdinal("status")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        });
-                    }
-                }
-            }
-            return await Task.FromResult(orcamentos);
-        }
-
         public async Task<IEnumerable<Orcamento>> GetOrcamentosByPacienteAsync(int pacienteId)
         {
             var orcamentos = new List<Orcamento>();

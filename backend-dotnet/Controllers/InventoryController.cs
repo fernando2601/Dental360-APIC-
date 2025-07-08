@@ -62,10 +62,6 @@ namespace DentalSpa.API.Controllers
             return NoContent();
         }
 
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<InventoryResponse>>> Search([FromQuery] string searchTerm)
-            => Ok(await _inventoryService.SearchByNameAsync(searchTerm));
-
         [HttpGet("low-stock")]
         public async Task<ActionResult<IEnumerable<InventoryResponse>>> GetLowStock([FromQuery] int threshold = 10)
             => Ok(await _inventoryService.GetLowStockItemsAsync(threshold));

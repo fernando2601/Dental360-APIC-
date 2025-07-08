@@ -153,42 +153,6 @@ namespace DentalSpa.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<Inventory>> SearchAsync(string searchTerm)
-        {
-            var inventories = new List<Inventory>();
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT id, name, description, category, quantity, unit, min_stock, unit_price, supplier, location, batch_number, expiration_date, status, is_active, created_at, updated_at FROM inventory WHERE is_active = 1 AND (name LIKE @SearchTerm OR description LIKE @SearchTerm OR category LIKE @SearchTerm)";
-                cmd.Parameters.Add(CreateParameter("@SearchTerm", $"%{searchTerm}%"));
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        inventories.Add(new Inventory
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
-                            Category = reader.GetString(reader.GetOrdinal("category")),
-                            Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
-                            Unit = reader.GetString(reader.GetOrdinal("unit")),
-                            MinStock = reader.GetInt32(reader.GetOrdinal("min_stock")),
-                            UnitPrice = reader.GetDecimal(reader.GetOrdinal("unit_price")),
-                            Supplier = reader.IsDBNull(reader.GetOrdinal("supplier")) ? null : reader.GetString(reader.GetOrdinal("supplier")),
-                            Location = reader.IsDBNull(reader.GetOrdinal("location")) ? null : reader.GetString(reader.GetOrdinal("location")),
-                            BatchNumber = reader.IsDBNull(reader.GetOrdinal("batch_number")) ? null : reader.GetString(reader.GetOrdinal("batch_number")),
-                            ExpirationDate = reader.IsDBNull(reader.GetOrdinal("expiration_date")) ? null : reader.GetDateTime(reader.GetOrdinal("expiration_date")),
-                            Status = reader.GetString(reader.GetOrdinal("status")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        });
-                    }
-                }
-            }
-            return await Task.FromResult(inventories);
-        }
-
         public async Task<IEnumerable<Inventory>> GetByCategoryAsync(string category)
         {
             var inventories = new List<Inventory>();
@@ -336,24 +300,6 @@ namespace DentalSpa.Infrastructure.Repositories
                 var count = Convert.ToInt32(cmd.ExecuteScalar());
                 return await Task.FromResult(count > 0);
             }
-        }
-
-        public async Task<IEnumerable<Inventory>> SearchByNameAsync(string name)
-        {
-            var items = new List<Inventory>();
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT * FROM inventory WHERE name LIKE @Name";
-                var param = cmd.CreateParameter(); param.ParameterName = "@Name"; param.Value = $"%{name}%"; cmd.Parameters.Add(param);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        // Mapear para entidade Inventory
-                    }
-                }
-            }
-            return items;
         }
 
         private IDbDataParameter CreateParameter(string name, object? value)

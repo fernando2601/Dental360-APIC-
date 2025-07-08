@@ -64,16 +64,6 @@ namespace DentalSpa.API.Controllers
             return NoContent();
         }
 
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<PatientResponse>>> Search([FromQuery] string term)
-        {
-            if (string.IsNullOrWhiteSpace(term))
-                return BadRequest("Search term is required");
-
-            var patients = await _patientService.SearchAsync(term);
-            return Ok(patients);
-        }
-
         [HttpGet("cpf/{cpf}")]
         public async Task<ActionResult<PatientResponse>> GetPatientByCPF(string cpf)
         {

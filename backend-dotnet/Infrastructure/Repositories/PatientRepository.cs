@@ -148,42 +148,6 @@ namespace DentalSpa.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<Patient>> SearchAsync(string searchTerm)
-        {
-            var patients = new List<Patient>();
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT id, name, email, phone, cpf, birth_date, gender, address, city, state, zip_code, created_at, updated_at FROM patients WHERE is_active = 1 AND (name LIKE @SearchTerm OR email LIKE @SearchTerm OR cpf LIKE @SearchTerm)";
-                var param = cmd.CreateParameter();
-                param.ParameterName = "@SearchTerm";
-                param.Value = $"%{searchTerm}%";
-                cmd.Parameters.Add(param);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        patients.Add(new Patient
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader.GetString(reader.GetOrdinal("name")),
-                            Email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString(reader.GetOrdinal("email")),
-                            Phone = reader.IsDBNull(reader.GetOrdinal("phone")) ? null : reader.GetString(reader.GetOrdinal("phone")),
-                            CPF = reader.IsDBNull(reader.GetOrdinal("cpf")) ? null : reader.GetString(reader.GetOrdinal("cpf")),
-                            BirthDate = reader.IsDBNull(reader.GetOrdinal("birth_date")) ? null : reader.GetDateTime(reader.GetOrdinal("birth_date")),
-                            Gender = reader.IsDBNull(reader.GetOrdinal("gender")) ? null : reader.GetString(reader.GetOrdinal("gender")),
-                            Address = reader.IsDBNull(reader.GetOrdinal("address")) ? null : reader.GetString(reader.GetOrdinal("address")),
-                            City = reader.IsDBNull(reader.GetOrdinal("city")) ? null : reader.GetString(reader.GetOrdinal("city")),
-                            State = reader.IsDBNull(reader.GetOrdinal("state")) ? null : reader.GetString(reader.GetOrdinal("state")),
-                            ZipCode = reader.IsDBNull(reader.GetOrdinal("zip_code")) ? null : reader.GetString(reader.GetOrdinal("zip_code")),
-                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        });
-                    }
-                }
-            }
-            return await Task.FromResult(patients);
-        }
-
         public async Task<Patient?> GetPatientByCPFAsync(string cpf)
         {
             using (var cmd = _connection.CreateCommand())

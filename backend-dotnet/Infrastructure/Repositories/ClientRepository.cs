@@ -97,23 +97,5 @@ namespace DentalSpa.Infrastructure.Repositories
                 return await Task.FromResult(rows > 0);
             }
         }
-
-        public async Task<IEnumerable<Client>> SearchAsync(string searchTerm)
-        {
-            var clients = new List<Client>();
-            using (var cmd = _connection.CreateCommand())
-            {
-                cmd.CommandText = "SELECT * FROM clients WHERE name LIKE @SearchTerm";
-                var param = cmd.CreateParameter(); param.ParameterName = "@SearchTerm"; param.Value = $"%{searchTerm}%"; cmd.Parameters.Add(param);
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        // Mapear para entidade Client
-                    }
-                }
-            }
-            return clients;
-        }
     }
 } 

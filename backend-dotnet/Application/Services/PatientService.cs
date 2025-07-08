@@ -98,12 +98,6 @@ namespace DentalSpa.Application.Services
             return await _patientRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<PatientResponse>> SearchAsync(string searchTerm)
-        {
-            var patients = await _patientRepository.SearchAsync(searchTerm);
-            return patients.Select(p => MapToResponse(p));
-        }
-
         public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
         {
             return await _patientRepository.GetAllPatientsAsync();

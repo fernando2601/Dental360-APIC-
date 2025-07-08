@@ -82,12 +82,5 @@ namespace DentalSpa.API.Controllers
 
             return NoContent();
         }
-
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> Search([FromQuery] string searchTerm)
-        {
-            var appointments = await _agendaService.SearchAsync(searchTerm);
-            return Ok(appointments);
-        }
     }
 } 

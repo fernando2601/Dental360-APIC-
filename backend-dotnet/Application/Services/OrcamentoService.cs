@@ -48,12 +48,6 @@ namespace DentalSpa.Application.Services
             return await _orcamentoRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<OrcamentoResponse>> SearchAsync(string searchTerm)
-        {
-            var orcamentos = await _orcamentoRepository.SearchAsync(searchTerm);
-            return orcamentos.Select((Orcamento o) => MapToResponse(o));
-        }
-
         public async Task<IEnumerable<Orcamento>> GetOrcamentosByPacienteAsync(int pacienteId)
         {
             return await _orcamentoRepository.GetOrcamentosByPacienteAsync(pacienteId);
