@@ -26,6 +26,7 @@ namespace DentalSpa.Domain.Entities
         public int? Rating { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public int ClinicId { get; set; }
     }
 
     public class AppointmentWithDetails

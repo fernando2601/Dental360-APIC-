@@ -17,5 +17,6 @@ namespace DentalSpa.Application.Interfaces
         Task<bool> ConfirmAppointmentAsync(int id);
         Task<bool> CancelAppointmentAsync(int id);
         Task<bool> CompleteAppointmentAsync(int id);
+        Task<IEnumerable<Appointment>> GetAppointmentsByStaffAndDateAsync(int staffId, DateTime date);
     }
 } 

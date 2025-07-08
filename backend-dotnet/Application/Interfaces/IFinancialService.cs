@@ -1,15 +1,16 @@
 using DentalSpa.Domain.Entities;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Interfaces
 {
     public interface IFinancialService
     {
-        Task<IEnumerable<FinancialTransaction>> GetAllAsync();
-        Task<FinancialTransaction?> GetByIdAsync(int id);
+        Task<IEnumerable<FinancialTransactionResponse>> GetAllAsync();
+        Task<FinancialTransactionResponse?> GetByIdAsync(int id);
         Task<FinancialTransaction> CreateAsync(FinancialTransaction transaction);
         Task<FinancialTransaction?> UpdateAsync(int id, FinancialTransaction transaction);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<FinancialTransaction>> SearchAsync(string searchTerm);
+        Task<IEnumerable<FinancialTransactionResponse>> SearchAsync(string searchTerm);
 
         // Métodos de dashboard e análises
         Task<object> GetFinancialDashboardAsync(DateTime? startDate, DateTime? endDate);

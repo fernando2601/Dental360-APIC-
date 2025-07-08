@@ -1,16 +1,14 @@
-namespace DentalSpa.Domain.Entities
+namespace DentalSpa.Application.DTOs
 {
-    public class Service
+    public class ServiceCreateRequest
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public string? Description { get; set; }
         public decimal Price { get; set; }
-        public int Duration { get; set; } // em minutos
+        public int Duration { get; set; }
         public bool IsActive { get; set; } = true;
-        public DateTime? CreatedAt { get; set; }
         public int ClinicId { get; set; }
-        public List<StaffService> StaffServices { get; set; } = new();
+        public List<int> StaffIds { get; set; } = new();
     }
-}
+} 

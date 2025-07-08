@@ -1,6 +1,7 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
@@ -15,72 +16,62 @@ namespace DentalSpa.Application.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<Staff>> GetAllStaffAsync()
+        public async Task<IEnumerable<StaffResponse>> GetAllStaffAsync()
         {
-            try
-            {
-                return await _staffRepository.GetAllAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar todos os funcionários");
-                throw;
-            }
+            var staff = await _staffRepository.GetAllStaffAsync();
+            return staff.Select(MapToResponse);
         }
 
-        public async Task<Staff?> GetStaffByIdAsync(int id)
+        public async Task<StaffResponse?> GetStaffByIdAsync(int id)
         {
-            if (id <= 0)
-            {
-                _logger.LogWarning("ID inválido fornecido: {Id}", id);
-                return null;
-            }
-
-            try
-            {
-                return await _staffRepository.GetByIdAsync(id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar funcionário com ID {Id}", id);
-                throw;
-            }
+            var staff = await _staffRepository.GetStaffByIdAsync(id);
+            return staff == null ? null : MapToResponse(staff);
         }
 
-        public async Task<Staff> CreateStaffAsync(Staff staff)
+        public async Task<StaffResponse> CreateAsync(StaffCreateRequest request)
         {
-            ValidateStaff(staff);
-
-            try
+            var staff = new Staff
             {
-                return await _staffRepository.CreateAsync(staff);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar funcionário");
-                throw;
-            }
+                FullName = request.FullName,
+                Email = request.Email,
+                Phone = request.Phone,
+                ClinicId = request.ClinicId,
+                PositionId = request.PositionId,
+                Department = request.Department,
+                Salary = request.Salary,
+                HireDate = request.HireDate,
+                IsActive = request.IsActive,
+                Bio = request.Bio,
+                ProfileImageUrl = request.ProfileImageUrl,
+                YearsOfExperience = request.YearsOfExperience,
+                License = request.License
+            };
+            var created = await _staffRepository.CreateAsync(staff);
+            // Salvar relação N:N com serviços
+            await _staffRepository.SetStaffServicesAsync(created.Id, request.ServiceIds);
+            return MapToResponse(created, request.ServiceIds);
         }
 
-        public async Task<Staff?> UpdateStaffAsync(Staff staff)
+        public async Task<StaffResponse?> UpdateAsync(int id, StaffCreateRequest request)
         {
-            if (staff.Id <= 0)
-            {
-                _logger.LogWarning("ID inválido fornecido para atualização: {Id}", staff.Id);
-                return null;
-            }
-
-            ValidateStaff(staff);
-
-            try
-            {
-                return await _staffRepository.UpdateAsync(staff.Id, staff);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar funcionário com ID {Id}", staff.Id);
-                throw;
-            }
+            var staff = await _staffRepository.GetByIdAsync(id);
+            if (staff == null) return null;
+            staff.FullName = request.FullName;
+            staff.Email = request.Email;
+            staff.Phone = request.Phone;
+            staff.ClinicId = request.ClinicId;
+            staff.PositionId = request.PositionId;
+            staff.Department = request.Department;
+            staff.Salary = request.Salary;
+            staff.HireDate = request.HireDate;
+            staff.IsActive = request.IsActive;
+            staff.Bio = request.Bio;
+            staff.ProfileImageUrl = request.ProfileImageUrl;
+            staff.YearsOfExperience = request.YearsOfExperience;
+            staff.License = request.License;
+            var updated = await _staffRepository.UpdateAsync(id, staff);
+            await _staffRepository.SetStaffServicesAsync(id, request.ServiceIds);
+            return MapToResponse(updated, request.ServiceIds);
         }
 
         public async Task<bool> DeleteStaffAsync(int id)
@@ -102,40 +93,28 @@ namespace DentalSpa.Application.Services
             }
         }
 
-        public async Task<IEnumerable<Staff>> SearchStaffAsync(string searchTerm)
+        public async Task<IEnumerable<StaffResponse>> SearchStaffAsync(string searchTerm)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                return Enumerable.Empty<Staff>();
-            }
-
-            try
-            {
-                return await _staffRepository.SearchAsync(searchTerm);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar funcionários com termo: {SearchTerm}", searchTerm);
-                throw;
-            }
+            var staff = await _staffRepository.SearchStaffAsync(searchTerm);
+            return staff.Select(MapToResponse);
         }
 
-        public async Task<IEnumerable<Staff>> GetStaffBySpecializationAsync(string specialization)
+        public async Task<IEnumerable<StaffResponse>> GetStaffBySpecializationAsync(string specialization)
         {
             // Implementação básica - retorna todos os funcionários
-            return await _staffRepository.GetAllAsync();
+            return Enumerable.Empty<StaffResponse>();
         }
 
-        public async Task<IEnumerable<Staff>> GetStaffByDepartmentAsync(string department)
+        public async Task<IEnumerable<StaffResponse>> GetStaffByDepartmentAsync(string department)
         {
-            // Implementação básica - retorna todos os funcionários
-            return await _staffRepository.GetAllAsync();
+            var staff = await _staffRepository.GetStaffByDepartmentAsync(department);
+            return staff.Select(MapToResponse);
         }
 
-        public async Task<IEnumerable<Staff>> GetStaffByPositionAsync(string position)
+        public async Task<IEnumerable<StaffResponse>> GetStaffByPositionAsync(string position)
         {
-            // Implementação básica - retorna todos os funcionários
-            return await _staffRepository.GetAllAsync();
+            var staff = await _staffRepository.GetStaffByPositionAsync(position);
+            return staff.Select(MapToResponse);
         }
 
         public async Task<object> GetStaffStatsAsync()
@@ -164,10 +143,10 @@ namespace DentalSpa.Application.Services
             return staff.Select(s => s.Position).Distinct();
         }
 
-        public async Task<IEnumerable<Staff>> GetTeamMembersAsync(int managerId)
+        public async Task<IEnumerable<StaffResponse>> GetTeamMembersAsync(int managerId)
         {
-            // Implementação básica - retorna todos os funcionários
-            return await _staffRepository.GetAllAsync();
+            var staff = await _staffRepository.GetTeamMembersAsync(managerId);
+            return staff.Select(MapToResponse);
         }
 
         private static void ValidateStaff(Staff staff)
@@ -196,6 +175,28 @@ namespace DentalSpa.Application.Services
             {
                 return false;
             }
+        }
+
+        private StaffResponse MapToResponse(Staff s, List<int>? serviceIds = null)
+        {
+            return new StaffResponse
+            {
+                FullName = s.FullName,
+                Email = s.Email,
+                Phone = s.Phone,
+                PositionId = s.PositionId,
+                ClinicId = s.ClinicId,
+                Department = s.Department,
+                Salary = s.Salary,
+                HireDate = s.HireDate,
+                IsActive = s.IsActive,
+                Bio = s.Bio,
+                ProfileImageUrl = s.ProfileImageUrl,
+                YearsOfExperience = s.YearsOfExperience,
+                License = s.License,
+                Name = s.Name,
+                ServiceIds = serviceIds ?? s.StaffServices.Select(ss => ss.ServiceId).ToList()
+            };
         }
     }
 }

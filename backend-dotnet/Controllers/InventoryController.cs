@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.API.Controllers
 {
@@ -18,30 +19,39 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Inventory>>> GetAll()
-            => Ok(await _inventoryService.GetAllInventoryAsync());
+        public async Task<ActionResult<IEnumerable<InventoryResponse>>> GetAll()
+        {
+            var items = await _inventoryService.GetAllAsync();
+            return Ok(items);
+        }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Inventory>> GetById(int id)
+        public async Task<ActionResult<InventoryResponse>> GetById(int id)
         {
-            var item = await _inventoryService.GetInventoryByIdAsync(id);
-            if (item == null) return NotFound();
+            var item = await _inventoryService.GetByIdAsync(id);
+            if (item == null)
+                return NotFound();
             return Ok(item);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Inventory>> Create([FromBody] Inventory inventory)
+        public async Task<ActionResult<InventoryResponse>> Create([FromBody] InventoryCreateRequest request)
         {
-            var created = await _inventoryService.CreateInventoryAsync(inventory);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _inventoryService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), null, response);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Inventory>> Update(int id, [FromBody] Inventory inventory)
+        public async Task<ActionResult<InventoryResponse>> Update(int id, [FromBody] InventoryCreateRequest request)
         {
-            var updated = await _inventoryService.UpdateInventoryAsync(inventory);
-            if (updated == null) return NotFound();
-            return Ok(updated);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _inventoryService.UpdateAsync(id, request);
+            if (response == null)
+                return NotFound();
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
@@ -53,11 +63,11 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Inventory>>> Search([FromQuery] string searchTerm)
+        public async Task<ActionResult<IEnumerable<InventoryResponse>>> Search([FromQuery] string searchTerm)
             => Ok(await _inventoryService.SearchByNameAsync(searchTerm));
 
         [HttpGet("low-stock")]
-        public async Task<ActionResult<IEnumerable<Inventory>>> GetLowStock([FromQuery] int threshold = 10)
+        public async Task<ActionResult<IEnumerable<InventoryResponse>>> GetLowStock([FromQuery] int threshold = 10)
             => Ok(await _inventoryService.GetLowStockItemsAsync(threshold));
     }
 } 

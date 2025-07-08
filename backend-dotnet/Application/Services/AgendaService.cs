@@ -25,6 +25,12 @@ namespace DentalSpa.Application.Services
 
         public async Task<Appointment> CreateAsync(Appointment appointment)
         {
+            // Verificar conflito de horário para o mesmo profissional
+            var conflicts = await _agendaRepository.GetByStaffAndTimeRangeAsync(appointment.StaffId, appointment.StartTime, appointment.EndTime);
+            if (conflicts.Any())
+            {
+                throw new InvalidOperationException("Já existe um agendamento para este profissional neste horário.");
+            }
             return await _agendaRepository.CreateAsync(appointment);
         }
 
@@ -95,6 +101,12 @@ namespace DentalSpa.Application.Services
             
             var updated = await _agendaRepository.UpdateAsync(id, appointment);
             return updated != null;
+        }
+
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByStaffAndDateAsync(int staffId, DateTime date)
+        {
+            var all = await _agendaRepository.GetAllAsync();
+            return all.Where(a => a.StaffId == staffId && a.StartTime.Date == date.Date);
         }
     }
 } 

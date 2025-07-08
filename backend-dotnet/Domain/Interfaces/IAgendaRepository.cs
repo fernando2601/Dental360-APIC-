@@ -10,5 +10,6 @@ namespace DentalSpa.Domain.Interfaces
         Task<Appointment?> UpdateAsync(int id, Appointment appointment);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<Appointment>> SearchAsync(string searchTerm);
+        Task<IEnumerable<Appointment>> GetByStaffAndTimeRangeAsync(int staffId, DateTime start, DateTime end);
     }
 }

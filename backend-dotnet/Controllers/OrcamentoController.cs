@@ -3,6 +3,7 @@ using DentalSpa.Application.Interfaces;
 using DentalSpa.Domain.Entities;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.API.Controllers
 {
@@ -17,17 +18,40 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Orcamento>> Create([FromBody] Orcamento orcamento)
+        public async Task<ActionResult<OrcamentoResponse>> Create([FromBody] Orcamento orcamento)
         {
-            var result = await _service.CreateOrcamentoAsync(orcamento);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var newOrcamento = await _service.CreateOrcamentoAsync(orcamento);
+            var response = new OrcamentoResponse
+            {
+                PacienteId = newOrcamento.PacienteId,
+                DataCriacao = newOrcamento.DataCriacao,
+                Status = newOrcamento.Status,
+                ValorTotal = newOrcamento.ValorTotal,
+                Observacoes = newOrcamento.Observacoes,
+                Itens = newOrcamento.Itens.Select(i => new OrcamentoItemResponse
+                {
+                    OrcamentoId = i.OrcamentoId,
+                    ServicoId = i.ServicoId,
+                    Descricao = i.Descricao,
+                    Quantidade = i.Quantidade,
+                    ValorUnitario = i.ValorUnitario,
+                    ValorTotal = i.ValorTotal
+                }).ToList(),
+                CreatedAt = newOrcamento.CreatedAt,
+                UpdatedAt = newOrcamento.UpdatedAt
+            };
+            return CreatedAtAction(nameof(GetById), null, response);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Orcamento>> GetById(int id)
+        public async Task<ActionResult<OrcamentoResponse>> GetById(int id)
         {
             var orcamento = await _service.GetOrcamentoByIdAsync(id);
-            if (orcamento == null) return NotFound();
+            if (orcamento == null)
+                return NotFound();
             return Ok(orcamento);
         }
 
@@ -39,7 +63,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Orcamento>>> GetAll()
+        public async Task<ActionResult<IEnumerable<OrcamentoResponse>>> GetAll()
         {
             var orcamentos = await _service.GetAllOrcamentosAsync();
             return Ok(orcamentos);

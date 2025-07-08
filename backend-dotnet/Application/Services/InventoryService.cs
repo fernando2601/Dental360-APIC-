@@ -1,6 +1,7 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
@@ -41,33 +42,53 @@ namespace DentalSpa.Application.Services
             }
         }
 
-        public async Task<Inventory> CreateInventoryAsync(Inventory inventory)
+        public async Task<InventoryResponse> CreateAsync(InventoryCreateRequest request)
         {
-            try
+            var item = new Inventory
             {
-                inventory.CreatedAt = DateTime.UtcNow;
-                inventory.UpdatedAt = DateTime.UtcNow;
-                return await _inventoryRepository.CreateAsync(inventory);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar item do inventário");
-                throw;
-            }
+                Name = request.Name,
+                Description = request.Description,
+                Category = request.Category,
+                Quantity = request.Quantity,
+                Unit = request.Unit,
+                MinStock = request.MinStock,
+                UnitPrice = request.UnitPrice,
+                Supplier = request.Supplier,
+                Location = request.Location,
+                BatchNumber = request.BatchNumber,
+                ExpirationDate = request.ExpirationDate,
+                Status = request.Status,
+                IsActive = request.IsActive,
+                CreatedAt = request.CreatedAt,
+                UpdatedAt = request.UpdatedAt,
+                ClinicId = request.ClinicId
+            };
+            var created = await _inventoryRepository.CreateAsync(item);
+            return MapToResponse(created);
         }
 
-        public async Task<Inventory> UpdateInventoryAsync(Inventory inventory)
+        public async Task<InventoryResponse?> UpdateAsync(int id, InventoryCreateRequest request)
         {
-            try
-            {
-                inventory.UpdatedAt = DateTime.UtcNow;
-                return await _inventoryRepository.UpdateAsync(inventory.Id, inventory);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar item do inventário: {Id}", inventory.Id);
-                throw;
-            }
+            var item = await _inventoryRepository.GetByIdAsync(id);
+            if (item == null) return null;
+            item.Name = request.Name;
+            item.Description = request.Description;
+            item.Category = request.Category;
+            item.Quantity = request.Quantity;
+            item.Unit = request.Unit;
+            item.MinStock = request.MinStock;
+            item.UnitPrice = request.UnitPrice;
+            item.Supplier = request.Supplier;
+            item.Location = request.Location;
+            item.BatchNumber = request.BatchNumber;
+            item.ExpirationDate = request.ExpirationDate;
+            item.Status = request.Status;
+            item.IsActive = request.IsActive;
+            item.CreatedAt = request.CreatedAt;
+            item.UpdatedAt = request.UpdatedAt;
+            item.ClinicId = request.ClinicId;
+            var updated = await _inventoryRepository.UpdateAsync(id, item);
+            return MapToResponse(updated);
         }
 
         public async Task<bool> DeleteInventoryAsync(int id)
@@ -112,6 +133,12 @@ namespace DentalSpa.Application.Services
         {
             // Implementação fictícia, pois não há método correspondente no repositório
             return false;
+        }
+
+        private InventoryResponse MapToResponse(Inventory inventory)
+        {
+            // Implemente a lógica para mapear um objeto Inventory para um objeto InventoryResponse
+            throw new NotImplementedException();
         }
     }
 }

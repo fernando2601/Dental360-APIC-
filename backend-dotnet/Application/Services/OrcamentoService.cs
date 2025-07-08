@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
@@ -17,14 +18,16 @@ namespace DentalSpa.Application.Services
             _orcamentoRepository = orcamentoRepository;
         }
 
-        public async Task<IEnumerable<Orcamento>> GetAllAsync()
+        public async Task<IEnumerable<OrcamentoResponse>> GetAllAsync()
         {
-            return await _orcamentoRepository.GetAllAsync();
+            var orcamentos = await _orcamentoRepository.GetAllAsync();
+            return orcamentos.Select(MapToResponse);
         }
 
-        public async Task<Orcamento?> GetByIdAsync(int id)
+        public async Task<OrcamentoResponse?> GetByIdAsync(int id)
         {
-            return await _orcamentoRepository.GetByIdAsync(id);
+            var orcamento = await _orcamentoRepository.GetByIdAsync(id);
+            return orcamento == null ? null : MapToResponse(orcamento);
         }
 
         public async Task<Orcamento> CreateAsync(Orcamento orcamento)
@@ -45,9 +48,10 @@ namespace DentalSpa.Application.Services
             return await _orcamentoRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<Orcamento>> SearchAsync(string searchTerm)
+        public async Task<IEnumerable<OrcamentoResponse>> SearchAsync(string searchTerm)
         {
-            return await _orcamentoRepository.SearchAsync(searchTerm);
+            var orcamentos = await _orcamentoRepository.SearchAsync(searchTerm);
+            return orcamentos.Select(MapToResponse);
         }
 
         public async Task<IEnumerable<Orcamento>> GetOrcamentosByPacienteAsync(int pacienteId)
@@ -98,6 +102,29 @@ namespace DentalSpa.Application.Services
         public async Task<bool> DeleteOrcamentoAsync(int id)
         {
             return await _orcamentoRepository.DeleteAsync(id);
+        }
+
+        private OrcamentoResponse MapToResponse(Orcamento o)
+        {
+            return new OrcamentoResponse
+            {
+                PacienteId = o.PacienteId,
+                DataCriacao = o.DataCriacao,
+                Status = o.Status,
+                ValorTotal = o.ValorTotal,
+                Observacoes = o.Observacoes,
+                Itens = o.Itens.Select(i => new OrcamentoItemResponse
+                {
+                    OrcamentoId = i.OrcamentoId,
+                    ServicoId = i.ServicoId,
+                    Descricao = i.Descricao,
+                    Quantidade = i.Quantidade,
+                    ValorUnitario = i.ValorUnitario,
+                    ValorTotal = i.ValorTotal
+                }).ToList(),
+                CreatedAt = o.CreatedAt,
+                UpdatedAt = o.UpdatedAt
+            };
         }
     }
 } 

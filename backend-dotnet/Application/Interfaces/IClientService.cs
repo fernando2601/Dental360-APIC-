@@ -1,14 +1,15 @@
 using DentalSpa.Domain.Entities;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Interfaces
 {
     public interface IClientService
     {
-        Task<IEnumerable<Client>> GetAllClientsAsync();
-        Task<Client?> GetClientByIdAsync(int id);
-        Task<Client> CreateClientAsync(Client client);
-        Task<Client?> UpdateClientAsync(Client client);
-        Task<bool> DeleteClientAsync(int id);
-        Task<IEnumerable<Client>> SearchClientsAsync(string searchTerm);
+        Task<IEnumerable<ClientResponse>> GetAllAsync();
+        Task<ClientResponse?> GetByIdAsync(int id);
+        Task<ClientResponse> CreateAsync(ClientCreateRequest request);
+        Task<ClientResponse?> UpdateAsync(int id, ClientCreateRequest request);
+        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<ClientResponse>> SearchAsync(string searchTerm);
     }
 }

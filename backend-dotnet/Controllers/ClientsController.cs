@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.API.Controllers
 {
@@ -22,17 +23,10 @@ namespace DentalSpa.API.Controllers
         /// </summary>
         /// <returns>Lista de clientes</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
+        public async Task<ActionResult<IEnumerable<ClientResponse>>> GetAll()
         {
-            try
-            {
-                var clients = await _clientService.GetAllClientsAsync();
-                return Ok(clients);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var clients = await _clientService.GetAllAsync();
+            return Ok(clients);
         }
 
         /// <summary>
@@ -41,77 +35,43 @@ namespace DentalSpa.API.Controllers
         /// <param name="id">ID do cliente</param>
         /// <returns>Dados do cliente</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Client>> GetClientById(int id)
+        public async Task<ActionResult<ClientResponse>> GetById(int id)
         {
-            try
-            {
-                var client = await _clientService.GetClientByIdAsync(id);
-                return Ok(client);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var client = await _clientService.GetByIdAsync(id);
+            if (client == null)
+                return NotFound();
+            return Ok(client);
         }
 
         /// <summary>
         /// Cria um novo cliente
         /// </summary>
-        /// <param name="client">Dados do cliente</param>
+        /// <param name="request">Dados do cliente</param>
         /// <returns>Cliente criado</returns>
         [HttpPost]
-        public async Task<ActionResult<Client>> CreateClient([FromBody] Client client)
+        public async Task<ActionResult<ClientResponse>> Create([FromBody] ClientCreateRequest request)
         {
-            try
-            {
-                var result = await _clientService.CreateClientAsync(client);
-                return CreatedAtAction(nameof(GetClientById), new { id = result.Id }, result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _clientService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), null, response);
         }
 
         /// <summary>
         /// Atualiza cliente existente
         /// </summary>
         /// <param name="id">ID do cliente</param>
-        /// <param name="client">Novos dados do cliente</param>
+        /// <param name="request">Novos dados do cliente</param>
         /// <returns>Cliente atualizado</returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult<Client>> UpdateClient(int id, [FromBody] Client client)
+        public async Task<ActionResult<ClientResponse>> Update(int id, [FromBody] ClientCreateRequest request)
         {
-            try
-            {
-                if (id != client.Id)
-                {
-                    return BadRequest("O ID do cliente não corresponde.");
-                }
-
-                var result = await _clientService.UpdateClientAsync(client);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _clientService.UpdateAsync(id, request);
+            if (response == null)
+                return NotFound();
+            return Ok(response);
         }
 
         /// <summary>

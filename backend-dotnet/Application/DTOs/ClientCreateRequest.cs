@@ -1,8 +1,7 @@
-namespace DentalSpa.Domain.Entities
+namespace DentalSpa.Application.DTOs
 {
-    public class Client
+    public class ClientCreateRequest
     {
-        public int Id { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
@@ -12,4 +11,4 @@ namespace DentalSpa.Domain.Entities
         public DateTime? CreatedAt { get; set; }
         public int ClinicId { get; set; }
     }
-}
+} 

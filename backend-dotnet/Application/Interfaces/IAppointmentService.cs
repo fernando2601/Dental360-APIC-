@@ -1,14 +1,16 @@
 using DentalSpa.Domain.Entities;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Interfaces
 {
     public interface IAppointmentService
     {
-        Task<IEnumerable<Appointment>> GetAllAppointmentsAsync();
-        Task<Appointment?> GetAppointmentByIdAsync(int id);
-        Task<Appointment> CreateAppointmentAsync(Appointment appointment);
-        Task<Appointment?> UpdateAppointmentAsync(int id, Appointment appointment);
-        Task<bool> DeleteAppointmentAsync(int id);
+        Task<IEnumerable<AppointmentResponse>> GetAllAsync();
+        Task<AppointmentResponse?> GetByIdAsync(int id);
+        Task<Appointment> CreateAsync(Appointment appointment);
+        Task<Appointment?> UpdateAsync(int id, Appointment appointment);
+        Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<AppointmentResponse>> SearchAsync(string searchTerm);
         Task<object> GetAppointmentReportsAsync(
             DateTime? startDate,
             DateTime? endDate,
@@ -19,5 +21,6 @@ namespace DentalSpa.Application.Interfaces
             string? sala,
             int page,
             int limit);
+        Task<IEnumerable<AppointmentResponse>> GetBusyTimesAsync(int staffId, DateTime date);
     }
 }

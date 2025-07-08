@@ -118,5 +118,40 @@ namespace DentalSpa.Infrastructure.Repositories
             }
             return await Task.FromResult(appointments);
         }
+
+        public async Task<IEnumerable<Appointment>> GetByStaffAndTimeRangeAsync(int staffId, DateTime start, DateTime end)
+        {
+            var appointments = new List<Appointment>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, staffid, starttime, endtime FROM appointments WHERE staffid = @StaffId AND is_active = 1 AND ((starttime < @End AND endtime > @Start))";
+                var paramStaff = cmd.CreateParameter();
+                paramStaff.ParameterName = "@StaffId";
+                paramStaff.Value = staffId;
+                cmd.Parameters.Add(paramStaff);
+                var paramStart = cmd.CreateParameter();
+                paramStart.ParameterName = "@Start";
+                paramStart.Value = start;
+                cmd.Parameters.Add(paramStart);
+                var paramEnd = cmd.CreateParameter();
+                paramEnd.ParameterName = "@End";
+                paramEnd.Value = end;
+                cmd.Parameters.Add(paramEnd);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        appointments.Add(new Appointment
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            StaffId = reader.GetInt32(reader.GetOrdinal("staffid")),
+                            StartTime = reader.GetDateTime(reader.GetOrdinal("starttime")),
+                            EndTime = reader.GetDateTime(reader.GetOrdinal("endtime"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(appointments);
+        }
     }
 } 

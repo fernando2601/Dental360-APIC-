@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.API.Controllers
 {
@@ -18,11 +19,11 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Service>>> GetAllServices()
+        public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetAll()
         {
             try
             {
-                var services = await _serviceService.GetAllServicesAsync();
+                var services = await _serviceService.GetAllAsync();
                 return Ok(services);
             }
             catch (Exception ex)
@@ -33,11 +34,11 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Service>> GetServiceById(int id)
+        public async Task<ActionResult<ServiceResponse>> GetById(int id)
         {
             try
             {
-                var service = await _serviceService.GetServiceByIdAsync(id);
+                var service = await _serviceService.GetByIdAsync(id);
                 if (service == null)
                 {
                     return NotFound(new { message = "Serviço não encontrado" });
@@ -53,61 +54,23 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Service>> CreateService([FromBody] Service service)
+        public async Task<ActionResult<ServiceResponse>> Create([FromBody] ServiceCreateRequest request)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var newService = await _serviceService.CreateServiceAsync(service);
-                return CreatedAtAction(nameof(GetServiceById), new { id = newService.Id }, newService);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar serviço");
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _serviceService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), null, response);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Service>> UpdateService(int id, [FromBody] Service service)
+        public async Task<ActionResult<ServiceResponse>> Update(int id, [FromBody] ServiceCreateRequest request)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                if (id != service.Id)
-                {
-                    return BadRequest("O ID do serviço não corresponde.");
-                }
-
-                var updatedService = await _serviceService.UpdateServiceAsync(id, service);
-                if (updatedService == null)
-                {
-                    return NotFound(new { message = "Serviço não encontrado" });
-                }
-
-                return Ok(updatedService);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar serviço {ServiceId}", id);
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _serviceService.UpdateAsync(id, request);
+            if (response == null)
+                return NotFound();
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
@@ -131,7 +94,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("category/{category}")]
-        public async Task<ActionResult<IEnumerable<Service>>> GetServicesByCategory(string category)
+        public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetServicesByCategory(string category)
         {
             try
             {

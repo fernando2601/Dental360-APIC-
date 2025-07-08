@@ -1,6 +1,7 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
@@ -13,33 +14,50 @@ namespace DentalSpa.Application.Services
             _serviceRepository = serviceRepository;
         }
 
-        public async Task<IEnumerable<Service>> GetAllServicesAsync()
+        public async Task<IEnumerable<ServiceResponse>> GetAllAsync()
         {
-            return await _serviceRepository.GetAllAsync();
+            var services = await _serviceRepository.GetAllAsync();
+            return services.Select(MapToResponse);
         }
 
-        public async Task<Service?> GetServiceByIdAsync(int id)
+        public async Task<ServiceResponse?> GetByIdAsync(int id)
         {
-            if (id <= 0)
-                return null;
-
-            return await _serviceRepository.GetByIdAsync(id);
+            var service = await _serviceRepository.GetByIdAsync(id);
+            return service == null ? null : MapToResponse(service);
         }
 
-        public async Task<Service> CreateServiceAsync(Service service)
+        public async Task<ServiceResponse> CreateAsync(ServiceCreateRequest request)
         {
-            ValidateService(service);
-            return await _serviceRepository.CreateAsync(service);
+            var service = new Service
+            {
+                Name = request.Name,
+                Category = request.Category,
+                Description = request.Description,
+                Price = request.Price,
+                Duration = request.Duration,
+                IsActive = request.IsActive,
+                ClinicId = request.ClinicId
+            };
+            var created = await _serviceRepository.CreateAsync(service);
+            // Salvar relação N:N com Staff
+            await _serviceRepository.SetServiceStaffAsync(created.Id, request.StaffIds);
+            return MapToResponse(created, request.StaffIds);
         }
 
-        public async Task<Service?> UpdateServiceAsync(int id, Service service)
+        public async Task<ServiceResponse?> UpdateAsync(int id, ServiceCreateRequest request)
         {
-            if (id <= 0)
-                return null;
-
-            service.Id = id; // Ensure the service has the correct ID
-            ValidateService(service);
-            return await _serviceRepository.UpdateAsync(id, service);
+            var service = await _serviceRepository.GetByIdAsync(id);
+            if (service == null) return null;
+            service.Name = request.Name;
+            service.Category = request.Category;
+            service.Description = request.Description;
+            service.Price = request.Price;
+            service.Duration = request.Duration;
+            service.IsActive = request.IsActive;
+            service.ClinicId = request.ClinicId;
+            var updated = await _serviceRepository.UpdateAsync(id, service);
+            await _serviceRepository.SetServiceStaffAsync(id, request.StaffIds);
+            return MapToResponse(updated, request.StaffIds);
         }
 
         public async Task<bool> DeleteServiceAsync(int id)
@@ -63,12 +81,10 @@ namespace DentalSpa.Application.Services
             return await _serviceRepository.GetAllAsync();
         }
 
-        public async Task<IEnumerable<Service>> SearchServicesAsync(string searchTerm)
+        public async Task<IEnumerable<ServiceResponse>> SearchAsync(string searchTerm)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return Enumerable.Empty<Service>();
-
-            return await _serviceRepository.SearchAsync(searchTerm);
+            var services = await _serviceRepository.SearchAsync(searchTerm);
+            return services.Select(MapToResponse);
         }
 
         public async Task<object> GetServiceStatsAsync()
@@ -100,6 +116,22 @@ namespace DentalSpa.Application.Services
 
             if (service.Duration <= 0)
                 throw new ArgumentException("Duração deve ser maior que zero");
+        }
+
+        private ServiceResponse MapToResponse(Service s, List<int>? staffIds = null)
+        {
+            return new ServiceResponse
+            {
+                Name = s.Name,
+                Category = s.Category,
+                Description = s.Description,
+                Price = s.Price,
+                Duration = s.Duration,
+                IsActive = s.IsActive,
+                ClinicId = s.ClinicId,
+                StaffIds = staffIds ?? s.StaffServices.Select(ss => ss.StaffId).ToList(),
+                CreatedAt = s.CreatedAt
+            };
         }
     }
 }

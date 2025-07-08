@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
 using DentalSpa.Application.DTOs;
+using System.Collections.Generic;
 
 namespace DentalSpa.Application.Services
 {
@@ -46,30 +47,31 @@ namespace DentalSpa.Application.Services
                 return null;
             }
 
-            return GenerateJwtToken(user);
+            // Buscar permissão do usuário
+            var permission = user.Permission?.Name ?? "ADM";
+
+            return GenerateJwtToken(user, permission);
         }
 
-        private object GenerateJwtToken(User user)
+        private object GenerateJwtToken(User user, string permission)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "DentalSpa-Default-Secret-Key-For-JWT-Token-Generation-2024");
-            
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user.Email ?? ""),
+                new Claim(ClaimTypes.Name, user.FullName ?? ""),
+                new Claim("permission", permission)
+            };
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email ?? ""),
-                    new Claim(ClaimTypes.Name, user.FullName ?? "")
-                }),
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddHours(8),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
-
-            return new { Token = tokenString, User = new { user.Id, user.Email, user.FullName } };
+            return new { Token = tokenString, User = new { user.Email, user.FullName, Permission = permission } };
         }
 
         public async Task<object> RegisterAsync(RegisterRequest request)

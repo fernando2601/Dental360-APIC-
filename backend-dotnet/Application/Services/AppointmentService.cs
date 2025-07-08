@@ -1,6 +1,7 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
@@ -13,14 +14,22 @@ namespace DentalSpa.Application.Services
             _appointmentRepository = appointmentRepository;
         }
 
-        public async Task<IEnumerable<Appointment>> GetAllAppointmentsAsync()
+        public async Task<IEnumerable<AppointmentResponse>> GetAllAsync()
         {
-            return await _appointmentRepository.GetAllAsync();
+            var appointments = await _appointmentRepository.GetAllAsync();
+            return appointments.Select(MapToResponse);
         }
 
-        public async Task<Appointment?> GetAppointmentByIdAsync(int id)
+        public async Task<AppointmentResponse?> GetByIdAsync(int id)
         {
-            return await _appointmentRepository.GetByIdAsync(id);
+            var appointment = await _appointmentRepository.GetByIdAsync(id);
+            return appointment == null ? null : MapToResponse(appointment);
+        }
+
+        public async Task<IEnumerable<AppointmentResponse>> SearchAsync(string searchTerm)
+        {
+            var appointments = await _appointmentRepository.SearchAsync(searchTerm);
+            return appointments.Select(MapToResponse);
         }
 
         public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
@@ -70,6 +79,42 @@ namespace DentalSpa.Application.Services
                     completedAppointments = appointments.Count(a => a.Status == "completed"),
                     cancelledAppointments = appointments.Count(a => a.Status == "cancelled")
                 }
+            };
+        }
+
+        public async Task<IEnumerable<AppointmentResponse>> GetBusyTimesAsync(int staffId, DateTime date)
+        {
+            var all = await _appointmentRepository.GetAllAsync();
+            return all.Where(a => a.StaffId == staffId && a.StartTime.Date == date.Date).Select(MapToResponse);
+        }
+
+        private AppointmentResponse MapToResponse(Appointment a)
+        {
+            return new AppointmentResponse
+            {
+                ClientId = a.ClientId,
+                StaffId = a.StaffId,
+                ServiceId = a.ServiceId,
+                StartTime = a.StartTime,
+                EndTime = a.EndTime,
+                Status = a.Status,
+                Notes = a.Notes,
+                Room = a.Room,
+                Price = a.Price,
+                PaymentStatus = a.PaymentStatus,
+                PaymentMethod = a.PaymentMethod,
+                IsRecurring = a.IsRecurring,
+                RecurrencePattern = a.RecurrencePattern,
+                RecurrenceEndDate = a.RecurrenceEndDate,
+                ParentAppointmentId = a.ParentAppointmentId,
+                CancellationReason = a.CancellationReason,
+                CancelledAt = a.CancelledAt,
+                ConfirmedAt = a.ConfirmedAt,
+                CompletedAt = a.CompletedAt,
+                ClientFeedback = a.ClientFeedback,
+                Rating = a.Rating,
+                CreatedAt = a.CreatedAt,
+                UpdatedAt = a.UpdatedAt
             };
         }
     }

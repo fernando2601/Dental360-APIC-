@@ -4,6 +4,7 @@ using DentalSpa.Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
@@ -56,6 +57,45 @@ namespace DentalSpa.Application.Services
                 return await GetAllClientsAsync();
             }
             return await _clientRepository.SearchAsync(searchTerm);
+        }
+
+        public async Task<ClientResponse> CreateAsync(ClientCreateRequest request)
+        {
+            var client = new Client
+            {
+                FullName = request.FullName,
+                Email = request.Email,
+                Phone = request.Phone,
+                Address = request.Address,
+                Birthday = request.Birthday,
+                Notes = request.Notes,
+                CreatedAt = request.CreatedAt,
+                ClinicId = request.ClinicId
+            };
+            var created = await _clientRepository.CreateAsync(client);
+            return MapToResponse(created);
+        }
+
+        public async Task<ClientResponse?> UpdateAsync(int id, ClientCreateRequest request)
+        {
+            var client = await _clientRepository.GetByIdAsync(id);
+            if (client == null) return null;
+            client.FullName = request.FullName;
+            client.Email = request.Email;
+            client.Phone = request.Phone;
+            client.Address = request.Address;
+            client.Birthday = request.Birthday;
+            client.Notes = request.Notes;
+            client.CreatedAt = request.CreatedAt;
+            client.ClinicId = request.ClinicId;
+            var updated = await _clientRepository.UpdateAsync(id, client);
+            return MapToResponse(updated);
+        }
+
+        private ClientResponse MapToResponse(Client client)
+        {
+            // Implementation of MapToResponse method
+            throw new NotImplementedException();
         }
     }
 }

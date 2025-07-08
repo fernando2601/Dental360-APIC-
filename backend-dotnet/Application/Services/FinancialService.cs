@@ -2,6 +2,7 @@ using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Application.Interfaces;
 using System.Text;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
@@ -14,14 +15,16 @@ namespace DentalSpa.Application.Services
             _financialRepository = financialRepository;
         }
 
-        public async Task<IEnumerable<FinancialTransaction>> GetAllAsync()
+        public async Task<IEnumerable<FinancialTransactionResponse>> GetAllAsync()
         {
-            return await _financialRepository.GetAllAsync();
+            var transactions = await _financialRepository.GetAllAsync();
+            return transactions.Select(MapToResponse);
         }
 
-        public async Task<FinancialTransaction?> GetByIdAsync(int id)
+        public async Task<FinancialTransactionResponse?> GetByIdAsync(int id)
         {
-            return await _financialRepository.GetByIdAsync(id);
+            var transaction = await _financialRepository.GetByIdAsync(id);
+            return transaction == null ? null : MapToResponse(transaction);
         }
 
         public async Task<FinancialTransaction> CreateAsync(FinancialTransaction transaction)
@@ -46,9 +49,10 @@ namespace DentalSpa.Application.Services
             return await _financialRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<FinancialTransaction>> SearchAsync(string searchTerm)
+        public async Task<IEnumerable<FinancialTransactionResponse>> SearchAsync(string searchTerm)
         {
-            return await _financialRepository.SearchAsync(searchTerm);
+            var transactions = await _financialRepository.SearchAsync(searchTerm);
+            return transactions.Select(MapToResponse);
         }
 
         public async Task<object> GetFinancialDashboardAsync(DateTime? startDate, DateTime? endDate)
@@ -370,6 +374,25 @@ namespace DentalSpa.Application.Services
         {
             var calendar = System.Globalization.CultureInfo.InvariantCulture.Calendar;
             return calendar.GetWeekOfYear(date, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+        }
+
+        private FinancialTransactionResponse MapToResponse(FinancialTransaction t)
+        {
+            return new FinancialTransactionResponse
+            {
+                Type = t.Type,
+                Category = t.Category,
+                Amount = t.Amount,
+                Description = t.Description,
+                Date = t.Date,
+                PaymentMethod = t.PaymentMethod,
+                ClientId = t.ClientId,
+                AppointmentId = t.AppointmentId,
+                ReferenceNumber = t.ReferenceNumber,
+                Status = t.Status,
+                CreatedAt = t.CreatedAt,
+                UpdatedAt = t.UpdatedAt
+            };
         }
     }
 }

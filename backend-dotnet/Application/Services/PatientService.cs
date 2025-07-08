@@ -1,6 +1,7 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Services
 {
@@ -13,27 +14,83 @@ namespace DentalSpa.Application.Services
             _patientRepository = patientRepository;
         }
 
-        public async Task<IEnumerable<Patient>> GetAllAsync()
+        public async Task<IEnumerable<PatientResponse>> GetAllAsync()
         {
-            return await _patientRepository.GetAllAsync();
+            var patients = await _patientRepository.GetAllAsync();
+            return patients.Select(p => MapToResponse(p));
         }
 
-        public async Task<Patient?> GetByIdAsync(int id)
+        public async Task<PatientResponse?> GetByIdAsync(int id)
         {
-            return await _patientRepository.GetByIdAsync(id);
+            var patient = await _patientRepository.GetByIdAsync(id);
+            return patient == null ? null : MapToResponse(patient);
         }
 
-        public async Task<Patient> CreateAsync(Patient patient)
+        public async Task<PatientResponse> CreateAsync(PatientCreateRequest request)
         {
-            patient.CreatedAt = DateTime.UtcNow;
-            patient.UpdatedAt = DateTime.UtcNow;
-            return await _patientRepository.CreateAsync(patient);
+            var patient = new Patient
+            {
+                Name = request.Name,
+                Email = request.Email,
+                Phone = request.Phone,
+                ClinicId = request.ClinicId,
+                BirthDate = request.BirthDate,
+                Gender = request.Gender,
+                Address = request.Address,
+                MedicalHistory = request.MedicalHistory,
+                Allergies = request.Allergies,
+                EmergencyContact = request.EmergencyContact,
+                EmergencyPhone = request.EmergencyPhone,
+                IsActive = request.IsActive,
+                Nome = request.Nome,
+                Idade = request.Idade,
+                CPF = request.CPF,
+                RG = request.RG,
+                EstadoNascimento = request.EstadoNascimento,
+                DataNascimento = request.DataNascimento,
+                Sexo = request.Sexo,
+                Telefone = request.Telefone,
+                Endereco = request.Endereco,
+                City = request.City,
+                State = request.State,
+                ZipCode = request.ZipCode,
+                Segment = request.Segment
+            };
+            var created = await _patientRepository.CreateAsync(patient);
+            return MapToResponse(created);
         }
 
-        public async Task<Patient?> UpdateAsync(int id, Patient patient)
+        public async Task<PatientResponse?> UpdateAsync(int id, PatientCreateRequest request)
         {
-            patient.UpdatedAt = DateTime.UtcNow;
-            return await _patientRepository.UpdateAsync(id, patient);
+            var patient = await _patientRepository.GetByIdAsync(id);
+            if (patient == null) return null;
+            patient.Name = request.Name;
+            patient.Email = request.Email;
+            patient.Phone = request.Phone;
+            patient.ClinicId = request.ClinicId;
+            patient.BirthDate = request.BirthDate;
+            patient.Gender = request.Gender;
+            patient.Address = request.Address;
+            patient.MedicalHistory = request.MedicalHistory;
+            patient.Allergies = request.Allergies;
+            patient.EmergencyContact = request.EmergencyContact;
+            patient.EmergencyPhone = request.EmergencyPhone;
+            patient.IsActive = request.IsActive;
+            patient.Nome = request.Nome;
+            patient.Idade = request.Idade;
+            patient.CPF = request.CPF;
+            patient.RG = request.RG;
+            patient.EstadoNascimento = request.EstadoNascimento;
+            patient.DataNascimento = request.DataNascimento;
+            patient.Sexo = request.Sexo;
+            patient.Telefone = request.Telefone;
+            patient.Endereco = request.Endereco;
+            patient.City = request.City;
+            patient.State = request.State;
+            patient.ZipCode = request.ZipCode;
+            patient.Segment = request.Segment;
+            var updated = await _patientRepository.UpdateAsync(id, patient);
+            return MapToResponse(updated);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -41,9 +98,10 @@ namespace DentalSpa.Application.Services
             return await _patientRepository.DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<Patient>> SearchAsync(string searchTerm)
+        public async Task<IEnumerable<PatientResponse>> SearchAsync(string searchTerm)
         {
-            return await _patientRepository.SearchAsync(searchTerm);
+            var patients = await _patientRepository.SearchAsync(searchTerm);
+            return patients.Select(p => MapToResponse(p));
         }
 
         public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
@@ -56,14 +114,16 @@ namespace DentalSpa.Application.Services
             return await _patientRepository.GetPatientByIdAsync(id);
         }
 
-        public async Task<Patient?> GetPatientByCPFAsync(string cpf)
+        public async Task<PatientResponse?> GetPatientByCPFAsync(string cpf)
         {
-            return await _patientRepository.GetPatientByCPFAsync(cpf);
+            var patient = await _patientRepository.GetPatientByCPFAsync(cpf);
+            return patient == null ? null : MapToResponse(patient);
         }
 
-        public async Task<Patient?> GetPatientByEmailAsync(string email)
+        public async Task<PatientResponse?> GetPatientByEmailAsync(string email)
         {
-            return await _patientRepository.GetPatientByEmailAsync(email);
+            var patient = await _patientRepository.GetPatientByEmailAsync(email);
+            return patient == null ? null : MapToResponse(patient);
         }
 
         public async Task<object> GetPatientAnalyticsAsync(DateTime? startDate, DateTime? endDate)
@@ -297,6 +357,39 @@ namespace DentalSpa.Application.Services
                 return false;
 
             return true;
+        }
+
+        private PatientResponse MapToResponse(Patient p)
+        {
+            return new PatientResponse
+            {
+                Name = p.Name,
+                Email = p.Email,
+                Phone = p.Phone,
+                BirthDate = p.BirthDate,
+                Gender = p.Gender,
+                Address = p.Address,
+                MedicalHistory = p.MedicalHistory,
+                Allergies = p.Allergies,
+                EmergencyContact = p.EmergencyContact,
+                EmergencyPhone = p.EmergencyPhone,
+                IsActive = p.IsActive,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt,
+                Nome = p.Nome,
+                Idade = p.Idade,
+                CPF = p.CPF,
+                RG = p.RG,
+                EstadoNascimento = p.EstadoNascimento,
+                DataNascimento = p.DataNascimento,
+                Sexo = p.Sexo,
+                Telefone = p.Telefone,
+                Endereco = p.Endereco,
+                City = p.City,
+                State = p.State,
+                ZipCode = p.ZipCode,
+                Segment = p.Segment
+            };
         }
     }
 }

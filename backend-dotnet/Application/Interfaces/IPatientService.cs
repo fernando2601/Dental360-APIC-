@@ -1,15 +1,16 @@
 using DentalSpa.Domain.Entities;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.Application.Interfaces
 {
     public interface IPatientService
     {
-        Task<IEnumerable<Patient>> GetAllAsync();
-        Task<Patient?> GetByIdAsync(int id);
-        Task<Patient> CreateAsync(Patient patient);
-        Task<Patient?> UpdateAsync(int id, Patient patient);
+        Task<IEnumerable<PatientResponse>> GetAllAsync();
+        Task<PatientResponse?> GetByIdAsync(int id);
+        Task<PatientResponse> CreateAsync(PatientCreateRequest request);
+        Task<PatientResponse?> UpdateAsync(int id, PatientCreateRequest request);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<Patient>> SearchAsync(string searchTerm);
+        Task<IEnumerable<PatientResponse>> SearchAsync(string searchTerm);
         
         // Analytics methods
         Task<object> GetPatientAnalyticsAsync(DateTime? startDate, DateTime? endDate);
@@ -22,7 +23,7 @@ namespace DentalSpa.Application.Interfaces
         Task<object> GetDashboardMetricsAsync();
         Task<object> GetPatientGrowthAsync(int months);
         Task<object> GetPatientRetentionAsync();
-        Task<Patient?> GetPatientByCPFAsync(string cpf);
-        Task<Patient?> GetPatientByEmailAsync(string email);
+        Task<PatientResponse?> GetPatientByCPFAsync(string cpf);
+        Task<PatientResponse?> GetPatientByEmailAsync(string email);
     }
 } 

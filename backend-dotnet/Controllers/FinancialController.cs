@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.API.Controllers
 {
@@ -18,14 +19,14 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FinancialTransaction>>> GetAll()
+        public async Task<ActionResult<IEnumerable<FinancialTransactionResponse>>> GetAll()
         {
             var transactions = await _financialService.GetAllAsync();
             return Ok(transactions);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<FinancialTransaction>> GetById(int id)
+        public async Task<ActionResult<FinancialTransactionResponse>> GetById(int id)
         {
             var transaction = await _financialService.GetByIdAsync(id);
             if (transaction == null)
@@ -34,14 +35,32 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<FinancialTransaction>> Create([FromBody] FinancialTransaction transaction)
+        public async Task<ActionResult<FinancialTransactionResponse>> Create([FromBody] FinancialTransaction transaction)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var newTransaction = await _financialService.CreateAsync(transaction);
-            return CreatedAtAction(nameof(GetById), new { id = newTransaction.Id }, newTransaction);
+            var response = new FinancialTransactionResponse
+            {
+                Type = newTransaction.Type,
+                Category = newTransaction.Category,
+                Amount = newTransaction.Amount,
+                Description = newTransaction.Description,
+                Date = newTransaction.Date,
+                PaymentMethod = newTransaction.PaymentMethod,
+                ClientId = newTransaction.ClientId,
+                AppointmentId = newTransaction.AppointmentId,
+                ReferenceNumber = newTransaction.ReferenceNumber,
+                Status = newTransaction.Status,
+                CreatedAt = newTransaction.CreatedAt,
+                UpdatedAt = newTransaction.UpdatedAt
+            };
+            return CreatedAtAction(nameof(GetById), null, response);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<FinancialTransaction>> Update(int id, [FromBody] FinancialTransaction transaction)
+        public async Task<ActionResult<FinancialTransactionResponse>> Update(int id, [FromBody] FinancialTransaction transaction)
         {
             if (id != transaction.Id)
             {
@@ -66,7 +85,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<FinancialTransaction>>> Search([FromQuery] string term)
+        public async Task<ActionResult<IEnumerable<FinancialTransactionResponse>>> Search([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
                 return BadRequest("Search term is required");

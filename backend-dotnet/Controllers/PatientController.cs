@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Application.Interfaces;
 using System.Security.Claims;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.API.Controllers
 {
@@ -19,14 +20,14 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Patient>>> GetAll()
+        public async Task<ActionResult<IEnumerable<PatientResponse>>> GetAll()
         {
             var patients = await _patientService.GetAllAsync();
             return Ok(patients);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Patient>> GetById(int id)
+        public async Task<ActionResult<PatientResponse>> GetById(int id)
         {
             var patient = await _patientService.GetByIdAsync(id);
             if (patient == null)
@@ -35,38 +36,23 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Patient>> Create([FromBody] Patient patient)
+        public async Task<ActionResult<PatientResponse>> Create([FromBody] PatientCreateRequest request)
         {
-            try
-            {
-                var newPatient = await _patientService.CreateAsync(patient);
-                return CreatedAtAction(nameof(GetById), new { id = newPatient.Id }, newPatient);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _patientService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), null, response);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Patient>> Update(int id, [FromBody] Patient patient)
+        public async Task<ActionResult<PatientResponse>> Update(int id, [FromBody] PatientCreateRequest request)
         {
-            try
-            {
-                if (id != patient.Id)
-                {
-                    return BadRequest("O ID do paciente não corresponde.");
-                }
-
-                var updatedPatient = await _patientService.UpdateAsync(id, patient);
-                if (updatedPatient == null)
-                    return NotFound();
-                return Ok(updatedPatient);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _patientService.UpdateAsync(id, request);
+            if (response == null)
+                return NotFound();
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
@@ -79,7 +65,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Patient>>> Search([FromQuery] string term)
+        public async Task<ActionResult<IEnumerable<PatientResponse>>> Search([FromQuery] string term)
         {
             if (string.IsNullOrWhiteSpace(term))
                 return BadRequest("Search term is required");
@@ -89,7 +75,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("cpf/{cpf}")]
-        public async Task<ActionResult<Patient>> GetPatientByCPF(string cpf)
+        public async Task<ActionResult<PatientResponse>> GetPatientByCPF(string cpf)
         {
             var patient = await _patientService.GetPatientByCPFAsync(cpf);
             if (patient == null)
@@ -99,7 +85,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("email/{email}")]
-        public async Task<ActionResult<Patient>> GetPatientByEmail(string email)
+        public async Task<ActionResult<PatientResponse>> GetPatientByEmail(string email)
         {
             var patient = await _patientService.GetPatientByEmailAsync(email);
             if (patient == null)

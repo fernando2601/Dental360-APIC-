@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Application.Interfaces;
+using DentalSpa.Application.DTOs;
 
 namespace DentalSpa.API.Controllers
 {
@@ -18,7 +19,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Staff>>> GetAllStaff()
+        public async Task<ActionResult<IEnumerable<StaffResponse>>> GetAllStaff()
         {
             try
             {
@@ -33,7 +34,7 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Staff>> GetStaffById(int id)
+        public async Task<ActionResult<StaffResponse>> GetStaffById(int id)
         {
             try
             {
@@ -53,65 +54,23 @@ namespace DentalSpa.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Staff>> CreateStaff([FromBody] Staff staff)
+        public async Task<ActionResult<StaffResponse>> Create([FromBody] StaffCreateRequest request)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var newStaff = await _staffService.CreateStaffAsync(staff);
-                return CreatedAtAction(nameof(GetStaffById), new { id = newStaff.Id }, newStaff);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar funcionário");
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _staffService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetStaffById), null, response);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Staff>> UpdateStaff(int id, [FromBody] Staff staff)
+        public async Task<ActionResult<StaffResponse>> Update(int id, [FromBody] StaffCreateRequest request)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                if (id != staff.Id)
-                {
-                    return BadRequest("O ID do funcionário não corresponde.");
-                }
-
-                var updatedStaff = await _staffService.UpdateStaffAsync(staff);
-                if (updatedStaff == null)
-                {
-                    return NotFound(new { message = "Funcionário não encontrado" });
-                }
-
-                return Ok(updatedStaff);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao atualizar funcionário {StaffId}", id);
-                return StatusCode(500, new { message = "Erro interno do servidor" });
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var response = await _staffService.UpdateAsync(id, request);
+            if (response == null)
+                return NotFound();
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]

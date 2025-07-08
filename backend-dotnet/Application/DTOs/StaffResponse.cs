@@ -1,8 +1,7 @@
-namespace DentalSpa.Domain.Entities
+namespace DentalSpa.Application.DTOs
 {
-    public class Staff
+    public class StaffResponse
     {
-        public int Id { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
@@ -18,10 +17,9 @@ namespace DentalSpa.Domain.Entities
         public string? License { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public int? ManagerId { get; set; }
-        public string Name { get => FullName; set => FullName = value; }
+        public string Name { get; set; } = string.Empty;
         public int ClinicId { get; set; }
         public int PositionId { get; set; }
-        public List<StaffService> StaffServices { get; set; } = new();
+        public List<int> ServiceIds { get; set; } = new();
     }
-}
+} 
