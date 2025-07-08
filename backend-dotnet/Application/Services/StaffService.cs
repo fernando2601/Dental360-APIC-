@@ -19,7 +19,7 @@ namespace DentalSpa.Application.Services
         public async Task<IEnumerable<StaffResponse>> GetAllStaffAsync()
         {
             var staff = await _staffRepository.GetAllStaffAsync();
-            return staff.Select(MapToResponse);
+            return staff.Select((Staff s) => MapToResponse(s));
         }
 
         public async Task<StaffResponse?> GetStaffByIdAsync(int id)
@@ -96,25 +96,25 @@ namespace DentalSpa.Application.Services
         public async Task<IEnumerable<StaffResponse>> SearchStaffAsync(string searchTerm)
         {
             var staff = await _staffRepository.SearchStaffAsync(searchTerm);
-            return staff.Select(MapToResponse);
+            return staff.Select((Staff s) => MapToResponse(s));
         }
 
-        public async Task<IEnumerable<StaffResponse>> GetStaffBySpecializationAsync(string specialization)
+        public async Task<IEnumerable<Staff>> GetStaffBySpecializationAsync(string specialization)
         {
             // Implementação básica - retorna todos os funcionários
-            return Enumerable.Empty<StaffResponse>();
+            return await _staffRepository.GetAllAsync();
         }
 
         public async Task<IEnumerable<StaffResponse>> GetStaffByDepartmentAsync(string department)
         {
             var staff = await _staffRepository.GetStaffByDepartmentAsync(department);
-            return staff.Select(MapToResponse);
+            return staff.Select((Staff s) => MapToResponse(s));
         }
 
         public async Task<IEnumerable<StaffResponse>> GetStaffByPositionAsync(string position)
         {
             var staff = await _staffRepository.GetStaffByPositionAsync(position);
-            return staff.Select(MapToResponse);
+            return staff.Select((Staff s) => MapToResponse(s));
         }
 
         public async Task<object> GetStaffStatsAsync()
@@ -133,20 +133,20 @@ namespace DentalSpa.Application.Services
         {
             // Implementação básica
             var staff = await _staffRepository.GetAllAsync();
-            return staff.Select(s => s.Department).Distinct();
+            return staff.Select((Staff s) => s.Department).Distinct();
         }
 
         public async Task<IEnumerable<string>> GetPositionsAsync()
         {
             // Implementação básica
             var staff = await _staffRepository.GetAllAsync();
-            return staff.Select(s => s.Position).Distinct();
+            return staff.Select((Staff s) => s.Position).Distinct();
         }
 
         public async Task<IEnumerable<StaffResponse>> GetTeamMembersAsync(int managerId)
         {
             var staff = await _staffRepository.GetTeamMembersAsync(managerId);
-            return staff.Select(MapToResponse);
+            return staff.Select((Staff s) => MapToResponse(s));
         }
 
         private static void ValidateStaff(Staff staff)

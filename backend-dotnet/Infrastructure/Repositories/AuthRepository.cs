@@ -33,7 +33,7 @@ namespace DentalSpa.Infrastructure.Repositories
                             Username = reader.GetString(reader.GetOrdinal("username")),
                             FullName = reader.GetString(reader.GetOrdinal("full_name")),
                             Email = reader.GetString(reader.GetOrdinal("email")),
-                            Role = reader.GetString(reader.GetOrdinal("role")),
+                            PermissionId = reader.GetInt32(reader.GetOrdinal("role")),
                             CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
                         };
                     }
@@ -62,7 +62,7 @@ namespace DentalSpa.Infrastructure.Repositories
                             Username = reader.GetString(reader.GetOrdinal("username")),
                             FullName = reader.GetString(reader.GetOrdinal("full_name")),
                             Email = reader.GetString(reader.GetOrdinal("email")),
-                            Role = reader.GetString(reader.GetOrdinal("role")),
+                            PermissionId = reader.GetInt32(reader.GetOrdinal("role")),
                             CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
                         };
                     }
@@ -99,7 +99,7 @@ namespace DentalSpa.Infrastructure.Repositories
 
                 var roleParam = cmd.CreateParameter();
                 roleParam.ParameterName = "@Role";
-                roleParam.Value = user.Role;
+                roleParam.Value = user.PermissionId;
                 cmd.Parameters.Add(roleParam);
 
                 var createdParam = cmd.CreateParameter();
@@ -142,7 +142,7 @@ namespace DentalSpa.Infrastructure.Repositories
 
                 var roleParam = cmd.CreateParameter();
                 roleParam.ParameterName = "@Role";
-                roleParam.Value = user.Role;
+                roleParam.Value = user.PermissionId;
                 cmd.Parameters.Add(roleParam);
 
                 var rows = cmd.ExecuteNonQuery();
@@ -185,7 +185,7 @@ namespace DentalSpa.Infrastructure.Repositories
                             FullName = reader.GetString(reader.GetOrdinal("full_name")),
                             Email = reader.GetString(reader.GetOrdinal("email")),
                             Password = reader.GetString(reader.GetOrdinal("password")),
-                            Role = reader.GetString(reader.GetOrdinal("role")),
+                            PermissionId = reader.GetInt32(reader.GetOrdinal("role")),
                             CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
                         };
                     }

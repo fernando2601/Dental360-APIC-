@@ -172,7 +172,7 @@ namespace DentalSpa.Application.Services
             var avgMonthlyRevenue = recentMonths.Average(g => g.Where(t => t.Type == "income").Sum(t => t.Amount));
             var avgMonthlyExpenses = recentMonths.Average(g => g.Where(t => t.Type == "expense").Sum(t => t.Amount));
 
-            var projections = Enumerable.Range(1, months).Select(i => new
+            var projections = Enumerable.Range(1, months).Select((int i) => new
             {
                 Month = DateTime.Now.AddMonths(i).ToString("yyyy-MM"),
                 ProjectedRevenue = avgMonthlyRevenue,

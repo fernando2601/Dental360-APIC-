@@ -14,5 +14,7 @@ namespace DentalSpa.Application.Interfaces
         Task<IEnumerable<Service>> GetServicesByCategoryAsync(string category);
         Task<object> GetServiceStatsAsync();
         Task<IEnumerable<string>> GetCategoriesAsync();
+        Task<bool> DeleteServiceAsync(int id);
+        Task SetServiceStaffAsync(int serviceId, List<int> staffIds);
     }
 }

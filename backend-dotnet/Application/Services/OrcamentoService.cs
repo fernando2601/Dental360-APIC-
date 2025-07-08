@@ -21,7 +21,7 @@ namespace DentalSpa.Application.Services
         public async Task<IEnumerable<OrcamentoResponse>> GetAllAsync()
         {
             var orcamentos = await _orcamentoRepository.GetAllAsync();
-            return orcamentos.Select(MapToResponse);
+            return orcamentos.Select((Orcamento o) => MapToResponse(o));
         }
 
         public async Task<OrcamentoResponse?> GetByIdAsync(int id)
@@ -51,7 +51,7 @@ namespace DentalSpa.Application.Services
         public async Task<IEnumerable<OrcamentoResponse>> SearchAsync(string searchTerm)
         {
             var orcamentos = await _orcamentoRepository.SearchAsync(searchTerm);
-            return orcamentos.Select(MapToResponse);
+            return orcamentos.Select((Orcamento o) => MapToResponse(o));
         }
 
         public async Task<IEnumerable<Orcamento>> GetOrcamentosByPacienteAsync(int pacienteId)
@@ -113,7 +113,7 @@ namespace DentalSpa.Application.Services
                 Status = o.Status,
                 ValorTotal = o.ValorTotal,
                 Observacoes = o.Observacoes,
-                Itens = o.Itens.Select(i => new OrcamentoItemResponse
+                Itens = o.Itens.Select((OrcamentoItem i) => new OrcamentoItemResponse
                 {
                     OrcamentoId = i.OrcamentoId,
                     ServicoId = i.ServicoId,

@@ -14,5 +14,7 @@ namespace DentalSpa.Application.Interfaces
         Task<IEnumerable<Inventory>> GetByStatusAsync(string status);
         Task<IEnumerable<Inventory>> GetLowStockItemsAsync(int threshold = 10);
         Task<bool> UpdateStockAsync(int id, int newQuantity);
+        Task<bool> DeleteInventoryAsync(int id);
+        Task<IEnumerable<InventoryResponse>> SearchByNameAsync(string name);
     }
 }

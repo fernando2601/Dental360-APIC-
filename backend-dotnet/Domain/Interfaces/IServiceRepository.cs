@@ -10,5 +10,7 @@ namespace DentalSpa.Domain.Interfaces
         Task<Service?> UpdateAsync(int id, Service service);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<Service>> SearchAsync(string searchTerm);
+        Task SetServiceStaffAsync(int serviceId, List<int> staffIds);
+        Task<IEnumerable<Service>> GetServicesByCategoryAsync(string category);
     }
 }

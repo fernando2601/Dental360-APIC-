@@ -16,6 +16,7 @@ namespace DentalSpa.Domain.Interfaces
         Task<IEnumerable<Inventory>> GetByCategoryAsync(string category);
         Task<IEnumerable<Inventory>> GetLowStockAsync();
         Task<IEnumerable<Inventory>> GetExpiredAsync();
+        Task<IEnumerable<Inventory>> SearchByNameAsync(string name);
 
         // Contagem
         Task<int> GetCountAsync();

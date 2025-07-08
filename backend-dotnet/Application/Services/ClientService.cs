@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DentalSpa.Application.DTOs;
+using System.Linq;
 
 namespace DentalSpa.Application.Services
 {
@@ -45,18 +46,12 @@ namespace DentalSpa.Application.Services
             return await _clientRepository.UpdateAsync(client.Id, client);
         }
 
-        public async Task<bool> DeleteClientAsync(int id)
-        {
-            return await _clientRepository.DeleteAsync(id);
-        }
+        public async Task DeleteClientAsync(int id) => await _clientRepository.DeleteAsync(id);
 
-        public async Task<IEnumerable<Client>> SearchClientsAsync(string searchTerm)
+        public async Task<IEnumerable<ClientResponse>> SearchClientsAsync(string searchTerm)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                return await GetAllClientsAsync();
-            }
-            return await _clientRepository.SearchAsync(searchTerm);
+            var clients = await _clientRepository.SearchAsync(searchTerm);
+            return clients.Select(MapToResponse);
         }
 
         public async Task<ClientResponse> CreateAsync(ClientCreateRequest request)
@@ -92,10 +87,42 @@ namespace DentalSpa.Application.Services
             return MapToResponse(updated);
         }
 
+        public async Task<IEnumerable<ClientResponse>> GetAllAsync()
+        {
+            var clients = await _clientRepository.GetAllAsync();
+            return clients.Select(MapToResponse);
+        }
+
+        public async Task<ClientResponse?> GetByIdAsync(int id)
+        {
+            var client = await _clientRepository.GetByIdAsync(id);
+            return client == null ? null : MapToResponse(client);
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            return await _clientRepository.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<ClientResponse>> SearchAsync(string searchTerm)
+        {
+            var clients = await _clientRepository.SearchAsync(searchTerm);
+            return clients.Select(MapToResponse);
+        }
+
         private ClientResponse MapToResponse(Client client)
         {
-            // Implementation of MapToResponse method
-            throw new NotImplementedException();
+            return new ClientResponse
+            {
+                FullName = client.FullName,
+                Email = client.Email,
+                Phone = client.Phone,
+                Address = client.Address,
+                Birthday = client.Birthday,
+                Notes = client.Notes,
+                CreatedAt = client.CreatedAt,
+                ClinicId = client.ClinicId
+            };
         }
     }
 }

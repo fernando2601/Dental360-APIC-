@@ -29,8 +29,8 @@ namespace DentalSpa.Domain.Entities
         public int PermissionId { get; set; }
         public Permission? Permission { get; set; }
 
-        public bool IsAdmin() => Permission?.Role == "admin";
-        public bool IsStaff() => Permission?.Role == "staff";
+        public bool IsAdmin() => Permission?.Name == "SUPER_ADM" || Permission?.Name == "ADM";
+        public bool IsStaff() => Permission?.Name == "STAFF";
         public bool IsValidResetToken(string token) => ResetToken == token && ResetTokenExpiry > DateTime.UtcNow;
     }
 }

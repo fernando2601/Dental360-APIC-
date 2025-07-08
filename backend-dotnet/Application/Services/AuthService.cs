@@ -104,7 +104,7 @@ namespace DentalSpa.Application.Services
                 Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
                 FullName = fullName,
-                Role = "user",
+                PermissionId = 2, // ou buscar o ID correto para o perfil padrão
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };
@@ -195,7 +195,8 @@ namespace DentalSpa.Application.Services
             }
 
             // Gerar um novo token de acesso
-            var newAccessToken = GenerateJwtToken(user);
+            var permission = user.Permission?.Name ?? "ADM";
+            var newAccessToken = GenerateJwtToken(user, permission);
             // Opcional: Gerar um novo refresh token e atualizar o usuário
             // var newRefreshToken = ...
             // user.RefreshToken = newRefreshToken;

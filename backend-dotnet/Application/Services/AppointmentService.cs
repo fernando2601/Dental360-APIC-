@@ -32,18 +32,18 @@ namespace DentalSpa.Application.Services
             return appointments.Select(MapToResponse);
         }
 
-        public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
+        public async Task<Appointment> CreateAsync(Appointment appointment)
         {
             appointment.CreatedAt = DateTime.UtcNow;
             return await _appointmentRepository.CreateAsync(appointment);
         }
 
-        public async Task<Appointment?> UpdateAppointmentAsync(int id, Appointment appointment)
+        public async Task<Appointment?> UpdateAsync(int id, Appointment appointment)
         {
             return await _appointmentRepository.UpdateAsync(id, appointment);
         }
 
-        public async Task<bool> DeleteAppointmentAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             return await _appointmentRepository.DeleteAsync(id);
         }

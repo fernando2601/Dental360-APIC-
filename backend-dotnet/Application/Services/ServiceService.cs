@@ -17,7 +17,7 @@ namespace DentalSpa.Application.Services
         public async Task<IEnumerable<ServiceResponse>> GetAllAsync()
         {
             var services = await _serviceRepository.GetAllAsync();
-            return services.Select(MapToResponse);
+            return services.Select((Service s) => MapToResponse(s));
         }
 
         public async Task<ServiceResponse?> GetByIdAsync(int id)
@@ -60,15 +60,13 @@ namespace DentalSpa.Application.Services
             return MapToResponse(updated, request.StaffIds);
         }
 
-        public async Task<bool> DeleteServiceAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             if (id <= 0)
                 return false;
-
             var existingService = await _serviceRepository.GetByIdAsync(id);
             if (existingService == null)
                 return false;
-
             return await _serviceRepository.DeleteAsync(id);
         }
 
@@ -84,7 +82,7 @@ namespace DentalSpa.Application.Services
         public async Task<IEnumerable<ServiceResponse>> SearchAsync(string searchTerm)
         {
             var services = await _serviceRepository.SearchAsync(searchTerm);
-            return services.Select(MapToResponse);
+            return services.Select((Service s) => MapToResponse(s));
         }
 
         public async Task<object> GetServiceStatsAsync()
@@ -103,8 +101,11 @@ namespace DentalSpa.Application.Services
         {
             // Implementação básica
             var services = await _serviceRepository.GetAllAsync();
-            return services.Select(s => s.Category).Distinct();
+            return services.Select((Service s) => s.Category).Distinct();
         }
+
+        public async Task<bool> DeleteServiceAsync(int id) => await DeleteAsync(id);
+        public async Task SetServiceStaffAsync(int serviceId, List<int> staffIds) => await _serviceRepository.SetServiceStaffAsync(serviceId, staffIds);
 
         private static void ValidateService(Service service)
         {

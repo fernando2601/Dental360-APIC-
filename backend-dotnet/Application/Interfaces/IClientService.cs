@@ -11,5 +11,7 @@ namespace DentalSpa.Application.Interfaces
         Task<ClientResponse?> UpdateAsync(int id, ClientCreateRequest request);
         Task<bool> DeleteAsync(int id);
         Task<IEnumerable<ClientResponse>> SearchAsync(string searchTerm);
+        Task DeleteClientAsync(int id);
+        Task<IEnumerable<ClientResponse>> SearchClientsAsync(string searchTerm);
     }
 }

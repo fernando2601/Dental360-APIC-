@@ -52,13 +52,13 @@ namespace DentalSpa.Infrastructure.Repositories
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
             await using var command = new NpgsqlCommand(
-                "INSERT INTO public.\"Users\" (\"FullName\", \"Username\", \"Password\", \"Email\", \"Role\") VALUES (@FullName, @Username, @Password, @Email, @Role)",
+                "INSERT INTO public.\"Users\" (\"FullName\", \"Username\", \"Password\", \"Email\", \"PermissionId\") VALUES (@FullName, @Username, @Password, @Email, @PermissionId)",
                 connection);
             command.Parameters.AddWithValue("@FullName", user.FullName);
             command.Parameters.AddWithValue("@Username", user.Username);
             command.Parameters.AddWithValue("@Password", user.Password);
             command.Parameters.AddWithValue("@Email", user.Email);
-            command.Parameters.AddWithValue("@Role", user.Role);
+            command.Parameters.AddWithValue("@PermissionId", user.PermissionId);
             await command.ExecuteNonQueryAsync();
         }
 
@@ -67,7 +67,7 @@ namespace DentalSpa.Infrastructure.Repositories
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
             var command = new NpgsqlCommand(
-                "UPDATE public.\"Users\" SET \"FullName\" = @FullName, \"Username\" = @Username, \"Password\" = @Password, \"Email\" = @Email, \"Role\" = @Role, " +
+                "UPDATE public.\"Users\" SET \"FullName\" = @FullName, \"Username\" = @Username, \"Password\" = @Password, \"Email\" = @Email, \"PermissionId\" = @PermissionId, " +
                 "\"PasswordResetToken\" = @PasswordResetToken, \"ResetTokenExpires\" = @ResetTokenExpires, " +
                 "\"RefreshToken\" = @RefreshToken, \"RefreshTokenExpiryTime\" = @RefreshTokenExpiryTime " +
                 "WHERE \"Id\" = @Id",
@@ -77,7 +77,7 @@ namespace DentalSpa.Infrastructure.Repositories
             command.Parameters.AddWithValue("@Username", user.Username);
             command.Parameters.AddWithValue("@Password", user.Password);
             command.Parameters.AddWithValue("@Email", user.Email);
-            command.Parameters.AddWithValue("@Role", user.Role);
+            command.Parameters.AddWithValue("@PermissionId", user.PermissionId);
             command.Parameters.AddWithValue("@PasswordResetToken", (object)user.PasswordResetToken ?? DBNull.Value);
             command.Parameters.AddWithValue("@ResetTokenExpires", (object)user.ResetTokenExpires ?? DBNull.Value);
             command.Parameters.AddWithValue("@RefreshToken", (object)user.RefreshToken ?? DBNull.Value);
@@ -177,7 +177,7 @@ namespace DentalSpa.Infrastructure.Repositories
                 Username = reader.GetString(reader.GetOrdinal("Username")),
                 Password = reader.GetString(reader.GetOrdinal("Password")),
                 Email = reader.GetString(reader.GetOrdinal("Email")),
-                Role = reader.GetString(reader.GetOrdinal("Role")),
+                PermissionId = reader.GetInt32(reader.GetOrdinal("PermissionId")),
                 PasswordResetToken = reader.IsDBNull(reader.GetOrdinal("PasswordResetToken")) ? null : reader.GetString(reader.GetOrdinal("PasswordResetToken")),
                 ResetTokenExpires = reader.IsDBNull(reader.GetOrdinal("ResetTokenExpires")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("ResetTokenExpires")),
                 RefreshToken = reader.IsDBNull(reader.GetOrdinal("RefreshToken")) ? null : reader.GetString(reader.GetOrdinal("RefreshToken")),

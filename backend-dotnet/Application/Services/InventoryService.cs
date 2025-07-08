@@ -91,30 +91,12 @@ namespace DentalSpa.Application.Services
             return MapToResponse(updated);
         }
 
-        public async Task<bool> DeleteInventoryAsync(int id)
-        {
-            try
-            {
-                return await _inventoryRepository.DeleteAsync(id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao deletar item do inventário: {Id}", id);
-                throw;
-            }
-        }
+        public async Task<bool> DeleteInventoryAsync(int id) => await _inventoryRepository.DeleteAsync(id);
 
-        public async Task<IEnumerable<Inventory>> SearchByNameAsync(string searchTerm)
+        public async Task<IEnumerable<InventoryResponse>> SearchByNameAsync(string name)
         {
-            try
-            {
-                return await _inventoryRepository.SearchAsync(searchTerm);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao pesquisar itens por nome: {SearchTerm}", searchTerm);
-                throw;
-            }
+            var items = await _inventoryRepository.SearchByNameAsync(name);
+            return items.Select(MapToResponse);
         }
 
         public async Task<IEnumerable<Inventory>> GetByStatusAsync(string status)
@@ -135,10 +117,50 @@ namespace DentalSpa.Application.Services
             return false;
         }
 
+        public async Task<IEnumerable<InventoryResponse>> GetAllAsync()
+        {
+            var items = await _inventoryRepository.GetAllAsync();
+            return items.Select(MapToResponse);
+        }
+
+        public async Task<InventoryResponse?> GetByIdAsync(int id)
+        {
+            var item = await _inventoryRepository.GetByIdAsync(id);
+            return item == null ? null : MapToResponse(item);
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            return await _inventoryRepository.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<InventoryResponse>> SearchAsync(string searchTerm)
+        {
+            var items = await _inventoryRepository.SearchAsync(searchTerm);
+            return items.Select(MapToResponse);
+        }
+
         private InventoryResponse MapToResponse(Inventory inventory)
         {
-            // Implemente a lógica para mapear um objeto Inventory para um objeto InventoryResponse
-            throw new NotImplementedException();
+            return new InventoryResponse
+            {
+                Name = inventory.Name,
+                Description = inventory.Description,
+                Category = inventory.Category,
+                Quantity = inventory.Quantity,
+                Unit = inventory.Unit,
+                MinStock = inventory.MinStock,
+                UnitPrice = inventory.UnitPrice,
+                Supplier = inventory.Supplier,
+                Location = inventory.Location,
+                BatchNumber = inventory.BatchNumber,
+                ExpirationDate = inventory.ExpirationDate,
+                Status = inventory.Status,
+                IsActive = inventory.IsActive,
+                CreatedAt = inventory.CreatedAt,
+                UpdatedAt = inventory.UpdatedAt,
+                ClinicId = inventory.ClinicId
+            };
         }
     }
 }

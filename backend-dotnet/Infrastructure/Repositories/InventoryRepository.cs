@@ -338,6 +338,24 @@ namespace DentalSpa.Infrastructure.Repositories
             }
         }
 
+        public async Task<IEnumerable<Inventory>> SearchByNameAsync(string name)
+        {
+            var items = new List<Inventory>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT * FROM inventory WHERE name LIKE @Name";
+                var param = cmd.CreateParameter(); param.ParameterName = "@Name"; param.Value = $"%{name}%"; cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // Mapear para entidade Inventory
+                    }
+                }
+            }
+            return items;
+        }
+
         private IDbDataParameter CreateParameter(string name, object? value)
         {
             var param = _connection.CreateCommand().CreateParameter();

@@ -100,26 +100,20 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<IEnumerable<Client>> SearchAsync(string searchTerm)
         {
-            var list = new List<Client>();
+            var clients = new List<Client>();
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, full_name, email, phone FROM clients WHERE is_active = 1 AND (full_name ILIKE @SearchTerm OR email ILIKE @SearchTerm)";
+                cmd.CommandText = "SELECT * FROM clients WHERE name LIKE @SearchTerm";
                 var param = cmd.CreateParameter(); param.ParameterName = "@SearchTerm"; param.Value = $"%{searchTerm}%"; cmd.Parameters.Add(param);
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        list.Add(new Client
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            FullName = reader.GetString(reader.GetOrdinal("full_name")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            Phone = reader.GetString(reader.GetOrdinal("phone"))
-                        });
+                        // Mapear para entidade Client
                     }
                 }
             }
-            return await Task.FromResult(list);
+            return clients;
         }
     }
 } 

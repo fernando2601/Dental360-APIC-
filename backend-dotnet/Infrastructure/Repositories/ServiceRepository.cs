@@ -142,5 +142,45 @@ namespace DentalSpa.Infrastructure.Repositories
             }
             return await Task.FromResult(services);
         }
+
+        public async Task SetServiceStaffAsync(int serviceId, List<int> staffIds)
+        {
+            // Remove relações antigas
+            using (var deleteCmd = _connection.CreateCommand())
+            {
+                deleteCmd.CommandText = "DELETE FROM staff_service WHERE service_id = @ServiceId";
+                var param = deleteCmd.CreateParameter(); param.ParameterName = "@ServiceId"; param.Value = serviceId; deleteCmd.Parameters.Add(param);
+                deleteCmd.ExecuteNonQuery();
+            }
+            // Adiciona novas relações
+            foreach (var staffId in staffIds)
+            {
+                using (var insertCmd = _connection.CreateCommand())
+                {
+                    insertCmd.CommandText = "INSERT INTO staff_service (service_id, staff_id) VALUES (@ServiceId, @StaffId)";
+                    var param1 = insertCmd.CreateParameter(); param1.ParameterName = "@ServiceId"; param1.Value = serviceId; insertCmd.Parameters.Add(param1);
+                    var param2 = insertCmd.CreateParameter(); param2.ParameterName = "@StaffId"; param2.Value = staffId; insertCmd.Parameters.Add(param2);
+                    insertCmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public async Task<IEnumerable<Service>> GetServicesByCategoryAsync(string category)
+        {
+            var services = new List<Service>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT * FROM services WHERE category = @Category";
+                var param = cmd.CreateParameter(); param.ParameterName = "@Category"; param.Value = category; cmd.Parameters.Add(param);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // Mapear para entidade Service
+                    }
+                }
+            }
+            return services;
+        }
     }
 } 
