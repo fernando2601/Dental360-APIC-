@@ -20,8 +20,8 @@ namespace DentalSpa.Domain.Entities
         public DateTime? UpdatedAt { get; set; }
         public int? ManagerId { get; set; }
         public string Name { get => FullName; set => FullName = value; }
-        public int ClinicId { get; set; }
         public int PositionId { get; set; }
         public List<StaffService> StaffServices { get; set; } = new();
+        public ICollection<StaffClinic> StaffClinics { get; set; } = new List<StaffClinic>();
     }
 }

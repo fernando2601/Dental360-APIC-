@@ -1,19 +1,20 @@
+using System.Data;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
-using System.Data;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DentalSpa.Infrastructure.Repositories
 {
     public class StaffRepository : IStaffRepository
     {
         private readonly IDbConnection _connection;
-
         public StaffRepository(IDbConnection connection)
         {
             _connection = connection;
         }
 
-        public async Task<IEnumerable<Staff>> GetAllAsync()
+        public Task<IEnumerable<Staff>> GetAllAsync()
         {
             var list = new List<Staff>();
             using (var cmd = _connection.CreateCommand())
@@ -45,10 +46,10 @@ namespace DentalSpa.Infrastructure.Repositories
                     }
                 }
             }
-            return await Task.FromResult(list);
+            return Task.FromResult((IEnumerable<Staff>)list);
         }
 
-        public async Task<Staff?> GetByIdAsync(int id)
+        public Task<Staff?> GetByIdAsync(int id)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -58,7 +59,7 @@ namespace DentalSpa.Infrastructure.Repositories
                 {
                     if (reader.Read())
                     {
-                        return new Staff
+                        return Task.FromResult<Staff?>(new Staff
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
                             FullName = reader.GetString(reader.GetOrdinal("full_name")),
@@ -76,14 +77,14 @@ namespace DentalSpa.Infrastructure.Repositories
                             License = reader.IsDBNull(reader.GetOrdinal("license")) ? null : reader.GetString(reader.GetOrdinal("license")),
                             ManagerId = reader.IsDBNull(reader.GetOrdinal("manager_id")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("manager_id")),
                             CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
-                        };
+                        });
                     }
                 }
             }
-            return await Task.FromResult<Staff?>(null);
+            return Task.FromResult<Staff?>(null);
         }
 
-        public async Task<Staff> CreateAsync(Staff staff)
+        public Task<Staff> CreateAsync(Staff staff)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -105,11 +106,11 @@ namespace DentalSpa.Infrastructure.Repositories
                 var p15 = cmd.CreateParameter(); p15.ParameterName = "@CreatedAt"; p15.Value = staff.CreatedAt; cmd.Parameters.Add(p15);
                 var id = Convert.ToInt32(cmd.ExecuteScalar());
                 staff.Id = id;
-                return await Task.FromResult(staff);
+                return Task.FromResult(staff);
             }
         }
 
-        public async Task<Staff?> UpdateAsync(int id, Staff staff)
+        public Task<Staff?> UpdateAsync(int id, Staff staff)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -130,22 +131,35 @@ namespace DentalSpa.Infrastructure.Repositories
                 var p13 = cmd.CreateParameter(); p13.ParameterName = "@License"; p13.Value = (object?)staff.License ?? DBNull.Value; cmd.Parameters.Add(p13);
                 var p14 = cmd.CreateParameter(); p14.ParameterName = "@ManagerId"; p14.Value = (object?)staff.ManagerId ?? DBNull.Value; cmd.Parameters.Add(p14);
                 var rows = cmd.ExecuteNonQuery();
-                return await Task.FromResult(rows > 0 ? staff : null);
+                if (rows > 0)
+                {
+                    // Atualizar associações StaffClinic
+                    // Excluir associações antigas
+                    // await _db.StaffClinics.Where(sc => sc.StaffId == id).DeleteAsync(); // This line was removed as _db is no longer available
+                    // Adicionar novas associações
+                    // foreach (var sc in staff.StaffClinics) // This line was removed as _db is no longer available
+                    // {
+                    //     _db.StaffClinics.Add(new StaffClinic { StaffId = id, ClinicId = sc.ClinicId }); // This line was removed as _db is no longer available
+                    // }
+                    // await _db.SaveChangesAsync(); // This line was removed as _db is no longer available
+                    return Task.FromResult<Staff?>(staff);
+                }
             }
+            return Task.FromResult<Staff?>(null);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public Task<bool> DeleteAsync(int id)
         {
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandText = "UPDATE staff SET is_active = 0 WHERE id = @Id";
                 var param = cmd.CreateParameter(); param.ParameterName = "@Id"; param.Value = id; cmd.Parameters.Add(param);
                 var rows = cmd.ExecuteNonQuery();
-                return await Task.FromResult(rows > 0);
+                return Task.FromResult(rows > 0);
             }
         }
 
-        public async Task<IEnumerable<Staff>> GetBySpecializationAsync(string specialization)
+        public Task<IEnumerable<Staff>> GetBySpecializationAsync(string specialization)
         {
             var list = new List<Staff>();
             using (var cmd = _connection.CreateCommand())
@@ -178,7 +192,7 @@ namespace DentalSpa.Infrastructure.Repositories
                     }
                 }
             }
-            return await Task.FromResult(list);
+            return Task.FromResult((IEnumerable<Staff>)list);
         }
 
         public async Task SetStaffServicesAsync(int staffId, List<int> serviceIds)

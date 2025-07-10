@@ -9,7 +9,6 @@ namespace DentalSpa.Application.Interfaces
         Task<Product> CreateProductAsync(Product product);
         Task<Product?> UpdateProductAsync(int id, Product product);
         Task<bool> DeleteProductAsync(int id);
-        Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm);
         Task<IEnumerable<Product>> GetActiveProductsAsync();
         Task<IEnumerable<Product>> GetPopularProductsAsync();
     }

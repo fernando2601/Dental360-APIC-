@@ -13,7 +13,7 @@ namespace DentalSpa.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task<User?> AuthenticateAsync(string username, string password)
+        public Task<User?> AuthenticateAsync(string username, string password)
         {
             // Implementation of AuthenticateAsync method
             throw new NotImplementedException();
@@ -29,19 +29,19 @@ namespace DentalSpa.Application.Services
             return await _userRepository.GetByIdAsync(id);
         }
 
-        public async Task<User?> GetUserByUsernameAsync(string username)
+        public Task<User?> GetUserByUsernameAsync(string username)
         {
             // Implementation of GetUserByUsernameAsync method
             throw new NotImplementedException();
         }
 
-        public async Task<string> GenerateJwtTokenAsync(User user)
+        public Task<string> GenerateJwtTokenAsync(User user)
         {
             // Implementation of GenerateJwtTokenAsync method
             throw new NotImplementedException();
         }
 
-        public async Task SeedDefaultUsersAsync()
+        public Task SeedDefaultUsersAsync()
         {
             // Implementation of SeedDefaultUsersAsync method
             throw new NotImplementedException();
@@ -72,28 +72,28 @@ namespace DentalSpa.Application.Services
             return await _userRepository.SearchAsync(searchTerm);
         }
 
-        public async Task<User?> GetUserByEmailAsync(string email)
+        public Task<User?> GetUserByEmailAsync(string email)
         {
             // Implementação mínima - retorna null por enquanto
-            return null;
+            return Task.FromResult<User?>(null!); // null is expected here
         }
 
-        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        public Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
             // Implementação mínima - retorna true por enquanto
-            return true;
+            return Task.FromResult(true);
         }
 
-        public async Task<bool> ResetPasswordAsync(int userId, string newPassword)
+        public Task<bool> ResetPasswordAsync(int userId, string newPassword)
         {
             // Implementação mínima - retorna true por enquanto
-            return true;
+            return Task.FromResult(true);
         }
 
-        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
+        public Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
         {
             // Implementação mínima - retorna lista vazia por enquanto
-            return Enumerable.Empty<User>();
+            return Task.FromResult(Enumerable.Empty<User>());
         }
     }
 }

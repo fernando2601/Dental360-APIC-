@@ -1,7 +1,7 @@
 using DentalSpa.Domain.Entities;
 using DentalSpa.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
+using System.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,14 +14,14 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public UserRepository(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException(nameof(configuration), "Connection string cannot be null.");
+            _connectionString = configuration.GetConnectionString("SqlServerConnection") ?? throw new ArgumentNullException(nameof(configuration), "Connection string cannot be null.");
         }
 
         public async Task<User?> FindByEmailAsync(string email)
         {
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"Email\" = @Email", connection);
+            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [Email] = @Email", connection);
             command.Parameters.AddWithValue("@Email", email);
             await using var reader = await command.ExecuteReaderAsync();
             return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
@@ -29,9 +29,9 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<User?> FindByUsernameAsync(string username)
         {
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"Username\" = @Username", connection);
+            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [Username] = @Username", connection);
             command.Parameters.AddWithValue("@Username", username);
             await using var reader = await command.ExecuteReaderAsync();
             return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
@@ -39,9 +39,9 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<User?> FindByRefreshTokenAsync(string refreshToken)
         {
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"RefreshToken\" = @RefreshToken", connection);
+            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [RefreshToken] = @RefreshToken", connection);
             command.Parameters.AddWithValue("@RefreshToken", refreshToken);
             await using var reader = await command.ExecuteReaderAsync();
             return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
@@ -49,10 +49,10 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task AddAsync(User user)
         {
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand(
-                "INSERT INTO public.\"Users\" (\"FullName\", \"Username\", \"Password\", \"Email\", \"PermissionId\") VALUES (@FullName, @Username, @Password, @Email, @PermissionId)",
+            await using var command = new SqlCommand(
+                "INSERT INTO [Users] ([FullName], [Username], [Password], [Email], [PermissionId]) VALUES (@FullName, @Username, @Password, @Email, @PermissionId)",
                 connection);
             command.Parameters.AddWithValue("@FullName", user.FullName);
             command.Parameters.AddWithValue("@Username", user.Username);
@@ -64,13 +64,13 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task UpdateAsync(User user)
         {
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            var command = new NpgsqlCommand(
-                "UPDATE public.\"Users\" SET \"FullName\" = @FullName, \"Username\" = @Username, \"Password\" = @Password, \"Email\" = @Email, \"PermissionId\" = @PermissionId, " +
-                "\"PasswordResetToken\" = @PasswordResetToken, \"ResetTokenExpires\" = @ResetTokenExpires, " +
-                "\"RefreshToken\" = @RefreshToken, \"RefreshTokenExpiryTime\" = @RefreshTokenExpiryTime " +
-                "WHERE \"Id\" = @Id",
+            var command = new SqlCommand(
+                "UPDATE [Users] SET [FullName] = @FullName, [Username] = @Username, [Password] = @Password, [Email] = @Email, [PermissionId] = @PermissionId, " +
+                "[PasswordResetToken] = @PasswordResetToken, [ResetTokenExpires] = @ResetTokenExpires, " +
+                "[RefreshToken] = @RefreshToken, [RefreshTokenExpiryTime] = @RefreshTokenExpiryTime " +
+                "WHERE [Id] = @Id",
                 connection);
             command.Parameters.AddWithValue("@Id", user.Id);
             command.Parameters.AddWithValue("@FullName", user.FullName);
@@ -87,9 +87,9 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<User?> GetByIdAsync(int id)
         {
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"Id\" = @Id", connection);
+            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [Id] = @Id", connection);
             command.Parameters.AddWithValue("@Id", id);
             await using var reader = await command.ExecuteReaderAsync();
             return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
@@ -110,9 +110,9 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<bool> DeleteAsync(int id)
         {
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand("DELETE FROM public.\"Users\" WHERE \"Id\" = @Id", connection);
+            await using var command = new SqlCommand("DELETE FROM [Users] WHERE [Id] = @Id", connection);
             command.Parameters.AddWithValue("@Id", id);
             var affectedRows = await command.ExecuteNonQueryAsync();
             return affectedRows > 0;
@@ -121,9 +121,9 @@ namespace DentalSpa.Infrastructure.Repositories
         public async Task<IEnumerable<User>> GetAllAsync()
         {
             var users = new List<User>();
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\"", connection);
+            await using var command = new SqlCommand("SELECT * FROM [Users]", connection);
             await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -135,9 +135,9 @@ namespace DentalSpa.Infrastructure.Repositories
         public async Task<IEnumerable<User>> SearchAsync(string query)
         {
             var users = new List<User>();
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand("SELECT * FROM public.\"Users\" WHERE \"FullName\" ILIKE @Query OR \"Email\" ILIKE @Query OR \"Username\" ILIKE @Query", connection);
+            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [FullName] LIKE @Query OR [Email] LIKE @Query OR [Username] LIKE @Query", connection);
             command.Parameters.AddWithValue("@Query", $"%{query}%");
             await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -149,9 +149,9 @@ namespace DentalSpa.Infrastructure.Repositories
 
         public async Task<object> GetProfileByIdAsync(int id)
         {
-            await using var connection = new NpgsqlConnection(_connectionString);
+            await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new NpgsqlCommand("SELECT \"FullName\", \"Email\", \"Username\" FROM public.\"Users\" WHERE \"Id\" = @Id", connection);
+            await using var command = new SqlCommand("SELECT [FullName], [Email], [Username] FROM [Users] WHERE [Id] = @Id", connection);
             command.Parameters.AddWithValue("@Id", id);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -168,7 +168,7 @@ namespace DentalSpa.Infrastructure.Repositories
             return new { };
         }
 
-        private User MapReaderToUser(NpgsqlDataReader reader)
+        private User MapReaderToUser(SqlDataReader reader)
         {
             return new User
             {

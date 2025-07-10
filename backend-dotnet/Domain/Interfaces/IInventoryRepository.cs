@@ -1,4 +1,6 @@
 using DentalSpa.Domain.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DentalSpa.Domain.Interfaces
 {
@@ -23,5 +25,8 @@ namespace DentalSpa.Domain.Interfaces
 
         // Verificação
         Task<bool> ExistsAsync(int id);
+
+        Task<IEnumerable<Inventory>> GetByProductIdAsync(int productId);
+        Task<IEnumerable<Inventory>> GetByClinicIdAsync(int clinicId);
     }
 }

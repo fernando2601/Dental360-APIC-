@@ -17,7 +17,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, username, full_name, email, role, created_at FROM users WHERE email = @Email AND is_active = 1";
+                cmd.CommandText = "SELECT Id, Username, FullName, Email, Role, CreatedAt FROM [User] WHERE Email = @Email AND IsActive = 1";
                 var param = cmd.CreateParameter();
                 param.ParameterName = "@Email";
                 param.Value = email;
@@ -29,12 +29,12 @@ namespace DentalSpa.Infrastructure.Repositories
                     {
                         return new User
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Username = reader.GetString(reader.GetOrdinal("username")),
-                            FullName = reader.GetString(reader.GetOrdinal("full_name")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            PermissionId = reader.GetInt32(reader.GetOrdinal("role")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Username = reader.GetString(reader.GetOrdinal("Username")),
+                            FullName = reader.GetString(reader.GetOrdinal("FullName")),
+                            Email = reader.GetString(reader.GetOrdinal("Email")),
+                            PermissionId = reader.GetInt32(reader.GetOrdinal("Role")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
                         };
                     }
                 }
@@ -46,7 +46,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, username, full_name, email, role, created_at FROM users WHERE id = @Id AND is_active = 1";
+                cmd.CommandText = "SELECT Id, Username, FullName, Email, Role, CreatedAt FROM [User] WHERE Id = @Id AND IsActive = 1";
                 var param = cmd.CreateParameter();
                 param.ParameterName = "@Id";
                 param.Value = id;
@@ -58,12 +58,12 @@ namespace DentalSpa.Infrastructure.Repositories
                     {
                         return new User
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Username = reader.GetString(reader.GetOrdinal("username")),
-                            FullName = reader.GetString(reader.GetOrdinal("full_name")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            PermissionId = reader.GetInt32(reader.GetOrdinal("role")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Username = reader.GetString(reader.GetOrdinal("Username")),
+                            FullName = reader.GetString(reader.GetOrdinal("FullName")),
+                            Email = reader.GetString(reader.GetOrdinal("Email")),
+                            PermissionId = reader.GetInt32(reader.GetOrdinal("Role")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
                         };
                     }
                 }
@@ -75,7 +75,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO users (username, full_name, email, password, role, is_active, created_at) VALUES (@Username, @FullName, @Email, @Password, @Role, 1, @CreatedAt); SELECT LASTVAL();";
+                cmd.CommandText = "INSERT INTO [User] (Username, FullName, Email, PasswordHash, Role, IsActive, CreatedAt) VALUES (@Username, @FullName, @Email, @PasswordHash, @Role, 1, @CreatedAt); SELECT SCOPE_IDENTITY();";
                 
                 var usernameParam = cmd.CreateParameter();
                 usernameParam.ParameterName = "@Username";
@@ -93,7 +93,7 @@ namespace DentalSpa.Infrastructure.Repositories
                 cmd.Parameters.Add(emailParam);
 
                 var passwordParam = cmd.CreateParameter();
-                passwordParam.ParameterName = "@Password";
+                passwordParam.ParameterName = "@PasswordHash";
                 passwordParam.Value = passwordHash;
                 cmd.Parameters.Add(passwordParam);
 
@@ -118,7 +118,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "UPDATE users SET username = @Username, full_name = @FullName, email = @Email, role = @Role WHERE id = @Id AND is_active = 1";
+                cmd.CommandText = "UPDATE [User] SET Username = @Username, FullName = @FullName, Email = @Email, Role = @Role WHERE Id = @Id AND IsActive = 1";
                 
                 var idParam = cmd.CreateParameter();
                 idParam.ParameterName = "@Id";
@@ -154,7 +154,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "UPDATE users SET is_active = 0 WHERE id = @Id";
+                cmd.CommandText = "UPDATE [User] SET IsActive = 0 WHERE Id = @Id";
                 var param = cmd.CreateParameter();
                 param.ParameterName = "@Id";
                 param.Value = id;
@@ -168,7 +168,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, username, full_name, email, password, role, created_at FROM users WHERE email = @Email AND is_active = 1";
+                cmd.CommandText = "SELECT Id, Username, FullName, Email, PasswordHash, Role, CreatedAt FROM [User] WHERE Email = @Email AND IsActive = 1";
                 var param = cmd.CreateParameter();
                 param.ParameterName = "@Email";
                 param.Value = email;
@@ -180,13 +180,13 @@ namespace DentalSpa.Infrastructure.Repositories
                     {
                         return new User
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Username = reader.GetString(reader.GetOrdinal("username")),
-                            FullName = reader.GetString(reader.GetOrdinal("full_name")),
-                            Email = reader.GetString(reader.GetOrdinal("email")),
-                            Password = reader.GetString(reader.GetOrdinal("password")),
-                            PermissionId = reader.GetInt32(reader.GetOrdinal("role")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Username = reader.GetString(reader.GetOrdinal("Username")),
+                            FullName = reader.GetString(reader.GetOrdinal("FullName")),
+                            Email = reader.GetString(reader.GetOrdinal("Email")),
+                            Password = reader.GetString(reader.GetOrdinal("PasswordHash")),
+                            PermissionId = reader.GetInt32(reader.GetOrdinal("Role")),
+                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt"))
                         };
                     }
                 }
@@ -198,7 +198,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "UPDATE users SET password = @NewPassword WHERE id = @Id";
+                cmd.CommandText = "UPDATE [User] SET PasswordHash = @NewPassword WHERE Id = @Id";
                 var idParam = cmd.CreateParameter();
                 idParam.ParameterName = "@Id";
                 idParam.Value = userId;
@@ -218,7 +218,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "UPDATE users SET password = @NewPassword WHERE email = @Email";
+                cmd.CommandText = "UPDATE [User] SET PasswordHash = @NewPassword WHERE Email = @Email";
                 var emailParam = cmd.CreateParameter();
                 emailParam.ParameterName = "@Email";
                 emailParam.Value = email;
@@ -240,7 +240,7 @@ namespace DentalSpa.Infrastructure.Repositories
             {
                 if (excludeId.HasValue)
                 {
-                    cmd.CommandText = "SELECT 1 FROM users WHERE email = @Email AND id != @ExcludeId AND is_active = 1";
+                    cmd.CommandText = "SELECT 1 FROM [User] WHERE Email = @Email AND Id != @ExcludeId AND IsActive = 1";
                     var excludeParam = cmd.CreateParameter();
                     excludeParam.ParameterName = "@ExcludeId";
                     excludeParam.Value = excludeId.Value;
@@ -248,7 +248,7 @@ namespace DentalSpa.Infrastructure.Repositories
                 }
                 else
                 {
-                    cmd.CommandText = "SELECT 1 FROM users WHERE email = @Email AND is_active = 1";
+                    cmd.CommandText = "SELECT 1 FROM [User] WHERE Email = @Email AND IsActive = 1";
                 }
 
                 var emailParam = cmd.CreateParameter();
@@ -269,7 +269,7 @@ namespace DentalSpa.Infrastructure.Repositories
             {
                 if (excludeId.HasValue)
                 {
-                    cmd.CommandText = "SELECT 1 FROM users WHERE username = @Username AND id != @ExcludeId AND is_active = 1";
+                    cmd.CommandText = "SELECT 1 FROM [User] WHERE Username = @Username AND Id != @ExcludeId AND IsActive = 1";
                     var excludeParam = cmd.CreateParameter();
                     excludeParam.ParameterName = "@ExcludeId";
                     excludeParam.Value = excludeId.Value;
@@ -277,7 +277,7 @@ namespace DentalSpa.Infrastructure.Repositories
                 }
                 else
                 {
-                    cmd.CommandText = "SELECT 1 FROM users WHERE username = @Username AND is_active = 1";
+                    cmd.CommandText = "SELECT 1 FROM [User] WHERE Username = @Username AND IsActive = 1";
                 }
 
                 var usernameParam = cmd.CreateParameter();

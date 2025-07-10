@@ -7,13 +7,13 @@ using DentalSpa.Infrastructure.Repositories;
 using DentalSpa.Application.Services;
 using DentalSpa.Application.Interfaces;
 using System.Data;
-using Npgsql;
+using System.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Configuration ---
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ??
-                       builder.Configuration.GetConnectionString("DefaultConnection");
+                       builder.Configuration.GetConnectionString("SqlServerConnection");
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "a_default_super_secret_key_that_is_long_enough_for_hs256";
 
@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddTransient<IDbConnection>(sp => new NpgsqlConnection(connectionString));
+builder.Services.AddTransient<IDbConnection>(sp => new SqlConnection(builder.Configuration.GetConnectionString("SqlServerConnection")));
 
 // --- Register ONLY Auth Dependencies to Isolate the issue ---
 builder.Services.AddScoped<IUserRepository, UserRepository>();

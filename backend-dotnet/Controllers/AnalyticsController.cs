@@ -11,101 +11,101 @@ namespace DentalSpa.API.Controllers
     {
         // Dashboard Principal
         [HttpGet("dashboard")]
-        public async Task<ActionResult> GetAnalyticsDashboard(
+        public Task<ActionResult> GetAnalyticsDashboard(
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            return Ok(new
+            return Task.FromResult<ActionResult>(Ok(new
             {
                 message = "Dashboard analytics",
                 startDate,
                 endDate
-            });
+            }));
         }
 
         // Análises de Pacientes
         [HttpGet("patients")]
-        public async Task<ActionResult> GetPatientAnalytics(
+        public Task<ActionResult> GetPatientAnalytics(
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            return Ok(new
+            return Task.FromResult<ActionResult>(Ok(new
             {
                 message = "Patient analytics",
                 startDate,
                 endDate
-            });
+            }));
         }
 
         // Análises de Agendamentos
         [HttpGet("appointments")]
-        public async Task<ActionResult> GetAppointmentAnalytics(
+        public Task<ActionResult> GetAppointmentAnalytics(
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            return Ok(new
+            return Task.FromResult<ActionResult>(Ok(new
             {
                 message = "Appointment analytics",
                 startDate,
                 endDate
-            });
+            }));
         }
 
         // Análises Financeiras
         [HttpGet("financial")]
-        public async Task<ActionResult> GetFinancialAnalytics(
+        public Task<ActionResult> GetFinancialAnalytics(
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            return Ok(new
+            return Task.FromResult<ActionResult>(Ok(new
             {
                 message = "Financial analytics",
                 startDate,
                 endDate
-            });
+            }));
         }
 
         // Análises de Performance
         [HttpGet("performance")]
-        public async Task<ActionResult> GetPerformanceAnalytics(
+        public Task<ActionResult> GetPerformanceAnalytics(
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            return Ok(new
+            return Task.FromResult<ActionResult>(Ok(new
             {
                 message = "Performance analytics",
                 startDate,
                 endDate
-            });
+            }));
         }
 
         // Relatórios Customizados
         [HttpPost("custom-report")]
-        public async Task<ActionResult> GenerateCustomReport([FromBody] object reportData)
+        public Task<ActionResult> GenerateCustomReport([FromBody] object reportData)
         {
-            return Ok(new
+            return Task.FromResult<ActionResult>(Ok(new
             {
                 message = "Custom report generated",
                 data = reportData
-            });
+            }));
         }
 
         // Exportar Dados
         [HttpGet("export")]
-        public async Task<ActionResult> ExportAnalytics(
+        public Task<ActionResult> ExportAnalytics(
             [FromQuery] string format = "excel",
             [FromQuery] string type = "complete",
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null)
         {
-            return Ok(new
+            return Task.FromResult<ActionResult>(Ok(new
             {
                 message = "Analytics exported",
                 format,
                 type,
                 startDate,
                 endDate
-            });
+            }));
         }
     }
 }

@@ -16,5 +16,6 @@ namespace DentalSpa.Application.DTOs
         public string? ProfileImageUrl { get; set; }
         public int YearsOfExperience { get; set; }
         public string? License { get; set; }
+        public List<int> ClinicIds { get; set; } = new();
     }
 } 

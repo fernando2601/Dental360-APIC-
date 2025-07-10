@@ -9,11 +9,13 @@ namespace DentalSpa.Application.Services
     {
         private readonly IInventoryRepository _inventoryRepository;
         private readonly ILogger<InventoryService> _logger;
+        private readonly IProductRepository _productRepository;
 
-        public InventoryService(IInventoryRepository inventoryRepository, ILogger<InventoryService> logger)
+        public InventoryService(IInventoryRepository inventoryRepository, ILogger<InventoryService> logger, IProductRepository productRepository)
         {
             _inventoryRepository = inventoryRepository;
             _logger = logger;
+            _productRepository = productRepository;
         }
 
         public async Task<IEnumerable<Inventory>> GetAllInventoryAsync()
@@ -44,51 +46,58 @@ namespace DentalSpa.Application.Services
 
         public async Task<InventoryResponse> CreateAsync(InventoryCreateRequest request)
         {
-            var item = new Inventory
+            var inventory = new Inventory
             {
-                Name = request.Name,
-                Description = request.Description,
-                Category = request.Category,
+                ProductId = request.ProductId,
                 Quantity = request.Quantity,
-                Unit = request.Unit,
-                MinStock = request.MinStock,
-                UnitPrice = request.UnitPrice,
-                Supplier = request.Supplier,
-                Location = request.Location,
-                BatchNumber = request.BatchNumber,
-                ExpirationDate = request.ExpirationDate,
+                MinQuantity = request.MinQuantity,
                 Status = request.Status,
-                IsActive = request.IsActive,
-                CreatedAt = request.CreatedAt,
-                UpdatedAt = request.UpdatedAt,
-                ClinicId = request.ClinicId
+                ClinicId = request.ClinicId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
-            var created = await _inventoryRepository.CreateAsync(item);
-            return MapToResponse(created);
+            var created = await _inventoryRepository.CreateAsync(inventory);
+            var product = await _productRepository.GetByIdAsync(request.ProductId);
+            return new InventoryResponse
+            {
+                Id = created.Id,
+                ProductId = created.ProductId,
+                ProductName = product?.Name ?? string.Empty,
+                ProductCategory = product?.Category ?? string.Empty,
+                Quantity = created.Quantity,
+                MinQuantity = created.MinQuantity,
+                Status = created.Status,
+                ClinicId = created.ClinicId,
+                CreatedAt = created.CreatedAt,
+                UpdatedAt = created.UpdatedAt
+            };
         }
 
         public async Task<InventoryResponse?> UpdateAsync(int id, InventoryCreateRequest request)
         {
             var item = await _inventoryRepository.GetByIdAsync(id);
             if (item == null) return null;
-            item.Name = request.Name;
-            item.Description = request.Description;
-            item.Category = request.Category;
+            item.ProductId = request.ProductId;
             item.Quantity = request.Quantity;
-            item.Unit = request.Unit;
-            item.MinStock = request.MinStock;
-            item.UnitPrice = request.UnitPrice;
-            item.Supplier = request.Supplier;
-            item.Location = request.Location;
-            item.BatchNumber = request.BatchNumber;
-            item.ExpirationDate = request.ExpirationDate;
+            item.MinQuantity = request.MinQuantity;
             item.Status = request.Status;
-            item.IsActive = request.IsActive;
-            item.CreatedAt = request.CreatedAt;
-            item.UpdatedAt = request.UpdatedAt;
             item.ClinicId = request.ClinicId;
+            item.UpdatedAt = DateTime.UtcNow;
             var updated = await _inventoryRepository.UpdateAsync(id, item);
-            return MapToResponse(updated);
+            var product = await _productRepository.GetByIdAsync(request.ProductId);
+            return updated == null ? null : new InventoryResponse
+            {
+                Id = updated.Id,
+                ProductId = updated.ProductId,
+                ProductName = product?.Name ?? string.Empty,
+                ProductCategory = product?.Category ?? string.Empty,
+                Quantity = updated.Quantity,
+                MinQuantity = updated.MinQuantity,
+                Status = updated.Status,
+                ClinicId = updated.ClinicId,
+                CreatedAt = updated.CreatedAt,
+                UpdatedAt = updated.UpdatedAt
+            };
         }
 
         public async Task<bool> DeleteInventoryAsync(int id) => await _inventoryRepository.DeleteAsync(id);
@@ -128,26 +137,67 @@ namespace DentalSpa.Application.Services
             return await _inventoryRepository.DeleteAsync(id);
         }
 
+        public async Task<IEnumerable<InventoryResponse>> GetByProductIdAsync(int productId)
+        {
+            var inventories = await _inventoryRepository.GetByProductIdAsync(productId);
+            var product = await _productRepository.GetByIdAsync(productId);
+            return inventories.Select(i => new InventoryResponse
+            {
+                Id = i.Id,
+                ProductId = i.ProductId,
+                ProductName = product?.Name ?? string.Empty,
+                ProductCategory = product?.Category ?? string.Empty,
+                Quantity = i.Quantity,
+                MinQuantity = i.MinQuantity,
+                Status = i.Status,
+                ClinicId = i.ClinicId,
+                CreatedAt = i.CreatedAt,
+                UpdatedAt = i.UpdatedAt
+            });
+        }
+
+        public async Task<IEnumerable<InventoryResponse>> GetByClinicIdAsync(int clinicId)
+        {
+            var inventories = await _inventoryRepository.GetByClinicIdAsync(clinicId);
+            var products = new Dictionary<int, (string Name, string? Category)>();
+            foreach (var inv in inventories)
+            {
+                if (!products.ContainsKey(inv.ProductId))
+                {
+                    var prod = await _productRepository.GetByIdAsync(inv.ProductId);
+                    products[inv.ProductId] = (prod?.Name ?? string.Empty, prod?.Category);
+                }
+            }
+            return inventories.Select(i => new InventoryResponse
+            {
+                Id = i.Id,
+                ProductId = i.ProductId,
+                ProductName = products[i.ProductId].Name,
+                ProductCategory = products[i.ProductId].Category ?? string.Empty,
+                Quantity = i.Quantity,
+                MinQuantity = i.MinQuantity,
+                Status = i.Status,
+                ClinicId = i.ClinicId,
+                CreatedAt = i.CreatedAt,
+                UpdatedAt = i.UpdatedAt
+            });
+        }
+
         private InventoryResponse MapToResponse(Inventory inventory)
         {
+            var product = _productRepository.GetByIdAsync(inventory.ProductId).Result;
             return new InventoryResponse
             {
-                Name = inventory.Name,
-                Description = inventory.Description,
-                Category = inventory.Category,
+                Id = inventory.Id,
+                ProductId = inventory.ProductId,
+                ProductName = product?.Name ?? string.Empty,
+                ProductCategory = product?.Category ?? string.Empty,
                 Quantity = inventory.Quantity,
-                Unit = inventory.Unit,
-                MinStock = inventory.MinStock,
-                UnitPrice = inventory.UnitPrice,
-                Supplier = inventory.Supplier,
-                Location = inventory.Location,
-                BatchNumber = inventory.BatchNumber,
-                ExpirationDate = inventory.ExpirationDate,
+                MinQuantity = inventory.MinQuantity,
                 Status = inventory.Status,
-                IsActive = inventory.IsActive,
+                ClinicId = inventory.ClinicId,
                 CreatedAt = inventory.CreatedAt,
-                UpdatedAt = inventory.UpdatedAt,
-                ClinicId = inventory.ClinicId
+                UpdatedAt = inventory.UpdatedAt
             };
         }
     }

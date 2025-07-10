@@ -18,7 +18,7 @@ namespace DentalSpa.Infrastructure.Repositories
             var inventories = new List<Inventory>();
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, name, description, category, quantity, unit, min_stock, unit_price, supplier, location, batch_number, expiration_date, status, is_active, created_at, updated_at FROM inventory WHERE is_active = 1";
+                cmd.CommandText = "SELECT id, product_id, quantity, min_quantity, status, clinic_id, created_at, updated_at FROM inventory WHERE status = 'active'";
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -26,21 +26,13 @@ namespace DentalSpa.Infrastructure.Repositories
                         inventories.Add(new Inventory
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
-                            Category = reader.GetString(reader.GetOrdinal("category")),
+                            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
                             Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
-                            Unit = reader.GetString(reader.GetOrdinal("unit")),
-                            MinStock = reader.GetInt32(reader.GetOrdinal("min_stock")),
-                            UnitPrice = reader.GetDecimal(reader.GetOrdinal("unit_price")),
-                            Supplier = reader.IsDBNull(reader.GetOrdinal("supplier")) ? null : reader.GetString(reader.GetOrdinal("supplier")),
-                            Location = reader.IsDBNull(reader.GetOrdinal("location")) ? null : reader.GetString(reader.GetOrdinal("location")),
-                            BatchNumber = reader.IsDBNull(reader.GetOrdinal("batch_number")) ? null : reader.GetString(reader.GetOrdinal("batch_number")),
-                            ExpirationDate = reader.IsDBNull(reader.GetOrdinal("expiration_date")) ? null : reader.GetDateTime(reader.GetOrdinal("expiration_date")),
+                            MinQuantity = reader.GetInt32(reader.GetOrdinal("min_quantity")),
                             Status = reader.GetString(reader.GetOrdinal("status")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                            ClinicId = reader.GetInt32(reader.GetOrdinal("clinic_id")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? null : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? null : reader.GetDateTime(reader.GetOrdinal("updated_at"))
                         });
                     }
                 }
@@ -52,7 +44,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, name, description, category, quantity, unit, min_stock, unit_price, supplier, location, batch_number, expiration_date, status, is_active, created_at, updated_at FROM inventory WHERE id = @Id AND is_active = 1";
+                cmd.CommandText = "SELECT id, product_id, quantity, min_quantity, status, clinic_id, created_at, updated_at FROM inventory WHERE id = @Id AND status = 'active'";
                 cmd.Parameters.Add(CreateParameter("@Id", id));
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -61,21 +53,13 @@ namespace DentalSpa.Infrastructure.Repositories
                         return new Inventory
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
-                            Category = reader.GetString(reader.GetOrdinal("category")),
+                            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
                             Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
-                            Unit = reader.GetString(reader.GetOrdinal("unit")),
-                            MinStock = reader.GetInt32(reader.GetOrdinal("min_stock")),
-                            UnitPrice = reader.GetDecimal(reader.GetOrdinal("unit_price")),
-                            Supplier = reader.IsDBNull(reader.GetOrdinal("supplier")) ? null : reader.GetString(reader.GetOrdinal("supplier")),
-                            Location = reader.IsDBNull(reader.GetOrdinal("location")) ? null : reader.GetString(reader.GetOrdinal("location")),
-                            BatchNumber = reader.IsDBNull(reader.GetOrdinal("batch_number")) ? null : reader.GetString(reader.GetOrdinal("batch_number")),
-                            ExpirationDate = reader.IsDBNull(reader.GetOrdinal("expiration_date")) ? null : reader.GetDateTime(reader.GetOrdinal("expiration_date")),
+                            MinQuantity = reader.GetInt32(reader.GetOrdinal("min_quantity")),
                             Status = reader.GetString(reader.GetOrdinal("status")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                            ClinicId = reader.GetInt32(reader.GetOrdinal("clinic_id")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? null : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? null : reader.GetDateTime(reader.GetOrdinal("updated_at"))
                         };
                     }
                 }
@@ -87,23 +71,15 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = @"INSERT INTO inventory (name, description, category, quantity, unit, min_stock, unit_price, supplier, location, batch_number, expiration_date, status, is_active, created_at, updated_at) 
-                                   VALUES (@Name, @Description, @Category, @Quantity, @Unit, @MinStock, @UnitPrice, @Supplier, @Location, @BatchNumber, @ExpirationDate, @Status, @IsActive, @CreatedAt, @UpdatedAt);
+                cmd.CommandText = @"INSERT INTO inventory (product_id, quantity, min_quantity, status, clinic_id, created_at, updated_at) 
+                                   VALUES (@ProductId, @Quantity, @MinQuantity, @Status, @ClinicId, @CreatedAt, @UpdatedAt);
                                    SELECT CAST(SCOPE_IDENTITY() as int)";
                 
-                cmd.Parameters.Add(CreateParameter("@Name", inventory.Name));
-                cmd.Parameters.Add(CreateParameter("@Description", inventory.Description));
-                cmd.Parameters.Add(CreateParameter("@Category", inventory.Category));
+                cmd.Parameters.Add(CreateParameter("@ProductId", inventory.ProductId));
                 cmd.Parameters.Add(CreateParameter("@Quantity", inventory.Quantity));
-                cmd.Parameters.Add(CreateParameter("@Unit", inventory.Unit));
-                cmd.Parameters.Add(CreateParameter("@MinStock", inventory.MinStock));
-                cmd.Parameters.Add(CreateParameter("@UnitPrice", inventory.UnitPrice));
-                cmd.Parameters.Add(CreateParameter("@Supplier", inventory.Supplier));
-                cmd.Parameters.Add(CreateParameter("@Location", inventory.Location));
-                cmd.Parameters.Add(CreateParameter("@BatchNumber", inventory.BatchNumber));
-                cmd.Parameters.Add(CreateParameter("@ExpirationDate", inventory.ExpirationDate));
+                cmd.Parameters.Add(CreateParameter("@MinQuantity", inventory.MinQuantity));
                 cmd.Parameters.Add(CreateParameter("@Status", inventory.Status));
-                cmd.Parameters.Add(CreateParameter("@IsActive", true));
+                cmd.Parameters.Add(CreateParameter("@ClinicId", inventory.ClinicId));
                 cmd.Parameters.Add(CreateParameter("@CreatedAt", DateTime.Now));
                 cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
                 
@@ -119,22 +95,14 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = @"UPDATE inventory SET name = @Name, description = @Description, category = @Category, quantity = @Quantity, unit = @Unit, min_stock = @MinStock, unit_price = @UnitPrice, supplier = @Supplier, location = @Location, batch_number = @BatchNumber, expiration_date = @ExpirationDate, status = @Status, is_active = @IsActive, updated_at = @UpdatedAt WHERE id = @Id AND is_active = 1";
+                cmd.CommandText = @"UPDATE inventory SET product_id = @ProductId, quantity = @Quantity, min_quantity = @MinQuantity, status = @Status, clinic_id = @ClinicId, updated_at = @UpdatedAt WHERE id = @Id AND status = 'active'";
                 
                 cmd.Parameters.Add(CreateParameter("@Id", id));
-                cmd.Parameters.Add(CreateParameter("@Name", inventory.Name));
-                cmd.Parameters.Add(CreateParameter("@Description", inventory.Description));
-                cmd.Parameters.Add(CreateParameter("@Category", inventory.Category));
+                cmd.Parameters.Add(CreateParameter("@ProductId", inventory.ProductId));
                 cmd.Parameters.Add(CreateParameter("@Quantity", inventory.Quantity));
-                cmd.Parameters.Add(CreateParameter("@Unit", inventory.Unit));
-                cmd.Parameters.Add(CreateParameter("@MinStock", inventory.MinStock));
-                cmd.Parameters.Add(CreateParameter("@UnitPrice", inventory.UnitPrice));
-                cmd.Parameters.Add(CreateParameter("@Supplier", inventory.Supplier));
-                cmd.Parameters.Add(CreateParameter("@Location", inventory.Location));
-                cmd.Parameters.Add(CreateParameter("@BatchNumber", inventory.BatchNumber));
-                cmd.Parameters.Add(CreateParameter("@ExpirationDate", inventory.ExpirationDate));
+                cmd.Parameters.Add(CreateParameter("@MinQuantity", inventory.MinQuantity));
                 cmd.Parameters.Add(CreateParameter("@Status", inventory.Status));
-                cmd.Parameters.Add(CreateParameter("@IsActive", inventory.IsActive));
+                cmd.Parameters.Add(CreateParameter("@ClinicId", inventory.ClinicId));
                 cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
                 
                 var rows = cmd.ExecuteNonQuery();
@@ -146,7 +114,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "UPDATE inventory SET is_active = 0 WHERE id = @Id";
+                cmd.CommandText = "UPDATE inventory SET status = 'inactive' WHERE id = @Id";
                 cmd.Parameters.Add(CreateParameter("@Id", id));
                 var rows = cmd.ExecuteNonQuery();
                 return await Task.FromResult(rows > 0);
@@ -158,8 +126,7 @@ namespace DentalSpa.Infrastructure.Repositories
             var inventories = new List<Inventory>();
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, name, description, category, quantity, unit, min_stock, unit_price, supplier, location, batch_number, expiration_date, status, is_active, created_at, updated_at FROM inventory WHERE category = @Category AND is_active = 1";
-                cmd.Parameters.Add(CreateParameter("@Category", category));
+                cmd.CommandText = "SELECT id, product_id, quantity, min_quantity, status, clinic_id, created_at, updated_at FROM inventory WHERE status = 'active'";
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -167,21 +134,13 @@ namespace DentalSpa.Infrastructure.Repositories
                         inventories.Add(new Inventory
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
-                            Category = reader.GetString(reader.GetOrdinal("category")),
+                            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
                             Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
-                            Unit = reader.GetString(reader.GetOrdinal("unit")),
-                            MinStock = reader.GetInt32(reader.GetOrdinal("min_stock")),
-                            UnitPrice = reader.GetDecimal(reader.GetOrdinal("unit_price")),
-                            Supplier = reader.IsDBNull(reader.GetOrdinal("supplier")) ? null : reader.GetString(reader.GetOrdinal("supplier")),
-                            Location = reader.IsDBNull(reader.GetOrdinal("location")) ? null : reader.GetString(reader.GetOrdinal("location")),
-                            BatchNumber = reader.IsDBNull(reader.GetOrdinal("batch_number")) ? null : reader.GetString(reader.GetOrdinal("batch_number")),
-                            ExpirationDate = reader.IsDBNull(reader.GetOrdinal("expiration_date")) ? null : reader.GetDateTime(reader.GetOrdinal("expiration_date")),
+                            MinQuantity = reader.GetInt32(reader.GetOrdinal("min_quantity")),
                             Status = reader.GetString(reader.GetOrdinal("status")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                            ClinicId = reader.GetInt32(reader.GetOrdinal("clinic_id")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? null : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? null : reader.GetDateTime(reader.GetOrdinal("updated_at"))
                         });
                     }
                 }
@@ -194,7 +153,7 @@ namespace DentalSpa.Infrastructure.Repositories
             var inventories = new List<Inventory>();
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, name, description, category, quantity, unit, min_stock, unit_price, supplier, location, batch_number, expiration_date, status, is_active, created_at, updated_at FROM inventory WHERE quantity <= min_stock AND is_active = 1";
+                cmd.CommandText = "SELECT id, product_id, quantity, min_quantity, status, clinic_id, created_at, updated_at FROM inventory WHERE quantity <= min_quantity AND status = 'active'";
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -202,21 +161,13 @@ namespace DentalSpa.Infrastructure.Repositories
                         inventories.Add(new Inventory
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
-                            Category = reader.GetString(reader.GetOrdinal("category")),
+                            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
                             Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
-                            Unit = reader.GetString(reader.GetOrdinal("unit")),
-                            MinStock = reader.GetInt32(reader.GetOrdinal("min_stock")),
-                            UnitPrice = reader.GetDecimal(reader.GetOrdinal("unit_price")),
-                            Supplier = reader.IsDBNull(reader.GetOrdinal("supplier")) ? null : reader.GetString(reader.GetOrdinal("supplier")),
-                            Location = reader.IsDBNull(reader.GetOrdinal("location")) ? null : reader.GetString(reader.GetOrdinal("location")),
-                            BatchNumber = reader.IsDBNull(reader.GetOrdinal("batch_number")) ? null : reader.GetString(reader.GetOrdinal("batch_number")),
-                            ExpirationDate = reader.IsDBNull(reader.GetOrdinal("expiration_date")) ? null : reader.GetDateTime(reader.GetOrdinal("expiration_date")),
+                            MinQuantity = reader.GetInt32(reader.GetOrdinal("min_quantity")),
                             Status = reader.GetString(reader.GetOrdinal("status")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                            ClinicId = reader.GetInt32(reader.GetOrdinal("clinic_id")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? null : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? null : reader.GetDateTime(reader.GetOrdinal("updated_at"))
                         });
                     }
                 }
@@ -229,8 +180,7 @@ namespace DentalSpa.Infrastructure.Repositories
             var inventories = new List<Inventory>();
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT id, name, description, category, quantity, unit, min_stock, unit_price, supplier, location, batch_number, expiration_date, status, is_active, created_at, updated_at FROM inventory WHERE expiration_date IS NOT NULL AND expiration_date <= @CurrentDate AND is_active = 1";
-                cmd.Parameters.Add(CreateParameter("@CurrentDate", DateTime.Now));
+                cmd.CommandText = "SELECT id, product_id, quantity, min_quantity, status, clinic_id, created_at, updated_at FROM inventory WHERE status = 'active'";
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -238,21 +188,13 @@ namespace DentalSpa.Infrastructure.Repositories
                         inventories.Add(new Inventory
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
-                            Category = reader.GetString(reader.GetOrdinal("category")),
+                            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
                             Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
-                            Unit = reader.GetString(reader.GetOrdinal("unit")),
-                            MinStock = reader.GetInt32(reader.GetOrdinal("min_stock")),
-                            UnitPrice = reader.GetDecimal(reader.GetOrdinal("unit_price")),
-                            Supplier = reader.IsDBNull(reader.GetOrdinal("supplier")) ? null : reader.GetString(reader.GetOrdinal("supplier")),
-                            Location = reader.IsDBNull(reader.GetOrdinal("location")) ? null : reader.GetString(reader.GetOrdinal("location")),
-                            BatchNumber = reader.IsDBNull(reader.GetOrdinal("batch_number")) ? null : reader.GetString(reader.GetOrdinal("batch_number")),
-                            ExpirationDate = reader.IsDBNull(reader.GetOrdinal("expiration_date")) ? null : reader.GetDateTime(reader.GetOrdinal("expiration_date")),
+                            MinQuantity = reader.GetInt32(reader.GetOrdinal("min_quantity")),
                             Status = reader.GetString(reader.GetOrdinal("status")),
-                            IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                            CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                            UpdatedAt = reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                            ClinicId = reader.GetInt32(reader.GetOrdinal("clinic_id")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? null : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? null : reader.GetDateTime(reader.GetOrdinal("updated_at"))
                         });
                     }
                 }
@@ -264,7 +206,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT COUNT(*) FROM inventory WHERE is_active = 1";
+                cmd.CommandText = "SELECT COUNT(*) FROM inventory WHERE status = 'active'";
                 var count = Convert.ToInt32(cmd.ExecuteScalar());
                 return await Task.FromResult(count);
             }
@@ -274,8 +216,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT COUNT(*) FROM inventory WHERE category = @Category AND is_active = 1";
-                cmd.Parameters.Add(CreateParameter("@Category", category));
+                cmd.CommandText = "SELECT COUNT(*) FROM inventory WHERE status = 'active'";
                 var count = Convert.ToInt32(cmd.ExecuteScalar());
                 return await Task.FromResult(count);
             }
@@ -285,7 +226,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT COUNT(*) FROM inventory WHERE quantity <= min_stock AND is_active = 1";
+                cmd.CommandText = "SELECT COUNT(*) FROM inventory WHERE quantity <= min_quantity AND status = 'active'";
                 var count = Convert.ToInt32(cmd.ExecuteScalar());
                 return await Task.FromResult(count);
             }
@@ -295,11 +236,67 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT COUNT(*) FROM inventory WHERE id = @Id AND is_active = 1";
+                cmd.CommandText = "SELECT COUNT(*) FROM inventory WHERE id = @Id AND status = 'active'";
                 cmd.Parameters.Add(CreateParameter("@Id", id));
                 var count = Convert.ToInt32(cmd.ExecuteScalar());
                 return await Task.FromResult(count > 0);
             }
+        }
+
+        public async Task<IEnumerable<Inventory>> GetByProductIdAsync(int productId)
+        {
+            var inventories = new List<Inventory>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, product_id, quantity, min_quantity, status, clinic_id, created_at, updated_at FROM inventory WHERE product_id = @ProductId AND status = 'active'";
+                cmd.Parameters.Add(CreateParameter("@ProductId", productId));
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        inventories.Add(new Inventory
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
+                            Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
+                            MinQuantity = reader.GetInt32(reader.GetOrdinal("min_quantity")),
+                            Status = reader.GetString(reader.GetOrdinal("status")),
+                            ClinicId = reader.GetInt32(reader.GetOrdinal("clinic_id")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? null : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? null : reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(inventories);
+        }
+
+        public async Task<IEnumerable<Inventory>> GetByClinicIdAsync(int clinicId)
+        {
+            var inventories = new List<Inventory>();
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT id, product_id, quantity, min_quantity, status, clinic_id, created_at, updated_at FROM inventory WHERE clinic_id = @ClinicId AND status = 'active'";
+                cmd.Parameters.Add(CreateParameter("@ClinicId", clinicId));
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        inventories.Add(new Inventory
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            ProductId = reader.GetInt32(reader.GetOrdinal("product_id")),
+                            Quantity = reader.GetInt32(reader.GetOrdinal("quantity")),
+                            MinQuantity = reader.GetInt32(reader.GetOrdinal("min_quantity")),
+                            Status = reader.GetString(reader.GetOrdinal("status")),
+                            ClinicId = reader.GetInt32(reader.GetOrdinal("clinic_id")),
+                            CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? null : reader.GetDateTime(reader.GetOrdinal("created_at")),
+                            UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? null : reader.GetDateTime(reader.GetOrdinal("updated_at"))
+                        });
+                    }
+                }
+            }
+            return await Task.FromResult(inventories);
         }
 
         private IDbDataParameter CreateParameter(string name, object? value)

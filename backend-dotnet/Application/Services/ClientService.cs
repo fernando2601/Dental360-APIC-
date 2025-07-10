@@ -78,7 +78,7 @@ namespace DentalSpa.Application.Services
             client.CreatedAt = request.CreatedAt;
             client.ClinicId = request.ClinicId;
             var updated = await _clientRepository.UpdateAsync(id, client);
-            return MapToResponse(updated);
+            return MapToResponse(updated!);
         }
 
         public async Task<IEnumerable<ClientResponse>> GetAllAsync()
@@ -90,7 +90,7 @@ namespace DentalSpa.Application.Services
         public async Task<ClientResponse?> GetByIdAsync(int id)
         {
             var client = await _clientRepository.GetByIdAsync(id);
-            return client == null ? null : MapToResponse(client);
+            return client == null ? null : MapToResponse(client!);
         }
 
         public async Task<bool> DeleteAsync(int id)

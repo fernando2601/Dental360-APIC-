@@ -25,7 +25,7 @@ namespace DentalSpa.Application.Services
         public async Task<StaffResponse?> GetStaffByIdAsync(int id)
         {
             var staff = await _staffRepository.GetStaffByIdAsync(id);
-            return staff == null ? null : MapToResponse(staff);
+            return staff == null ? null : MapToResponse(staff!);
         }
 
         public async Task<StaffResponse> CreateAsync(StaffCreateRequest request)
@@ -35,7 +35,6 @@ namespace DentalSpa.Application.Services
                 FullName = request.FullName,
                 Email = request.Email,
                 Phone = request.Phone,
-                ClinicId = request.ClinicId,
                 PositionId = request.PositionId,
                 Department = request.Department,
                 Salary = request.Salary,
@@ -44,12 +43,31 @@ namespace DentalSpa.Application.Services
                 Bio = request.Bio,
                 ProfileImageUrl = request.ProfileImageUrl,
                 YearsOfExperience = request.YearsOfExperience,
-                License = request.License
+                License = request.License,
+                StaffClinics = request.ClinicIds.Select(cid => new StaffClinic { ClinicId = cid }).ToList(),
+                StaffServices = request.ServiceIds.Select(sid => new DentalSpa.Domain.Entities.StaffService { ServiceId = sid }).ToList()
             };
             var created = await _staffRepository.CreateAsync(staff);
-            // Salvar relação N:N com serviços
-            await _staffRepository.SetStaffServicesAsync(created.Id, request.ServiceIds);
-            return MapToResponse(created, request.ServiceIds);
+            return new StaffResponse
+            {
+                FullName = created.FullName,
+                Email = created.Email,
+                Phone = created.Phone,
+                Position = created.Position,
+                Specialization = created.Specialization,
+                Department = created.Department,
+                Salary = created.Salary,
+                HireDate = created.HireDate,
+                IsActive = created.IsActive,
+                Bio = created.Bio,
+                ProfileImageUrl = created.ProfileImageUrl,
+                YearsOfExperience = created.YearsOfExperience,
+                License = created.License,
+                Name = created.FullName,
+                PositionId = created.PositionId,
+                ServiceIds = created.StaffServices.Select(ss => ss.ServiceId).ToList(),
+                ClinicIds = created.StaffClinics.Select(sc => sc.ClinicId).ToList()
+            };
         }
 
         public async Task<StaffResponse?> UpdateAsync(int id, StaffCreateRequest request)
@@ -59,7 +77,6 @@ namespace DentalSpa.Application.Services
             staff.FullName = request.FullName;
             staff.Email = request.Email;
             staff.Phone = request.Phone;
-            staff.ClinicId = request.ClinicId;
             staff.PositionId = request.PositionId;
             staff.Department = request.Department;
             staff.Salary = request.Salary;
@@ -69,9 +86,10 @@ namespace DentalSpa.Application.Services
             staff.ProfileImageUrl = request.ProfileImageUrl;
             staff.YearsOfExperience = request.YearsOfExperience;
             staff.License = request.License;
+            staff.StaffClinics = request.ClinicIds.Select(cid => new StaffClinic { StaffId = staff.Id, ClinicId = cid }).ToList();
             var updated = await _staffRepository.UpdateAsync(id, staff);
             await _staffRepository.SetStaffServicesAsync(id, request.ServiceIds);
-            return MapToResponse(updated, request.ServiceIds);
+            return MapToResponse(updated!, request.ServiceIds);
         }
 
         public async Task<bool> DeleteStaffAsync(int id)
@@ -173,7 +191,7 @@ namespace DentalSpa.Application.Services
                 Email = s.Email,
                 Phone = s.Phone,
                 PositionId = s.PositionId,
-                ClinicId = s.ClinicId,
+                // ClinicId removido
                 Department = s.Department,
                 Salary = s.Salary,
                 HireDate = s.HireDate,
@@ -183,7 +201,8 @@ namespace DentalSpa.Application.Services
                 YearsOfExperience = s.YearsOfExperience,
                 License = s.License,
                 Name = s.Name,
-                ServiceIds = serviceIds ?? s.StaffServices.Select(ss => ss.ServiceId).ToList()
+                ServiceIds = serviceIds ?? s.StaffServices.Select(ss => ss.ServiceId).ToList(),
+                ClinicIds = s.StaffClinics.Select(sc => sc.ClinicId).ToList()
             };
         }
     }

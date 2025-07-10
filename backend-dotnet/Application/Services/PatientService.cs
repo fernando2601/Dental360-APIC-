@@ -23,7 +23,7 @@ namespace DentalSpa.Application.Services
         public async Task<PatientResponse?> GetByIdAsync(int id)
         {
             var patient = await _patientRepository.GetByIdAsync(id);
-            return patient == null ? null : MapToResponse(patient);
+            return patient == null ? null : MapToResponse(patient!);
         }
 
         public async Task<PatientResponse> CreateAsync(PatientCreateRequest request)
@@ -33,7 +33,6 @@ namespace DentalSpa.Application.Services
                 Name = request.Name,
                 Email = request.Email,
                 Phone = request.Phone,
-                ClinicId = request.ClinicId,
                 BirthDate = request.BirthDate,
                 Gender = request.Gender,
                 Address = request.Address,
@@ -54,10 +53,38 @@ namespace DentalSpa.Application.Services
                 City = request.City,
                 State = request.State,
                 ZipCode = request.ZipCode,
-                Segment = request.Segment
+                Segment = request.Segment,
+                PatientClinics = request.ClinicIds.Select(cid => new PatientClinic { ClinicId = cid }).ToList()
             };
             var created = await _patientRepository.CreateAsync(patient);
-            return MapToResponse(created);
+            return new PatientResponse
+            {
+                Name = created.Name,
+                Email = created.Email,
+                Phone = created.Phone,
+                BirthDate = created.BirthDate,
+                Gender = created.Gender,
+                Address = created.Address,
+                MedicalHistory = created.MedicalHistory,
+                Allergies = created.Allergies,
+                EmergencyContact = created.EmergencyContact,
+                EmergencyPhone = created.EmergencyPhone,
+                IsActive = created.IsActive,
+                Nome = created.Nome,
+                Idade = created.Idade,
+                CPF = created.CPF,
+                RG = created.RG,
+                EstadoNascimento = created.EstadoNascimento,
+                DataNascimento = created.DataNascimento,
+                Sexo = created.Sexo,
+                Telefone = created.Telefone,
+                Endereco = created.Endereco,
+                City = created.City,
+                State = created.State,
+                ZipCode = created.ZipCode,
+                Segment = created.Segment,
+                ClinicIds = created.PatientClinics.Select(pc => pc.ClinicId).ToList()
+            };
         }
 
         public async Task<PatientResponse?> UpdateAsync(int id, PatientCreateRequest request)
@@ -67,7 +94,6 @@ namespace DentalSpa.Application.Services
             patient.Name = request.Name;
             patient.Email = request.Email;
             patient.Phone = request.Phone;
-            patient.ClinicId = request.ClinicId;
             patient.BirthDate = request.BirthDate;
             patient.Gender = request.Gender;
             patient.Address = request.Address;
@@ -89,8 +115,9 @@ namespace DentalSpa.Application.Services
             patient.State = request.State;
             patient.ZipCode = request.ZipCode;
             patient.Segment = request.Segment;
+            patient.PatientClinics = request.ClinicIds.Select(cid => new PatientClinic { PatientId = patient.Id, ClinicId = cid }).ToList();
             var updated = await _patientRepository.UpdateAsync(id, patient);
-            return MapToResponse(updated);
+            return MapToResponse(updated!);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -150,7 +177,7 @@ namespace DentalSpa.Application.Services
             var patients = await _patientRepository.GetAllAsync();
             var totalPatients = patients.Count();
             var activePatients = patients.Count(p => p.IsActive);
-            var averageAge = patients.Where(p => p.BirthDate.HasValue).Average(p => DateTime.Now.Year - p.BirthDate.Value.Year);
+            var averageAge = patients.Where(p => p.BirthDate.HasValue).Average(p => DateTime.Now.Year - p.BirthDate.GetValueOrDefault().Year);
 
             return new
             {
@@ -158,7 +185,7 @@ namespace DentalSpa.Application.Services
                 {
                     Id = patient.Id,
                     Name = patient.Name,
-                    Age = patient.BirthDate.HasValue ? DateTime.Now.Year - patient.BirthDate.Value.Year : 0,
+                    Age = patient.BirthDate.HasValue ? DateTime.Now.Year - patient.BirthDate.GetValueOrDefault().Year : 0,
                     IsActive = patient.IsActive,
                     CreatedAt = patient.CreatedAt
                 },
@@ -232,7 +259,7 @@ namespace DentalSpa.Application.Services
                     Name = patient.Name,
                     Email = patient.Email,
                     Phone = patient.Phone,
-                    Age = patient.BirthDate.HasValue ? DateTime.Now.Year - patient.BirthDate.Value.Year : 0,
+                    Age = patient.BirthDate.HasValue ? DateTime.Now.Year - patient.BirthDate.GetValueOrDefault().Year : 0,
                     City = patient.City,
                     State = patient.State,
                     IsActive = patient.IsActive,
@@ -245,7 +272,7 @@ namespace DentalSpa.Application.Services
                     ActivePatients = patients.Count(p => p.IsActive),
                     NewPatientsThisMonth = patients.Count(p => p.CreatedAt.Month == DateTime.Now.Month && p.CreatedAt.Year == DateTime.Now.Year),
                     NewPatientsThisYear = patients.Count(p => p.CreatedAt.Year == DateTime.Now.Year),
-                    AverageAge = patients.Where(p => p.BirthDate.HasValue).Average(p => DateTime.Now.Year - p.BirthDate.Value.Year),
+                    AverageAge = patients.Where(p => p.BirthDate.HasValue).Average(p => DateTime.Now.Year - p.BirthDate.GetValueOrDefault().Year),
                     TopCities = patients.GroupBy(p => p.City ?? "Não Informado")
                                       .Select(g => new { City = g.Key, Count = g.Count() })
                                       .OrderByDescending(x => x.Count)

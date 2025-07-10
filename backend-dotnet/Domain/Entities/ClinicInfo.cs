@@ -59,5 +59,8 @@ namespace DentalSpa.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<StaffClinic> StaffClinics { get; set; } = new List<StaffClinic>();
+        public ICollection<PatientClinic> PatientClinics { get; set; } = new List<PatientClinic>();
     }
 }

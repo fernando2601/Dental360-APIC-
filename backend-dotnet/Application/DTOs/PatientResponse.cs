@@ -28,6 +28,6 @@ namespace DentalSpa.Application.DTOs
         public string State { get; set; } = string.Empty;
         public string ZipCode { get; set; } = string.Empty;
         public string Segment { get; set; } = string.Empty;
-        public int ClinicId { get; set; }
+        public List<int> ClinicIds { get; set; } = new();
     }
 } 

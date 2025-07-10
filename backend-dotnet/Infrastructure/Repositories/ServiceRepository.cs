@@ -13,7 +13,7 @@ namespace DentalSpa.Infrastructure.Repositories
             _connection = connection;
         }
 
-        public async Task<IEnumerable<Service>> GetAllAsync()
+        public Task<IEnumerable<Service>> GetAllAsync()
         {
             var services = new List<Service>();
             using (var cmd = _connection.CreateCommand())
@@ -30,10 +30,10 @@ namespace DentalSpa.Infrastructure.Repositories
                     }
                 }
             }
-            return await Task.FromResult(services);
+            return Task.FromResult((IEnumerable<Service>)services);
         }
 
-        public async Task<Service?> GetByIdAsync(int id)
+        public Task<Service?> GetByIdAsync(int id)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -46,28 +46,28 @@ namespace DentalSpa.Infrastructure.Repositories
                 {
                     if (reader.Read())
                     {
-                        return new Service
+                        return Task.FromResult<Service?>(new Service
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id"))
-                        };
+                        });
                     }
                 }
             }
-            return await Task.FromResult<Service?>(null);
+            return Task.FromResult<Service?>(null);
         }
 
-        public async Task<Service> CreateAsync(Service service)
+        public Task<Service> CreateAsync(Service service)
         {
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandText = "INSERT INTO services (is_active) VALUES (1); SELECT CAST(SCOPE_IDENTITY() as int)";
                 var id = Convert.ToInt32(cmd.ExecuteScalar());
                 service.Id = id;
-                return await Task.FromResult(service);
+                return Task.FromResult(service);
             }
         }
 
-        public async Task<Service?> UpdateAsync(int id, Service service)
+        public Task<Service?> UpdateAsync(int id, Service service)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -77,11 +77,11 @@ namespace DentalSpa.Infrastructure.Repositories
                 param.Value = id;
                 cmd.Parameters.Add(param);
                 var rows = cmd.ExecuteNonQuery();
-                return await Task.FromResult(rows > 0 ? service : null);
+                return Task.FromResult(rows > 0 ? service : null);
             }
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public Task<bool> DeleteAsync(int id)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -91,11 +91,11 @@ namespace DentalSpa.Infrastructure.Repositories
                 param.Value = id;
                 cmd.Parameters.Add(param);
                 var rows = cmd.ExecuteNonQuery();
-                return await Task.FromResult(rows > 0);
+                return Task.FromResult(rows > 0);
             }
         }
 
-        public async Task<IEnumerable<Service>> SearchAsync(string searchTerm)
+        public Task<IEnumerable<Service>> SearchAsync(string searchTerm)
         {
             var services = new List<Service>();
             using (var cmd = _connection.CreateCommand())
@@ -116,10 +116,10 @@ namespace DentalSpa.Infrastructure.Repositories
                     }
                 }
             }
-            return await Task.FromResult(services);
+            return Task.FromResult((IEnumerable<Service>)services);
         }
 
-        public async Task<IEnumerable<Service>> GetByCategoryAsync(string category)
+        public Task<IEnumerable<Service>> GetByCategoryAsync(string category)
         {
             var services = new List<Service>();
             using (var cmd = _connection.CreateCommand())
@@ -140,7 +140,7 @@ namespace DentalSpa.Infrastructure.Repositories
                     }
                 }
             }
-            return await Task.FromResult(services);
+            return Task.FromResult((IEnumerable<Service>)services);
         }
 
         public async Task SetServiceStaffAsync(int serviceId, List<int> staffIds)

@@ -23,7 +23,7 @@ namespace DentalSpa.Application.Services
         public async Task<ServiceResponse?> GetByIdAsync(int id)
         {
             var service = await _serviceRepository.GetByIdAsync(id);
-            return service == null ? null : MapToResponse(service);
+            return service == null ? null : MapToResponse(service!);
         }
 
         public async Task<ServiceResponse> CreateAsync(ServiceCreateRequest request)
@@ -57,7 +57,7 @@ namespace DentalSpa.Application.Services
             service.ClinicId = request.ClinicId;
             var updated = await _serviceRepository.UpdateAsync(id, service);
             await _serviceRepository.SetServiceStaffAsync(id, request.StaffIds);
-            return MapToResponse(updated, request.StaffIds);
+            return MapToResponse(updated!, request.StaffIds);
         }
 
         public async Task<bool> DeleteAsync(int id)

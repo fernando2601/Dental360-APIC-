@@ -18,8 +18,8 @@ namespace DentalSpa.Application.DTOs
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string Name { get; set; } = string.Empty;
-        public int ClinicId { get; set; }
         public int PositionId { get; set; }
         public List<int> ServiceIds { get; set; } = new();
+        public List<int> ClinicIds { get; set; } = new();
     }
 } 

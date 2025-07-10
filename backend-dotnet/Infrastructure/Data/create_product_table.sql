@@ -1,0 +1,15 @@
+CREATE TABLE Product (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(200) NOT NULL,
+    Description NVARCHAR(1000) NULL,
+    Price DECIMAL(18,2) NOT NULL,
+    Category NVARCHAR(100) NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    ClinicId INT NOT NULL,
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id) ON DELETE RESTRICT,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+); 

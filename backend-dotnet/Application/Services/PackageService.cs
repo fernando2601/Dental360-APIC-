@@ -81,19 +81,6 @@ namespace DentalSpa.Application.Services
             }
         }
 
-        public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
-        {
-            try
-            {
-                return await _productRepository.SearchAsync(searchTerm);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error searching products with term: {SearchTerm}", searchTerm);
-                throw;
-            }
-        }
-
         public async Task<IEnumerable<Product>> GetActiveProductsAsync()
         {
             try

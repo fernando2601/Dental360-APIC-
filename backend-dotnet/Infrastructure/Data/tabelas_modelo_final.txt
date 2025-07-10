@@ -1,0 +1,404 @@
+-- USER
+CREATE TABLE [User] (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL UNIQUE,
+    Email NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(500) NOT NULL,
+    Role NVARCHAR(50) COLLATE Latin1_General_CI_AI NOT NULL CHECK (Role IN ('SuperAdmin', 'Admin', 'Staff', 'Reception', 'User')),
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+CREATE UNIQUE INDEX IX_User_Email ON [User](Email);
+CREATE UNIQUE INDEX IX_User_Username ON [User](Username);
+
+-- CLINICINFO
+CREATE TABLE ClinicInfo (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Street NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Number NVARCHAR(20) NOT NULL,
+    Neighborhood NVARCHAR(100) COLLATE Latin1_General_CI_AI NULL,
+    City NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL,
+    State NVARCHAR(50) COLLATE Latin1_General_CI_AI NOT NULL,
+    ZipCode NVARCHAR(20) NOT NULL,
+    Phone NVARCHAR(50) NOT NULL,
+    Email NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+
+-- PATIENT
+CREATE TABLE Patient (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Email NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Phone NVARCHAR(50) NOT NULL,
+    BirthDate DATETIME2 NULL,
+    Gender NVARCHAR(20) COLLATE Latin1_General_CI_AI NOT NULL CHECK (Gender IN ('Male', 'Female', 'Other')),
+    Street NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Number NVARCHAR(20) NOT NULL,
+    Neighborhood NVARCHAR(100) COLLATE Latin1_General_CI_AI NULL,
+    City NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL,
+    State NVARCHAR(50) COLLATE Latin1_General_CI_AI NOT NULL,
+    ZipCode NVARCHAR(20) NOT NULL,
+    AddressComplement NVARCHAR(200) COLLATE Latin1_General_CI_AI NULL,
+    MedicalHistory NVARCHAR(1000) COLLATE Latin1_General_CI_AI NULL,
+    Allergies NVARCHAR(500) COLLATE Latin1_General_CI_AI NULL,
+    EmergencyContact NVARCHAR(200) COLLATE Latin1_General_CI_AI NULL,
+    EmergencyPhone NVARCHAR(50) NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    Cpf NVARCHAR(20) NOT NULL,
+    Rg NVARCHAR(20) NULL,
+    StateOfBirth NVARCHAR(50) COLLATE Latin1_General_CI_AI NULL,
+    Segment NVARCHAR(100) COLLATE Latin1_General_CI_AI NULL,
+    UNIQUE (Email),
+    UNIQUE (Cpf),
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id),
+    CONSTRAINT CK_Patient_CPF CHECK (LEN(Cpf) = 11 AND Cpf NOT LIKE '%[^0-9]%')
+);
+CREATE UNIQUE INDEX IX_Patient_CPF ON Patient(Cpf);
+CREATE UNIQUE INDEX IX_Patient_Email ON Patient(Email);
+
+-- STAFF
+CREATE TABLE Staff (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    FullName NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Email NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Phone NVARCHAR(50) NOT NULL,
+    PositionId INT NOT NULL,
+    DepartmentId INT NULL,
+    SpecializationId INT NULL,
+    Salary DECIMAL(18,2) NOT NULL,
+    HireDate DATETIME2 NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    Bio NVARCHAR(1000) COLLATE Latin1_General_CI_AI NULL,
+    ProfileImageUrl NVARCHAR(500) NULL,
+    YearsOfExperience INT NULL,
+    License NVARCHAR(100) COLLATE Latin1_General_CI_AI NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    ManagerId INT NULL,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (ManagerId) REFERENCES Staff(Id)
+);
+CREATE UNIQUE INDEX IX_Staff_Email ON Staff(Email);
+CREATE INDEX IX_Staff_DepartmentId_PositionId ON Staff(DepartmentId, PositionId);
+
+-- POSITION
+CREATE TABLE Position (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL UNIQUE
+);
+
+-- DEPARTMENT
+CREATE TABLE Department (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL UNIQUE
+);
+
+-- SPECIALIZATION
+CREATE TABLE Specialization (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL UNIQUE
+);
+
+-- ROOM
+CREATE TABLE Room (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL UNIQUE,
+    ClinicId INT NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id)
+);
+
+-- PATIENTCLINIC
+CREATE TABLE PatientClinic (
+    PatientId INT NOT NULL,
+    ClinicId INT NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    PRIMARY KEY (PatientId, ClinicId),
+    FOREIGN KEY (PatientId) REFERENCES Patient(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id) ON DELETE CASCADE,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+CREATE INDEX IX_PatientClinic_ClinicId ON PatientClinic(ClinicId);
+
+-- STAFFCLINIC
+CREATE TABLE StaffClinic (
+    StaffId INT NOT NULL,
+    ClinicId INT NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    PRIMARY KEY (StaffId, ClinicId),
+    FOREIGN KEY (StaffId) REFERENCES Staff(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id) ON DELETE CASCADE,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+CREATE INDEX IX_StaffClinic_ClinicId ON StaffClinic(ClinicId);
+
+-- SERVICE
+CREATE TABLE Service (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Category NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL,
+    Description NVARCHAR(1000) COLLATE Latin1_General_CI_AI NULL,
+    Price DECIMAL(18,2) NOT NULL,
+    Duration INT NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    ClinicId INT NOT NULL,
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id),
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+
+-- STAFFSERVICE
+CREATE TABLE StaffService (
+    StaffId INT NOT NULL,
+    ServiceId INT NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    PRIMARY KEY (StaffId, ServiceId),
+    FOREIGN KEY (StaffId) REFERENCES Staff(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ServiceId) REFERENCES Service(Id) ON DELETE CASCADE,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+CREATE INDEX IX_StaffService_ServiceId ON StaffService(ServiceId);
+
+-- PRODUCT
+CREATE TABLE Product (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(200) COLLATE Latin1_General_CI_AI NOT NULL,
+    Description NVARCHAR(1000) COLLATE Latin1_General_CI_AI NULL,
+    Price DECIMAL(18,2) NOT NULL,
+    Category NVARCHAR(100) COLLATE Latin1_General_CI_AI NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    ClinicId INT NOT NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id),
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+
+-- INVENTORY
+CREATE TABLE Inventory (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ProductId INT NOT NULL,
+    Quantity INT NOT NULL,
+    MinQuantity INT NOT NULL,
+    Status NVARCHAR(50) COLLATE Latin1_General_CI_AI NOT NULL CHECK (Status IN ('Active', 'Inactive', 'LowStock', 'OutOfStock')),
+    ClinicId INT NOT NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (ProductId) REFERENCES Product(Id),
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id),
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+CREATE INDEX IX_Inventory_Status_ClinicId ON Inventory(Status, ClinicId);
+CREATE UNIQUE INDEX IX_Inventory_Product_Clinic ON Inventory(ProductId, ClinicId);
+
+-- APPOINTMENT
+CREATE TABLE Appointment (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    PatientId INT NOT NULL,
+    StaffId INT NOT NULL,
+    ServiceId INT NOT NULL,
+    ClinicId INT NOT NULL,
+    RoomId INT NULL,
+    StartTime DATETIME2 NOT NULL,
+    EndTime DATETIME2 NOT NULL,
+    Status NVARCHAR(50) COLLATE Latin1_General_CI_AI NOT NULL CHECK (Status IN ('Scheduled', 'Completed', 'Cancelled', 'NoShow')),
+    Notes NVARCHAR(1000) COLLATE Latin1_General_CI_AI NULL,
+    Price DECIMAL(18,2) NOT NULL,
+    PaymentStatus NVARCHAR(50) COLLATE Latin1_General_CI_AI NULL CHECK (PaymentStatus IN ('Pending', 'Paid', 'Cancelled')),
+    PaymentMethod NVARCHAR(50) COLLATE Latin1_General_CI_AI NULL,
+    IsRecurring BIT NOT NULL DEFAULT 0,
+    RecurrencePattern NVARCHAR(100) COLLATE Latin1_General_CI_AI NULL,
+    RecurrenceEndDate DATETIME2 NULL,
+    ParentAppointmentId INT NULL,
+    CancellationReason NVARCHAR(500) COLLATE Latin1_General_CI_AI NULL,
+    CancelledAt DATETIME2 NULL,
+    ConfirmedAt DATETIME2 NULL,
+    CompletedAt DATETIME2 NULL,
+    ClientFeedback NVARCHAR(1000) COLLATE Latin1_General_CI_AI NULL,
+    Rating INT NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (PatientId) REFERENCES Patient(Id),
+    FOREIGN KEY (StaffId) REFERENCES Staff(Id),
+    FOREIGN KEY (ServiceId) REFERENCES Service(Id),
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id),
+    FOREIGN KEY (RoomId) REFERENCES Room(Id) ON DELETE SET NULL,
+    FOREIGN KEY (ParentAppointmentId) REFERENCES Appointment(Id),
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+CREATE INDEX IX_Appointment_ClinicId ON Appointment(ClinicId);
+CREATE INDEX IX_Appointment_StaffId ON Appointment(StaffId);
+CREATE INDEX IX_Appointment_StartTime_ClinicId ON Appointment(StartTime, ClinicId);
+
+-- FINANCIALTRANSACTION
+CREATE TABLE FinancialTransaction (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Type NVARCHAR(50) COLLATE Latin1_General_CI_AI NOT NULL CHECK (Type IN ('Income', 'Expense')),
+    Category NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL,
+    Amount DECIMAL(18,2) NOT NULL,
+    Description NVARCHAR(1000) COLLATE Latin1_General_CI_AI NOT NULL,
+    Date DATETIME2 NOT NULL,
+    PaymentMethod NVARCHAR(50) COLLATE Latin1_General_CI_AI NOT NULL,
+    PatientId INT NULL,
+    AppointmentId INT NULL,
+    ReferenceNumber NVARCHAR(100) COLLATE Latin1_General_CI_AI NULL,
+    Status NVARCHAR(50) COLLATE Latin1_General_CI_AI NOT NULL CHECK (Status IN ('Pending', 'Completed', 'Cancelled')),
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (PatientId) REFERENCES Patient(Id),
+    FOREIGN KEY (AppointmentId) REFERENCES Appointment(Id),
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+
+-- USERCLINIC
+CREATE TABLE UserClinic (
+    UserId INT NOT NULL,
+    ClinicId INT NOT NULL,
+    PRIMARY KEY (UserId, ClinicId),
+    FOREIGN KEY (UserId) REFERENCES [User](Id) ON DELETE CASCADE,
+    FOREIGN KEY (ClinicId) REFERENCES ClinicInfo(Id) ON DELETE CASCADE
+);
+CREATE INDEX IX_UserClinic_ClinicId ON UserClinic(ClinicId);
+
+-- PERMISSION
+CREATE TABLE Permission (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) COLLATE Latin1_General_CI_AI NOT NULL,
+    Description NVARCHAR(500) COLLATE Latin1_General_CI_AI NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+
+-- ORCAMENTO
+CREATE TABLE Orcamento (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    PatientId INT NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    Status NVARCHAR(30) COLLATE Latin1_General_CI_AI NOT NULL DEFAULT 'Pending' CHECK (Status IN ('Pending', 'Approved', 'Rejected', 'Cancelled')),
+    TotalValue DECIMAL(12,2) NOT NULL,
+    Notes NVARCHAR(MAX) COLLATE Latin1_General_CI_AI NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (PatientId) REFERENCES Patient(Id),
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+
+-- ORCAMENTOITEM
+CREATE TABLE OrcamentoItem (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    OrcamentoId INT NOT NULL,
+    ServiceId INT NOT NULL,
+    Description NVARCHAR(255) COLLATE Latin1_General_CI_AI NOT NULL,
+    Quantity INT NOT NULL,
+    UnitValue DECIMAL(12,2) NOT NULL,
+    TotalValue DECIMAL(12,2) NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (OrcamentoId) REFERENCES Orcamento(Id) ON DELETE CASCADE,
+    FOREIGN KEY (ServiceId) REFERENCES Service(Id),
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+);
+
+-- USERSESSION
+CREATE TABLE UserSession (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    RefreshToken NVARCHAR(255) NOT NULL,
+    ExpiresAt DATETIME2 NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    IsRevoked BIT NOT NULL DEFAULT 0,
+    FOREIGN KEY (UserId) REFERENCES [User](Id)
+);
+
+--
+-- IMPORTANTE: Todas as queries da aplicação devem filtrar por IsDeleted = 0 nas tabelas principais para simular deleção lógica (soft delete) e garantir integridade referencial.
+--
+-- ON DELETE CASCADE está aplicado nas tabelas de relacionamento para facilitar manutenção automática de vínculos. Remova se não desejar esse comportamento. 
+
+-- LISTA DE TODAS AS TABELAS CRIADAS NESTE SCRIPT:
+-- 1. User
+-- 2. Permission
+-- 3. ClinicInfo
+-- 4. Position
+-- 5. Department
+-- 6. Specialization
+-- 7. Room
+-- 8. Patient
+-- 9. Staff
+-- 10. PatientClinic
+-- 11. StaffClinic
+-- 12. Service
+-- 13. StaffService
+-- 14. Product
+-- 15. Inventory
+-- 16. Appointment
+-- 17. FinancialTransaction
+-- 18. Orcamento
+-- 19. OrcamentoItem
+-- 20. UserClinic
+-- 21. UserSession 

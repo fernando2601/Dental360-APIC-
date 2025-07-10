@@ -27,7 +27,7 @@ namespace DentalSpa.Application.Services
                 Credentials = new NetworkCredential(smtpUser, smtpPass),
                 EnableSsl = true
             };
-            var mail = new MailMessage(from, to, subject, body)
+            var mail = new MailMessage(from!, to, subject, body)
             {
                 IsBodyHtml = true
             };

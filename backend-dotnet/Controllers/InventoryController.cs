@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using DentalSpa.Domain.Entities;
 using DentalSpa.Application.Interfaces;
 using DentalSpa.Application.DTOs;
+using DentalSpa.Domain.Interfaces;
 
 namespace DentalSpa.API.Controllers
 {
@@ -12,10 +13,12 @@ namespace DentalSpa.API.Controllers
     public class InventoryController : ControllerBase
     {
         private readonly IInventoryService _inventoryService;
+        private readonly IProductRepository _productRepository;
 
-        public InventoryController(IInventoryService inventoryService)
+        public InventoryController(IInventoryService inventoryService, IProductRepository productRepository)
         {
             _inventoryService = inventoryService;
+            _productRepository = productRepository;
         }
 
         [HttpGet]

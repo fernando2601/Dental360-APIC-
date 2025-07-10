@@ -1,0 +1,21 @@
+CREATE TABLE FinancialTransaction (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Type NVARCHAR(50) NOT NULL,
+    Category NVARCHAR(100) NOT NULL,
+    Amount DECIMAL(18,2) NOT NULL,
+    Description NVARCHAR(1000) NOT NULL,
+    Date DATETIME2 NOT NULL,
+    PaymentMethod NVARCHAR(50) NOT NULL,
+    PatientId INT NULL,
+    AppointmentId INT NULL,
+    ReferenceNumber NVARCHAR(100) NULL,
+    Status NVARCHAR(50) NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt DATETIME2 NULL,
+    CreatedByUserId INT NULL,
+    UpdatedByUserId INT NULL,
+    FOREIGN KEY (PatientId) REFERENCES Patient(Id) ON DELETE RESTRICT,
+    FOREIGN KEY (AppointmentId) REFERENCES Appointment(Id) ON DELETE RESTRICT,
+    FOREIGN KEY (CreatedByUserId) REFERENCES [User](Id),
+    FOREIGN KEY (UpdatedByUserId) REFERENCES [User](Id)
+); 

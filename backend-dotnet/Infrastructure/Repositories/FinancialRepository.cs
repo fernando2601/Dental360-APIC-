@@ -13,7 +13,7 @@ namespace DentalSpa.Infrastructure.Repositories
             _connection = connection;
         }
 
-        public async Task<IEnumerable<FinancialTransaction>> GetAllAsync()
+        public Task<IEnumerable<FinancialTransaction>> GetAllAsync()
         {
             var transactions = new List<FinancialTransaction>();
             using (var cmd = _connection.CreateCommand())
@@ -26,10 +26,10 @@ namespace DentalSpa.Infrastructure.Repositories
                         transactions.Add(new FinancialTransaction
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
+                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description"))!,
                             Amount = reader.IsDBNull(reader.GetOrdinal("amount")) ? 0 : reader.GetDecimal(reader.GetOrdinal("amount")),
-                            Type = reader.IsDBNull(reader.GetOrdinal("type")) ? null : reader.GetString(reader.GetOrdinal("type")),
-                            Category = reader.IsDBNull(reader.GetOrdinal("category")) ? null : reader.GetString(reader.GetOrdinal("category")),
+                            Type = reader.IsDBNull(reader.GetOrdinal("type")) ? null : reader.GetString(reader.GetOrdinal("type"))!,
+                            Category = reader.IsDBNull(reader.GetOrdinal("category")) ? null : reader.GetString(reader.GetOrdinal("category"))!,
                             Date = reader.IsDBNull(reader.GetOrdinal("date")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("date")),
                             CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
                             UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
@@ -37,10 +37,10 @@ namespace DentalSpa.Infrastructure.Repositories
                     }
                 }
             }
-            return await Task.FromResult(transactions);
+            return Task.FromResult((IEnumerable<FinancialTransaction>)transactions);
         }
 
-        public async Task<FinancialTransaction?> GetByIdAsync(int id)
+        public Task<FinancialTransaction?> GetByIdAsync(int id)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -53,24 +53,24 @@ namespace DentalSpa.Infrastructure.Repositories
                 {
                     if (reader.Read())
                     {
-                        return new FinancialTransaction
+                        return Task.FromResult<FinancialTransaction?>(new FinancialTransaction
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
+                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description"))!,
                             Amount = reader.IsDBNull(reader.GetOrdinal("amount")) ? 0 : reader.GetDecimal(reader.GetOrdinal("amount")),
-                            Type = reader.IsDBNull(reader.GetOrdinal("type")) ? null : reader.GetString(reader.GetOrdinal("type")),
-                            Category = reader.IsDBNull(reader.GetOrdinal("category")) ? null : reader.GetString(reader.GetOrdinal("category")),
+                            Type = reader.IsDBNull(reader.GetOrdinal("type")) ? null : reader.GetString(reader.GetOrdinal("type"))!,
+                            Category = reader.IsDBNull(reader.GetOrdinal("category")) ? null : reader.GetString(reader.GetOrdinal("category"))!,
                             Date = reader.IsDBNull(reader.GetOrdinal("date")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("date")),
                             CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
                             UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
-                        };
+                        });
                     }
                 }
             }
-            return await Task.FromResult<FinancialTransaction?>(null);
+            return Task.FromResult<FinancialTransaction?>(null);
         }
 
-        public async Task<FinancialTransaction> CreateAsync(FinancialTransaction transaction)
+        public Task<FinancialTransaction> CreateAsync(FinancialTransaction transaction)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -88,11 +88,11 @@ namespace DentalSpa.Infrastructure.Repositories
                 
                 var id = Convert.ToInt32(cmd.ExecuteScalar());
                 transaction.Id = id;
-                return await Task.FromResult(transaction);
+                return Task.FromResult(transaction);
             }
         }
 
-        public async Task<FinancialTransaction?> UpdateAsync(int id, FinancialTransaction transaction)
+        public Task<FinancialTransaction?> UpdateAsync(int id, FinancialTransaction transaction)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -109,11 +109,11 @@ namespace DentalSpa.Infrastructure.Repositories
                 cmd.Parameters.Add(CreateParameter("@UpdatedAt", DateTime.Now));
                 
                 var rows = cmd.ExecuteNonQuery();
-                return await Task.FromResult(rows > 0 ? transaction : null);
+                return Task.FromResult(rows > 0 ? transaction : null);
             }
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public Task<bool> DeleteAsync(int id)
         {
             using (var cmd = _connection.CreateCommand())
             {
@@ -123,11 +123,11 @@ namespace DentalSpa.Infrastructure.Repositories
                 param.Value = id;
                 cmd.Parameters.Add(param);
                 var rows = cmd.ExecuteNonQuery();
-                return await Task.FromResult(rows > 0);
+                return Task.FromResult(rows > 0);
             }
         }
 
-        public async Task<IEnumerable<FinancialTransaction>> SearchAsync(string searchTerm)
+        public Task<IEnumerable<FinancialTransaction>> SearchAsync(string searchTerm)
         {
             var transactions = new List<FinancialTransaction>();
             using (var cmd = _connection.CreateCommand())
@@ -144,10 +144,10 @@ namespace DentalSpa.Infrastructure.Repositories
                         transactions.Add(new FinancialTransaction
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description")),
+                            Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description"))!,
                             Amount = reader.IsDBNull(reader.GetOrdinal("amount")) ? 0 : reader.GetDecimal(reader.GetOrdinal("amount")),
-                            Type = reader.IsDBNull(reader.GetOrdinal("type")) ? null : reader.GetString(reader.GetOrdinal("type")),
-                            Category = reader.IsDBNull(reader.GetOrdinal("category")) ? null : reader.GetString(reader.GetOrdinal("category")),
+                            Type = reader.IsDBNull(reader.GetOrdinal("type")) ? null : reader.GetString(reader.GetOrdinal("type"))!,
+                            Category = reader.IsDBNull(reader.GetOrdinal("category")) ? null : reader.GetString(reader.GetOrdinal("category"))!,
                             Date = reader.IsDBNull(reader.GetOrdinal("date")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("date")),
                             CreatedAt = reader.IsDBNull(reader.GetOrdinal("created_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("created_at")),
                             UpdatedAt = reader.IsDBNull(reader.GetOrdinal("updated_at")) ? DateTime.Now : reader.GetDateTime(reader.GetOrdinal("updated_at"))
@@ -155,48 +155,48 @@ namespace DentalSpa.Infrastructure.Repositories
                     }
                 }
             }
-            return await Task.FromResult(transactions);
+            return Task.FromResult((IEnumerable<FinancialTransaction>)transactions);
         }
 
         // Analytics methods - returning mock data for now
-        public async Task<object> GetFinancialDashboardAsync()
+        public Task<object> GetFinancialDashboardAsync()
         {
-            return await Task.FromResult(new { totalRevenue = 0, totalExpenses = 0, netIncome = 0 });
+            return Task.FromResult<object>(new { totalRevenue = 0, totalExpenses = 0, netIncome = 0 });
         }
 
-        public async Task<object> GetCashFlowAsync()
+        public Task<object> GetCashFlowAsync()
         {
-            return await Task.FromResult(new { });
+            return Task.FromResult<object>(new { });
         }
 
-        public async Task<object> GetCashFlowProjectionsAsync()
+        public Task<object> GetCashFlowProjectionsAsync()
         {
-            return await Task.FromResult(new { });
+            return Task.FromResult<object>(new { });
         }
 
-        public async Task<object> GetTransactionsWithFiltersAsync(string? searchTerm, DateTime? startDate, DateTime? endDate, string? category)
+        public Task<object> GetTransactionsWithFiltersAsync(string? searchTerm, DateTime? startDate, DateTime? endDate, string? category)
         {
-            return await Task.FromResult(new { });
+            return Task.FromResult<object>(new { });
         }
 
-        public async Task<object> GetExpenseAnalysisAsync()
+        public Task<object> GetExpenseAnalysisAsync()
         {
-            return await Task.FromResult(new { });
+            return Task.FromResult<object>(new { });
         }
 
-        public async Task<object> GetExpenseCategoriesAsync()
+        public Task<object> GetExpenseCategoriesAsync()
         {
-            return await Task.FromResult(new { });
+            return Task.FromResult<object>(new { });
         }
 
-        public async Task<object> GetAdvancedAnalysisAsync()
+        public Task<object> GetAdvancedAnalysisAsync()
         {
-            return await Task.FromResult(new { });
+            return Task.FromResult<object>(new { });
         }
 
-        public async Task<object> GetProfitabilityAnalysisAsync()
+        public Task<object> GetProfitabilityAnalysisAsync()
         {
-            return await Task.FromResult(new { });
+            return Task.FromResult<object>(new { });
         }
 
         public async Task<object> GetFinancialTrendsAsync()
