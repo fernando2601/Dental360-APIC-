@@ -5,7 +5,7 @@ class Program
 {
     static void Main()
     {
-        var connStr = "Server=LAPTOP-2VN5LPKO\\SQLEXPRESS;Database=DENTAL360;Trusted_Connection=True;TrustServerCertificate=True;";
+        var connStr = "Server=localhost\\SQLEXPRESS;Database=DENTAL360;Trusted_Connection=True;TrustServerCertificate=True;";
         using (var conn = new SqlConnection(connStr))
         {
             try

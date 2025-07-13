@@ -21,7 +21,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [Email] = @Email", connection);
+            await using var command = new SqlCommand("SELECT * FROM [User] WHERE [Email] = @Email", connection);
             command.Parameters.AddWithValue("@Email", email);
             await using var reader = await command.ExecuteReaderAsync();
             return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
@@ -31,7 +31,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [Username] = @Username", connection);
+            await using var command = new SqlCommand("SELECT * FROM [User] WHERE [Username] = @Username", connection);
             command.Parameters.AddWithValue("@Username", username);
             await using var reader = await command.ExecuteReaderAsync();
             return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
@@ -41,7 +41,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [RefreshToken] = @RefreshToken", connection);
+            await using var command = new SqlCommand("SELECT * FROM [User] WHERE [RefreshToken] = @RefreshToken", connection);
             command.Parameters.AddWithValue("@RefreshToken", refreshToken);
             await using var reader = await command.ExecuteReaderAsync();
             return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
@@ -52,13 +52,12 @@ namespace DentalSpa.Infrastructure.Repositories
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
             await using var command = new SqlCommand(
-                "INSERT INTO [Users] ([FullName], [Username], [Password], [Email], [PermissionId]) VALUES (@FullName, @Username, @Password, @Email, @PermissionId)",
+                "INSERT INTO [User] ([Username], [PasswordHash], [Email], [Role]) VALUES (@Username, @PasswordHash, @Email, @Role)",
                 connection);
-            command.Parameters.AddWithValue("@FullName", user.FullName);
             command.Parameters.AddWithValue("@Username", user.Username);
-            command.Parameters.AddWithValue("@Password", user.Password);
+            command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
             command.Parameters.AddWithValue("@Email", user.Email);
-            command.Parameters.AddWithValue("@PermissionId", user.PermissionId);
+            command.Parameters.AddWithValue("@Role", user.Role);
             await command.ExecuteNonQueryAsync();
         }
 
@@ -67,21 +66,19 @@ namespace DentalSpa.Infrastructure.Repositories
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
             var command = new SqlCommand(
-                "UPDATE [Users] SET [FullName] = @FullName, [Username] = @Username, [Password] = @Password, [Email] = @Email, [PermissionId] = @PermissionId, " +
-                "[PasswordResetToken] = @PasswordResetToken, [ResetTokenExpires] = @ResetTokenExpires, " +
-                "[RefreshToken] = @RefreshToken, [RefreshTokenExpiryTime] = @RefreshTokenExpiryTime " +
+                "UPDATE [User] SET [Username] = @Username, [PasswordHash] = @PasswordHash, [Email] = @Email, [Role] = @Role, " +
+                "[IsActive] = @IsActive, [IsDeleted] = @IsDeleted, [UpdatedAt] = @UpdatedAt, [UpdatedByUserId] = @UpdatedByUserId " +
                 "WHERE [Id] = @Id",
                 connection);
             command.Parameters.AddWithValue("@Id", user.Id);
-            command.Parameters.AddWithValue("@FullName", user.FullName);
             command.Parameters.AddWithValue("@Username", user.Username);
-            command.Parameters.AddWithValue("@Password", user.Password);
+            command.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
             command.Parameters.AddWithValue("@Email", user.Email);
-            command.Parameters.AddWithValue("@PermissionId", user.PermissionId);
-            command.Parameters.AddWithValue("@PasswordResetToken", (object)user.PasswordResetToken ?? DBNull.Value);
-            command.Parameters.AddWithValue("@ResetTokenExpires", (object)user.ResetTokenExpires ?? DBNull.Value);
-            command.Parameters.AddWithValue("@RefreshToken", (object)user.RefreshToken ?? DBNull.Value);
-            command.Parameters.AddWithValue("@RefreshTokenExpiryTime", (object)user.RefreshTokenExpiryTime ?? DBNull.Value);
+            command.Parameters.AddWithValue("@Role", user.Role);
+            command.Parameters.AddWithValue("@IsActive", user.IsActive);
+            command.Parameters.AddWithValue("@IsDeleted", user.IsDeleted);
+            command.Parameters.AddWithValue("@UpdatedAt", user.UpdatedAt);
+            command.Parameters.AddWithValue("@UpdatedByUserId", user.UpdatedByUserId);
             await command.ExecuteNonQueryAsync();
         }
 
@@ -89,7 +86,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [Id] = @Id", connection);
+            await using var command = new SqlCommand("SELECT * FROM [User] WHERE [Id] = @Id", connection);
             command.Parameters.AddWithValue("@Id", id);
             await using var reader = await command.ExecuteReaderAsync();
             return await reader.ReadAsync() ? MapReaderToUser(reader) : null;
@@ -112,7 +109,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("DELETE FROM [Users] WHERE [Id] = @Id", connection);
+            await using var command = new SqlCommand("DELETE FROM [User] WHERE [Id] = @Id", connection);
             command.Parameters.AddWithValue("@Id", id);
             var affectedRows = await command.ExecuteNonQueryAsync();
             return affectedRows > 0;
@@ -123,7 +120,7 @@ namespace DentalSpa.Infrastructure.Repositories
             var users = new List<User>();
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("SELECT * FROM [Users]", connection);
+            await using var command = new SqlCommand("SELECT * FROM [User]", connection);
             await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -137,7 +134,7 @@ namespace DentalSpa.Infrastructure.Repositories
             var users = new List<User>();
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("SELECT * FROM [Users] WHERE [FullName] LIKE @Query OR [Email] LIKE @Query OR [Username] LIKE @Query", connection);
+            await using var command = new SqlCommand("SELECT * FROM [User] WHERE [Username] LIKE @Query OR [Email] LIKE @Query", connection);
             command.Parameters.AddWithValue("@Query", $"%{query}%");
             await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -151,7 +148,7 @@ namespace DentalSpa.Infrastructure.Repositories
         {
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("SELECT [FullName], [Email], [Username] FROM [Users] WHERE [Id] = @Id", connection);
+            await using var command = new SqlCommand("SELECT [Username], [Email] FROM [User] WHERE [Id] = @Id", connection);
             command.Parameters.AddWithValue("@Id", id);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -159,9 +156,8 @@ namespace DentalSpa.Infrastructure.Repositories
             {
                 return new
                 {
-                    FullName = reader.GetString(reader.GetOrdinal("FullName")),
+                    Username = reader.GetString(reader.GetOrdinal("Username")),
                     Email = reader.GetString(reader.GetOrdinal("Email")),
-                    Username = reader.GetString(reader.GetOrdinal("Username"))
                 };
             }
             // Retorna um objeto anônimo vazio se não encontrar, para evitar nulos
@@ -173,15 +169,16 @@ namespace DentalSpa.Infrastructure.Repositories
             return new User
             {
                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                FullName = reader.GetString(reader.GetOrdinal("FullName")),
                 Username = reader.GetString(reader.GetOrdinal("Username")),
-                Password = reader.GetString(reader.GetOrdinal("Password")),
+                PasswordHash = reader.GetString(reader.GetOrdinal("PasswordHash")),
                 Email = reader.GetString(reader.GetOrdinal("Email")),
-                PermissionId = reader.GetInt32(reader.GetOrdinal("PermissionId")),
-                PasswordResetToken = reader.IsDBNull(reader.GetOrdinal("PasswordResetToken")) ? null : reader.GetString(reader.GetOrdinal("PasswordResetToken")),
-                ResetTokenExpires = reader.IsDBNull(reader.GetOrdinal("ResetTokenExpires")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("ResetTokenExpires")),
-                RefreshToken = reader.IsDBNull(reader.GetOrdinal("RefreshToken")) ? null : reader.GetString(reader.GetOrdinal("RefreshToken")),
-                RefreshTokenExpiryTime = reader.IsDBNull(reader.GetOrdinal("RefreshTokenExpiryTime")) ? null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("RefreshTokenExpiryTime")),
+                Role = reader.GetString(reader.GetOrdinal("Role")),
+                IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
+                IsDeleted = reader.GetBoolean(reader.GetOrdinal("IsDeleted")),
+                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
+                UpdatedAt = reader.IsDBNull(reader.GetOrdinal("UpdatedAt")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("UpdatedAt")),
+                CreatedByUserId = reader.IsDBNull(reader.GetOrdinal("CreatedByUserId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("CreatedByUserId")),
+                UpdatedByUserId = reader.IsDBNull(reader.GetOrdinal("UpdatedByUserId")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("UpdatedByUserId")),
             };
         }
     }

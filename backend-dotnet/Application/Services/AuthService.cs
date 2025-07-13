@@ -48,7 +48,7 @@ namespace DentalSpa.Application.Services
             }
 
             // Buscar permissão do usuário
-            var permission = user.Permission?.Name ?? "ADM";
+            var permission = user.Role ?? "ADM";
 
             return GenerateJwtToken(user, permission);
         }
@@ -60,7 +60,7 @@ namespace DentalSpa.Application.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email ?? ""),
-                new Claim(ClaimTypes.Name, user.FullName ?? ""),
+                new Claim(ClaimTypes.Name, user.Username ?? ""),
                 new Claim("permission", permission)
             };
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -71,19 +71,19 @@ namespace DentalSpa.Application.Services
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
-            return new { Token = tokenString, User = new { user.Email, user.FullName, Permission = permission } };
+            return new { Token = tokenString, User = new { user.Email, user.Username, Permission = permission } };
         }
 
         public async Task<object> RegisterAsync(RegisterRequest request)
         {
             var email = request.Email;
             var password = request.Password;
-            var fullName = request.FullName;
             var username = request.Username;
+            var role = string.IsNullOrEmpty(request.Role) ? "User" : request.Role;
 
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(fullName) || string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(username))
             {
-                throw new ArgumentException("Email, username, password, and full name are required.");
+                throw new ArgumentException("Email, username, and password are required.");
             }
 
             var existingUser = await _userRepository.FindByEmailAsync(email);
@@ -103,8 +103,7 @@ namespace DentalSpa.Application.Services
                 Email = email,
                 Username = username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                FullName = fullName,
-                PermissionId = 2, // ou buscar o ID correto para o perfil padrão
+                Role = role,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };
@@ -122,13 +121,13 @@ namespace DentalSpa.Application.Services
             }
 
             // Verificar a senha antiga
-            if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.Password))
+            if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PasswordHash))
             {
                 return false;
             }
 
             // Criptografar e salvar a nova senha
-            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             await _userRepository.UpdateAsync(user);
 
             return true;
@@ -136,46 +135,14 @@ namespace DentalSpa.Application.Services
         
         public async Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request)
         {
-            var user = await _userRepository.FindByEmailAsync(request.Email);
-            if (user == null)
-            {
-                // Não revele que o usuário não existe.
-                return true;
-            }
-
-            // Gerar token
-            var token = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(64));
-            user.PasswordResetToken = token;
-            user.ResetTokenExpires = DateTime.UtcNow.AddHours(1); // Token válido por 1 hora
-
-            await _userRepository.UpdateAsync(user);
-
-            // TODO: Enviar o token por e-mail para o usuário.
-            // Por enquanto, vamos pular o envio de e-mail real.
-            // _emailService.SendPasswordResetEmail(user.Email, token);
-
-            return true;
+            // Função desabilitada: não há campos de token de reset na tabela User
+            return false;
         }
 
         public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
         {
-            var user = await _userRepository.FindByEmailAsync(request.Email);
-
-            if (user == null || 
-                user.PasswordResetToken != request.Token || 
-                user.ResetTokenExpires < DateTime.UtcNow)
-            {
-                return false; // Token inválido, expirado ou usuário não encontrado
-            }
-
-            // Token válido, redefinir a senha
-            user.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-            user.PasswordResetToken = null; // Limpar o token
-            user.ResetTokenExpires = null;
-
-            await _userRepository.UpdateAsync(user);
-
-            return true;
+            // Função desabilitada: não há campos de token de reset na tabela User
+            return false;
         }
 
         public async Task<object> GetProfileAsync(int userId)
@@ -185,25 +152,8 @@ namespace DentalSpa.Application.Services
 
         public async Task<object?> RefreshTokenAsync(RefreshTokenRequest request)
         {
-            // A lógica de validação do token (se é JWT, etc.) foi omitida por simplicidade.
-            // Aqui, estamos apenas procurando o usuário pelo refresh token.
-            var user = await _userRepository.FindByRefreshTokenAsync(request.Token);
-
-            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-            {
-                return null; // Token inválido ou expirado
-            }
-
-            // Gerar um novo token de acesso
-            var permission = user.Permission?.Name ?? "ADM";
-            var newAccessToken = GenerateJwtToken(user, permission);
-            // Opcional: Gerar um novo refresh token e atualizar o usuário
-            // var newRefreshToken = ...
-            // user.RefreshToken = newRefreshToken;
-            // user.RefreshTokenExpiryTime = ...
-            // await _userRepository.UpdateAsync(user);
-
-            return new { token = newAccessToken };
+            // Função desabilitada: não há campos de refresh token na tabela User
+            return null;
         }
     }
 } 
